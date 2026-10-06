@@ -1580,16 +1580,23 @@ export default function PanoClient() {
     }
 
     // Polling fallback every 2.5s for instances where SSE stream is interrupted
+    let consecutive404s = 0
     pollTimer = setInterval(async () => {
       try {
         const res = await fetch(`/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}`)
         if (res.ok) {
+          consecutive404s = 0
           const data = await res.json()
           if (data.state) {
             handleRemoteState(data.state)
           }
-        } else if (res.status === 404 || res.status === 403) {
+        } else if (res.status === 403 || res.status === 410) {
           handleRemoteSessionClosed()
+        } else if (res.status === 404) {
+          consecutive404s++
+          if (consecutive404s >= 4) {
+            handleRemoteSessionClosed()
+          }
         }
       } catch (_) {}
     }, 2500)

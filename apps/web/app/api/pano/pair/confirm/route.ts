@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       teacherData.orgSlug = 'neclagorer'
     }
 
-    const result = pairPanoSession({ code, sessionId }, teacherData)
+    const result = await pairPanoSession({ code, sessionId }, teacherData)
 
     if (!result.success) {
       return NextResponse.json(

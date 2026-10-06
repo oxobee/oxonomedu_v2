@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     let teacherData: TeacherPairData | undefined = clientTeacherData
 
     if (sessionId) {
-      const session = getPanoSession(sessionId)
+      const session = await getPanoSession(sessionId)
       if (session && session.teacherData) {
         teacherData = {
           ...session.teacherData,

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const { sessionId } = body
 
     if (sessionId) {
-      closePanoSession(sessionId)
+      await closePanoSession(sessionId)
     }
 
     const response = NextResponse.json({ success: true, message: 'Tahta oturumu sonlandırıldı.' })

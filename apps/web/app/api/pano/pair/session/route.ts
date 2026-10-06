@@ -18,7 +18,7 @@ function getLanIp(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = createPanoSession()
+    const session = await createPanoSession()
     let host = req.headers.get('host') || 'localhost:3010'
     const protocol = req.headers.get('x-forwarded-proto') || 'http'
 
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'sessionId gereklidir' }, { status: 400 })
   }
 
-  const session = getPanoSession(sessionId)
+  const session = await getPanoSession(sessionId)
   if (!session) {
     return NextResponse.json({ success: false, error: 'Oturum bulunamadı veya süresi doldu' }, { status: 404 })
   }

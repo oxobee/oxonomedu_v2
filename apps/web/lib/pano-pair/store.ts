@@ -1,4 +1,7 @@
-// In-memory Realtime Pairing Store for Oxonom Smart Board (Pano OS)
+// Persistent Realtime Pairing & Shared State Store for Oxonom Smart Board (Pano OS)
+// Backed by MongoDB Atlas (Cloud) with in-memory caching and fallback
+
+import { MongoClient, Db, Collection } from 'mongodb'
 
 export interface TeacherPairData {
   sessionId?: string
@@ -53,6 +56,9 @@ export interface PanoPairSession {
   status: 'waiting' | 'paired' | 'expired' | 'closed'
   teacherData?: TeacherPairData
   sharedState?: PanoSharedState
+  pairedAt?: number
+  closedAt?: number
+  closedReason?: string
 }
 
 export type PanoSessionEvent =
@@ -62,9 +68,15 @@ export type PanoSessionEvent =
 
 export type SessionListener = (event: PanoSessionEvent) => void
 
-// Use globalThis to persist session store across hot reloads in Next.js
+// MongoDB Connection Pool
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  'mongodb+srv://oxobee_admin:OxonomEdu2026DbSecret@oxonomedu.miwnehh.mongodb.net/eduboard?retryWrites=true&w=majority'
+
 interface GlobalPanoStore {
-  sessions: Map<string, PanoPairSession>
+  client?: MongoClient
+  db?: Db
+  memorySessions: Map<string, PanoPairSession>
   codeToSessionId: Map<string, string>
   listeners: Map<string, Set<SessionListener>>
 }
@@ -73,7 +85,7 @@ const g = globalThis as unknown as { _panoPairStore?: GlobalPanoStore }
 
 if (!g._panoPairStore) {
   g._panoPairStore = {
-    sessions: new Map(),
+    memorySessions: new Map(),
     codeToSessionId: new Map(),
     listeners: new Map(),
   }
@@ -81,45 +93,34 @@ if (!g._panoPairStore) {
 
 const store = g._panoPairStore
 
-// Helper to generate a unique 6-digit numeric code
-function generateUniqueCode(): string {
-  let code = ''
-  let attempts = 0
-  const now = Date.now()
-
-  while (attempts < 100) {
-    const num = Math.floor(100000 + Math.random() * 900000)
-    code = String(num)
-    const existingId = store.codeToSessionId.get(code)
-    if (!existingId) break
-
-    const existing = store.sessions.get(existingId)
-    if (!existing || existing.expiresAt < now) {
-      store.codeToSessionId.delete(code)
-      break
+async function getPanoCollection(): Promise<Collection<PanoPairSession> | null> {
+  try {
+    if (!store.client) {
+      store.client = new MongoClient(MONGODB_URI, {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 4000,
+        connectTimeoutMS: 4000,
+      })
+      await store.client.connect()
     }
-    attempts++
-  }
-  return code
-}
-
-// Cleanup expired sessions periodically
-function cleanExpired() {
-  const now = Date.now()
-  for (const [id, sess] of store.sessions.entries()) {
-    if (sess.expiresAt < now) {
-      store.codeToSessionId.delete(sess.code)
-      store.sessions.delete(id)
-      store.listeners.delete(id)
+    if (!store.db) {
+      store.db = store.client.db('eduboard')
     }
+    return store.db.collection<PanoPairSession>('pano_sessions')
+  } catch (err) {
+    console.warn('[PanoStore] MongoDB connection fallback to memory:', err)
+    return null
   }
 }
 
-export function createPanoSession(ttlMs = 5 * 60 * 1000): PanoPairSession {
-  cleanExpired()
+// Generate a random 6-digit code
+function generateCode(): string {
+  return String(Math.floor(100000 + Math.random() * 900000))
+}
 
+export async function createPanoSession(ttlMs = 5 * 60 * 1000): Promise<PanoPairSession> {
   const sessionId = `pano_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-  const code = generateUniqueCode()
+  const code = generateCode()
   const now = Date.now()
 
   const session: PanoPairSession = {
@@ -130,45 +131,103 @@ export function createPanoSession(ttlMs = 5 * 60 * 1000): PanoPairSession {
     status: 'waiting',
   }
 
-  store.sessions.set(sessionId, session)
+  // Update memory cache
+  store.memorySessions.set(sessionId, session)
   store.codeToSessionId.set(code, sessionId)
 
-  return session
-}
-
-export function getPanoSession(sessionId: string): PanoPairSession | null {
-  const session = store.sessions.get(sessionId)
-  if (!session) return null
-
-  if (session.expiresAt < Date.now()) {
-    session.status = 'expired'
-    store.codeToSessionId.delete(session.code)
-    store.sessions.delete(sessionId)
-    return session
+  // Persist to MongoDB
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      await coll.updateOne(
+        { sessionId },
+        { $set: session },
+        { upsert: true }
+      )
+    }
+  } catch (err) {
+    console.error('[PanoStore] createPanoSession DB error:', err)
   }
 
   return session
 }
 
-export function getPanoSessionByCode(code: string): PanoPairSession | null {
+export async function getPanoSession(sessionId: string): Promise<PanoPairSession | null> {
+  if (!sessionId) return null
+
+  // 1. Try DB first
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      const doc = await coll.findOne({ sessionId })
+      if (doc) {
+        // Strip mongo internal _id
+        const { _id, ...cleanSession } = doc as any
+        if (cleanSession.expiresAt < Date.now() && cleanSession.status === 'waiting') {
+          cleanSession.status = 'expired'
+          coll.updateOne({ sessionId }, { $set: { status: 'expired' } }).catch(() => {})
+        }
+        store.memorySessions.set(sessionId, cleanSession)
+        store.codeToSessionId.set(cleanSession.code, sessionId)
+        return cleanSession
+      }
+    }
+  } catch (err) {
+    console.warn('[PanoStore] getPanoSession DB error, checking memory:', err)
+  }
+
+  // 2. Memory fallback
+  const mem = store.memorySessions.get(sessionId)
+  if (!mem) return null
+
+  if (mem.expiresAt < Date.now() && mem.status === 'waiting') {
+    mem.status = 'expired'
+    store.codeToSessionId.delete(mem.code)
+  }
+
+  return mem
+}
+
+export async function getPanoSessionByCode(code: string): Promise<PanoPairSession | null> {
   const clean = code.replace(/[^0-9]/g, '')
+  if (!clean) return null
+
+  // 1. Try DB first
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      const doc = await coll.findOne({
+        code: clean,
+        expiresAt: { $gt: Date.now() },
+        status: { $in: ['waiting', 'paired'] },
+      })
+      if (doc) {
+        const { _id, ...cleanSession } = doc as any
+        store.memorySessions.set(cleanSession.sessionId, cleanSession)
+        store.codeToSessionId.set(clean, cleanSession.sessionId)
+        return cleanSession
+      }
+    }
+  } catch (err) {
+    console.warn('[PanoStore] getPanoSessionByCode DB error, checking memory:', err)
+  }
+
+  // 2. Memory fallback
   const sessionId = store.codeToSessionId.get(clean)
   if (!sessionId) return null
   return getPanoSession(sessionId)
 }
 
-export function pairPanoSession(
+export async function pairPanoSession(
   identifier: { code?: string; sessionId?: string },
   teacherData: TeacherPairData
-): { success: boolean; session?: PanoPairSession; error?: string } {
-  cleanExpired()
-
+): Promise<{ success: boolean; session?: PanoPairSession; error?: string }> {
   let session: PanoPairSession | null = null
 
   if (identifier.sessionId) {
-    session = getPanoSession(identifier.sessionId)
+    session = await getPanoSession(identifier.sessionId)
   } else if (identifier.code) {
-    session = getPanoSessionByCode(identifier.code)
+    session = await getPanoSessionByCode(identifier.code)
   }
 
   if (!session) {
@@ -179,31 +238,57 @@ export function pairPanoSession(
     return { success: false, error: 'Eşleştirme kodunun süresi dolmuş. Lütfen tahtadaki yeni kodu deneyin.' }
   }
 
-  session.status = 'paired'
-  session.teacherData = teacherData
-  if (!session.sharedState) {
-    session.sharedState = {
-      version: 1,
-      updatedAt: Date.now(),
-      sourceDeviceId: 'system',
-      updatedBy: 'phone',
-      openWindows: [],
-      activeWindowId: null,
-      currentView: 'home',
-      selectedClassId: teacherData.selectedClassId || (teacherData.classrooms?.[0]?.id) || 101,
-      isLocked: false,
-    }
+  const defaultSharedState: PanoSharedState = {
+    version: 1,
+    updatedAt: Date.now(),
+    sourceDeviceId: 'system',
+    updatedBy: 'phone',
+    openWindows: [],
+    activeWindowId: null,
+    currentView: 'home',
+    selectedClassId: teacherData.selectedClassId || (teacherData.classrooms?.[0]?.id) || 101,
+    isLocked: false,
   }
-  store.sessions.set(session.sessionId, session)
 
-  // Notify active SSE listeners immediately with paired event
+  const updatedSession: PanoPairSession = {
+    ...session,
+    status: 'paired',
+    teacherData,
+    sharedState: session.sharedState || defaultSharedState,
+    pairedAt: Date.now(),
+  }
+
+  // Save to memory
+  store.memorySessions.set(session.sessionId, updatedSession)
+
+  // Persist to MongoDB
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      await coll.updateOne(
+        { sessionId: session.sessionId },
+        {
+          $set: {
+            status: 'paired',
+            teacherData,
+            sharedState: updatedSession.sharedState,
+            pairedAt: updatedSession.pairedAt,
+          },
+        }
+      )
+    }
+  } catch (err) {
+    console.error('[PanoStore] pairPanoSession DB error:', err)
+  }
+
+  // Notify in-process listeners
   notifySessionListeners(session.sessionId, {
     type: 'paired',
     teacherData,
-    session,
+    session: updatedSession,
   })
 
-  return { success: true, session }
+  return { success: true, session: updatedSession }
 }
 
 export function notifySessionListeners(sessionId: string, event: PanoSessionEvent): void {
@@ -219,13 +304,13 @@ export function notifySessionListeners(sessionId: string, event: PanoSessionEven
   }
 }
 
-export function updatePanoSharedState(
+export async function updatePanoSharedState(
   sessionId: string,
   patch: Partial<PanoSharedState>,
   sourceDeviceId: string,
   updatedBy: 'board' | 'phone' = 'phone'
-): PanoSharedState | null {
-  const session = getPanoSession(sessionId)
+): Promise<PanoSharedState | null> {
+  const session = await getPanoSession(sessionId)
   if (!session || session.status !== 'paired') {
     return null
   }
@@ -246,9 +331,22 @@ export function updatePanoSharedState(
   }
 
   session.sharedState = nextState
-  store.sessions.set(sessionId, session)
+  store.memorySessions.set(sessionId, session)
 
-  // Broadcast state event to all connected clients
+  // Persist to MongoDB
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      await coll.updateOne(
+        { sessionId },
+        { $set: { sharedState: nextState } }
+      )
+    }
+  } catch (err) {
+    console.error('[PanoStore] updatePanoSharedState DB error:', err)
+  }
+
+  // Broadcast state event to in-process listeners
   notifySessionListeners(sessionId, {
     type: 'state',
     state: nextState,
@@ -257,8 +355,8 @@ export function updatePanoSharedState(
   return nextState
 }
 
-export function getPanoSharedState(sessionId: string): PanoSharedState | null {
-  const session = getPanoSession(sessionId)
+export async function getPanoSharedState(sessionId: string): Promise<PanoSharedState | null> {
+  const session = await getPanoSession(sessionId)
   if (!session) return null
   return session.sharedState || null
 }
@@ -278,18 +376,38 @@ export function subscribePanoSession(sessionId: string, listener: SessionListene
   }
 }
 
-export function closePanoSession(sessionId: string, reason = 'user_logout'): void {
-  const sess = store.sessions.get(sessionId)
+export async function closePanoSession(sessionId: string, reason = 'user_logout'): Promise<void> {
+  const sess = store.memorySessions.get(sessionId)
   if (sess) {
     sess.status = 'closed'
-    // Notify all clients that session has closed
-    notifySessionListeners(sessionId, {
-      type: 'session_closed',
-      sessionId,
-      reason,
-    })
     store.codeToSessionId.delete(sess.code)
-    store.sessions.delete(sessionId)
+    store.memorySessions.delete(sessionId)
     store.listeners.delete(sessionId)
+  }
+
+  // Notify in-process listeners
+  notifySessionListeners(sessionId, {
+    type: 'session_closed',
+    sessionId,
+    reason,
+  })
+
+  // Persist closed status to MongoDB
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      await coll.updateOne(
+        { sessionId },
+        {
+          $set: {
+            status: 'closed',
+            closedReason: reason,
+            closedAt: Date.now(),
+          },
+        }
+      )
+    }
+  } catch (err) {
+    console.error('[PanoStore] closePanoSession DB error:', err)
   }
 }

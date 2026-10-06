@@ -7,12 +7,20 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'sessionId gereklidir' }, { status: 400 })
   }
 
-  const session = getPanoSession(sessionId)
-  if (!session || session.status !== 'paired') {
+  const session = await getPanoSession(sessionId)
+  if (!session) {
+    return NextResponse.json({ success: false, error: 'Oturum bulunamadı' }, { status: 404 })
+  }
+
+  if (session.status === 'closed') {
+    return NextResponse.json({ success: false, error: 'Oturum kapatıldı', closed: true }, { status: 403 })
+  }
+
+  if (session.status !== 'paired') {
     return NextResponse.json({ success: false, error: 'Aktif eşleştirilmiş oturum bulunamadı' }, { status: 404 })
   }
 
-  const state = getPanoSharedState(sessionId)
+  const state = await getPanoSharedState(sessionId)
   return NextResponse.json({ success: true, state })
 }
 
@@ -29,9 +37,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'deviceId gereklidir' }, { status: 400 })
     }
 
-    const session = getPanoSession(sessionId)
+    const session = await getPanoSession(sessionId)
     if (!session) {
       return NextResponse.json({ success: false, error: 'Oturum bulunamadı veya süresi doldu' }, { status: 404 })
+    }
+
+    if (session.status === 'closed') {
+      return NextResponse.json({ success: false, error: 'Oturum kapatılmış', closed: true }, { status: 403 })
     }
 
     if (session.status !== 'paired') {
@@ -65,7 +77,7 @@ export async function POST(req: NextRequest) {
       patch.isLocked = state.isLocked
     }
 
-    const updated = updatePanoSharedState(
+    const updated = await updatePanoSharedState(
       sessionId,
       patch,
       String(deviceId),
