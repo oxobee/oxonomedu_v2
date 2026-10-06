@@ -1,6 +1,7 @@
 // In-memory Realtime Pairing Store for Oxonom Smart Board (Pano OS)
 
 export interface TeacherPairData {
+  sessionId?: string
   id?: number
   username?: string
   first_name?: string
@@ -16,16 +17,50 @@ export interface TeacherPairData {
   settings?: any
 }
 
+export interface WindowStateItem {
+  app: {
+    id: string
+    type: 'widget' | 'app'
+    widgetType?: string
+    title: string
+    icon?: string
+    color?: string
+    iconColor?: string
+    badge?: string
+    path?: string
+  }
+  isMaximized: boolean
+  iframeKey: number
+}
+
+export interface PanoSharedState {
+  version: number
+  updatedAt: number
+  sourceDeviceId: string
+  updatedBy: 'board' | 'phone'
+  openWindows: WindowStateItem[]
+  activeWindowId: string | null
+  currentView: 'home' | 'window'
+  selectedClassId: number
+  isLocked: boolean
+}
+
 export interface PanoPairSession {
   sessionId: string
   code: string // 6-digit string
   createdAt: number
   expiresAt: number
-  status: 'waiting' | 'paired' | 'expired'
+  status: 'waiting' | 'paired' | 'expired' | 'closed'
   teacherData?: TeacherPairData
+  sharedState?: PanoSharedState
 }
 
-type SessionListener = (session: PanoPairSession) => void
+export type PanoSessionEvent =
+  | { type: 'paired'; teacherData: TeacherPairData; session: PanoPairSession }
+  | { type: 'state'; state: PanoSharedState }
+  | { type: 'session_closed'; sessionId: string; reason?: string }
+
+export type SessionListener = (event: PanoSessionEvent) => void
 
 // Use globalThis to persist session store across hot reloads in Next.js
 interface GlobalPanoStore {
@@ -146,21 +181,86 @@ export function pairPanoSession(
 
   session.status = 'paired'
   session.teacherData = teacherData
+  if (!session.sharedState) {
+    session.sharedState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceDeviceId: 'system',
+      updatedBy: 'phone',
+      openWindows: [],
+      activeWindowId: null,
+      currentView: 'home',
+      selectedClassId: teacherData.selectedClassId || (teacherData.classrooms?.[0]?.id) || 101,
+      isLocked: false,
+    }
+  }
   store.sessions.set(session.sessionId, session)
 
-  // Notify active SSE listeners immediately
-  const listeners = store.listeners.get(session.sessionId)
+  // Notify active SSE listeners immediately with paired event
+  notifySessionListeners(session.sessionId, {
+    type: 'paired',
+    teacherData,
+    session,
+  })
+
+  return { success: true, session }
+}
+
+export function notifySessionListeners(sessionId: string, event: PanoSessionEvent): void {
+  const listeners = store.listeners.get(sessionId)
   if (listeners) {
     for (const listener of listeners) {
       try {
-        listener(session)
+        listener(event)
       } catch (err) {
         console.error('[PanoStore] Listener error:', err)
       }
     }
   }
+}
 
-  return { success: true, session }
+export function updatePanoSharedState(
+  sessionId: string,
+  patch: Partial<PanoSharedState>,
+  sourceDeviceId: string,
+  updatedBy: 'board' | 'phone' = 'phone'
+): PanoSharedState | null {
+  const session = getPanoSession(sessionId)
+  if (!session || session.status !== 'paired') {
+    return null
+  }
+
+  const currentVersion = session.sharedState?.version || 0
+  const nextVersion = currentVersion + 1
+
+  const nextState: PanoSharedState = {
+    version: nextVersion,
+    updatedAt: Date.now(),
+    sourceDeviceId,
+    updatedBy,
+    openWindows: patch.openWindows !== undefined ? patch.openWindows : (session.sharedState?.openWindows || []),
+    activeWindowId: patch.activeWindowId !== undefined ? patch.activeWindowId : (session.sharedState?.activeWindowId ?? null),
+    currentView: patch.currentView !== undefined ? patch.currentView : (session.sharedState?.currentView || 'home'),
+    selectedClassId: patch.selectedClassId !== undefined ? patch.selectedClassId : (session.sharedState?.selectedClassId || 101),
+    isLocked: patch.isLocked !== undefined ? patch.isLocked : (session.sharedState?.isLocked ?? false),
+  }
+
+  session.sharedState = nextState
+  store.sessions.set(sessionId, session)
+
+  // Broadcast state event to all connected clients
+  notifySessionListeners(sessionId, {
+    type: 'state',
+    state: nextState,
+  })
+
+  return nextState
+}
+
+export function getPanoSharedState(sessionId: string): PanoSharedState | null {
+  const session = getPanoSession(sessionId)
+  if (!session) return null
+  return session.sharedState || null
 }
 
 export function subscribePanoSession(sessionId: string, listener: SessionListener): () => void {
@@ -178,9 +278,16 @@ export function subscribePanoSession(sessionId: string, listener: SessionListene
   }
 }
 
-export function closePanoSession(sessionId: string): void {
+export function closePanoSession(sessionId: string, reason = 'user_logout'): void {
   const sess = store.sessions.get(sessionId)
   if (sess) {
+    sess.status = 'closed'
+    // Notify all clients that session has closed
+    notifySessionListeners(sessionId, {
+      type: 'session_closed',
+      sessionId,
+      reason,
+    })
     store.codeToSessionId.delete(sess.code)
     store.sessions.delete(sessionId)
     store.listeners.delete(sessionId)

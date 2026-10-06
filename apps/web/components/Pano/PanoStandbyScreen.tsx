@@ -200,7 +200,10 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
 
     // Smooth delay to celebrate and unlock into dashboard
     setTimeout(() => {
-      onPaired(finalTeacherData)
+      onPaired({
+        ...finalTeacherData,
+        sessionId,
+      })
     }, 1200)
   }
 

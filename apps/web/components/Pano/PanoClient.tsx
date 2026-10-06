@@ -1,6 +1,6 @@
 'use client'
-import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -37,12 +37,15 @@ import {
   CloudSun,
   Presentation,
   CheckCircle2,
-  Sparkle
+  Sparkle,
+  LogOut,
+  Smartphone,
+  Tv
 } from 'lucide-react'
 import { createBoard } from '@services/boards/boards'
 import toast from 'react-hot-toast'
 import PanoStandbyScreen from './PanoStandbyScreen'
-import { TeacherPairData } from '@/lib/pano-pair/store'
+import { TeacherPairData, PanoSharedState } from '@/lib/pano-pair/store'
 
 // Pixel-perfect SVG Icons matching EduOS design
 const Icons = {
@@ -1381,11 +1384,235 @@ export default function PanoClient() {
   // Paired Session Management (Standby Screen & QR/OTP Pairing)
   const [isSessionHydrated, setIsSessionHydrated] = useState(false)
   const [forceStandby, setForceStandby] = useState(false)
+  const searchParams = useSearchParams()
+
+  // Unique client device ID (prevents echo loops)
+  const [deviceId] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'init'
+    let id = localStorage.getItem('oxonom_pano_device_id')
+    if (!id) {
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
+      const prefix = isMobileUA ? 'phone' : 'board'
+      id = `${prefix}-${Math.random().toString(36).substring(2, 9)}`
+      localStorage.setItem('oxonom_pano_device_id', id)
+    }
+    return id
+  })
+
+  // Device client type ('phone' vs 'board')
+  const isPhone = useMemo(() => {
+    if (typeof window === 'undefined') return false
+    const qDevice = searchParams?.get('device')
+    if (qDevice === 'phone') return true
+    if (qDevice === 'board') return false
+    const savedType = localStorage.getItem('oxonom_pano_device_type')
+    if (savedType === 'phone') return true
+    if (savedType === 'board') return false
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    return isMobileUA && window.innerWidth < 768
+  }, [searchParams])
+
+  // Active Pano Session ID for shared state sync
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const qSession = searchParams?.get('session')
+      if (qSession) {
+        localStorage.setItem('oxonom_pano_active_session_id', qSession)
+        return qSession
+      }
+      return localStorage.getItem('oxonom_pano_active_session_id')
+    }
+    return null
+  })
+
+  // Class Selection State
+  const [classrooms, setClassrooms] = useState<ClassroomItem[]>(DEFAULT_CLASSROOMS)
+  const [selectedClass, setSelectedClass] = useState<ClassroomItem>(DEFAULT_CLASSROOMS[0])
+  const [isClassModalOpen, setIsClassModalOpen] = useState(false)
+
+  // Window Management
+  const [openWindows, setOpenWindows] = useState<WindowState[]>([])
+  const [activeWindowId, setActiveWindowId] = useState<string | null>(null)
+
+  // Sync state tracking refs
+  const lastAppliedVersionRef = useRef<number>(0)
+  const isApplyingRemoteUpdateRef = useRef<boolean>(false)
+
+  // Send local state changes to server for two-way synchronization
+  const syncStateToServer = useCallback(async (patch: Partial<PanoSharedState>) => {
+    if (!activeSessionId) return
+    if (isApplyingRemoteUpdateRef.current) return
+
+    try {
+      const res = await fetch('/api/pano/pair/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: activeSessionId,
+          deviceId,
+          deviceType: isPhone ? 'phone' : 'board',
+          state: patch,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.state?.version) {
+          lastAppliedVersionRef.current = data.state.version
+        }
+      }
+    } catch (err) {
+      console.warn('[PanoSync] State push error:', err)
+    }
+  }, [activeSessionId, deviceId, isPhone])
+
+  // Apply authoritative remote state received from server
+  const handleRemoteState = useCallback((remoteState: PanoSharedState) => {
+    if (!remoteState) return
+
+    // 1. Ignore echo from this exact device
+    if (remoteState.sourceDeviceId === deviceId) return
+
+    // 2. Ignore older or identical version (monotonic version control)
+    if (remoteState.version <= lastAppliedVersionRef.current) return
+    lastAppliedVersionRef.current = remoteState.version
+
+    // 3. Mark applying remote update to block outgoing sync loop
+    isApplyingRemoteUpdateRef.current = true
+
+    try {
+      // Sync windows
+      if (Array.isArray(remoteState.openWindows)) {
+        setOpenWindows(remoteState.openWindows)
+      }
+
+      // Sync active window
+      if (remoteState.activeWindowId !== undefined) {
+        setActiveWindowId(remoteState.activeWindowId)
+      }
+
+      // Sync selected class
+      if (remoteState.selectedClassId) {
+        setSelectedClass(prev => {
+          if (prev.id === remoteState.selectedClassId) return prev
+          const found = classrooms.find(c => c.id === remoteState.selectedClassId) || DEFAULT_CLASSROOMS.find(c => c.id === remoteState.selectedClassId)
+          if (found && typeof window !== 'undefined') {
+            localStorage.setItem('oxonom_pano_selected_class_id', String(found.id))
+          }
+          return found || prev
+        })
+      }
+
+      // Sync lock state
+      if (typeof remoteState.isLocked === 'boolean') {
+        setIsLocked(remoteState.isLocked)
+        if (typeof window !== 'undefined') {
+          if (remoteState.isLocked) {
+            localStorage.setItem('oxonom_pano_is_locked', 'true')
+          } else {
+            localStorage.removeItem('oxonom_pano_is_locked')
+          }
+        }
+      }
+    } finally {
+      setTimeout(() => {
+        isApplyingRemoteUpdateRef.current = false
+      }, 50)
+    }
+  }, [classrooms, deviceId])
+
+  // Handle remote session termination (logout on either device)
+  const handleRemoteSessionClosed = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('oxonom_pano_paired_session')
+      localStorage.removeItem('oxonom_pano_active_session_id')
+      localStorage.removeItem('oxonom_pano_is_locked')
+      localStorage.removeItem('oxonom_pano_selected_class_id')
+    }
+
+    setPairedSession(null)
+    setActiveSessionId(null)
+    setOpenWindows([])
+    setActiveWindowId(null)
+    setIsLocked(false)
+
+    if (isPhone) {
+      toast('Akıllı tahta oturumu sonlandırıldı.', { icon: 'ℹ️' })
+      router.push('/dash/connect-board')
+    } else {
+      setForceStandby(true)
+      setIsProfileOpen(false)
+      toast('Öğretmen oturumu kapattı.', { icon: 'ℹ️' })
+    }
+
+    if (session?.update) {
+      session.update(true).catch(() => {})
+    }
+  }, [isPhone, router, session])
+
+  // Realtime SSE listener + fallback polling for shared state
+  useEffect(() => {
+    if (!activeSessionId) return
+
+    let sse: EventSource | null = null
+    let pollTimer: NodeJS.Timeout | null = null
+
+    try {
+      sse = new EventSource(`/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}`)
+
+      sse.addEventListener('state', (e) => {
+        try {
+          const data: PanoSharedState = JSON.parse(e.data)
+          handleRemoteState(data)
+        } catch (err) {
+          console.error('[PanoSSE] Parse state error:', err)
+        }
+      })
+
+      sse.addEventListener('session_closed', () => {
+        handleRemoteSessionClosed()
+      })
+
+      sse.onerror = () => {
+        // EventSource reconnects automatically
+      }
+    } catch (err) {
+      console.warn('[PanoSSE] Stream setup error:', err)
+    }
+
+    // Polling fallback every 2.5s for instances where SSE stream is interrupted
+    pollTimer = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.state) {
+            handleRemoteState(data.state)
+          }
+        } else if (res.status === 404 || res.status === 403) {
+          handleRemoteSessionClosed()
+        }
+      } catch (_) {}
+    }, 2500)
+
+    return () => {
+      if (sse) sse.close()
+      if (pollTimer) clearInterval(pollTimer)
+    }
+  }, [activeSessionId, handleRemoteState, handleRemoteSessionClosed])
 
   // Handle successful pairing from Standby Screen
   const handlePaired = async (teacherData: TeacherPairData) => {
     setPairedSession(teacherData)
     setForceStandby(false)
+
+    const sId = (teacherData as any).sessionId || searchParams?.get('session') || ''
+    if (sId) {
+      setActiveSessionId(sId)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('oxonom_pano_active_session_id', sId)
+      }
+    }
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('oxonom_pano_paired_session', JSON.stringify(teacherData))
     }
@@ -1435,14 +1662,19 @@ export default function PanoClient() {
     toast.success(`Hoş geldiniz Sayın ${teacherData.first_name || teacherData.username || 'Öğretmenim'}!`)
   }
 
-  // Handle Logout -> clears local state, calls backend logout, resets to Standby Screen with fresh QR
+  // Handle Logout -> clears local state, calls backend logout, resets to Standby Screen or redirects
   const handleLogout = async () => {
     try {
-      await fetch('/api/pano/pair/logout', { method: 'POST' })
+      await fetch('/api/pano/pair/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: activeSessionId }),
+      })
     } catch (_) {}
 
     if (typeof window !== 'undefined') {
       localStorage.removeItem('oxonom_pano_paired_session')
+      localStorage.removeItem('oxonom_pano_active_session_id')
       localStorage.removeItem('oxonom_pano_is_locked')
       localStorage.removeItem('oxonom_pano_selected_class_id')
     }
@@ -1453,14 +1685,23 @@ export default function PanoClient() {
     }
 
     setPairedSession(null)
-    setForceStandby(true)
+    setActiveSessionId(null)
+    setOpenWindows([])
+    setActiveWindowId(null)
+    setIsLocked(false)
     setIsProfileOpen(false)
 
     if (session?.update) {
       session.update(true).catch(() => {})
     }
 
-    toast.success('Pano oturumu kapatıldı.')
+    if (isPhone) {
+      toast.success('Pano oturumu kapatıldı.')
+      router.push('/dash/connect-board')
+    } else {
+      setForceStandby(true)
+      toast.success('Pano oturumu kapatıldı.')
+    }
   }
 
   const lockPano = () => {
@@ -1468,6 +1709,7 @@ export default function PanoClient() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('oxonom_pano_is_locked', 'true')
     }
+    syncStateToServer({ isLocked: true })
   }
 
   const unlockPano = () => {
@@ -1475,16 +1717,27 @@ export default function PanoClient() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('oxonom_pano_is_locked')
     }
+    syncStateToServer({ isLocked: false })
   }
 
-  // Class Selection State
-  const [classrooms, setClassrooms] = useState<ClassroomItem[]>(DEFAULT_CLASSROOMS)
-  const [selectedClass, setSelectedClass] = useState<ClassroomItem>(DEFAULT_CLASSROOMS[0])
-  const [isClassModalOpen, setIsClassModalOpen] = useState(false)
-
-  // Window Management
-  const [openWindows, setOpenWindows] = useState<WindowState[]>([])
-  const [activeWindowId, setActiveWindowId] = useState<string | null>(null)
+  // Toggle board lock from phone (locks board, leaves phone functional)
+  const handleToggleBoardLockFromPhone = () => {
+    const nextLocked = !isLocked
+    setIsLocked(nextLocked)
+    if (typeof window !== 'undefined') {
+      if (nextLocked) {
+        localStorage.setItem('oxonom_pano_is_locked', 'true')
+      } else {
+        localStorage.removeItem('oxonom_pano_is_locked')
+      }
+    }
+    syncStateToServer({ isLocked: nextLocked })
+    if (nextLocked) {
+      toast('Akıllı tahta kilitlendi 🔒', { icon: '🔒' })
+    } else {
+      toast.success('Akıllı tahtanın kilidi açıldı 🔓')
+    }
+  }
 
   // Load Saved Settings & Selected Class from localStorage
   useEffect(() => {
@@ -1560,6 +1813,7 @@ export default function PanoClient() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('oxonom_pano_selected_class_id', String(cls.id))
     }
+    syncStateToServer({ selectedClassId: cls.id })
   }
 
   // User Activity Tracker for Auto-Lock
@@ -1628,28 +1882,45 @@ export default function PanoClient() {
 
   // Window Actions
   const openAppInWindow = (app: AppItem) => {
-    setOpenWindows(prev => {
-      const existing = prev.find(w => w.app.id === app.id)
-      if (existing) return prev
-      return [...prev, { app, isMaximized: true, iframeKey: 1 }]
-    })
+    const existing = openWindows.find(w => w.app.id === app.id)
+    const nextWindows = existing ? openWindows : [...openWindows, { app, isMaximized: true, iframeKey: 1 }]
+    setOpenWindows(nextWindows)
     setActiveWindowId(app.id)
+    syncStateToServer({
+      openWindows: nextWindows,
+      activeWindowId: app.id,
+      currentView: 'window',
+    })
   }
 
   const handleCloseWindow = (appId: string) => {
-    setOpenWindows(prev => prev.filter(w => w.app.id !== appId))
-    if (activeWindowId === appId) {
-      const remaining = openWindows.filter(w => w.app.id !== appId)
-      setActiveWindowId(remaining.length > 0 ? remaining[remaining.length - 1].app.id : null)
-    }
+    const remaining = openWindows.filter(w => w.app.id !== appId)
+    const nextActiveId = activeWindowId === appId
+      ? (remaining.length > 0 ? remaining[remaining.length - 1].app.id : null)
+      : activeWindowId
+    setOpenWindows(remaining)
+    setActiveWindowId(nextActiveId)
+    syncStateToServer({
+      openWindows: remaining,
+      activeWindowId: nextActiveId,
+      currentView: nextActiveId ? 'window' : 'home',
+    })
   }
 
   const handleToggleMaximizeWindow = (appId: string) => {
-    setOpenWindows(prev => prev.map(w => w.app.id === appId ? { ...w, isMaximized: !w.isMaximized } : w))
+    const nextWindows = openWindows.map(w => w.app.id === appId ? { ...w, isMaximized: !w.isMaximized } : w)
+    setOpenWindows(nextWindows)
+    syncStateToServer({
+      openWindows: nextWindows,
+    })
   }
 
   const handleReloadWindow = (appId: string) => {
-    setOpenWindows(prev => prev.map(w => w.app.id === appId ? { ...w, iframeKey: w.iframeKey + 1 } : w))
+    const nextWindows = openWindows.map(w => w.app.id === appId ? { ...w, iframeKey: w.iframeKey + 1 } : w)
+    setOpenWindows(nextWindows)
+    syncStateToServer({
+      openWindows: nextWindows,
+    })
   }
 
   // Native Fullscreen State & Toggle
@@ -1894,7 +2165,7 @@ export default function PanoClient() {
     <div
       onPointerDownCapture={recordActivity}
       onTouchStartCapture={recordActivity}
-      className="fixed inset-0 w-screen h-screen flex flex-col relative overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans select-none m-0 p-0 z-10 touch-manipulation overscroll-none"
+      className={`fixed inset-0 w-screen h-screen flex flex-col relative overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans select-none m-0 p-0 z-10 touch-manipulation overscroll-none ${isPhone ? 'pb-24' : ''}`}
       style={{
         backgroundImage: `
           radial-gradient(at 35% 15%, hsla(228,100%,74%,0.16) 0px, transparent 50%),
@@ -1906,9 +2177,9 @@ export default function PanoClient() {
         overscrollBehavior: 'none'
       }}
     >
-      {/* 1. PROFESSIONAL 3D NEON GLASS LOCK SCREEN */}
+      {/* 1. PROFESSIONAL 3D NEON GLASS LOCK SCREEN (ONLY ON BOARD) */}
       <AnimatePresence>
-        {isLocked && (
+        {isLocked && !isPhone && (
           <NeonGlass3DLockScreen
             user={effectiveUser}
             org={org}
@@ -1918,6 +2189,22 @@ export default function PanoClient() {
           />
         )}
       </AnimatePresence>
+
+      {/* Phone Lock Status Banner */}
+      {isPhone && isLocked && (
+        <div className="z-40 bg-amber-500/95 dark:bg-amber-600/95 text-slate-950 px-4 py-2 text-xs font-bold flex items-center justify-between shadow-md shrink-0">
+          <div className="flex items-center gap-2">
+            <Lock className="w-4 h-4 animate-pulse text-slate-950" />
+            <span>Akıllı Tahta Kilitli (Kilit Ekranı devrede)</span>
+          </div>
+          <button
+            onClick={handleToggleBoardLockFromPhone}
+            className="px-2.5 py-1 bg-black/20 hover:bg-black/30 rounded-lg text-xs font-semibold cursor-pointer active:scale-95 transition-all text-slate-950"
+          >
+            Kilidi Aç
+          </button>
+        </div>
+      )}
 
       {/* 2. TOPBAR */}
       <div className="w-full px-4 sm:px-6 py-2.5 sm:py-3 flex justify-between items-center z-40 relative border-b border-white/40 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shrink-0">
@@ -2331,6 +2618,42 @@ export default function PanoClient() {
           />
         )}
       </AnimatePresence>
+
+      {/* 7. MOBILE BOTTOM DOCK (ÖĞRETMEN TELEFONU KONTROL DOCK'U) */}
+      {isPhone && (
+        <div className="fixed bottom-0 inset-x-0 z-[60] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-slate-950/85 backdrop-blur-2xl border-t border-white/10 shadow-2xl flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={handleToggleBoardLockFromPhone}
+            className={`flex-1 max-w-[220px] py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 ${
+              isLocked
+                ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-amber-500/20'
+                : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80'
+            }`}
+          >
+            {isLocked ? (
+              <>
+                <Unlock className="w-4 h-4 text-slate-950" />
+                <span>Tahta Kilidini Aç</span>
+              </>
+            ) : (
+              <>
+                <Lock className="w-4 h-4 text-amber-400" />
+                <span>Ekranı Kilitle</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex-1 max-w-[220px] py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white transition-all cursor-pointer shadow-lg shadow-rose-600/30 active:scale-95 border border-rose-500/30"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Oturumu Kapat</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }

@@ -302,8 +302,20 @@ export default function ConnectBoardClient({
 
       if (data.success) {
         setIsSuccess(true)
-        toast.success('Akıllı tahta başarıyla eşleştirildi!')
+        const confirmedSessionId = data.session?.sessionId || sessId || sessionId
+        setSessionId(confirmedSessionId)
+        if (typeof window !== 'undefined') {
+          if (confirmedSessionId) {
+            localStorage.setItem('oxonom_pano_active_session_id', confirmedSessionId)
+          }
+          localStorage.setItem('oxonom_pano_paired_session', JSON.stringify(teacherData))
+          localStorage.setItem('oxonom_pano_device_type', 'phone')
+        }
+        toast.success('Akıllı tahta başarıyla eşleştirildi! Pano açılıyor...')
         if (onSuccess) onSuccess()
+        setTimeout(() => {
+          router.push(`/pano?session=${encodeURIComponent(confirmedSessionId || '')}&device=phone`)
+        }, 1200)
       } else {
         setErrorMessage(data.error || 'Eşleştirme başarısız oldu. Lütfen kodu kontrol edin.')
         toast.error(data.error || 'Eşleştirme başarısız.')
@@ -404,15 +416,16 @@ export default function ConnectBoardClient({
                     Başka Tahta Eşleştir
                   </button>
 
-                  <a
-                    href="/pano"
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push(`/pano?session=${encodeURIComponent(sessionId || '')}&device=phone`)
+                    }}
                     className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <span>Tahtayı Aç</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                    <span>Pano'yu Aç</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </motion.div>
             ) : activeTab === 'otp' ? (

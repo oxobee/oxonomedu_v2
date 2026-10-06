@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
   }
 
   let cleanup: (() => void) | null = null
+  let pingInterval: NodeJS.Timeout | null = null
 
   const stream = new ReadableStream({
     start(controller) {
@@ -23,26 +24,55 @@ export async function GET(req: NextRequest) {
       // Initial heartbeat ping
       controller.enqueue(encoder.encode(`event: ping\ndata: {"time":${Date.now()}}\n\n`))
 
+      // Keepalive heartbeat every 15s to keep SSE connection alive across firewalls/proxies
+      pingInterval = setInterval(() => {
+        try {
+          controller.enqueue(encoder.encode(`event: ping\ndata: {"time":${Date.now()}}\n\n`))
+        } catch (_) {}
+      }, 15000)
+
       // If already paired before connection was opened
       if (session.status === 'paired' && session.teacherData) {
         controller.enqueue(
           encoder.encode(`event: paired\ndata: ${JSON.stringify(session.teacherData)}\n\n`)
         )
+        if (session.sharedState) {
+          controller.enqueue(
+            encoder.encode(`event: state\ndata: ${JSON.stringify(session.sharedState)}\n\n`)
+          )
+        }
       }
 
-      cleanup = subscribePanoSession(sessionId, (updated) => {
-        if (updated.status === 'paired' && updated.teacherData) {
-          try {
+      cleanup = subscribePanoSession(sessionId, (event) => {
+        try {
+          if (event.type === 'paired' && event.teacherData) {
             controller.enqueue(
-              encoder.encode(`event: paired\ndata: ${JSON.stringify(updated.teacherData)}\n\n`)
+              encoder.encode(`event: paired\ndata: ${JSON.stringify(event.teacherData)}\n\n`)
             )
-          } catch (err) {
-            console.error('[PanoSSE] Enqueue error:', err)
+            if (event.session.sharedState) {
+              controller.enqueue(
+                encoder.encode(`event: state\ndata: ${JSON.stringify(event.session.sharedState)}\n\n`)
+              )
+            }
+          } else if (event.type === 'state' && event.state) {
+            controller.enqueue(
+              encoder.encode(`event: state\ndata: ${JSON.stringify(event.state)}\n\n`)
+            )
+          } else if (event.type === 'session_closed') {
+            controller.enqueue(
+              encoder.encode(`event: session_closed\ndata: ${JSON.stringify({ closed: true, reason: event.reason })}\n\n`)
+            )
+            try {
+              controller.close()
+            } catch (_) {}
           }
+        } catch (err) {
+          console.error('[PanoSSE] Enqueue error:', err)
         }
       })
     },
     cancel() {
+      if (pingInterval) clearInterval(pingInterval)
       if (cleanup) cleanup()
     },
   })
