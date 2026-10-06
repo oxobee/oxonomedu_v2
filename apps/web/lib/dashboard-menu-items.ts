@@ -13,6 +13,7 @@ import {
   ChartBar,
   Code,
   GraduationCap,
+  Sparkle,
 } from '@phosphor-icons/react'
 
 export interface DashboardMenuItem {
@@ -27,6 +28,12 @@ export interface DashboardMenuItem {
 }
 
 export const DASHBOARD_MENU_ITEMS: DashboardMenuItem[] = [
+  {
+    id: 'pano',
+    href: '/pano',
+    icon: Sparkle,
+    labelKey: 'common.pano',
+  },
   {
     id: 'home',
     href: '/dash',
@@ -53,24 +60,10 @@ export const DASHBOARD_MENU_ITEMS: DashboardMenuItem[] = [
     featureKey: 'folders',
   },
   {
-    id: 'communities',
-    href: '/dash/communities',
-    icon: ChatsCircle,
-    labelKey: 'communities.title',
-    featureKey: 'communities',
-  },
-  {
     id: 'classrooms',
     href: '/dash/classrooms',
     icon: GraduationCap,
     labelKey: 'common.classrooms',
-  },
-  {
-    id: 'podcasts',
-    href: '/dash/podcasts',
-    icon: Headphones,
-    labelKey: 'podcasts.podcasts',
-    featureKey: 'podcasts',
   },
   {
     id: 'boards',
@@ -106,17 +99,5 @@ export const DASHBOARD_MENU_ITEMS: DashboardMenuItem[] = [
     href: '/dash/org/settings/general',
     icon: Buildings,
     labelKey: 'common.organization',
-  },
-  {
-    id: 'analytics',
-    href: '/dash/analytics',
-    icon: ChartBar,
-    labelKey: 'common.analytics',
-  },
-  {
-    id: 'developers',
-    href: '/dash/developers/api',
-    icon: Code,
-    labelKey: 'dashboard.developers.breadcrumb',
   },
 ]

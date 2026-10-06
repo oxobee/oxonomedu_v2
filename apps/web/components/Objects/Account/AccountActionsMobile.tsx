@@ -5,6 +5,8 @@ import { User, Lock, ShoppingBag, Settings } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 
+import useAdminStatus from '@components/Hooks/useAdminStatus'
+
 interface AccountActionsMobileProps {
   orgslug: string
   currentSubpage: string
@@ -19,6 +21,10 @@ const NAV_ITEMS = [
 
 export function AccountActionsMobile({ orgslug, currentSubpage }: AccountActionsMobileProps) {
   const { t } = useTranslation()
+  const { isTeacher } = useAdminStatus()
+
+  // Teachers keep the persistent dashboard mobile menu instead
+  if (isTeacher) return null
 
   return (
     <nav aria-label="Account mobile actions" className="fixed bottom-0 start-0 end-0 z-50 md:hidden">

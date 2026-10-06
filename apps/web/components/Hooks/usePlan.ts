@@ -18,5 +18,5 @@ export function usePlan(): PlanLevel {
   const config = org?.config?.config
   const isV2 = config?.config_version?.startsWith('2')
   const plan = isV2 ? config?.plan : config?.cloud?.plan
-  return (plan || 'free') as PlanLevel
+  return (plan || 'enterprise') as PlanLevel
 }

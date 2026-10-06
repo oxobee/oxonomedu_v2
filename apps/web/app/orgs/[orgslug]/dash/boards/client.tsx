@@ -31,7 +31,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
 import { createBoard, deleteBoard, duplicateBoard, getBoards, getStoredCustomBoards } from '@services/boards/boards'
 import { getBoardThumbnailMediaDirectory } from '@services/media/media'
-import { getActiveClassroom, generateClassroomBoards } from '@services/demo/schoolDirectory'
+import { getActiveClassroom, generateClassroomBoards, ALL_CLASSROOM_BOARDS } from '@services/demo/schoolDirectory'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
@@ -57,13 +57,15 @@ interface BoardListClientProps {
   orgslug: string
 }
 
-function CreateBoardForm({ onCreated, orgId, accessToken }: {
+function CreateBoardForm({ onCreated, orgId, accessToken, usergroupId }: {
   onCreated: () => void
   orgId: number
   accessToken: string
+  usergroupId?: number
 }) {
   const { t } = useTranslation()
   const { track } = useLHAnalytics('dashboard')
+  const [boardDate, setBoardDate] = useState(() => new Date().toISOString().split('T')[0])
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
 
@@ -80,12 +82,18 @@ function CreateBoardForm({ onCreated, orgId, accessToken }: {
       await createBoard(orgId, { 
         name, 
         description,
+        usergroup_id: usergroupId,
+        creation_date: new Date(boardDate).toISOString(),
+        board_date: boardDate,
+        blank: true,
         share_type: finalShareType,
         share_code: shareCode,
         features: {
           requires_pin: requiresPin,
           pin: shareCode,
-          read_only: shareType === 'view'
+          read_only: shareType === 'view',
+          board_date: boardDate,
+          blank: true,
         }
       }, accessToken)
       track(AnalyticsEvent.BoardCreated, { has_description: !!description.trim() })
@@ -103,6 +111,16 @@ function CreateBoardForm({ onCreated, orgId, accessToken }: {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-1">
+      <div>
+        <label className="text-sm font-medium text-gray-700">Tarih</label>
+        <input
+          type="date"
+          value={boardDate}
+          onChange={(e) => setBoardDate(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+          required
+        />
+      </div>
       <div>
         <label className="text-sm font-medium text-gray-700">{t('boards.name', { defaultValue: 'Pano Adı' })}</label>
         <input
@@ -288,12 +306,22 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
     staleTime: 60_000,
   })
 
-  // Students ONLY see their classroom's boards (never high school or foreign class boards)
+  const usergroupIdParam = searchParams?.get('usergroupId')
+
+  // Students ONLY see their classroom's boards; when usergroupId is provided, filter strictly by class
   const allBoards = useMemo(() => {
+    if (usergroupIdParam) {
+      const gid = Number(usergroupIdParam)
+      const localCustom = getStoredCustomBoards()
+      const classCustom = localCustom.filter((b) => Number(b.usergroup_id) === gid)
+      const classBoards = ALL_CLASSROOM_BOARDS.filter((b) => Number(b.usergroup_id) === gid)
+      const uuids = new Set(classCustom.map((b) => b.board_uuid))
+      return [...classCustom, ...classBoards.filter((b) => !uuids.has(b.board_uuid))]
+    }
     if (isStudent) {
       const localCustom = getStoredCustomBoards()
       const classCustom = localCustom.filter(
-        (b) => !b.usergroup_id || Number(b.usergroup_id) === Number(activeClass?.id)
+        (b) => Number(b.usergroup_id) === Number(activeClass?.id)
       )
       const classBoards = generateClassroomBoards(activeClass)
       const uuids = new Set(classBoards.map((b) => b.board_uuid))
@@ -301,7 +329,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
       return [...uniqueLocal, ...classBoards]
     }
     return boardsData || []
-  }, [isStudent, activeClass, boardsData])
+  }, [usergroupIdParam, isStudent, activeClass, boardsData])
 
   // Subject options
   const subjectOptions = useMemo(() => {
@@ -505,6 +533,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                         onCreated={handleCreated}
                         orgId={org_id}
                         accessToken={access_token}
+                        usergroupId={usergroupIdParam ? Number(usergroupIdParam) : undefined}
                       />
                     }
                     dialogTrigger={
@@ -533,6 +562,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                       onCreated={handleCreated}
                       orgId={org_id}
                       accessToken={access_token}
+                      usergroupId={usergroupIdParam ? Number(usergroupIdParam) : undefined}
                     />
                   }
                   dialogTrigger={
@@ -905,6 +935,19 @@ function BoardCard({
       {/* Content Body */}
       <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
         <div>
+          {/* Tarih (Önce Tarih) */}
+          <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 mb-1">
+            <Calendar size={13} className="text-indigo-500 shrink-0" />
+            <span>
+              {board.board_date
+                ? new Date(board.board_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+                : board.creation_date
+                  ? new Date(board.creation_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+                  : new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </span>
+          </div>
+
+          {/* Tahta Adı (Altında Tahta Adı) */}
           <Link
             href={boardOpenLink}
             className="text-sm sm:text-base font-black text-gray-900 leading-snug hover:text-indigo-600 transition-colors line-clamp-2 block cursor-pointer"

@@ -26,6 +26,7 @@ import {
   CaretDown,
   MagnifyingGlass,
   Code,
+  QrCode,
 } from '@phosphor-icons/react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import Link from 'next/link'
@@ -36,25 +37,24 @@ import UserAvatar from '../../Objects/UserAvatar'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg, getDeploymentMode } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
-import { changeLanguage } from '@/lib/i18n'
-import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import OrgSquareLogo, { hasOrgLogo } from '@components/Objects/Org/OrgSquareLogo'
 import { cn } from '@/lib/utils'
 import { usePlan } from '@components/Hooks/usePlan'
 import { planMeetsRequirement } from '@services/plans/plans'
 import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { useCommandPalette } from '@components/Dashboard/CommandPalette/CommandPaletteContext'
+import useAdminStatus from '@components/Hooks/useAdminStatus'
 
 function DashMobileMenu() {
   const org = useOrg() as any
   const session = useLHSession() as any
   const { t, i18n } = useTranslation()
+  const { isTeacher, canManageOrg } = useAdminStatus()
   const pathname = usePathname() || ''
   const plan = usePlan()
   const { toggle: openSearch } = useCommandPalette()
   const [menuOpen, setMenuOpen] = useState(false)
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
-  const [langExpanded, setLangExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   React.useEffect(() => { setMounted(true) }, [])
@@ -79,7 +79,7 @@ function DashMobileMenu() {
     await signOut({ redirect: true, callbackUrl: getUriWithOrg(org.slug, '/login') })
   }
 
-  const close = () => { setMenuOpen(false); setLangExpanded(false) }
+  const close = () => { setMenuOpen(false) }
 
   return createPortal(
     <>
@@ -107,21 +107,31 @@ function DashMobileMenu() {
             />
           </Link>
           {/* Progressive reveal — more icons as viewport widens */}
-          <PillLink href="/dash/courses" icon={<BookOpen size={18} weight="fill" />} active={isActive('/dash/courses')} className="hidden min-[340px]:flex" />
+          {isTeacher && (
+            <PillLink
+              href="/dash/connect-board"
+              icon={<QrCode size={18} weight="bold" className="text-amber-400" />}
+              active={isActive('/dash/connect-board')}
+              className="flex"
+            />
+          )}
+          <PillLink
+            href={isTeacher ? "/dash/boards" : "/dash/courses"}
+            icon={isTeacher ? <ChalkboardSimple size={18} weight="fill" /> : <BookOpen size={18} weight="fill" />}
+            active={isActive(isTeacher ? '/dash/boards' : '/dash/courses')}
+            className="hidden min-[340px]:flex"
+          />
           <PillLink href="/dash/assignments" icon={<Files size={18} weight="fill" />} active={isActive('/dash/assignments')} className="hidden min-[390px]:flex" />
           <PillLink href="/dash/users/settings/users" icon={<Users size={18} weight="fill" />} active={isActive('/dash/users')} className="hidden min-[430px]:flex" />
-          {isEnabled('communities') && (
-            <PillLink href="/dash/communities" icon={<ChatsCircle size={18} weight="fill" />} active={isActive('/dash/communities')} className="hidden min-[470px]:flex" />
-          )}
           {isEnabled('boards') && (
             <PillLink href="/dash/boards" icon={<ChalkboardSimple size={18} weight="fill" />} active={isActive('/dash/boards')} className="hidden min-[550px]:flex" />
           )}
           {isEnabled('playgrounds') && (
             <PillLink href="/dash/playgrounds" icon={<Cube size={18} weight="fill" />} active={isActive('/dash/playgrounds')} className="hidden min-[590px]:flex" />
           )}
-          <PillLink href="/dash/analytics" icon={<ChartBar size={18} weight="fill" />} active={isActive('/dash/analytics')} className="hidden min-[630px]:flex" />
-          <PillLink href="/dash/org/settings/general" icon={<Buildings size={18} weight="fill" />} active={isActive('/dash/org')} className="hidden min-[670px]:flex" />
-          <PillLink href="/dash/developers/api" icon={<Code size={18} weight="fill" />} active={isActive('/dash/developers')} className="hidden min-[710px]:flex" />
+          {!isTeacher && canManageOrg && (
+            <PillLink href="/dash/org/settings/general" icon={<Buildings size={18} weight="fill" />} active={isActive('/dash/org')} className="hidden min-[670px]:flex" />
+          )}
           {isEnabled('payments') && (
             <PillLink href="/dash/payments/overview" icon={<CurrencyCircleDollar size={18} weight="fill" />} active={isActive('/dash/payments')} className="hidden min-[750px]:flex" />
           )}
@@ -214,65 +224,44 @@ function DashMobileMenu() {
               {/* Nav items */}
               <div className="py-2 px-2 max-h-[52vh] overflow-y-auto overscroll-contain space-y-px">
                 <PanelItem href="/dash" icon={<House size={15} weight="fill" />} label={t('common.home')} active={isActive('/dash')} onClick={close} />
-                <PanelItem href="/dash/courses" icon={<BookOpen size={15} weight="fill" />} label={t('courses.courses')} active={isActive('/dash/courses')} onClick={close} />
+                {isTeacher && (
+                  <PanelItem
+                    href="/dash/connect-board"
+                    icon={<QrCode size={15} weight="bold" className="text-amber-400" />}
+                    label="Tahtaya Bağlan"
+                    active={isActive('/dash/connect-board')}
+                    onClick={close}
+                  />
+                )}
+                {isTeacher && (
+                  <PanelItem
+                    href="/pano"
+                    icon={<ChalkboardSimple size={15} weight="fill" className="text-indigo-400" />}
+                    label="Pano Modu"
+                    active={isActive('/pano')}
+                    onClick={close}
+                  />
+                )}
+                <PanelItem
+                  href={isTeacher ? "/dash/boards" : "/dash/courses"}
+                  icon={isTeacher ? <ChalkboardSimple size={15} weight="fill" /> : <BookOpen size={15} weight="fill" />}
+                  label={isTeacher ? "Tahtalar" : t('courses.courses')}
+                  active={isActive(isTeacher ? '/dash/boards' : '/dash/courses')}
+                  onClick={close}
+                />
                 {isEnabled('folders') && <PanelItem href="/dash/library" icon={<FolderSimple size={15} weight="fill" />} label={t('library.library')} active={isActive('/dash/library')} onClick={close} />}
                 <PanelItem href="/dash/assignments" icon={<Files size={15} weight="fill" />} label={t('common.assignments')} active={isActive('/dash/assignments')} onClick={close} />
                 <PanelItem href="/dash/users/settings/users" icon={<Users size={15} weight="fill" />} label={t('common.users')} active={isActive('/dash/users')} onClick={close} />
-                {isEnabled('communities') && <PanelItem href="/dash/communities" icon={<ChatsCircle size={15} weight="fill" />} label="Topluluk" active={isActive('/dash/communities')} onClick={close} />}
-                {isEnabled('boards') && <PanelItem href="/dash/boards" icon={<ChalkboardSimple size={15} weight="fill" />} label="Panolar" active={isActive('/dash/boards')} onClick={close} />}
+                {isEnabled('boards') && <PanelItem href="/dash/boards" icon={<ChalkboardSimple size={15} weight="fill" />} label="Akıllı Tahtalar" active={isActive('/dash/boards')} onClick={close} />}
                 {isEnabled('playgrounds') && <PanelItem href="/dash/playgrounds" icon={<Cube size={15} weight="fill" />} label="Modüller" active={isActive('/dash/playgrounds')} onClick={close} />}
                 {isEnabled('payments') && <PanelItem href="/dash/payments/overview" icon={<CurrencyCircleDollar size={15} weight="fill" />} label={t('common.payments')} active={isActive('/dash/payments')} onClick={close} />}
-                <PanelItem href="/dash/analytics" icon={<ChartBar size={15} weight="fill" />} label="Analitik" active={isActive('/dash/analytics')} onClick={close} />
-                <PanelItem href="/dash/org/settings/general" icon={<Buildings size={15} weight="fill" />} label={t('common.organization')} active={isActive('/dash/org')} onClick={close} />
-                <PanelItem href="/dash/developers/api" icon={<Code size={15} weight="fill" />} label={t('dashboard.developers.breadcrumb', { defaultValue: 'Developers' })} active={isActive('/dash/developers')} onClick={close} />
+                {!isTeacher && canManageOrg && (
+                  <PanelItem href="/dash/org/settings/general" icon={<Buildings size={15} weight="fill" />} label={t('common.organization')} active={isActive('/dash/org')} onClick={close} />
+                )}
 
                 <div className="h-px bg-white/[0.05] mx-2 my-1.5" />
 
                 <PanelItem href="/account/general" icon={<Gear size={15} weight="fill" />} label={t('common.settings')} active={isActive('/account')} onClick={close} />
-
-                {/* Language picker */}
-                <button
-                  onClick={() => setLangExpanded(v => !v)}
-                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
-                >
-                  <Globe size={15} weight="fill" />
-                  <span className="text-sm font-medium flex-1 text-start">{t('common.language')}</span>
-                  <CaretDown size={10} weight="bold" className={cn('transition-transform', langExpanded && 'rotate-180')} />
-                </button>
-                {langExpanded && (
-                  <div className="ms-2 ps-3 border-s border-white/[0.05] space-y-px">
-                    {AVAILABLE_LANGUAGES.map(lang => (
-                      <button
-                        key={lang.code}
-                        onClick={() => { changeLanguage(lang.code); setLangExpanded(false) }}
-                        className="flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg text-sm text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
-                      >
-                        <span className="font-medium">{lang.nativeName}</span>
-                        {i18n.language.split('-')[0] === lang.code && <Check size={11} weight="bold" className="text-green-500" />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <a href="https://docs.learnhouse.app" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
-                >
-                  <Book size={15} weight="fill" />
-                  <span className="text-sm font-medium">{t('common.help_menu.documentation')}</span>
-                </a>
-                <a href="https://discord.gg/learnhouse" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
-                >
-                  <DiscordIcon size={15} />
-                  <span className="text-sm font-medium">{t('common.help_menu.discord')}</span>
-                </a>
-                <button
-                  onClick={() => { setFeedbackModalOpen(true); close() }}
-                  className="flex items-center w-full rounded-lg px-2.5 py-2 gap-2.5 text-white/40 hover:text-white/80 hover:bg-white/[0.05] transition-all"
-                >
-                  <ChatCircleDots size={15} weight="fill" />
-                  <span className="text-sm font-medium">{t('common.help_menu.report_feedback')}</span>
-                </button>
               </div>
 
               {/* User footer */}

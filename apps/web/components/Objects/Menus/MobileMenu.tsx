@@ -357,31 +357,7 @@ export default function MobileMenu({
               />
             </Link>
 
-            {/* 2.2 Veli & Sınıf Forumu */}
-            <Link
-              href={getUriWithOrg(orgslug, '/communities')}
-              onClick={onClose}
-              className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-gray-200/90 shadow-xs hover:border-teal-300 active:scale-[0.99] transition-all group"
-            >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-700 border border-rose-200/80 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <ChatsCircle size={20} weight="fill" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm font-bold text-gray-900 group-hover:text-rose-700 transition-colors truncate">
-                    Topluluk
-                  </h3>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">
-                    Okul duyuruları, sınıf tartışmaları ve veli iletişimi
-                  </p>
-                </div>
-              </div>
-              <ArrowRight
-                size={16}
-                weight="bold"
-                className="text-gray-300 group-hover:text-rose-700 group-hover:translate-x-1 transition-all shrink-0 ml-2"
-              />
-            </Link>
+            {/* Topluluk - Geçici Olarak Gizlendi */}
           </div>
         </div>
 
@@ -461,36 +437,7 @@ export default function MobileMenu({
               </button>
             )}
 
-            {/* 3.3 Geri Bildirim */}
-            {onOpenFeedback && (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose()
-                  onOpenFeedback()
-                }}
-                className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-gray-200/90 shadow-xs hover:border-gray-300 active:scale-[0.99] transition-all group text-start w-full cursor-pointer"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 text-gray-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <Question size={20} weight="fill" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-gray-900 transition-colors truncate">
-                      Geri Bildirim & Yardım
-                    </h3>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">
-                      Görüş, öneri veya teknik destek talebi iletin
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight
-                  size={16}
-                  weight="bold"
-                  className="text-gray-300 group-hover:text-gray-700 group-hover:translate-x-1 transition-all shrink-0 ml-2"
-                />
-              </button>
-            )}
+
           </div>
         </div>
       </div>

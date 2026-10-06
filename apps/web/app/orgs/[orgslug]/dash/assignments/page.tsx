@@ -22,7 +22,16 @@ import {
   Search,
   Sparkles,
   Users,
+  ChevronDown,
+  Check,
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@components/ui/dialog'
 import { useTranslation } from 'react-i18next'
 import { getUserGroups } from '@services/usergroups/usergroups'
 import { getBoards } from '@services/boards/boards'
@@ -55,6 +64,9 @@ export default function SchoolAssignmentsPage() {
 
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isClassModalOpen, setIsClassModalOpen] = useState(false)
+  const [classSearchQuery, setClassSearchQuery] = useState('')
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [selectedAssignmentForDo, setSelectedAssignmentForDo] = useState<SchoolAssignmentItem | null>(null)
   const [selectedAssignmentForSubmissions, setSelectedAssignmentForSubmissions] = useState<SchoolAssignmentItem | null>(null)
 
@@ -225,13 +237,10 @@ export default function SchoolAssignmentsPage() {
             <Breadcrumbs
               items={[{ label: 'Ödevler', href: '/dash/assignments', icon: <FileText size={14} /> }]}
             />
-            <div className="flex items-center gap-3 pt-1">
+            <div className="pt-1">
               <h1 className="font-black text-2xl sm:text-3xl text-gray-900 tracking-tight">
                 {viewMode === 'teacher' ? 'Okul & Sınıf Ev Ödevleri' : 'Ödevlerim & Ders Görevlerim'}
               </h1>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                1-12. Sınıf K-12
-              </span>
             </div>
             <p className="text-xs text-gray-500">
               {viewMode === 'teacher'
@@ -241,31 +250,6 @@ export default function SchoolAssignmentsPage() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            {/* View switcher for teachers */}
-            {!isActualStudent && (
-              <div className="flex items-center bg-gray-100 p-1 rounded-xl text-xs font-bold">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('teacher')}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                    viewMode === 'teacher' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Öğretmen Paneli
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('student')}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
-                    viewMode === 'student' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <Eye size={12} />
-                  <span>Öğrenci Gözüyle</span>
-                </button>
-              </div>
-            )}
-
             {viewMode === 'teacher' && (
               <button
                 type="button"
@@ -327,111 +311,245 @@ export default function SchoolAssignmentsPage() {
               </div>
             </div>
 
-            {/* CLASSROOM TABS / PILLS (SINIF BAZLI FİLTRELEME) */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Users size={14} className="text-indigo-600" />
-                  Sınıfsal Kategoriler & Şubeler
-                </span>
-                <span className="text-xs text-gray-400">{classrooms.length} Aktif Şube</span>
-              </div>
-
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                <button
-                  type="button"
-                  onClick={() => setSelectedUsergroupId(null)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                    selectedUsergroupId === null
-                      ? 'bg-indigo-600 text-white shadow-xs'
-                      : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  Tüm Sınıflar
-                </button>
-                {classrooms.map((c) => (
+            {/* ACTION & FILTERS TOOLBAR */}
+            <div className="flex flex-col gap-3">
+              <div className="bg-white p-3 rounded-2xl border border-gray-200/90 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {/* Sınıfsal Kategoriler & Şubeler Modal Trigger */}
                   <button
-                    key={c.id}
                     type="button"
-                    onClick={() => setSelectedUsergroupId(c.id)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                      selectedUsergroupId === c.id
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    onClick={() => setIsClassModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200 shadow-2xs"
+                  >
+                    <Users size={15} className="text-indigo-600" />
+                    <span>Sınıfsal Kategoriler & Şubeler</span>
+                    <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100">
+                      {selectedUsergroupId
+                        ? (classrooms.find((c) => c.id === selectedUsergroupId)?.name || 'Seçildi')
+                        : 'Tüm Sınıflar'}
+                    </span>
+                    <ChevronDown size={14} className="text-slate-400" />
+                  </button>
+
+                  {/* Filtrele Toggle Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsFilterOpen((prev) => !prev)}
+                    className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                      isFilterOpen || selectedCategory !== 'all' || selectedSubject !== 'all' || selectedToolType !== 'all'
+                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-xs'
+                        : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
                     }`}
                   >
-                    <span>{c.name}</span>
-                    {c.invitation_code && (
-                      <span className={`text-[10px] px-1 py-0.2 rounded font-mono ${
-                        selectedUsergroupId === c.id ? 'bg-indigo-700 text-white' : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {c.invitation_code}
+                    <Filter size={15} className={isFilterOpen ? 'text-indigo-600' : 'text-slate-500'} />
+                    <span>Filtrele</span>
+                    {(selectedCategory !== 'all' || selectedSubject !== 'all' || selectedToolType !== 'all') && (
+                      <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center">
+                        {(selectedCategory !== 'all' ? 1 : 0) +
+                          (selectedSubject !== 'all' ? 1 : 0) +
+                          (selectedToolType !== 'all' ? 1 : 0)}
                       </span>
                     )}
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`}
+                    />
                   </button>
-                ))}
+
+                  {(selectedCategory !== 'all' ||
+                    selectedSubject !== 'all' ||
+                    selectedToolType !== 'all' ||
+                    selectedUsergroupId !== null) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedCategory('all')
+                        setSelectedSubject('all')
+                        setSelectedToolType('all')
+                        setSelectedUsergroupId(null)
+                      }}
+                      className="text-xs text-rose-600 hover:text-rose-700 font-bold px-2 py-1 transition-colors cursor-pointer"
+                    >
+                      Sıfırla
+                    </button>
+                  )}
+                </div>
+
+                {/* Search */}
+                <div className="relative min-w-[220px] flex-1 sm:flex-initial">
+                  <Search size={14} className="absolute left-3 top-2.5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Ödev başlığı veya konu ara..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
               </div>
+
+              {/* Açılır Filtre Paneli (Tüm kademeler, branşlar, ödev araçları) */}
+              {isFilterOpen && (
+                <div className="bg-white p-4 rounded-2xl border border-indigo-100 shadow-sm flex flex-wrap items-center gap-4 text-xs animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+                    {/* Kademe */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kademe</label>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none hover:bg-slate-100"
+                      >
+                        <option value="all">Tüm Kademeler (1-12)</option>
+                        <option value="İlkokul (1-4)">İlkokul (1-4)</option>
+                        <option value="Ortaokul (5-8)">Ortaokul (5-8)</option>
+                        <option value="Lise (9-12)">Lise (9-12)</option>
+                      </select>
+                    </div>
+
+                    {/* Branş / Ders */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Branş / Ders</label>
+                      <select
+                        value={selectedSubject}
+                        onChange={(e) => setSelectedSubject(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none hover:bg-slate-100"
+                      >
+                        <option value="all">Tüm Branşlar / Dersler</option>
+                        <option value="Matematik">Matematik</option>
+                        <option value="Fizik">Fizik</option>
+                        <option value="Kimya">Kimya</option>
+                        <option value="Biyoloji">Biyoloji</option>
+                        <option value="Türk Dili ve Edebiyatı">Edebiyat</option>
+                        <option value="Türkçe">Türkçe</option>
+                        <option value="Tarih">Tarih</option>
+                        <option value="Coğrafya">Coğrafya</option>
+                        <option value="İngilizce">İngilizce</option>
+                      </select>
+                    </div>
+
+                    {/* Ödev Aracı */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ödev Aracı</label>
+                      <select
+                        value={selectedToolType}
+                        onChange={(e) => setSelectedToolType(e.target.value)}
+                        className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none hover:bg-slate-100"
+                      >
+                        <option value="all">Tüm Ödev Araçları</option>
+                        <option value="WHITEBOARD">🎨 İnteraktif Akıllı Tahta</option>
+                        <option value="WORKSHEET">📝 Çalışma Kağıdı / Dosya</option>
+                        <option value="QUIZ">🧪 İnteraktif Test</option>
+                        <option value="READING">📖 Okuma & Özet</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* DETAILED CATEGORICAL FILTERS BAR */}
-            <div className="bg-white p-3.5 rounded-2xl border border-gray-200/90 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex flex-wrap items-center gap-2.5">
-                {/* Kademe */}
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-800 outline-none"
-                >
-                  <option value="all">Tüm Kademeler (1-12)</option>
-                  <option value="İlkokul (1-4)">İlkokul (1-4)</option>
-                  <option value="Ortaokul (5-8)">Ortaokul (5-8)</option>
-                  <option value="Lise (9-12)">Lise (9-12)</option>
-                </select>
+            {/* SINIFSAL KATEGORİLER & ŞUBELER SEÇİM PENCERESİ */}
+            <Dialog open={isClassModalOpen} onOpenChange={setIsClassModalOpen}>
+              <DialogContent className="max-w-xl max-h-[85vh] flex flex-col p-6 rounded-3xl bg-white shadow-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-indigo-600" />
+                    <span>Sınıfsal Kategoriler & Şubeler</span>
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-slate-500">
+                    Ödevleri filtrelemek veya incelemek istediğiniz sınıf / şubeyi seçin.
+                  </DialogDescription>
+                </DialogHeader>
 
-                {/* Branş / Ders */}
-                <select
-                  value={selectedSubject}
-                  onChange={(e) => setSelectedSubject(e.target.value)}
-                  className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-800 outline-none"
-                >
-                  <option value="all">Tüm Branşlar / Dersler</option>
-                  <option value="Matematik">Matematik</option>
-                  <option value="Fizik">Fizik</option>
-                  <option value="Kimya">Kimya</option>
-                  <option value="Biyoloji">Biyoloji</option>
-                  <option value="Türk Dili ve Edebiyatı">Edebiyat</option>
-                  <option value="Türkçe">Türkçe</option>
-                  <option value="Tarih">Tarih</option>
-                  <option value="Coğrafya">Coğrafya</option>
-                  <option value="İngilizce">İngilizce</option>
-                </select>
+                <div className="relative my-3">
+                  <Search size={14} className="absolute left-3.5 top-3 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Şube veya sınıf adı ara..."
+                    value={classSearchQuery}
+                    onChange={(e) => setClassSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
 
-                {/* Ödev Aracı */}
-                <select
-                  value={selectedToolType}
-                  onChange={(e) => setSelectedToolType(e.target.value)}
-                  className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-800 outline-none"
-                >
-                  <option value="all">Tüm Ödev Araçları</option>
-                  <option value="WHITEBOARD">🎨 İnteraktif Akıllı Tahta</option>
-                  <option value="WORKSHEET">📝 Çalışma Kağıdı / Dosya</option>
-                  <option value="QUIZ">🧪 İnteraktif Test</option>
-                  <option value="READING">📖 Okuma & Özet</option>
-                </select>
-              </div>
+                <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[360px]">
+                  {/* Tüm Sınıflar Option */}
+                  <div
+                    onClick={() => {
+                      setSelectedUsergroupId(null)
+                      setIsClassModalOpen(false)
+                    }}
+                    className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                      selectedUsergroupId === null
+                        ? 'bg-indigo-50/70 border-indigo-300 text-indigo-900 shadow-xs'
+                        : 'bg-white border-slate-200/80 hover:bg-slate-50 text-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${
+                          selectedUsergroupId === null ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        <Layers size={16} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-xs">Tüm Sınıflar ve Şubeler</h4>
+                        <p className="text-[11px] text-slate-500">Filtreleme yapmadan tüm okul ödevlerini gösterir</p>
+                      </div>
+                    </div>
+                    {selectedUsergroupId === null && <Check size={18} className="text-indigo-600" />}
+                  </div>
 
-              {/* Search */}
-              <div className="relative min-w-[200px]">
-                <Search size={14} className="absolute left-3 top-2.5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Ödev başlığı veya konu ara..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/20"
-                />
-              </div>
-            </div>
+                  {/* Classes List */}
+                  {classrooms
+                    .filter(
+                      (c) =>
+                        c.name?.toLowerCase().includes(classSearchQuery.toLowerCase()) ||
+                        c.invitation_code?.toLowerCase().includes(classSearchQuery.toLowerCase())
+                    )
+                    .map((c) => {
+                      const isSelected = selectedUsergroupId === c.id
+                      return (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            setSelectedUsergroupId(c.id)
+                            setIsClassModalOpen(false)
+                          }}
+                          className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                            isSelected
+                              ? 'bg-indigo-50/70 border-indigo-300 text-indigo-900 shadow-xs'
+                              : 'bg-white border-slate-200/80 hover:bg-slate-50 text-slate-800'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${
+                                isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                              }`}
+                            >
+                              <Users size={16} />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-bold text-xs text-slate-900">{c.name}</h4>
+                                {c.invitation_code && (
+                                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">
+                                    {c.invitation_code}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-slate-500">Şube / Sınıf Grubu</p>
+                            </div>
+                          </div>
+                          {isSelected && <Check size={18} className="text-indigo-600" />}
+                        </div>
+                      )
+                    })}
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* ASSIGNMENTS LIST (TEACHER CARDS) */}
             {isLoadingAssignments ? (
@@ -461,7 +579,8 @@ export default function SchoolAssignmentsPage() {
                 {filteredTeacherAssignments.map((asg) => (
                   <div
                     key={asg.id}
-                    className="bg-white rounded-2xl border border-gray-200/90 shadow-xs p-5 flex flex-col justify-between hover:shadow-md transition-shadow group space-y-4"
+                    onClick={() => setSelectedAssignmentForSubmissions(asg)}
+                    className="bg-white rounded-2xl border border-gray-200/90 shadow-xs p-5 flex flex-col justify-between hover:shadow-md hover:border-indigo-300 transition-all group space-y-4 cursor-pointer"
                   >
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between gap-2">
@@ -509,21 +628,17 @@ export default function SchoolAssignmentsPage() {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 pt-1">
+                      <div className="pt-1">
                         <button
                           type="button"
-                          onClick={() => setSelectedAssignmentForSubmissions(asg)}
-                          className="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-colors text-center cursor-pointer text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedAssignmentForSubmissions(asg)
+                          }}
+                          className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-colors text-center cursor-pointer text-xs flex items-center justify-center gap-1.5"
                         >
-                          Teslimleri İncele ({asg.total_submissions || 0})
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedAssignmentForDo(asg)}
-                          className="p-2 border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer"
-                          title="Ödevi Önizle / Çöz"
-                        >
-                          <Eye size={15} />
+                          <FileText size={14} />
+                          <span>Teslimleri İncele ({asg.total_submissions || 0})</span>
                         </button>
                       </div>
                     </div>

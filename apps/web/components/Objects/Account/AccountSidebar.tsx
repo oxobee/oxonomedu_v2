@@ -7,6 +7,8 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { getUriWithOrg } from '@services/config/config'
 
+import useAdminStatus from '@components/Hooks/useAdminStatus'
+
 interface AccountSidebarProps {
   orgslug: string
   currentSubpage: string
@@ -21,8 +23,11 @@ const NAV_ITEMS = [
 
 export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps) {
   const { t } = useTranslation()
+  const { isTeacher } = useAdminStatus()
   const session = useLHSession() as any
   const user = session?.data?.user
+
+  const visibleItems = isTeacher ? NAV_ITEMS.filter((i) => i.id !== 'purchases') : NAV_ITEMS
 
   return (
     <div className="space-y-4">
@@ -57,7 +62,7 @@ export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps)
         {/* Navigation */}
         <div className="p-2">
           <nav className="space-y-1">
-            {NAV_ITEMS.map((item) => {
+            {visibleItems.map((item) => {
               const Icon = item.icon
               const isActive = currentSubpage === item.id
               return (

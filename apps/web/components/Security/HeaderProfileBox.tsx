@@ -49,6 +49,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
   const org = useOrg() as any
   const { t, i18n } = useTranslation()
   const { track } = useLHAnalytics()
+  const { isTeacher } = useAdminStatus()
   const colors = getMenuColorClasses(primaryColor)
 
   // The user's organizations (deduped) from the session roles — used by the
@@ -248,12 +249,14 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                     <span>{t('user.user_settings')}</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center space-x-2">
-                    <ShoppingBag size={16} weight="fill" />
-                    <span>{t('account.purchases')}</span>
-                  </Link>
-                </DropdownMenuItem>
+                {!isTeacher && (
+                  <DropdownMenuItem asChild>
+                    <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center space-x-2">
+                      <ShoppingBag size={16} weight="fill" />
+                      <span>{t('account.purchases')}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 {multiOrg && (
                   <>
                     <DropdownMenuSeparator />
@@ -304,27 +307,6 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                     </DropdownMenuSub>
                   </>
                 )}
-                <DropdownMenuSeparator />
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="flex items-center gap-2 space-x-2">
-                    <Globe size={14} weight="fill" />
-                    <span>{t('common.language')}</span>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      {AVAILABLE_LANGUAGES.map((language) => (
-                        <DropdownMenuItem 
-                          key={language.code}
-                          onClick={() => changeLanguage(language.code)}
-                          className="flex items-center justify-between"
-                        >
-                          <span>{t(language.translationKey)} ({language.nativeName})</span>
-                          {i18n.language.split('-')[0] === language.code && <Check size={14} weight="bold" />}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {

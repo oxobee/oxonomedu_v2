@@ -52,10 +52,7 @@ async function loadLocale(lng: string) {
 
 if (typeof window !== 'undefined') {
   try {
-    const userPicked = localStorage.getItem('i18nextLng_userPicked');
-    if (!userPicked) {
-      localStorage.setItem('i18nextLng', 'tr');
-    }
+    localStorage.setItem('i18nextLng', 'tr');
   } catch {}
 }
 
@@ -64,7 +61,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: typeof window !== 'undefined' && localStorage.getItem('i18nextLng_userPicked') ? (localStorage.getItem('i18nextLng') || 'tr') : 'tr',
+    lng: 'tr',
     fallbackLng: 'tr',
     ns: ['common'],
     defaultNS: 'common',

@@ -251,38 +251,6 @@ function HomeClient() {
                   </button>
                 )}
 
-                {/* Language Switcher */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 text-xs font-semibold text-gray-700 transition-colors cursor-pointer">
-                      <Languages size={14} className="text-gray-500" />
-                      <span>{currentLangCode}</span>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48 z-[200]" align="end">
-                    <DropdownMenuLabel className="text-xs text-gray-500 font-medium">
-                      {t('common.language', { defaultValue: 'Dil Seçimi' })}
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {AVAILABLE_LANGUAGES.map((language) => (
-                      <DropdownMenuItem
-                        key={language.code}
-                        onClick={() => {
-                          try {
-                            localStorage.setItem('i18nextLng_userPicked', '1')
-                          } catch {}
-                          changeLanguage(language.code)
-                        }}
-                        className="flex items-center justify-between text-xs cursor-pointer"
-                      >
-                        <span className="font-medium">{language.nativeName}</span>
-                        {i18n.language?.split('-')[0] === language.code && (
-                          <Check size={14} className="text-gray-900" />
-                        )}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
 
                 {/* User Menu */}
                 <DropdownMenu>

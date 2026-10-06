@@ -258,6 +258,26 @@ export default async function proxy(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
+  // Hidden / disabled routes: /communities, /developers, /podcasts, /analytics
+  // -------------------------------------------------------------------------
+  const cleanPath = pathname.replace(/^\/orgs\/[^/]+/, '').toLowerCase()
+  const blockedPrefixes = [
+    '/communities',
+    '/dash/communities',
+    '/developers',
+    '/dash/developers',
+    '/podcasts',
+    '/dash/podcasts',
+    '/analytics',
+    '/dash/analytics',
+    '/admin/analytics',
+    '/admin/developers',
+  ]
+  if (blockedPrefixes.some(prefix => cleanPath === prefix || cleanPath.startsWith(`${prefix}/`))) {
+    return new NextResponse('Not Found', { status: 404 })
+  }
+
+  // -------------------------------------------------------------------------
   // 1. Admin subdomain (multi only) → rewrite to /admin route group.
   //    Idempotent: if the path already starts with /admin (e.g. internal nav
   //    uses /admin/organizations so it works in both subdomain and path mode),

@@ -70,6 +70,9 @@ export async function createBoard(
     features?: any
     share_type?: string
     share_code?: string | null
+    creation_date?: string
+    board_date?: string
+    blank?: boolean
   },
   access_token?: string
 ) {
@@ -100,14 +103,20 @@ export async function createBoard(
       thumbnail_image: data.thumbnail_image || null,
       slug: data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       published: true,
-      creation_date: new Date().toISOString(),
+      creation_date: data.creation_date || new Date().toISOString(),
+      board_date: data.board_date || new Date().toISOString().split('T')[0],
       update_date: new Date().toISOString(),
       is_owner: true,
       is_member: true,
+      is_custom: true,
+      blank: data.blank !== false,
       member_count: 1,
       share_type: data.share_type || 'public',
       share_code: data.share_code || null,
-      features: data.features || {
+      features: {
+        ...(data.features || {}),
+        blank: data.blank !== false,
+        board_date: data.board_date || new Date().toISOString().split('T')[0],
         effects_enabled: true,
         chat_enabled: true,
         reactions_enabled: true,
@@ -117,6 +126,11 @@ export async function createBoard(
         avatar_image: null,
       },
     }
+  } else {
+    createdBoard.is_custom = true
+    createdBoard.blank = data.blank !== false
+    createdBoard.board_date = data.board_date || new Date().toISOString().split('T')[0]
+    if (data.usergroup_id) createdBoard.usergroup_id = data.usergroup_id
   }
 
   saveStoredCustomBoard(createdBoard)
@@ -145,8 +159,9 @@ export async function getClassroomBoards(usergroupId: number, access_token?: str
   } catch (_err) {}
 
   const localCustom = getStoredCustomBoards()
+  // Strictly filter custom boards by classroom's usergroupId
   const classCustom = localCustom.filter(
-    (b) => !b.usergroup_id || Number(b.usergroup_id) === Number(usergroupId)
+    (b) => Number(b.usergroup_id) === Number(usergroupId)
   )
 
   if (serverBoards.length > 0) {
@@ -155,11 +170,11 @@ export async function getClassroomBoards(usergroupId: number, access_token?: str
     return [...uniqueLocal, ...serverBoards]
   }
 
+  // Strictly filter ALL_CLASSROOM_BOARDS by usergroupId (never leak boards from other classes)
   const match = ALL_CLASSROOM_BOARDS.filter((b) => Number(b.usergroup_id) === Number(usergroupId))
-  const baseBoards = match.length > 0 ? match : ALL_CLASSROOM_BOARDS.slice(0, 4)
-  const uuids = new Set(baseBoards.map((b) => b.board_uuid))
+  const uuids = new Set(match.map((b) => b.board_uuid))
   const uniqueLocal = classCustom.filter((b) => !uuids.has(b.board_uuid))
-  return [...uniqueLocal, ...baseBoards]
+  return [...uniqueLocal, ...match]
 }
 
 export async function getBoards(orgId: number, access_token?: string) {

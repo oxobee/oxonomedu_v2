@@ -59,13 +59,23 @@ const getSettingTabs = (t: any): TabConfig[] => [
   { id: 'danger', label: t('dashboard.organization.settings.tabs.danger') || 'Danger Zone', icon: AlertTriangle },
 ]
 
+import useAdminStatus from '@components/Hooks/useAdminStatus'
+
 function OrgPage(props: { params: Promise<OrgParams> }) {
   const { t } = useTranslation()
   const router = useRouter()
   const params = use(props.params);
+  const { isTeacher, isAdmin, canManageOrg, loading: adminLoading } = useAdminStatus()
   const [H1Label, setH1Label] = React.useState('')
   const [H2Label, setH2Label] = React.useState('')
   const SETTING_TABS = getSettingTabs(t)
+
+  // Block teachers without admin rights from entering school settings
+  useEffect(() => {
+    if (!adminLoading && isTeacher && !canManageOrg && !isAdmin) {
+      router.replace('/dash')
+    }
+  }, [adminLoading, isTeacher, canManageOrg, isAdmin, router])
 
   // Redirect legacy developer subpages to the new top-level Developers dashboard.
   const movedTo = MOVED_TO_DEVELOPERS[params.subpage]
@@ -74,6 +84,10 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
     if (movedTo) router.replace(`/dash/developers/${movedTo}`)
     else if (movedToUsers) router.replace(`/dash/users/settings/${movedToUsers}`)
   }, [movedTo, movedToUsers, router])
+
+  if (!adminLoading && isTeacher && !canManageOrg && !isAdmin) {
+    return null
+  }
 
   function handleLabels() {
     if (params.subpage == 'general') {

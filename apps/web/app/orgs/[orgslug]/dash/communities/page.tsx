@@ -1,62 +1,15 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
-import React from 'react'
-import { getServerSession } from '@/lib/auth/server'
-import { getCommunities } from '@services/communities/communities'
-import CommunitiesDashClient from './client'
+import { notFound } from 'next/navigation'
 
-type MetadataProps = {
-  params: Promise<{ orgslug: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
-
-export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
-  const params = await props.params
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    revalidate: 120,
-    tags: ['organizations'],
-  })
-
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Communities — ' + org.name,
-    description: `Manage communities for ${org.name}`,
-    robots: {
-      index: false,
-      follow: false,
-    },
+    title: 'Not Found',
+    robots: { index: false, follow: false },
   }
 }
 
-async function CommunitiesDashPage(params: any) {
-  const orgslug = (await params.params).orgslug
-  const org = await getOrganizationContextInfo(orgslug, {
-    revalidate: 120,
-    tags: ['organizations'],
-  })
-  const session = await getServerSession()
-  const access_token = session?.tokens?.access_token
-
-  let communities = []
-  try {
-    communities = await getCommunities(
-      org.id,
-      1,
-      100,
-      { revalidate: 0, tags: ['communities'] },
-      access_token ? access_token : undefined
-    )
-  } catch (error) {
-    console.error('Failed to fetch communities:', error)
-    communities = []
-  }
-
-  return (
-    <CommunitiesDashClient
-      org_id={org.id}
-      orgslug={orgslug}
-      communities={communities || []}
-    />
-  )
+async function CommunitiesDashPage() {
+  notFound()
 }
 
 export default CommunitiesDashPage

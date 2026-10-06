@@ -868,82 +868,79 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
         />
       )}
 
-      {/* Quick Interactive Preview Modal for Teacher */}
+      {/* Full-Responsive Interactive Module Window for Teacher & Smartboard */}
       {previewModule && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6 animate-in fade-in-50 duration-200"
-          onClick={() => setPreviewModule(null)}
+          className="fixed inset-0 z-[100] flex flex-col w-full h-full bg-slate-900 text-white animate-in fade-in-50 duration-200"
+          onClick={(e) => e.stopPropagation()}
         >
-          <div
-            className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-5xl h-[88vh] flex flex-col overflow-hidden text-gray-800"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Topbar */}
-            <div className="p-4 px-6 border-b border-gray-100 flex items-center justify-between gap-4 bg-slate-50">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
-                  <Play className="w-4 h-4 fill-white" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-base text-gray-900 leading-tight">
-                    {previewModule.name}
-                  </h3>
-                  <span className="text-[11px] text-gray-500 font-medium">
-                    {isTr ? 'Öğretmen Canlı Modül Önizlemesi' : 'Teacher Live Module Preview'}
-                  </span>
-                </div>
+          {/* Modal Topbar */}
+          <div className="p-3 px-5 border-b border-slate-800 flex items-center justify-between gap-4 bg-slate-950 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-600/30">
+                <Play className="w-4 h-4 fill-white" />
               </div>
-
-              <div className="flex items-center gap-2">
-                <Link
-                  href={getUriWithOrg(orgslug, `/playground/${previewModule.playground_uuid}`)}
-                  target="_blank"
-                  className="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>{isTr ? 'Tam Ekran Aç' : 'Full Screen'}</span>
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const pg = previewModule
-                    setPreviewModule(null)
-                    setVisibilityModalModule(pg)
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 text-xs font-bold transition flex items-center gap-1.5"
-                >
-                  <School className="w-3.5 h-3.5" />
-                  <span>{isTr ? 'Sınıfa Ata' : 'Assign'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPreviewModule(null)}
-                  className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+              <div>
+                <h3 className="font-extrabold text-sm text-white leading-tight">
+                  {previewModule.name}
+                </h3>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {isTr ? 'Öğretmen & Sınıf Canlı Modülü' : 'Teacher & Class Live Module'}
+                </span>
               </div>
             </div>
 
-            {/* Iframe View */}
-            <div className="flex-1 w-full bg-slate-100 overflow-hidden relative">
-              {previewModule.html_content ? (
-                <iframe
-                  srcDoc={previewModule.html_content}
-                  title={previewModule.name}
-                  className="w-full h-full border-0"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                />
-              ) : (
-                <iframe
-                  src={getUriWithOrg(orgslug, `/playground/${previewModule.playground_uuid}`)}
-                  title={previewModule.name}
-                  className="w-full h-full border-0"
-                />
-              )}
+            <div className="flex items-center gap-2">
+              <Link
+                href={getUriWithOrg(orgslug, `/playground/${previewModule.playground_uuid}`)}
+                target="_blank"
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center gap-1.5 border border-slate-700"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>{isTr ? 'Ayrı Sekmede Aç' : 'Open in New Tab'}</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const pg = previewModule
+                  setPreviewModule(null)
+                  setVisibilityModalModule(pg)
+                }}
+                className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <School className="w-3.5 h-3.5" />
+                <span>{isTr ? 'Sınıfa Ata' : 'Assign'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPreviewModule(null)}
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition cursor-pointer"
+                title="Kapat"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
+          </div>
+
+          {/* Iframe View: 100% full screen responsive */}
+          <div className="flex-1 w-full h-full bg-slate-50 overflow-hidden relative">
+            {previewModule.html_content ? (
+              <iframe
+                srcDoc={previewModule.html_content}
+                title={previewModule.name}
+                className="w-full h-full border-0 block"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              />
+            ) : (
+              <iframe
+                src={getUriWithOrg(orgslug, `/playground/${previewModule.playground_uuid}`)}
+                title={previewModule.name}
+                className="w-full h-full border-0 block"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              />
+            )}
           </div>
         </div>
       )}

@@ -10,6 +10,10 @@ export interface DemoBoardDocument {
  * based on the subject and grade level of the board.
  */
 export function getDemoBoardInitialContent(board: any): DemoBoardDocument {
+  if (board?.blank || board?.is_blank || board?.features?.blank || board?.is_custom) {
+    return { type: 'doc', content: [] }
+  }
+
   const uuid = (board?.board_uuid || '').toLowerCase()
   const name = (board?.name || '').toLowerCase()
   const desc = (board?.description || '').toLowerCase()

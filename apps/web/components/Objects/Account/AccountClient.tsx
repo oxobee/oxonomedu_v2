@@ -1,10 +1,13 @@
 'use client'
 
 import React, { useEffect, useRef } from 'react'
+import Link from 'next/link'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { AccountSidebar } from '@components/Objects/Account/AccountSidebar'
 import { AccountActionsMobile } from '@components/Objects/Account/AccountActionsMobile'
+import DashMobileMenu from '@components/Dashboard/Menus/DashMobileMenu'
+import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { User } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { useMediaQuery } from 'usehooks-ts'
@@ -34,6 +37,7 @@ const getSubpageTitle = (subpage: string, t: (_key: string) => string): string =
 
 const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
   const isMobile = useMediaQuery('(max-width: 768px)')
+  const { isTeacher } = useAdminStatus()
   const session = useLHSession() as any
   const user = session?.data?.user
   const { t } = useTranslation()
@@ -98,6 +102,32 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
                 {user?.first_name} {user?.last_name}
               </h1>
               <p className="mt-1 text-sm text-gray-500">@{user?.username}</p>
+
+              {/* Subpage switcher pills on mobile for teachers */}
+              {isTeacher && (
+                <div className="flex items-center gap-1.5 mt-3 overflow-x-auto pb-1">
+                  {[
+                    { id: 'general', label: t('account.general') },
+                    { id: 'profile', label: t('account.profile') },
+                    { id: 'security', label: t('account.security') },
+                  ].map((item) => {
+                    const isActive = subpage === item.id
+                    return (
+                      <Link
+                        key={item.id}
+                        href={getUriWithOrg(orgslug, `/account/${item.id}`)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                          isActive
+                            ? 'bg-[#111113] text-white shadow-sm'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Subpage Content */}
@@ -106,12 +136,17 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
         </div>
 
         {/* Bottom padding for mobile action bar */}
-        {isMobile && <div className="h-24" />}
+        {isMobile && <div className="h-28" />}
       </GeneralWrapperStyled>
 
-      {/* Mobile Actions Bar */}
-      {isMobile && (
+      {/* Mobile Actions Bar for non-teachers */}
+      {isMobile && !isTeacher && (
         <AccountActionsMobile orgslug={orgslug} currentSubpage={subpage} />
+      )}
+
+      {/* Persistent Dashboard Mobile Menu for teachers */}
+      {isMobile && isTeacher && (
+        <DashMobileMenu />
       )}
     </>
   )

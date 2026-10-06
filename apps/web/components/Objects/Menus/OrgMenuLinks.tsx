@@ -3,7 +3,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg } from '@services/config/config'
 import {
   Books, FolderSimple, ChatsCircle, Headphones, Cube, ShoppingBag,
-  ChalkboardSimple, Files, GameController, GraduationCap
+  ChalkboardSimple, Files, GameController, GraduationCap, Sparkle
 } from '@phosphor-icons/react'
 import { menuIcon } from '@components/Objects/Menus/menuIcons'
 import Link from 'next/link'
@@ -15,6 +15,7 @@ import useAdminStatus from '@components/Hooks/useAdminStatus'
 type Builtin = { feature: string; link: string; labelKey: string; Icon: any }
 
 const BUILTIN: Record<string, Builtin> = {
+  pano: { feature: 'pano', link: '/pano', labelKey: 'common.pano', Icon: Sparkle },
   classrooms: { feature: 'classrooms', link: '/dash/classrooms', labelKey: 'common.classrooms', Icon: GraduationCap },
   boards: { feature: 'boards', link: '/boards', labelKey: 'boards.boards', Icon: ChalkboardSimple },
   library: { feature: 'folders', link: '/library', labelKey: 'library.library', Icon: FolderSimple },
@@ -27,19 +28,23 @@ const BUILTIN: Record<string, Builtin> = {
   store: { feature: 'payments', link: '/store', labelKey: 'common.store', Icon: ShoppingBag },
 }
 
-// Default order for Oxonom Edu (Games is at the very end, podcasts hidden)
-const DEFAULT_ORDER = ['classrooms', 'boards', 'library', 'communities', 'playgrounds', 'games']
+// Default order for Oxonom Edu (Pano is at the beginning, Games is at the very end)
+const DEFAULT_ORDER = ['pano', 'classrooms', 'boards', 'library', 'playgrounds', 'games']
 
 function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
   const { t } = useTranslation()
   const org = useOrg() as any
   const session = useLHSession() as any
   const isAuthenticated = session?.status === 'authenticated' && !!session?.data?.user
-  const { isStudent } = useAdminStatus()
+  const { isStudent, isTeacher, canManageOrg } = useAdminStatus()
+  const email = (session?.data?.user?.email || '').toLowerCase()
+  const isTeacherOnly = (isTeacher || email.includes('ogretmen')) && !isStudent && !canManageOrg
   const colors = getMenuColorClasses(props.primaryColor || '')
 
   const rf = org?.config?.config?.resolved_features
   const isEnabled = (feature: string) => {
+    if (feature === 'communities') return false // Topluluk sekmesini gizleyelim
+    if (feature === 'pano' && !isTeacherOnly) return false // Pano sadece öğretmen profilinde
     if (feature === 'podcasts') return false
     if (!rf) return true
     if (rf[feature] === undefined) return true

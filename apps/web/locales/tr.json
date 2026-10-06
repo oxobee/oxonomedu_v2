@@ -129,8 +129,8 @@
           "title": "Kurumsal Özellik"
         },
         "boards": {
-          "title": "Standard Feature",
-          "description": "Boards is a premium feature available only to organizations on our Standard plan or higher. Upgrade to unlock collaborative boards for real-time brainstorming and planning."
+          "title": "Akıllı Tahta",
+          "description": "Akıllı Tahta, etkileşimli dersler, çizim araçları ve ortak çalışma tahtaları sunar."
         },
         "playgrounds": {
           "title": "Standard Feature",
@@ -162,7 +162,7 @@
           "podcasts": "Podcastler",
           "payments": "Ödemeler",
           "trail": "İlerleme Takibi",
-          "boards": "Panolar",
+          "boards": "Akıllı Tahta",
           "playgrounds": "Modüller",
           "library": "Kaynaklar",
           "folders": "Kaynaklar"
@@ -211,7 +211,7 @@
     "of": "/",
     "creating": "Oluşturuluyor...",
     "view_details": "Detayları Görüntüle",
-    "boards": "Panolar",
+    "boards": "Akıllı Tahta",
     "close": "Kapat",
     "optional": "isteğe bağlı",
     "playgrounds": "Modüller",
@@ -1490,7 +1490,7 @@
       "courses": "Dersler",
       "communities": "Veli Forum",
       "podcasts": "Podcast'ler",
-      "boards": "Panolar",
+      "boards": "Akıllı Tahtalar",
       "published": "yayınlandı",
       "draft": "taslak",
       "total_users": "Toplam kullanıcı",
@@ -5568,7 +5568,7 @@
     "board_deleted_success": "Pano silindi",
     "board_duplicated_error": "Pano çoğaltılamadı",
     "board_duplicated_success": "Pano çoğaltıldı",
-    "boards": "Panolar",
+    "boards": "Akıllı Tahtalar",
     "boards_deleted_partial": "{{success}} silindi, {{error}} başarısız",
     "boards_deleted_success": "{{count}} pano silindi",
     "chat": {
@@ -5951,7 +5951,7 @@
       "courses": "Dersler",
       "podcasts": "Podcastler",
       "communities": "Veli Forum",
-      "boards": "Panolar",
+      "boards": "Akıllı Tahtalar",
       "playgrounds": "Modüller",
       "media": "Medya & Dosyalar"
     },

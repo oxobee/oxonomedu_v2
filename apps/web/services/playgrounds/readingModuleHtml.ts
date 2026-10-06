@@ -14,6 +14,7 @@ export const READING_MODULE_HTML = `<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Akıcı & Hızlı Okuma Atölyesi</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +27,17 @@ export const READING_MODULE_HTML = `<!DOCTYPE html>
       overflow-x: hidden;
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       touch-action: manipulation;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      outline: none;
+    }
+    input, select, textarea {
+      font-family: inherit;
     }
     .font-meb {
       font-family: 'Comic Neue', cursive, sans-serif;

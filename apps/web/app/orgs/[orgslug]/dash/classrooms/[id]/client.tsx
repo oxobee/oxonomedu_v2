@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -71,6 +71,11 @@ type TabType = 'boards' | 'students' | 'attendance' | 'assignments'
 
 export default function ClassDetailClient({ orgslug, classroomId }: ClassDetailClientProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const tabParam = searchParams?.get('tab')
+  const onlyTabParam = searchParams?.get('onlyTab')
+  const isOnlyAttendance = tabParam === 'attendance' && (onlyTabParam === '1' || searchParams?.get('chrome') === 'none')
+
   const org = useOrg() as any
   const session = useLHSession() as any
   const token = session?.data?.tokens?.access_token
@@ -145,7 +150,12 @@ export default function ClassDetailClient({ orgslug, classroomId }: ClassDetailC
   }
 
   // Active tab: 'boards' | 'students' | 'attendance' | 'assignments'
-  const [activeTab, setActiveTab] = useState<TabType>('boards')
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    if (tabParam === 'attendance') return 'attendance'
+    if (tabParam === 'students') return 'students'
+    if (tabParam === 'assignments') return 'assignments'
+    return 'boards'
+  })
 
   // Modals
   const [isManageUsersOpen, setIsManageUsersOpen] = useState(false)
@@ -367,6 +377,156 @@ export default function ClassDetailClient({ orgslug, classroomId }: ClassDetailC
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4">
         <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
         <p className="text-slate-500 text-sm font-medium">Sınıf verileri yükleniyor...</p>
+      </div>
+    )
+  }
+
+  if (isOnlyAttendance) {
+    return (
+      <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full space-y-6">
+        {/* Ders Yoklama Oturumu Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Ders Yoklama Oturumu</h3>
+              <p className="text-xs text-gray-500">
+                Sınıftaki öğrencilerin derse katılım durumlarını işaretleyip anında kaydedin.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="date"
+              value={attendanceDate}
+              onChange={(e) => setAttendanceDate(e.target.value)}
+              className="px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+
+            <button
+              onClick={handleSaveAttendance}
+              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer"
+            >
+              <Check className="w-4 h-4" />
+              <span>Yoklamayı Kaydet</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Attendance Metrics */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+          <div className="p-4 bg-white border border-emerald-100 rounded-2xl shadow-xs">
+            <div className="text-xs font-semibold text-emerald-700">Katılım Oranı</div>
+            <div className="text-2xl font-black text-emerald-600 mt-1">%{attendanceStats.rate}</div>
+            <div className="text-[11px] text-gray-400 mt-0.5">{attendanceStats.present} / {students.length} Öğrenci</div>
+          </div>
+
+          <div className="p-4 bg-white border border-red-100 rounded-2xl shadow-xs">
+            <div className="text-xs font-semibold text-red-700">Gelmedi (Yok)</div>
+            <div className="text-2xl font-black text-red-600 mt-1">{attendanceStats.absent}</div>
+            <div className="text-[11px] text-gray-400 mt-0.5">Devamsız</div>
+          </div>
+
+          <div className="p-4 bg-white border border-amber-100 rounded-2xl shadow-xs">
+            <div className="text-xs font-semibold text-amber-700">İzinli / Raporlu</div>
+            <div className="text-2xl font-black text-amber-600 mt-1">{attendanceStats.excused}</div>
+            <div className="text-[11px] text-gray-400 mt-0.5">Resmi mazeretli</div>
+          </div>
+
+          <div className="p-4 bg-white border border-blue-100 rounded-2xl shadow-xs">
+            <div className="text-xs font-semibold text-blue-700">Geç Kaldı</div>
+            <div className="text-2xl font-black text-blue-600 mt-1">{attendanceStats.late}</div>
+            <div className="text-[11px] text-gray-400 mt-0.5">İlk derse gecikme</div>
+          </div>
+        </div>
+
+        {/* Attendance Roster Table */}
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50/80 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-semibold">
+                <tr>
+                  <th className="px-6 py-3.5">Öğrenci</th>
+                  <th className="px-6 py-3.5">Yoklama Durumu</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {students.map((s: any) => {
+                  const cur = attendanceState[s.id] || 'present'
+                  return (
+                    <tr key={s.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 flex items-center gap-3">
+                        <UserAvatar
+                          username={s.username}
+                          width={36}
+                        />
+                        <div>
+                          <div className="font-bold text-gray-900 text-sm">
+                            {s.first_name || s.last_name
+                              ? `${s.first_name || ''} ${s.last_name || ''}`.trim()
+                              : s.username}
+                          </div>
+                          <div className="text-[11px] text-gray-400">{s.email}</div>
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleAttendanceChange(s.id, 'present')}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                              cur === 'present'
+                                ? 'bg-emerald-600 text-white shadow-xs'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            Var
+                          </button>
+
+                          <button
+                            onClick={() => handleAttendanceChange(s.id, 'absent')}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                              cur === 'absent'
+                                ? 'bg-red-600 text-white shadow-xs'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            Yok
+                          </button>
+
+                          <button
+                            onClick={() => handleAttendanceChange(s.id, 'excused')}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                              cur === 'excused'
+                                ? 'bg-amber-600 text-white shadow-xs'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            İzinli
+                          </button>
+
+                          <button
+                            onClick={() => handleAttendanceChange(s.id, 'late')}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                              cur === 'late'
+                                ? 'bg-blue-600 text-white shadow-xs'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            Geç
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     )
   }

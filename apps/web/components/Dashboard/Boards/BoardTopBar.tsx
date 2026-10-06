@@ -1,10 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { getUriWithOrg } from '@services/config/config'
 
@@ -22,6 +23,28 @@ export default function BoardTopBar({
   accessToken,
 }: BoardTopBarProps) {
   const { t } = useTranslation()
+  const searchParams = useSearchParams()
+  const [isInIframe, setIsInIframe] = useState(false)
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && window.self !== window.top) {
+        setIsInIframe(true)
+      }
+    } catch (_) {
+      setIsInIframe(true)
+    }
+  }, [])
+
+  const isPanoWindow =
+    searchParams?.get('chrome') === 'none' ||
+    searchParams?.get('isPano') === '1' ||
+    isInIframe
+
+  // If opened inside Pano window, hide the top bar pill as requested
+  if (isPanoWindow) {
+    return null
+  }
 
   return (
     <>

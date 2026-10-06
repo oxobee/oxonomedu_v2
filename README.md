@@ -1,142 +1,278 @@
 <p align="center">
-  <a href="https://learnhouse.app">
-    <img src=".github/images/learnhouse-github.png" alt="LearnHouse" width="600" />
+  <a href="https://oxonomedu.vercel.app">
+    <img src=".github/images/learnhouse-github.png" alt="Oxonom Edu Logo" width="600" />
   </a>
 </p>
 
-<h3 align="center">The next-gen open-source platform for world-class educational content.</h3>
+<h1 align="center">🎓 Oxonom Edu (LearnHouze v2.0)</h1>
 
 <p align="center">
-  <a href="https://github.com/learnhouse/learnhouse/blob/main/LICENSE"><img src="https://img.shields.io/github/license/learnhouse/learnhouse?style=flat&color=blue" alt="License" /></a>
-  <a href="https://github.com/learnhouse/learnhouse/stargazers"><img src="https://img.shields.io/github/stars/learnhouse/learnhouse?style=flat" alt="Stars" /></a>
-  <a href="https://www.npmjs.com/package/learnhouse"><img src="https://img.shields.io/npm/v/learnhouse?style=flat&label=cli" alt="CLI Version" /></a>
-  <a href="https://app.codecov.io/gh/learnhouse/learnhouse"><img src="https://img.shields.io/codecov/c/github/learnhouse/learnhouse?flag=api&label=api%20coverage" alt="API Coverage" /></a>
-  <a href="https://github.com/learnhouse/learnhouse/commits"><img src="https://img.shields.io/github/last-commit/learnhouse/learnhouse?style=flat&label=last%20commit" alt="Last Commit" /></a>
-  <a href="https://github.com/learnhouse/learnhouse/issues"><img src="https://img.shields.io/github/issues/learnhouse/learnhouse?style=flat" alt="Issues" /></a>
-  <a href="https://github.com/learnhouse/learnhouse/pulls"><img src="https://img.shields.io/github/issues-pr/learnhouse/learnhouse?style=flat&label=PRs" alt="Pull Requests" /></a>
+  <b>Yeni Nesil Akıllı Okul Yönetim Sistemi, Dijital Kampüs ve İnteraktif Eğitim Platformu</b><br>
+  <i>K-12 Okulları, Kolejler, Öğretmenler ve Öğrenciler İçin Tasarlanmış Hepsi Bir Arada Eğitim Ekosistemi</i>
 </p>
 
 <p align="center">
-📖 <b>Courses</b> — Create and manage courses with ease<br>
-✏️ <b>Editor</b> — Powerful block-based Notion-like content editor<br>
-📦 <b>Collections</b> — Organize courses into curated bundles<br>
-📝 <b>Assignments</b> — Create tasks and track student submissions<br>
-💬 <b>Discussions</b> — Community forums for your learners<br>
-🎙️ <b>Podcasts</b> — Audio content for on-the-go learning<br>
-📊 <b>Analytics</b> — Track engagement and course performance<br>
-🧊 <b>Playgrounds</b> — AI-generated interactive elements, simulations & diagrams<br>
-💻 <b>Code</b> — Real code execution with auto-grading in 30+ languages<br>
-📋 <b>Boards</b> — Real-time collaborative whiteboards<br>
-🧠 <b>AI</b> — Context-aware AI for learning & teaching<br>
-🎓 <b>Certificates</b> — Auto-generate certificates on course completion<br>
-👥 <b>User Groups</b> — Organize learners and control access<br>
-🔍 <b>SEO</b> — Built-in SEO optimization with metadata, sitemaps & open graph<br>
-🎨 <b>Customization</b> — Custom branding, landing pages & theming<br>
-💳 <b>Payments (Enterprise)</b> — Sell courses with no fees and no lock-in<br>
-🔐 <b>SSO (Enterprise)</b> — Single sign-on with OAuth providers<br>
-🏢 <b>Multi-Org (Enterprise)</b> — Run multiple organizations from a single instance<br>
+  <a href="https://oxonomedu.vercel.app"><img src="https://img.shields.io/badge/Production-Live%20on%20Vercel-success?style=for-the-badge&logo=vercel" alt="Vercel Live" /></a>
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16%20(Turbopack)-black?style=for-the-badge&logo=nextdotjs" alt="Next.js" /></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react" alt="React" /></a>
+  <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-Python%203.11-009688?style=for-the-badge&logo=fastapi" alt="FastAPI" /></a>
+  <a href="https://www.postgresql.org"><img src="https://img.shields.io/badge/PostgreSQL-16%20(pgvector)-336791?style=for-the-badge&logo=postgresql" alt="PostgreSQL" /></a>
+  <a href="https://redis.io"><img src="https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis" alt="Redis" /></a>
 </p>
 
-## 🚀 Get Started
+---
 
-LearnHouse has an official CLI that handles everything — self-hosting, updates, backups, and local development.
+## 📌 İçindekiler
 
-### Self-host
+- [🌍 Canlı Bağlantılar ve Servisler](#-canlı-bağlantılar-ve-servisler)
+- [✨ Öne Çıkan İnteraktif Eğitim Atölyeleri](#-öne-çıkan-i̇nteraktif-eğitim-atölyeleri)
+  - [1. 1 Dk Okuma & Hızlı Okuma Atölyesi](#1--1-dk-okuma--hızlı-okuma-atölyesi)
+  - [2. İngilizce Kelime & Görsel Macera Atölyesi](#2--i̇ngilizce-kelime--görsel-macera-atölyesi)
+  - [3. MEB Kılavuz Çizgili Harf Çizgi & Yazılış Yönü Atölyesi](#3--meb-kılavuz-çizgili-harf-çizgi--yazılış-yönü-atölyesi)
+- [🏫 K-12 Akıllı Okul Yönetimi & LMS Özellikleri](#-k-12-akıllı-okul-yönetimi--lms-özellikleri)
+  - [Yeni Nesil Akıllı İnteraktif Tahta (Infinite Whiteboard)](#-yeni-nesil-akıllı-i̇nteraktif-tahta-infinite-whiteboard)
+  - [Ödev ve Değerlendirme Merkezi](#-ödev-ve-değerlendirme-merkezi)
+  - [Sınıf, Şube ve Kütük Yönetimi](#-sınıf-şube-ve-kütük-yönetimi)
+  - [Adım Adım Öğrenci Kayıt ve Sınıfa Katılım](#-adım-adım-öğrenci-kayıt-ve-sınıfa-katılım)
+- [👥 Roller ve Yetkilendirme Matrisi (RBAC)](#-roller-ve-yetkilendirme-matrisi-rbac)
+- [🔑 Hazır Demo Hesap Bilgileri](#-hazır-demo-hesap-bilgileri)
+- [🛠️ Sistem Mimarisi ve Teknoloji Yığını](#️-sistem-mimarisi-ve-teknoloji-yığını)
+- [🚀 Kurulum ve Çalıştırma Kılavuzu](#-kurulum-ve-çalıştırma-kılavuzu)
+  - [1. macOS / Yerel Hızlı Başlatma](#seçenek-1-yerel-hızlı-başlatma-macos--linux)
+  - [2. Docker ile Kurulum (Bulut & VPS)](#seçenek-2-docker-compose-ile-tam-kurulum)
+  - [3. Otomatik Kurulum Betiği](#seçenek-3-tek-komutla-otomatik-kurulum)
+- [📁 Proje Dizin Yapısı](#-proje-dizin-yapısı)
+- [🔒 Güvenlik Politikası](#-güvenlik-politikası)
+- [📄 Lisans](#-lisans)
 
-```bash
-npx learnhouse@latest setup
+---
+
+## 🌍 Canlı Bağlantılar ve Servisler
+
+| Servis | Bağlantı / Adres | Açıklama |
+|---|---|---|
+| **Canlı Üretim (Production)** | [https://oxonomedu.vercel.app](https://oxonomedu.vercel.app) | Vercel üzerinde aktif çalışan güncel canlı web portalı |
+| **Giriş Paneli (Login)** | `http://lvh.me:3010/login` | Tüm roller için birleşik kimlik doğrulama ekranı |
+| **Örnek Okul (Riverbend Academy)** | `http://demo.lvh.me:3010/dash` | Hazır kurslar, atölyeler ve sınıflarla canlı demo okul |
+| **Organizasyon Seçici** | `http://lvh.me:3010/home` | Çok kiracılı (multi-tenant) okul ve organizasyon seçimi |
+| **Backend REST API (Swagger)** | `http://lvh.me:1348/docs` | FastAPI interaktif OpenAPI Swagger dokümantasyonu |
+| **Canlı İşbirliği (Collab WS)** | `ws://localhost:4000` | Hocuspocus v4 & Yjs gerçek zamanlı senkronizasyon sunucusu |
+
+> 💡 **İpucu:** `lvh.me` ve tüm alt alan adları (örn. `demo.lvh.me`) otomatik olarak `127.0.0.1` (localhost) adresine çözümlenir; yerel testlerde `hosts` dosyasını değiştirmeniz gerekmez.
+
+---
+
+## ✨ Öne Çıkan İnteraktif Eğitim Atölyeleri
+
+Oxonom Edu, öğrencilerin okuma-yazma, dil ve temel becerilerini geliştiren yerleşik interaktif pedagojik modüllerle donatılmıştır:
+
+### 1. 📖 1 Dk Okuma & Hızlı Okuma Atölyesi
+* **60 Saniye Geri Sayım & Canlı WPM:** Okuma hızını Kelime/Dakika (WPM) cinsinden anlık ölçer, toplam okunan kelime ve başarı skorunu hesaplar.
+* **MEB Dik Temel Abece Tipografisi:** İlkokul çağındaki çocukların göz sağlığına ve müfredata uygun font ve satır aralıkları.
+* **Kelime & Hece Piramidi Egzersizi:** Göz sıçrama aralığını (sakkadik hareketler) ve çevresel odak alanını genişleten oyunlaştırılmış piramit modu.
+* **Sevimli Hikaye Kütüphanesi:** Açılır kapak görselleriyle zenginleştirilmiş, yaş seviyelerine göre kategorize edilmiş geniş hikaye koleksiyonu.
+* **Sesli Metin Okuma & Kalıcı Geçmiş:** Web Speech API ile telaffuz desteği, öğrencinin önceki okuma performanslarını kayıt altına alan ve istendiğinde temizlenebilen geçmiş listesi.
+* **%100 Mobil & Tablet Uyumu:** Dokunmatik ekranlar için optimize edilmiş sezgisel arayüz.
+
+### 2. 🎨 İngilizce Kelime & Görsel Macera Atölyesi
+* **8 Tematik Kategori (100+ Kelime):** Hayvanlar, Meyve & Sebzeler, Renkler, Okul Eşyaları, Sayılar, Aile Bireyleri, Meslekler ve Taşıtlar.
+* **Doğal `en-US` Telaffuz:** Kartlara dokunulduğunda akıcı Amerikan İngilizcesi ses motoru ve işitsel pekiştirme.
+* **4 Seçenekli Mini Test Oyunu:** Eğlenceli skor tablosu, doğru/yanlış ses efektleri ve dinamik soru akışı.
+* **Kopya Önleyici Bulanıklık Kilidi (Anti-Cheat Blur):** Mini oyun başladığında kelime kartları otomatik bulanıklaşarak öğrencinin ezberden kopya çekmesini engeller, kalıcı öğrenmeyi zorunlu kılar.
+* **Mobil Sekmeli Geçiş (Segmented Switcher):** Küçük ekranlarda *🃏 Kelime Kartları* ve *🎮 Mini Oyun* arasında tek tıkla geçiş olanağı.
+
+### 3. ✍️ MEB Kılavuz Çizgili Harf Çizgi & Yazılış Yönü Atölyesi
+* **4 Çizgili, 3 Aralıklı MEB Kılavuz Satır Standardı:** İlkokul 1. sınıf yazı defterinin birebir dijital karşılığı.
+* **Doğru Tipografik Harf Taslakları:** Türkçe alfabedeki tüm büyük ve küçük harfler (A-Z, Ç, Ğ, I, İ, Ö, Ş, Ü) nizami oranlarla yer alır.
+* **Adım Adım Kalem Simülasyonu:** Harflerin hangi noktadan başlayıp hangi yönde çizileceğini gösteren kılavuz oklar ve animasyonlu yazım demosu.
+* **Türkçe Sesli Yönergeler:** *"Yukarıdan başla, aşağıya dik çizgi çek..."* şeklinde pedagojik sesli anlatım.
+* **Dokunmatik & Fare Serbest Çizim Tuvali:** HTML5 Canvas ve PointerEvents API ile gecikmesiz, hassas serbest el çizimi.
+* **Otomatik Yeniden Boyutlandırma:** `ResizeObserver` motoru sayesinde ekran döndürme ve boyut değişikliklerinde tuval kalitesi bozulmaz.
+
+---
+
+## 🏫 K-12 Akıllı Okul Yönetimi & LMS Özellikleri
+
+### 📋 Yeni Nesil Akıllı İnteraktif Tahta (Infinite Whiteboard)
+Promethean, SMART Board, iPad ve dokunmatik bilgisayarlar için özel geliştirilmiş sınırsız kanvas:
+- **Sıfır Not Kaybı:** Tahtaya yazılan her formül, çizim ve açıklama anında buluta kaydedilir.
+- **Evden Kesintisiz Tekrar:** Öğrenci eve gittiğinde sınıf tahtasını kendi profilinden açabilir, zumlayarak eksik notlarını tamamlayabilir.
+- **Ders Arşivi:** Matematik, Fen, Türkçe gibi derslere göre tarihsel sıralı tahta arşivi.
+
+### 📝 Ödev ve Değerlendirme Merkezi
+- MEB kazanım kodlarıyla entegre ödev oluşturma.
+- Öğrencilerin doğrudan sistem üzerinden veya tahta kanvasında interaktif ödev teslimi.
+- Öğretmenler için tek ekranda toplu inceleme, puanlama ve geri bildirim sistemi.
+
+### 👥 Sınıf, Şube ve Kütük Yönetimi
+- Şubeli yapı desteği (örn. 9-A, 10-A, 11-B).
+- **Hızlı K-12 Yoklama Motoru:** Geldi, Gelmedi, Geç, İzinli statüleri ile tek tıkla devamsızlık işleme.
+- **GNO (Genel Not Ortalaması) Motoru:** Dönemlik ağırlıklı ortalama ve gelişim karnesi hesabı.
+- Öğretmen rehberlik ve gelişim notları arşivi.
+
+### 🔐 Adım Adım Öğrenci Kayıt ve Sınıfa Katılım
+- Modern, animasyonlu çok adımlı kayıt sihirbazı.
+- Telefon ve e-posta doğrulama desteği.
+- **Sınıf Katılım Kodu (`Class Code`):** Öğrenci tek bir kod ile doğrudan kendi okuluna, şubesine ve öğretmenine otomatik bağlanır.
+
+---
+
+## 👥 Roller ve Yetkilendirme Matrisi (RBAC)
+
+Oxonom platformu çok kiracılı (multi-tenant) rol tabanlı erişim kontrolü ile çalışır:
+
+| Rol | Kapsam | Temel Yetkiler |
+|---|---|---|
+| **Sistem Yöneticisi (Superadmin)** | Platform Geneli | Tüm okulları/organizasyonları yönetme, küresel ayarlar, modül kütüphanesi eşitlemesi, sistem sağlığı |
+| **Okul Müdürü / İdare (Admin)** | Okul / Kurum | Şube yapılandırması, öğretmen kadrosu atamaları, öğrenci işleri kütüğü, okul devamsızlık ve başarı raporları |
+| **Öğretmen (Instructor)** | Sınıf & Dersler | Sınıf yönetimi, yoklama alma, akıllı tahta kullanımı, ödev ve sınav oluşturma, öğrenci değerlendirme |
+| **Öğrenci (Learner)** | Şube & Kişisel | Dersleri izleme, tahtaları zumlayarak tekrar etme, interaktif ödev teslimi, eğitim atölyeleri ve oyunlar |
+
+---
+
+## 🔑 Hazır Demo Hesap Bilgileri
+
+Tüm yerel demo hesaplar için geçerli varsayılan şifre: **`Ugur2803*`**
+
+| Rol | E-posta | Kullanıcı Adı | Açıklama |
+|---|---|---|---|
+| 👑 **Superadmin** | `admin@oxonom.com` | `admin` | Tam sistem yöneticisi paneli |
+| 🏫 **Okul Müdürü** | `idare@oxonom.com` | `idare` | Okul idaresi ve şube yönetim ekranı |
+| 👨‍🏫 **Öğretmen** | `ogretmen@oxonom.com` / `teacher@oxonom.com` | `ogretmen` | 10-A ve sınıflar için öğretmen paneli |
+| 🎒 **Öğrenci** | `ogrenci@oxonom.com` / `student@oxonom.com` | `ogrenci` | Öğrenci ders, ödev ve atölye ekranı |
+
+---
+
+## 🛠️ Sistem Mimarisi ve Teknoloji Yığını
+
+```
+                           ┌────────────────────────┐
+                           │   Next.js 16 Web App   │
+                           │ React 19 / TailwindCSS │
+                           └───────────┬────────────┘
+                                       │
+                 ┌─────────────────────┴─────────────────────┐
+                 ▼                                           ▼
+      ┌────────────────────┐                       ┌───────────────────┐
+      │  FastAPI (Python)  │                       │ Hocuspocus Server │
+      │  REST API Service  │                       │ Yjs WebSocket WS  │
+      └──────────┬─────────┘                       └─────────┬─────────┘
+                 │                                           │
+                 ├─────────────────────┬─────────────────────┤
+                 ▼                     ▼                     ▼
+      ┌────────────────────┐ ┌───────────────────┐ ┌───────────────────┐
+      │   PostgreSQL 16    │ │      Redis 7      │ │ Vercel Production │
+      │     (pgvector)     │ │   Önbellek & Pub  │ │  Edge Dağıtımı    │
+      └────────────────────┘ └───────────────────┘ └───────────────────┘
 ```
 
-The setup wizard walks you through domain, database, admin account, and optional features. Once done, it generates all config files and starts your instance.
+- **Ön Yüz (Frontend):** Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS, Radix UI Primitives, Lucide Icons, Tiptap Editör.
+- **Arka Yüz (Backend API):** FastAPI (Python 3.11+), SQLModel, Pydantic v2, AsyncPG, Alembic migrasyonları.
+- **Gerçek Zamanlı İşbirliği (Collab):** Node.js, Hocuspocus Server v4, Yjs (CRDT mimarisi), WebSocket.
+- **Veri Depolama:** PostgreSQL 16 (`pgvector` vektörel arama eklentisiyle), Redis 7 (önbellek, oturumlar ve mesaj kuyruğu).
+- **Dağıtım (Deployment):** Vercel (Frontend), Docker & Docker Compose (Tüm servisler), macOS / Linux Native betikleri.
 
+---
+
+## 🚀 Kurulum ve Çalıştırma Kılavuzu
+
+Depoyu yerel makinenize klonlayın:
 ```bash
-npx learnhouse start       # Start services
-npx learnhouse stop        # Stop services
-npx learnhouse update      # Update to latest version
-npx learnhouse logs        # Stream logs
-npx learnhouse backup      # Backup database
-npx learnhouse doctor      # Diagnose issues
+git clone https://github.com/oxobee/oxonom.git
+cd oxonom
 ```
 
-### Development
+### Seçenek 1: Yerel Hızlı Başlatma (macOS / Linux)
+Sistemde kurulu servisleri (Postgres, Redis, API, Collab, Web) tek tıkla ayağa kaldırmak için:
 
 ```bash
-git clone https://github.com/learnhouse/learnhouse.git
-cd learnhouse
-npx learnhouse dev
+# Tüm servisleri arka planda başlatır
+./start.sh
+
+# Çalışan servisleri güvenle durdurur
+./stop.sh
+```
+> Çalışma günlükleri `logs/` dizininde (`web.log`, `api.log`, `collab.log`) saklanır.
+
+---
+
+### Seçenek 2: Docker Compose ile Tam Kurulum
+Docker ve Docker Compose kurulu olan tüm sunucu ve makinelerde sıfır konfigürasyonla başlatma:
+
+```bash
+# 1. Ortam değişkenlerini kopyalayın
+cp .env.example .env
+
+# 2. Konteynerleri derleyin ve ayağa kaldırın
+docker compose up -d --build
+```
+*Bu komut PostgreSQL 16'yı başlatır, `database/learnhouse_dump.sql` yedeğini otomatik olarak içeri aktarır ve Web, API ile Collab sunucularını ayağa kaldırır.*
+
+---
+
+### Seçenek 3: Tek Komutla Otomatik Kurulum
+Sıfır bir Ubuntu / Debian veya macOS sunucusunda eksik paketleri tespit edip bağımlılıkları yüklemek için:
+
+```bash
+bash install.sh
 ```
 
-This spins up PostgreSQL and Redis, installs dependencies, and starts the API, Web, and Collab servers with hot reload.
+---
 
-> See the full [CLI documentation](apps/cli/README.md) for all commands and options.
+### 🌐 Vercel Üretim Dağıtımı
+Frontend arayüzünü canlıya almak için:
 
-## 🛠️ Tech Stack
+```bash
+npx vercel --prod --yes
+```
+
+---
+
+## 📁 Proje Dizin Yapısı
+
+```text
+LearnHouze_v2.0/
+├── apps/
+│   ├── web/                     # Next.js 16 Web arayüzü
+│   │   ├── app/                 # App Router sayfaları (admin, orgs, auth, editor)
+│   │   ├── components/          # Radix UI & özel arayüz bileşenleri
+│   │   └── services/
+│   │       └── playgrounds/     # İnteraktif atölyeler (Hızlı Okuma, İngilizce, Çizgi)
+│   ├── api/                     # FastAPI Python arka uç servisi
+│   │   ├── app/                 # Modeller, rotalar, SQLModel şemaları
+│   │   └── run_demo_api.sh      # API demo çalıştırma betiği
+│   ├── collab/                  # Hocuspocus v4 & Yjs WebSocket sunucusu
+│   │   └── src/index.ts         # Canlı tahta ve eşzamanlı düzenleme motoru
+│   └── cli/                     # LearnHouse yönetim ve kurulum CLI aracı
+├── database/
+│   ├── learnhouse_dump.sql      # Hazır demo okulu ve içerikleri barındıran SQL dökümü
+│   └── restore.sh               # Veritabanı geri yükleme aracı
+├── docs/                        # Kapsamlı okul yönetim ve mimari kılavuzları
+├── docker-compose.yml           # Çoklu servis Docker orkestrasyonu
+├── start.sh                     # Tek tıkla yerel başlatma betiği
+├── stop.sh                      # Tek tıkla yerel durdurma betiği
+├── install.sh                   # Otomatik ortam hazırlama ve kurulum betiği
+└── README.md                    # Proje ana başvuru dokümanı
+```
+
+---
+
+## 🔒 Güvenlik Politikası
+
+- Rol bazlı erişim denetimi (RBAC) ile izole edilmiş organizasyon ve şube verileri.
+- JWT tabanlı oturum yönetimi ve güvenli parola şifreleme algoritmaları.
+- Cross-Origin Resource Sharing (CORS) kısıtlamaları ve güvenli iframe sanal alanları (sandbox).
+- Güvenlik açığı bildirimleri için lütfen doğrudan proje yöneticisiyle iletişime geçiniz.
+
+---
+
+## 📄 Lisans
+
+Bu proje [AGPL-3.0](LICENSE) lisansı altında sunulmaktadır.
+Kurumsal (Enterprise) özellikler ve özel dağıtım modelleri için ayrı lisanslama uygulanmaktadır.
+
+---
 
 <p align="center">
-<a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-000?style=flat&logo=nextdotjs&logoColor=white" alt="Next.js" /></a>
-<a href="https://react.dev"><img src="https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black" alt="React" /></a>
-<a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white" alt="TypeScript" /></a>
-<a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white" alt="TailwindCSS" /></a>
-<a href="https://www.radix-ui.com"><img src="https://img.shields.io/badge/Radix_UI-161618?style=flat&logo=radixui&logoColor=white" alt="Radix UI" /></a>
-<a href="https://tiptap.dev"><img src="https://img.shields.io/badge/Tiptap-1a1a2e?style=flat&logoColor=white" alt="Tiptap" /></a>
-<a href="https://codemirror.net"><img src="https://img.shields.io/badge/CodeMirror-D30707?style=flat&logo=codemirror&logoColor=white" alt="CodeMirror" /></a>
-<a href="https://yjs.dev"><img src="https://img.shields.io/badge/Yjs-6EEB83?style=flat&logoColor=black" alt="Yjs" /></a>
-<a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
-<a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" alt="Python" /></a>
-<a href="https://www.postgresql.org"><img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
-<a href="https://redis.io"><img src="https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white" alt="Redis" /></a>
-<a href="https://www.docker.com"><img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" alt="Docker" /></a>
-<a href="https://stripe.com"><img src="https://img.shields.io/badge/Stripe-635BFF?style=flat&logo=stripe&logoColor=white" alt="Stripe" /></a>
-<a href="https://ai.google.dev"><img src="https://img.shields.io/badge/Gemini-8E75B2?style=flat&logo=googlegemini&logoColor=white" alt="Gemini" /></a>
-<a href="https://www.llamaindex.ai"><img src="https://img.shields.io/badge/LlamaIndex-000?style=flat&logoColor=white" alt="LlamaIndex" /></a>
-<a href="https://aws.amazon.com/s3"><img src="https://img.shields.io/badge/AWS_S3-569A31?style=flat&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyTDIgN3YxMGwxMCA1IDEwLTVWN0wxMiAyem0wIDIuMThMMTkuMTggNyAxMiA5LjgyIDQuODIgNyAxMiA0LjE4ek00IDguNjRsNyAzLjVWMTkuNWwtNy0zLjVWOC42NHptMTAgMTAuODZWMTIuMTRsNy0zLjV2Ny4zNmwtNyAzLjV6Ii8+PC9zdmc+&logoColor=white" alt="AWS S3" /></a>
-<a href="https://www.tinybird.co"><img src="https://img.shields.io/badge/Tinybird-1A1A1A?style=flat&logoColor=white" alt="Tinybird" /></a>
+  <b>Oxonom Edu</b> — <i>Eğitimi interaktif, erişilebilir ve keyifli kılmak için tasarlandı.</i> 💜
 </p>
-
-## 📁 Project Structure
-
-| App | Path | Description | Technology | Used by |
-|-----|------|-------------|------------|---------|
-| **Web** | `apps/web` | Frontend application — dashboard, course player, editor, landing pages | Next.js, React, TailwindCSS, Tiptap | Teachers, Students, Admins |
-| **API** | `apps/api` | Backend REST API — auth, courses, payments, AI, analytics | FastAPI, Python, SQLModel, Alembic | Web, CLI, Collab |
-| **Collab** | `apps/collab` | Real-time collaboration server — live editing sync for courses & boards | Hocuspocus, Yjs, WebSocket | Web (editor, boards) |
-| **CLI** | `apps/cli` | Official CLI — setup wizard, dev environment, instance management | Commander, Node.js | Developers, Self-hosters |
-
-## 💬 Community
-
-- [Discord](https://discord.gg/CMyZjjYZ6x) — chat with the team and other users
-- [Documentation](https://docs.learnhouse.app) — guides and references
-
-## 🤝 Contributing
-
-```bash
-git clone https://github.com/learnhouse/learnhouse.git
-cd learnhouse
-npx learnhouse dev
-```
-
-- [Contributing Guide](CONTRIBUTING.md)
-- [Submit a bug](https://github.com/learnhouse/learnhouse/issues/new?assignees=&labels=bug%2Ctriage&projects=&template=bug.yml&title=%5BBug%5D%3A+)
-- [Good first issues](https://github.com/learnhouse/learnhouse/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
-
-## 🔒 Security
-
-We take the security of LearnHouse and the data entrusted to us seriously. If you discover a vulnerability, please email **security@learnhouse.app** — do not disclose it publicly until we've had a chance to investigate.
-
-Please include a clear description, steps to reproduce, affected endpoints, and any relevant screenshots or proof-of-concept code. We will acknowledge your report, keep you informed, and credit you once resolved if you wish.
-
-See our full [Security Policy](https://learnhouse.app/security) for details on our practices, scope, and responsible disclosure guidelines.
-
-## ✍️ Author & Maintainer
-
-Sweave (Badr B.) — [@swve](https://github.com/swve)
-
-## 💜 A Word
-
-LearnHouse is made with 💜, from the UI to the features it is carefully designed to make students and teachers lives easier and make education software more enjoyable.
-
-Thank you and have fun using/developing/testing LearnHouse !
-
-## 📄 License
-
-[AGPL-3.0](LICENSE) — Enterprise features are available under a separate Enterprise License.

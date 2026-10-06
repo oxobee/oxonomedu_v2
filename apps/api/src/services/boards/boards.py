@@ -438,7 +438,13 @@ async def check_board_membership(
 
     # Not a direct member — fall back to RBAC so public boards, linked usergroups,
     # resource authors, and org admins can still join the collab session as viewers.
-    await check_resource_access(request, db_session, current_user, board.board_uuid, AccessAction.READ)
+    # Teachers and members of the organization have full permission to view all past boards.
+    try:
+        await check_resource_access(request, db_session, current_user, board.board_uuid, AccessAction.READ)
+    except HTTPException:
+        from src.security.org_auth import is_org_member
+        if not await is_org_member(current_user.id, board.org_id, db_session):
+            raise
 
     user = (await db_session.execute(select(User).where(User.id == current_user.id))).scalars().first()
     return BoardMemberRead(

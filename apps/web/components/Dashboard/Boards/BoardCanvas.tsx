@@ -58,6 +58,7 @@ import { Extension } from '@tiptap/core'
 import { BoardYjsProvider } from './BoardYjsContext'
 import { BoardSelectionProvider } from './BoardSelectionContext'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import useAdminStatus from '@components/Hooks/useAdminStatus'
 
 
 interface BoardCanvasProps {
@@ -1378,6 +1379,7 @@ function BoardEditorInner({
 
 /** Outer component — handles Yjs lifecycle, only renders editor once ready */
 export default function BoardCanvas({ board, accessToken, orgslug, username, orgUuid }: BoardCanvasProps) {
+  const { isTeacher, isAdmin } = useAdminStatus()
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null)
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null)
   const [connStatus, setConnStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
@@ -1386,6 +1388,8 @@ export default function BoardCanvas({ board, accessToken, orgslug, username, org
   const isDemo = Boolean(
     board?.is_demo ||
     board?.board_uuid?.startsWith('board_') ||
+    board?.usergroup_id ||
+    isTeacher ||
     (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && getCollabUrl().includes('localhost'))
   )
 
@@ -1423,7 +1427,8 @@ export default function BoardCanvas({ board, accessToken, orgslug, username, org
       },
       onAuthenticationFailed({ reason }: { reason: string }) {
         console.error('[board] Authentication failed:', reason)
-        if (!isDemo) {
+        // Teachers and admins have full authority to view all past boards; never lock them out
+        if (!isDemo && !board?.usergroup_id && !isTeacher && !isAdmin) {
           setAuthFailed(true)
           prov.disconnect()
         }
@@ -1448,15 +1453,15 @@ export default function BoardCanvas({ board, accessToken, orgslug, username, org
   if (authFailed) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-neutral-50">
-        <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-8 shadow-lg">
+        <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-8 shadow-lg text-center max-w-sm">
           <div className="text-2xl">🔒</div>
-          <p className="text-sm font-medium text-neutral-700">Unable to connect to this board</p>
-          <p className="text-xs text-neutral-400">You may not have access, or the session has expired.</p>
+          <p className="text-sm font-bold text-neutral-800">Bu tahtaya bağlanılamıyor</p>
+          <p className="text-xs text-neutral-500">Erişim yetkiniz olmayabilir veya oturum süresi dolmuş olabilir.</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-2 rounded-lg bg-neutral-900 px-4 py-2 text-xs font-medium text-white hover:bg-neutral-800 transition-colors"
+            className="mt-2 rounded-lg bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800 transition-colors cursor-pointer"
           >
-            Retry
+            Yeniden Dene
           </button>
         </div>
       </div>

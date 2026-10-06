@@ -43,6 +43,7 @@ import {
   Code,
   Lightning,
   GraduationCap,
+  QrCode,
   Student,
   ChalkboardTeacher,
   Receipt,
@@ -198,7 +199,9 @@ function DashLeftMenu() {
   const plan = usePlan()
   const mode = getDeploymentMode()
   // Only org managers (admins/superadmins) see billing surfaces — non-admins
-  const { canManageOrg, isStudent } = useAdminStatus()
+  const { canManageOrg, isStudent, isTeacher } = useAdminStatus()
+  const email = (session?.data?.user?.email || '').toLowerCase()
+  const isTeacherUser = (isTeacher || email.includes('ogretmen')) && !isStudent && !canManageOrg
 
   if (!org || !session) return null
   const planLabel =
@@ -533,14 +536,7 @@ function DashLeftMenu() {
                   active={isActivePath('/dash/library')}
                 />
 
-                {/* Topluluk */}
-                <MenuLink
-                  href="/dash/communities"
-                  icon={<ChatsCircle size={20} weight="fill" />}
-                  label="Topluluk"
-                  isCollapsed={isCollapsed}
-                  active={isActivePath('/dash/communities')}
-                />
+                {/* Topluluk - Geçici Olarak Gizlendi */}
 
                 {/* Sınıflar (Yalnızca Öğretmenler / Yönetim) */}
                 {!isStudent && (
@@ -553,11 +549,11 @@ function DashLeftMenu() {
                   />
                 )}
 
-                {/* Panolar */}
+                {/* Akıllı Tahtalar */}
                 <MenuLink
                   href="/dash/boards"
                   icon={<ChalkboardSimple size={20} weight="fill" />}
-                  label="Panolar"
+                  label="Akıllı Tahtalar"
                   isCollapsed={isCollapsed}
                   active={isActivePath('/dash/boards')}
                 />
@@ -571,68 +567,6 @@ function DashLeftMenu() {
                   active={isActivePath('/dash/playgrounds')}
                 />
               </>
-            )}
-
-            {/* Disabled features shown in an "Other" hover menu (teachers/students only) */}
-            {!canManageOrg && (!showCommunities || !showBoards || !showPlaygrounds) && (
-              <HoverMenu
-                content={
-                  <HoverMenuContent className="w-64">
-                    <HoverMenuLabel className="flex items-center justify-between text-white/70 font-medium">
-                      <span>{t('common.other')}</span>
-                      <span className="text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/[0.06] text-white/25">
-                        {t('common.disabled')}
-                      </span>
-                    </HoverMenuLabel>
-                    <HoverMenuSeparator />
-                    {!showCommunities && (
-                      <HoverMenuItem asChild>
-                        <Link href="/dash/communities" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
-                          <ChatsCircle size={16} weight="fill" />
-                          <span>{t('communities.title')}</span>
-                        </Link>
-                      </HoverMenuItem>
-                    )}
-                    {!showBoards && (
-                      <HoverMenuItem asChild>
-                        <Link href="/dash/boards" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
-                          <ChalkboardSimple size={16} weight="fill" />
-                          <span>{t('common.boards')}</span>
-                        </Link>
-                      </HoverMenuItem>
-                    )}
-                    {!showPlaygrounds && (
-                      <HoverMenuItem asChild>
-                        <Link href="/dash/playgrounds" className="flex items-center gap-2 px-3 py-2 text-sm text-white/30 hover:text-white/50 hover:bg-white/[0.05] cursor-pointer transition-colors">
-                          <Cube size={16} weight="fill" />
-                          <span>{t('common.playgrounds')}</span>
-                        </Link>
-                      </HoverMenuItem>
-                    )}
-                  </HoverMenuContent>
-                }
-              >
-                <button
-                  aria-label={t('dashboard.nav.other')}
-                  className={cn(
-                    "flex items-center w-full rounded-lg text-white/30 hover:text-white/50 hover:bg-white/[0.05] transition-all",
-                    isCollapsed ? "justify-center h-10" : "px-3 py-2 gap-3"
-                  )}
-                >
-                  <span className="relative flex items-center justify-center">
-                    <DotsThree size={20} weight="bold" />
-                    {isCollapsed && (
-                      <CaretDown aria-hidden="true" size={8} weight="bold" className="absolute -end-2.5 text-white/20" />
-                    )}
-                  </span>
-                  {!isCollapsed && (
-                    <>
-                      <span className="text-sm font-medium flex-1 text-start">{t('common.other')}</span>
-                      <CaretDown aria-hidden="true" size={14} weight="bold" className="text-white/20" />
-                    </>
-                  )}
-                </button>
-              </HoverMenu>
             )}
           </div>
       </div>
@@ -782,115 +716,6 @@ function DashLeftMenu() {
             </Tooltip>
           )}
 
-          {/* Language Switcher with hover menu */}
-          <HoverMenu
-            align="end"
-            content={
-              <HoverMenuContent className="w-64 max-h-96 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                <HoverMenuLabel className="flex items-center gap-2 text-white/70 font-medium">
-                  <Globe size={16} weight="fill" />
-                  <span>{t('common.language')}</span>
-                </HoverMenuLabel>
-                <HoverMenuSeparator />
-                {AVAILABLE_LANGUAGES.map((language) => (
-                  <HoverMenuItem
-                    key={language.code}
-                    onClick={() => {
-                      try {
-                        localStorage.setItem('i18nextLng_userPicked', '1')
-                      } catch {}
-                      changeLanguage(language.code)
-                    }}
-                    className="flex items-center justify-between px-3 py-2.5 cursor-pointer text-white/70 hover:text-white hover:bg-white/[0.08] transition-colors"
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-medium text-sm">{language.nativeName}</span>
-                      <span className="text-xs text-white/40">{t(language.translationKey)}</span>
-                    </div>
-                    {i18n.language.split('-')[0] === language.code && (
-                      <Check size={16} weight="bold" className="text-green-500" />
-                    )}
-                  </HoverMenuItem>
-                ))}
-              </HoverMenuContent>
-            }
-          >
-            <button aria-label={t('dashboard.nav.open_language_menu')} className={cn(
-              "flex items-center w-full rounded-lg text-white/50 hover:text-white hover:bg-white/[0.08] transition-all group",
-              isCollapsed ? "justify-center h-10" : "px-3 py-2 gap-3"
-            )}>
-              <Globe size={20} weight="fill" />
-              {!isCollapsed && (
-                <span className="text-sm font-medium">{t('common.language')}</span>
-              )}
-            </button>
-          </HoverMenu>
-
-          {/* Help with hover menu */}
-          <HoverMenu
-            align="end"
-            content={
-              <HoverMenuContent className="w-56">
-                <HoverMenuLabel className="flex items-center gap-2 text-white/70 font-medium">
-                  <Question size={16} weight="fill" />
-                  <span>{t('common.help')}</span>
-                </HoverMenuLabel>
-                <HoverMenuSeparator />
-                <HoverMenuItem asChild>
-                  <a
-                    href="https://docs.learnhouse.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors"
-                  >
-                    <Book size={16} weight="fill" />
-                    <span>{t('common.help_menu.documentation')}</span>
-                  </a>
-                </HoverMenuItem>
-                <HoverMenuItem asChild>
-                  <a
-                    href="https://learnhouse.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors"
-                  >
-                    <Globe size={16} weight="fill" />
-                    <span>{t('common.help_menu.website')}</span>
-                  </a>
-                </HoverMenuItem>
-                <HoverMenuItem asChild>
-                  <a
-                    href="https://discord.gg/learnhouse"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors"
-                  >
-                    <DiscordIcon size={16} />
-                    <span>{t('common.help_menu.discord')}</span>
-                  </a>
-                </HoverMenuItem>
-                <HoverMenuSeparator />
-                <HoverMenuItem
-                  onClick={() => setFeedbackModalOpen(true)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors"
-                >
-                  <ChatCircleDots size={16} weight="fill" />
-                  <span>{t('common.help_menu.report_feedback')}</span>
-                </HoverMenuItem>
-              </HoverMenuContent>
-            }
-          >
-            <button aria-label={t('dashboard.nav.open_help_menu')} className={cn(
-              "flex items-center w-full rounded-lg text-white/50 hover:text-white hover:bg-white/[0.08] transition-all group",
-              isCollapsed ? "justify-center h-10" : "px-3 py-2 gap-3"
-            )}>
-              <Question size={20} weight="fill" />
-              {!isCollapsed && (
-                <span className="text-sm font-medium">{t('common.help')}</span>
-              )}
-            </button>
-          </HoverMenu>
-
           {/* My Organizations with hover menu (multi-org / SaaS only) */}
           {multiOrg && (
             <HoverMenu
@@ -951,6 +776,80 @@ function DashLeftMenu() {
             </HoverMenu>
           )}
 
+          {/* Tahtaya Bağlan ve Pano Modu Butonları (Öğretmen profilinin hemen üstünde) */}
+          {isTeacherUser && (
+            <div className="pt-1 pb-1.5 space-y-1.5">
+              {/* Tahtaya Bağlan */}
+              <Link
+                href="/dash/connect-board"
+                className={cn(
+                  "group relative flex items-center rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer",
+                  "bg-gradient-to-r from-rose-600 via-rose-500 to-amber-600 hover:from-rose-500 hover:to-amber-500",
+                  "shadow-lg shadow-rose-600/25 border border-rose-300/40 hover:border-rose-200",
+                  "active:scale-[0.98]",
+                  isCollapsed ? "justify-center h-12 w-12 mx-auto" : "px-3.5 py-2.5 gap-3 w-full"
+                )}
+                title="Tahtaya Bağlan (QR Kod & 6 Haneli Kod ile Eşleş)"
+              >
+                <div className="relative shrink-0 flex items-center justify-center">
+                  <QrCode size={isCollapsed ? 22 : 20} weight="bold" className="text-white drop-shadow-sm" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-300 rounded-full border-2 border-[#0f0f10] animate-ping" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border-2 border-[#0f0f10]" />
+                </div>
+
+                {!isCollapsed && (
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-white tracking-wide uppercase drop-shadow-xs">
+                        Tahtaya Bağlan
+                      </span>
+                      <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-md bg-white/20 text-white border border-white/30 tracking-tight">
+                        EŞLEŞTİR
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-rose-100 font-medium truncate mt-0.5">
+                      QR veya 6 Haneli Kod ile
+                    </p>
+                  </div>
+                )}
+              </Link>
+
+              {/* Pano Modu */}
+              <Link
+                href="/pano"
+                className={cn(
+                  "group relative flex items-center rounded-2xl transition-all duration-300 overflow-hidden cursor-pointer",
+                  "bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500",
+                  "shadow-lg shadow-indigo-600/30 border border-indigo-300/40 hover:border-indigo-200",
+                  "active:scale-[0.98]",
+                  isCollapsed ? "justify-center h-12 w-12 mx-auto" : "px-3.5 py-2.5 gap-3 w-full"
+                )}
+                title="Pano Modu (Akıllı Tahta & Sınıf Modu)"
+              >
+                <div className="relative shrink-0 flex items-center justify-center">
+                  <ChalkboardSimple size={isCollapsed ? 22 : 20} weight="fill" className="text-white drop-shadow-sm" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#0f0f10] animate-pulse" />
+                </div>
+
+                {!isCollapsed && (
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-white tracking-wide uppercase drop-shadow-xs">
+                        Pano Modu
+                      </span>
+                      <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-md bg-white/20 text-white border border-white/30 tracking-tight">
+                        CANLI
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-indigo-100 font-medium truncate mt-0.5">
+                      Akıllı Tahta & Sınıf Panosu
+                    </p>
+                  </div>
+                )}
+              </Link>
+            </div>
+          )}
+
           {/* User Menu with hover menu */}
           <HoverMenu
             align="end"
@@ -967,12 +866,14 @@ function DashLeftMenu() {
                     <span>{t('common.settings')}</span>
                   </Link>
                 </HoverMenuItem>
-                <HoverMenuItem asChild>
-                  <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
-                    <ShoppingBag size={16} weight="fill" />
-                    <span>{t('account.purchases')}</span>
-                  </Link>
-                </HoverMenuItem>
+                {!isTeacherUser && (
+                  <HoverMenuItem asChild>
+                    <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors">
+                      <ShoppingBag size={16} weight="fill" />
+                      <span>{t('account.purchases')}</span>
+                    </Link>
+                  </HoverMenuItem>
+                )}
                 <HoverMenuSeparator />
                 <HoverMenuItem
                   onClick={() => logOutUI()}

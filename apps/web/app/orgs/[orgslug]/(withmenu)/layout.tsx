@@ -103,8 +103,10 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
   const pathParts = pathname?.split('/').filter(Boolean) || []
 
   // Pages that use a full-bleed layout (no footer/watermark)
-  const noFooterPaths = ['copilot']
+  const noFooterPaths = ['copilot', 'pano']
+  const isPano = pathParts.includes('pano')
   const isFullBleedPage = noFooterPaths.some((p) => pathParts.includes(p))
+  const hideChrome = chromeless || isPano
 
   return (
     <div
@@ -112,22 +114,22 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
       // font-family in Arabic, where Tajawal replaces the org's custom face
       // outright. An inline style beats any normal rule, so the override has to
       // target this element specifically.
-      className="lh-org-font-root flex flex-col min-h-screen"
+      className={`lh-org-font-root flex flex-col ${isPano ? 'h-screen w-screen overflow-hidden m-0 p-0' : 'min-h-screen'}`}
       style={{
-        backgroundColor: primaryColor ? hexToRgba(primaryColor, 0.05) : 'transparent',
+        backgroundColor: primaryColor && !isPano ? hexToRgba(primaryColor, 0.05) : 'transparent',
         ...(customFont ? { fontFamily: `'${customFont}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif` } : {}),
       }}
     >
       <PageViewTracker />
-      {!chromeless && <OrgJoinBanner />}
-      {!chromeless && <OrgMenu orgslug={orgslug} />}
+      {!hideChrome && <OrgJoinBanner />}
+      {!hideChrome && <OrgMenu orgslug={orgslug} />}
       {/* Org-wide 2FA policy: renders nothing unless this user is non-compliant. */}
-      {!chromeless && <OrgMFAPolicyGate />}
-      <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
+      {!hideChrome && <OrgMFAPolicyGate />}
+      <div className={`flex-1 relative ${isPano ? 'h-full w-full overflow-hidden' : ''}`} style={{ zIndex: 'var(--z-content)' }}>
         {children}
       </div>
-      {!isFullBleedPage && !chromeless && <GlobalEduFooter />}
-      {!isFullBleedPage && !chromeless && <Watermark />}
+      {!isFullBleedPage && !hideChrome && <GlobalEduFooter />}
+      {!isFullBleedPage && !hideChrome && <Watermark />}
     </div>
   )
 }

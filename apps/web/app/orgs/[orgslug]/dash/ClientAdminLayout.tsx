@@ -11,6 +11,7 @@ import CommandPalette from '@components/Dashboard/CommandPalette/CommandPalette'
 import { UpgradeModalProvider } from '@components/Dashboard/Shared/PlanRestricted/UpgradeModalContext'
 import React from 'react'
 import { useMediaQuery } from 'usehooks-ts';
+import { useSearchParams } from 'next/navigation'
 
 function ClientAdminLayout({
     children,
@@ -20,13 +21,15 @@ function ClientAdminLayout({
     params?: any
 }) {
     const isMobile = useMediaQuery('(max-width: 1024px)')
+    const searchParams = useSearchParams()
+    const chromeless = searchParams?.get('chrome') === 'none'
 
     return (
         <SessionGate>
             <AdminAuthorization authorizationMode="page">
                 <CommandPaletteProvider>
                     <UpgradeModalProvider>
-                        {isMobile && <DashMobileMenu />}
+                        {!chromeless && isMobile && <DashMobileMenu />}
                         {/* Built-in page translation (Chrome/Edge/Firefox) swaps text
                             nodes out from under React. On the editor — where nodes are
                             constantly inserted and moved — that desyncs the two trees
@@ -34,15 +37,14 @@ function ClientAdminLayout({
                             this node", taking the whole page with it. The dashboard is
                             already translated by i18n, so opting it out costs nothing.
                             Public course pages stay translatable. */}
-                        <div translate="no" className="notranslate flex flex-col lg:flex-row">
-                            {!isMobile && <DashLeftMenu />}
+                        <div translate="no" className="notranslate flex flex-col lg:flex-row min-h-screen">
+                            {!chromeless && !isMobile && <DashLeftMenu />}
                             <div className="flex flex-col w-full min-w-0 relative isolate pb-24 lg:pb-0">
-                                {/* Renders nothing outside the demo organization. */}
-                                <DemoBanner />
+                                {!chromeless && <DemoBanner />}
                                 {children}
-                                <OnboardingTracker />
+                                {!chromeless && <OnboardingTracker />}
                             </div>
-                            <WelcomeModal />
+                            {!chromeless && <WelcomeModal />}
                             <CommandPalette />
                         </div>
                     </UpgradeModalProvider>
