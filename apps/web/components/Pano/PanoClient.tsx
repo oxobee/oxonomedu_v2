@@ -1356,7 +1356,8 @@ export default function PanoClient() {
   const params = useParams() as any
   const session = useLHSession() as any
   const org = useOrg() as any
-  const orgslug = params?.orgslug || org?.org_slug || 'neclagorer'
+  const [pairedSession, setPairedSession] = useState<TeacherPairData | null>(null)
+  const orgslug = params?.orgslug || pairedSession?.orgSlug || org?.org_slug || 'neclagorer'
   const user = session?.data?.user
 
   // Check role: Pano is strictly for teachers!
@@ -1378,12 +1379,11 @@ export default function PanoClient() {
   })
 
   // Paired Session Management (Standby Screen & QR/OTP Pairing)
-  const [pairedSession, setPairedSession] = useState<TeacherPairData | null>(null)
   const [isSessionHydrated, setIsSessionHydrated] = useState(false)
   const [forceStandby, setForceStandby] = useState(false)
 
   // Handle successful pairing from Standby Screen
-  const handlePaired = (teacherData: TeacherPairData) => {
+  const handlePaired = async (teacherData: TeacherPairData) => {
     setPairedSession(teacherData)
     setForceStandby(false)
     if (typeof window !== 'undefined') {
@@ -1411,6 +1411,27 @@ export default function PanoClient() {
       localStorage.removeItem('oxonom_pano_is_locked')
     }
 
+    // Set client-side cookies immediately
+    if (typeof document !== 'undefined') {
+      const oSlug = teacherData.orgSlug || 'neclagorer'
+      document.cookie = `LH_session=1; path=/; max-age=2592000; SameSite=Lax`
+      document.cookie = `LH_org=${oSlug}; path=/; max-age=2592000; SameSite=Lax`
+    }
+
+    // Call claim endpoint to ensure HTTP-only auth cookies (LH_access, LH_refresh) are firmly established
+    try {
+      await fetch('/api/pano/pair/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teacherData }),
+      })
+    } catch (_) {}
+
+    // Update active React session context
+    if (session?.update) {
+      session.update(true).catch(() => {})
+    }
+
     toast.success(`Hoş geldiniz Sayın ${teacherData.first_name || teacherData.username || 'Öğretmenim'}!`)
   }
 
@@ -1426,9 +1447,19 @@ export default function PanoClient() {
       localStorage.removeItem('oxonom_pano_selected_class_id')
     }
 
+    if (typeof document !== 'undefined') {
+      document.cookie = 'LH_session=; path=/; max-age=0'
+      document.cookie = 'LH_org=; path=/; max-age=0'
+    }
+
     setPairedSession(null)
     setForceStandby(true)
     setIsProfileOpen(false)
+
+    if (session?.update) {
+      session.update(true).catch(() => {})
+    }
+
     toast.success('Pano oturumu kapatıldı.')
   }
 
@@ -1471,6 +1502,21 @@ export default function PanoClient() {
           if (parsed.classrooms && Array.isArray(parsed.classrooms) && parsed.classrooms.length > 0) {
             setClassrooms(parsed.classrooms)
             setSelectedClass(parsed.classrooms[0])
+          }
+
+          // Ensure cookies are intact on the board browser even after browser restart
+          const hasMarker = document.cookie.split('; ').some((c) => c.startsWith('LH_session='))
+          if (!hasMarker) {
+            fetch('/api/pano/pair/claim', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ teacherData: parsed }),
+            }).then(() => {
+              const oSlug = parsed.orgSlug || 'neclagorer'
+              document.cookie = `LH_session=1; path=/; max-age=2592000; SameSite=Lax`
+              document.cookie = `LH_org=${oSlug}; path=/; max-age=2592000; SameSite=Lax`
+              if (session?.update) session.update(true).catch(() => {})
+            }).catch(() => {})
           }
         } catch (_) {}
       }

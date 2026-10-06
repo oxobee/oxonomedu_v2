@@ -18,6 +18,7 @@ import {
   Maximize2
 } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useAuth } from '@components/Contexts/AuthContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import toast from 'react-hot-toast'
 
@@ -37,6 +38,7 @@ export default function ConnectBoardClient({
   const router = useRouter()
   const searchParams = useSearchParams()
   const session = useLHSession() as any
+  const auth = useAuth() as any
   const org = useOrg() as any
   const user = session?.data?.user
 
@@ -263,14 +265,24 @@ export default function ConnectBoardClient({
       } catch (_) {}
     }
 
+    let token = session?.data?.tokens?.access_token || auth?.accessToken
+    if (!token && auth?.refreshSession) {
+      try {
+        token = await auth.refreshSession()
+      } catch (_) {}
+    }
+    const refreshToken = session?.data?.tokens?.refresh_token || token
+
     const teacherData = {
-      id: user?.id || 1,
+      id: user?.id || 2,
       username: user?.username || 'ogretmen',
-      first_name: user?.first_name || 'Öğretmen',
-      last_name: user?.last_name || '',
-      email: user?.email || '',
+      first_name: user?.first_name || 'Özlem',
+      last_name: user?.last_name || 'ZOR',
+      email: user?.email || 'ogretmen@oxonom.com',
       role: 'teacher',
-      token: session?.data?.tokens?.access_token,
+      token,
+      refreshToken,
+      orgSlug: org?.slug || 'neclagorer',
       lock_pin: savedSettings?.pin || '1234',
       settings: savedSettings,
     }

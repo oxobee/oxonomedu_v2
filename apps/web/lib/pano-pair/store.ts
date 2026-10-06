@@ -8,6 +8,8 @@ export interface TeacherPairData {
   email?: string
   role?: string
   token?: string
+  refreshToken?: string
+  orgSlug?: string
   lock_pin?: string
   selectedClassId?: number
   classrooms?: any[]

@@ -158,12 +158,41 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
     }, 1800)
   }
 
-  const handleSuccessfulPair = (teacherData: TeacherPairData) => {
+  const handleSuccessfulPair = async (teacherData: TeacherPairData) => {
     if (sseRef.current) sseRef.current.close()
     if (pollTimerRef.current) clearInterval(pollTimerRef.current)
 
     setPairedTeacher(teacherData)
     setIsPairedSuccess(true)
+
+    // Set client-side cookies immediately
+    if (typeof document !== 'undefined') {
+      const orgSlug = teacherData.orgSlug || 'neclagorer'
+      document.cookie = `LH_session=1; path=/; max-age=2592000; SameSite=Lax`
+      document.cookie = `LH_org=${orgSlug}; path=/; max-age=2592000; SameSite=Lax`
+    }
+
+    // Call claim endpoint to set HTTP-only auth cookies (LH_access, LH_refresh) on the board browser
+    let finalTeacherData = teacherData
+    try {
+      const res = await fetch('/api/pano/pair/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          teacherData,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.teacherData) {
+          finalTeacherData = data.teacherData
+          setPairedTeacher(finalTeacherData)
+        }
+      }
+    } catch (err) {
+      console.error('[PanoStandby] Claim error:', err)
+    }
 
     if (typeof window !== 'undefined' && navigator.vibrate) {
       try { navigator.vibrate([100, 50, 100]) } catch (_) {}
@@ -171,7 +200,7 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
 
     // Smooth delay to celebrate and unlock into dashboard
     setTimeout(() => {
-      onPaired(teacherData)
+      onPaired(finalTeacherData)
     }, 1200)
   }
 
