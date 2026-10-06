@@ -1096,10 +1096,10 @@ const EduOSWindow = ({
   let targetPath = app.path || `/dash`
   const separator = targetPath.includes('?') ? '&' : '?'
   const fullAppUrl = targetPath.startsWith('/orgs/')
-    ? `${targetPath}${separator}chrome=none`
+    ? `${targetPath}${separator}chrome=none&pano=1`
     : targetPath.startsWith('/board') || targetPath.startsWith('/games')
-      ? `${targetPath}${separator}chrome=none`
-      : `/orgs/${orgslug}${targetPath}${separator}chrome=none`
+      ? `${targetPath}${separator}chrome=none&pano=1`
+      : `/orgs/${orgslug}${targetPath}${separator}chrome=none&pano=1`
 
   const IconComponent = (Icons as any)[app.icon || 'Board'] || Icons.Board
 

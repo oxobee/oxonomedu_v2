@@ -22,7 +22,21 @@ function ClientAdminLayout({
 }) {
     const isMobile = useMediaQuery('(max-width: 1024px)')
     const searchParams = useSearchParams()
-    const chromeless = searchParams?.get('chrome') === 'none'
+    const chromeless = searchParams?.get('chrome') === 'none' || searchParams?.get('pano') === '1'
+
+    if (chromeless) {
+        return (
+            <CommandPaletteProvider>
+                <UpgradeModalProvider>
+                    <div translate="no" className="notranslate flex flex-col w-full min-h-screen">
+                        <div className="flex flex-col w-full min-w-0 relative isolate">
+                            {children}
+                        </div>
+                    </div>
+                </UpgradeModalProvider>
+            </CommandPaletteProvider>
+        )
+    }
 
     return (
         <SessionGate>

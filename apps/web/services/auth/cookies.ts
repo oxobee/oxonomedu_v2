@@ -42,6 +42,9 @@ export function getCookieDomain(request: NextRequest): string | undefined {
 
   if (isLocalhost(host)) return undefined
   if (topDomain === 'localhost') return undefined
+  // Vercel deployment domains (*.vercel.app) are on the Public Suffix List (PSL).
+  // Setting Domain=.vercel.app causes browsers to silently drop the cookie.
+  if (topDomain === 'vercel.app' || topDomain.endsWith('.vercel.app')) return undefined
   if (isSubdomainOf(host, domain) || isSameHost(host, domain)) {
     return `.${topDomain}`
   }

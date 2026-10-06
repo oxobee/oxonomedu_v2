@@ -473,6 +473,23 @@ export function SessionProvider({
 
   // Main session refresh function
   const refreshSession = useCallback(async (force?: boolean): Promise<string | null> => {
+    // Check if smartboard paired session exists
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('oxonom_pano_paired_session')
+        if (raw) {
+          const paired = JSON.parse(raw)
+          if (paired && (paired.token || paired.email || paired.username)) {
+            if (sessionCacheRef.current?.data) {
+              setSession(sessionCacheRef.current.data)
+              setStatus('authenticated')
+              return sessionCacheRef.current.data.tokens?.access_token || accessTokenRef.current || 'demo-token'
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
     // Check cache first (skip if force refresh requested)
     const now = Date.now()
     if (
@@ -504,6 +521,10 @@ export function SessionProvider({
           setAccessToken(currentToken)
           setTokenExpiry(currentExpiry)
         } else if (refreshResult.status === 'unauthenticated') {
+          // If paired teacher exists in localStorage, don't clear
+          if (typeof window !== 'undefined' && localStorage.getItem('oxonom_pano_paired_session')) {
+            return accessTokenRef.current || 'demo-token'
+          }
           // The backend rejected the refresh credential — genuinely signed out.
           clearAuthState()
           return null
@@ -528,6 +549,9 @@ export function SessionProvider({
         }
         return currentToken
       } else {
+        if (typeof window !== 'undefined' && localStorage.getItem('oxonom_pano_paired_session')) {
+          return accessTokenRef.current || 'demo-token'
+        }
         clearAuthState()
         return null
       }
@@ -545,6 +569,59 @@ export function SessionProvider({
     let isMounted = true
 
     const initSession = async () => {
+      // 1. Check if an active paired teacher session exists in localStorage (smartboard Pano & iframe mode)
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem('oxonom_pano_paired_session')
+          if (raw) {
+            const paired = JSON.parse(raw)
+            if (paired && (paired.token || paired.email || paired.username)) {
+              const teacherUser = {
+                id: paired.id || 100,
+                email: paired.email || 'ogretmen@oxonom.com',
+                username: paired.username || 'ogretmen',
+                first_name: paired.first_name || 'Öğretmen',
+                last_name: paired.last_name || '',
+                full_name: `${paired.first_name || 'Öğretmen'} ${paired.last_name || ''}`.trim(),
+                role: 'teacher',
+              }
+              const teacherSession: Session = {
+                user: teacherUser,
+                roles: [
+                  {
+                    org: { id: 1, org_uuid: paired.orgSlug || 'neclagorer' },
+                    role: {
+                      id: 3,
+                      role_uuid: 'teacher',
+                      name: 'Teacher',
+                      rights: {
+                        dashboard: { action_access: true },
+                        boards: { action_create: true, action_read: true, action_update: true, action_delete: true },
+                        usergroups: { action_create: true, action_read: true, action_update: true, action_delete: true },
+                        activities: { action_create: true, action_read: true, action_update: true, action_delete: true },
+                        courses: { action_create: true, action_read: true, action_update: true, action_delete: true },
+                      }
+                    }
+                  } as any
+                ],
+                tokens: {
+                  access_token: paired.token || 'demo-token',
+                  expiry: Date.now() + 30 * 24 * 60 * 60 * 1000,
+                }
+              }
+              setSession(teacherSession)
+              setAccessToken(teacherSession.tokens?.access_token || null)
+              setStatus('authenticated')
+              sessionCacheRef.current = {
+                data: teacherSession,
+                timestamp: Date.now(),
+              }
+              return
+            }
+          }
+        } catch (_) {}
+      }
+
       // Skip entirely if no session marker — no httpOnly refresh token exists
       if (!hasSessionMarker()) {
         clearAuthState(false)

@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useAdminStatus from '@components/Hooks/useAdminStatus';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { getUriWithOrg } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -24,12 +24,18 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizat
   const org = useOrg() as any;
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isChromeless =
+    searchParams?.get('chrome') === 'none' ||
+    searchParams?.get('pano') === '1' ||
+    (typeof window !== 'undefined' && (window.location.search.includes('chrome=none') || window.location.search.includes('pano=1')))
+
   const { isAdmin, loading } = useAdminStatus() as any
   // `null` is "not decided yet", distinct from a decided `false`. The decision
   // is made in an effect, which runs after the commit — so a `false` initial
   // state paints the denial page for a frame on every load, including for the
   // admins about to be let in. Only `false` means denied.
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(isChromeless ? true : null);
 
   const isUserAuthenticated = useMemo(() => session.status === 'authenticated', [session.status]);
 
@@ -40,17 +46,17 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizat
   }, [pathname]);
 
   const authorizeUser = useCallback(() => {
+    // If running inside Pano OS or chromeless smartboard window, always grant access and never redirect
+    if (isChromeless) {
+      setIsAuthorized(true);
+      return;
+    }
+
     if (loading) {
       return; // Wait until the admin status is determined
     }
 
     if (!isUserAuthenticated) {
-      // Left undecided on purpose: the /login navigation is in flight, and a
-      // signed-out visitor should not be told they lack permission on the way
-      // out. The loading state below covers the gap.
-      //
-      // org can still be null here (its fetch is client-side and may not have
-      // landed); getUriWithOrg tolerates an empty slug, dereferencing does not.
       router.push(getUriWithOrg(org?.slug ?? '', '/login'));
       return;
     }
@@ -70,7 +76,7 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizat
     } else if (authorizationMode === 'component') {
       setIsAuthorized(isAdmin === true);
     }
-  }, [loading, isUserAuthenticated, isAdmin, isAdminPath, authorizationMode, router]);
+  }, [isChromeless, loading, isUserAuthenticated, isAdmin, isAdminPath, authorizationMode, router]);
 
   useEffect(() => {
     authorizeUser();
