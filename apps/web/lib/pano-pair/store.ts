@@ -75,6 +75,7 @@ export interface PanoPairSession {
   code: string // 6-digit string
   createdAt: number
   expiresAt: number
+  expireAt?: Date
   status: 'waiting' | 'paired' | 'expired' | 'closed'
   teacherData?: TeacherPairData
   sharedState?: PanoSharedState
@@ -99,6 +100,8 @@ const MONGODB_URI = process.env.MONGODB_URI || ''
 // Redis Configuration (FAZ 4 Realtime Infrastructure)
 const REDIS_URL = process.env.REDIS_URL || process.env.LEARNHOUSE_REDIS_URL || ''
 
+const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL)
+
 let redisPub: Redis | null = null
 
 export function getRedisPublisher(): Redis | null {
@@ -111,7 +114,7 @@ export function getRedisPublisher(): Redis | null {
         lazyConnect: true,
       })
       redisPub.connect().catch((err: any) => {
-        console.warn('[PanoRedis] Publisher connection fallback:', err.message)
+        console.warn('[PanoRedis] Publisher connection fallback:', err?.message || err)
         redisPub = null
       })
     } catch (_) {
@@ -129,7 +132,7 @@ export function createRedisSubscriber(): Redis | null {
       enableOfflineQueue: false,
     })
     sub.on('error', (err: any) => {
-      console.warn('[PanoRedis] Subscriber error:', err.message)
+      console.warn('[PanoRedis] Subscriber error:', err?.message || err)
     })
     return sub
   } catch (_) {
@@ -137,47 +140,112 @@ export function createRedisSubscriber(): Redis | null {
   }
 }
 
+declare global {
+  var _panoMongoClient: MongoClient | undefined
+  var _panoMongoDb: Db | undefined
+  var _panoIndexesReady: boolean | undefined
+  var _panoPairStore: GlobalPanoStore | undefined
+}
+
 interface GlobalPanoStore {
-  client?: MongoClient
-  db?: Db
   memorySessions: Map<string, PanoPairSession>
   codeToSessionId: Map<string, string>
   listeners: Map<string, Set<SessionListener>>
 }
 
-const g = globalThis as unknown as { _panoPairStore?: GlobalPanoStore }
-
-if (!g._panoPairStore) {
-  g._panoPairStore = {
+if (!globalThis._panoPairStore) {
+  globalThis._panoPairStore = {
     memorySessions: new Map(),
     codeToSessionId: new Map(),
     listeners: new Map(),
   }
 }
 
-const store = g._panoPairStore
+const store = globalThis._panoPairStore
 
-async function getPanoCollection(): Promise<Collection<PanoPairSession> | null> {
+export async function getPanoDb(): Promise<Db | null> {
   if (!MONGODB_URI) {
+    if (isProduction) {
+      const err = new Error('Veritabanı yapılandırılmamış (MONGODB_URI ortam değişkeni eksik)')
+      ;(err as any).code = 'store_unavailable'
+      throw err
+    }
     return null
   }
 
   try {
-    if (!store.client) {
-      store.client = new MongoClient(MONGODB_URI, {
+    if (!globalThis._panoMongoClient) {
+      const client = new MongoClient(MONGODB_URI, {
         maxPoolSize: 10,
-        serverSelectionTimeoutMS: 4000,
-        connectTimeoutMS: 4000,
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 5000,
       })
-      await store.client.connect()
+      await client.connect()
+      globalThis._panoMongoClient = client
+      globalThis._panoMongoDb = client.db('eduboard')
     }
-    if (!store.db) {
-      store.db = store.client.db('eduboard')
+    return globalThis._panoMongoDb || globalThis._panoMongoClient.db('eduboard')
+  } catch (err: any) {
+    console.error('[PanoStore] MongoDB connection error:', err?.message || err)
+    if (isProduction) {
+      const error = new Error('Veritabanı yapılandırılmamış (MongoDB bağlantısı kurulamadı)')
+      ;(error as any).code = 'store_unavailable'
+      throw error
     }
-    return store.db.collection<PanoPairSession>('pano_sessions')
-  } catch (err) {
-    console.warn('[PanoStore] MongoDB connection fallback to memory:', err)
     return null
+  }
+}
+
+export async function getPanoCollection(): Promise<Collection<PanoPairSession> | null> {
+  const db = await getPanoDb()
+  if (!db) return null
+
+  const coll = db.collection<PanoPairSession>('pano_sessions')
+  if (!globalThis._panoIndexesReady) {
+    try {
+      await Promise.all([
+        coll.createIndex({ sessionId: 1 }, { unique: true }),
+        coll.createIndex({ code: 1 }),
+        coll.createIndex({ expireAt: 1 }, { expireAfterSeconds: 0 }),
+        coll.createIndex({ expiresAt: 1 }),
+      ])
+      globalThis._panoIndexesReady = true
+    } catch (idxErr) {
+      console.warn('[PanoStore] Index creation warning:', idxErr)
+    }
+  }
+  return coll
+}
+
+export async function checkMongoHealth(): Promise<{
+  mongoConfigured: boolean
+  mongoPing: boolean
+  redisConfigured: boolean
+  env: 'vercel' | 'other'
+}> {
+  const mongoConfigured = Boolean(MONGODB_URI)
+  const redisConfigured = Boolean(REDIS_URL)
+  const env: 'vercel' | 'other' = process.env.VERCEL ? 'vercel' : 'other'
+
+  let mongoPing = false
+  if (mongoConfigured) {
+    try {
+      const db = await getPanoDb()
+      if (db) {
+        const pingRes = await db.command({ ping: 1 })
+        mongoPing = Boolean(pingRes && (pingRes.ok === 1 || pingRes.ok === true))
+      }
+    } catch (err: any) {
+      console.warn('[PanoHealth] MongoDB ping check error:', err?.message || err)
+      mongoPing = false
+    }
+  }
+
+  return {
+    mongoConfigured,
+    mongoPing,
+    redisConfigured,
+    env,
   }
 }
 
@@ -195,12 +263,14 @@ export async function createPanoSession(ttlMs = 5 * 60 * 1000): Promise<PanoPair
   const boardDeviceToken = crypto.randomUUID ? crypto.randomUUID() : `board_${Math.random().toString(36).substring(2)}`
   const code = generateCode()
   const now = Date.now()
+  const expiresAt = now + ttlMs
 
   const session: PanoPairSession = {
     sessionId,
     code,
     createdAt: now,
-    expiresAt: now + ttlMs,
+    expiresAt,
+    expireAt: new Date(expiresAt),
     status: 'waiting',
     boardDeviceToken,
     failedAttempts: 0,
@@ -210,18 +280,14 @@ export async function createPanoSession(ttlMs = 5 * 60 * 1000): Promise<PanoPair
   store.memorySessions.set(sessionId, session)
   store.codeToSessionId.set(code, sessionId)
 
-  // Persist to MongoDB
-  try {
-    const coll = await getPanoCollection()
-    if (coll) {
-      await coll.updateOne(
-        { sessionId },
-        { $set: session },
-        { upsert: true }
-      )
-    }
-  } catch (err) {
-    console.error('[PanoStore] createPanoSession DB error:', err)
+  // Persist to MongoDB (in production, fails loudly if DB is down)
+  const coll = await getPanoCollection()
+  if (coll) {
+    await coll.updateOne(
+      { sessionId },
+      { $set: session },
+      { upsert: true }
+    )
   }
 
   return session
@@ -230,28 +296,31 @@ export async function createPanoSession(ttlMs = 5 * 60 * 1000): Promise<PanoPair
 export async function getPanoSession(sessionId: string): Promise<PanoPairSession | null> {
   if (!sessionId) return null
 
-  // 1. Try DB first
+  // 1. In production / when Mongo is configured, trust DB as single source of truth across serverless instances
   try {
     const coll = await getPanoCollection()
     if (coll) {
       const doc = await coll.findOne({ sessionId })
-      if (doc) {
-        // Strip mongo internal _id
-        const { _id, ...cleanSession } = doc as any
-        if (cleanSession.expiresAt < Date.now() && cleanSession.status === 'waiting') {
-          cleanSession.status = 'expired'
-          coll.updateOne({ sessionId }, { $set: { status: 'expired' } }).catch(() => {})
-        }
-        store.memorySessions.set(sessionId, cleanSession)
-        store.codeToSessionId.set(cleanSession.code, sessionId)
-        return cleanSession
+      if (!doc) {
+        return null
       }
+      const { _id: _unusedId, expireAt: _unusedExpireAt, ...cleanSession } = doc as any
+      if (cleanSession.expiresAt < Date.now() && cleanSession.status === 'waiting') {
+        cleanSession.status = 'expired'
+        coll.updateOne({ sessionId }, { $set: { status: 'expired' } }).catch(() => {})
+      }
+      store.memorySessions.set(sessionId, cleanSession)
+      store.codeToSessionId.set(cleanSession.code, sessionId)
+      return cleanSession
     }
-  } catch (err) {
-    console.warn('[PanoStore] getPanoSession DB error, checking memory:', err)
+  } catch (err: any) {
+    if (isProduction) {
+      throw err
+    }
+    console.warn('[PanoStore] getPanoSession DB error, fallback to memory in dev:', err)
   }
 
-  // 2. Memory fallback
+  // 2. Memory fallback ONLY in development mode when DB is not configured
   const mem = store.memorySessions.get(sessionId)
   if (!mem) return null
 
@@ -267,7 +336,7 @@ export async function getPanoSessionByCode(code: string): Promise<PanoPairSessio
   const clean = code.replace(/[^0-9]/g, '')
   if (!clean) return null
 
-  // 1. Try DB first
+  // 1. Trust DB across serverless instances
   try {
     const coll = await getPanoCollection()
     if (coll) {
@@ -276,18 +345,20 @@ export async function getPanoSessionByCode(code: string): Promise<PanoPairSessio
         expiresAt: { $gt: Date.now() },
         status: { $in: ['waiting', 'paired'] },
       })
-      if (doc) {
-        const { _id, ...cleanSession } = doc as any
-        store.memorySessions.set(cleanSession.sessionId, cleanSession)
-        store.codeToSessionId.set(clean, cleanSession.sessionId)
-        return cleanSession
-      }
+      if (!doc) return null
+      const { _id: _unusedId, expireAt: _unusedExpireAt, ...cleanSession } = doc as any
+      store.memorySessions.set(cleanSession.sessionId, cleanSession)
+      store.codeToSessionId.set(clean, cleanSession.sessionId)
+      return cleanSession
     }
-  } catch (err) {
-    console.warn('[PanoStore] getPanoSessionByCode DB error, checking memory:', err)
+  } catch (err: any) {
+    if (isProduction) {
+      throw err
+    }
+    console.warn('[PanoStore] getPanoSessionByCode DB error, fallback to memory in dev:', err)
   }
 
-  // 2. Memory fallback
+  // 2. Memory fallback ONLY in development
   const sessionId = store.codeToSessionId.get(clean)
   if (!sessionId) return null
   return getPanoSession(sessionId)
@@ -319,7 +390,9 @@ export async function recordFailedAttempt(code: string): Promise<{ locked: boole
         }
       )
     }
-  } catch (_) {}
+  } catch (_) {
+    // ignore record attempt error
+  }
 
   return { locked: attempts >= 5, attempts }
 }
@@ -391,8 +464,9 @@ export async function pairPanoSession(
         }
       )
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('[PanoStore] pairPanoSession DB error:', err)
+    if (isProduction) throw err
   }
 
   // FAZ 5 Security: Strip teacher JWT token and refreshToken before publishing over SSE
@@ -601,8 +675,9 @@ export async function applyPanoAction(
         assignedVersion = res.sharedState.version
       }
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('[PanoStore] applyPanoAction DB error:', err)
+    if (isProduction) throw err
   }
 
   const nextState: PanoSharedState = {
@@ -698,8 +773,9 @@ export async function updatePanoSharedState(
         assignedVersion = res.sharedState.version
       }
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('[PanoStore] updatePanoSharedState DB error:', err)
+    if (isProduction) throw err
   }
 
   const nextState: PanoSharedState = {

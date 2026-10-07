@@ -7,23 +7,56 @@ import {
   PanoSessionEvent,
 } from '@/lib/pano-pair/store'
 
+export const runtime = 'nodejs'
+export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId')
   if (!sessionId) {
-    return new Response('sessionId gereklidir', { status: 400 })
+    return new Response(JSON.stringify({ error: 'sessionId gereklidir', code: 'bad_request' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   const token = req.nextUrl.searchParams.get('token') || req.headers.get('x-device-token')
-  const isAuthorized = await verifyDeviceToken(sessionId, token)
-  if (!isAuthorized) {
-    return new Response('Unauthorized deviceToken', { status: 401 })
+  let isAuthorized = false
+  try {
+    isAuthorized = await verifyDeviceToken(sessionId, token)
+  } catch (err: any) {
+    if (err?.code === 'store_unavailable' || err?.message?.includes('Veritabanı') || err?.message?.includes('MONGODB_')) {
+      return new Response(JSON.stringify({ error: 'Veritabanı yapılandırılmamış', code: 'store_unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
   }
 
-  const session = await getPanoSession(sessionId)
+  if (!isAuthorized) {
+    return new Response(JSON.stringify({ error: 'Yetkisiz erişim: Geçersiz deviceToken', code: 'token_invalid' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  let session: any = null
+  try {
+    session = await getPanoSession(sessionId)
+  } catch (err: any) {
+    if (err?.code === 'store_unavailable' || err?.message?.includes('Veritabanı') || err?.message?.includes('MONGODB_')) {
+      return new Response(JSON.stringify({ error: 'Veritabanı yapılandırılmamış', code: 'store_unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
   if (!session) {
-    return new Response('Oturum bulunamadı veya süresi doldu', { status: 404 })
+    return new Response(JSON.stringify({ error: 'Oturum bulunamadı veya süresi doldu', code: 'session_not_found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   const lastEventId = req.headers.get('last-event-id')

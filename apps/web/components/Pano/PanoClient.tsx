@@ -1427,7 +1427,7 @@ export default function PanoClient() {
     setPairedSession(null)
     setActiveSessionId(null)
 
-    const isCurrentPhone = searchParams?.get('device') === 'phone' || (typeof window !== 'undefined' && localStorage.getItem('oxonom_pano_device_type') === 'phone')
+    const isCurrentPhone = searchParams?.get('device') === 'phone' || (typeof window !== 'undefined' && (sessionStorage.getItem('oxonom_pano_device_type') === 'phone' || localStorage.getItem('oxonom_pano_device_type') === 'phone'))
     if (isCurrentPhone) {
       toast('Akıllı tahta oturumu sonlandırıldı.', { icon: 'ℹ️' })
       router.push('/dash/connect-board')
@@ -1482,9 +1482,10 @@ export default function PanoClient() {
 
   // Handle successful pairing from Standby Screen
   const handlePaired = async (teacherData: TeacherPairData) => {
-    // FIX: Standby wrote the real boardDeviceToken to localStorage after the hook mounted; refresh hook state
+    // FIX: Standby wrote the real boardDeviceToken to storage after the hook mounted; refresh hook state
     if (typeof window !== 'undefined') {
-      setDeviceToken(localStorage.getItem('oxonom_pano_device_token') || '')
+      const tok = sessionStorage.getItem('oxonom_pano_device_token') || localStorage.getItem('oxonom_pano_device_token') || ''
+      setDeviceToken(tok)
     }
     setPairedSession(teacherData)
     setForceStandby(false)

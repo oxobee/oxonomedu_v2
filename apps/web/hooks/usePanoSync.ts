@@ -57,28 +57,30 @@ export function usePanoSync({
   const searchParams = useSearchParams()
 
   // 1. Device ID & Token (Unique client tokens for echo loop prevention and authentication)
+  // Requirement 6: Keep deviceId and role in sessionStorage (per-tab) so multiple tabs never conflict or echo
   const [deviceId] = useState<string>(() => {
     if (typeof window === 'undefined') return 'init'
-    let id = localStorage.getItem('oxonom_pano_device_id')
+    let id = sessionStorage.getItem('oxonom_pano_device_id')
     if (!id) {
       const qDevice = searchParams?.get('device')
       const prefix = qDevice === 'phone' ? 'phone' : 'board'
       id = `${prefix}-${Math.random().toString(36).substring(2, 9)}`
-      localStorage.setItem('oxonom_pano_device_id', id)
+      sessionStorage.setItem('oxonom_pano_device_id', id)
     }
     return id
   })
 
-  // FIX: the token used to be read once at mount and could be a random value that never matched the
-  // server-issued boardDeviceToken (written later by the Standby screen) -> 401 on every request.
-  // Now: state + always read fresh from localStorage right before each request. Never invent a token.
-  const readStoredToken = () =>
-    typeof window === 'undefined' ? '' : localStorage.getItem('oxonom_pano_device_token') || ''
+  // FIX: token read state + always read fresh right before each request.
+  const readStoredToken = () => {
+    if (typeof window === 'undefined') return ''
+    return sessionStorage.getItem('oxonom_pano_device_token') || localStorage.getItem('oxonom_pano_device_token') || ''
+  }
 
   const [deviceToken, setDeviceToken] = useState<string>(() => {
     if (typeof window === 'undefined') return ''
     const qToken = searchParams?.get('token')
     if (qToken) {
+      sessionStorage.setItem('oxonom_pano_device_token', qToken)
       localStorage.setItem('oxonom_pano_device_token', qToken)
       return qToken
     }
@@ -87,13 +89,19 @@ export function usePanoSync({
 
   const getToken = useCallback(() => readStoredToken() || deviceToken, [deviceToken])
 
-  // 2. Device Role (Phone vs Board): Strictly based on ?device=phone|board or pairing role (NO innerWidth guessing)
+  // 2. Device Role (Phone vs Board): Strictly based on ?device=phone|board or pairing role (in sessionStorage)
   const isPhone = useMemo(() => {
     if (typeof window === 'undefined') return false
     const qDevice = searchParams?.get('device')
-    if (qDevice === 'phone') return true
-    if (qDevice === 'board') return false
-    const savedType = localStorage.getItem('oxonom_pano_device_type')
+    if (qDevice === 'phone') {
+      sessionStorage.setItem('oxonom_pano_device_type', 'phone')
+      return true
+    }
+    if (qDevice === 'board') {
+      sessionStorage.setItem('oxonom_pano_device_type', 'board')
+      return false
+    }
+    const savedType = sessionStorage.getItem('oxonom_pano_device_type')
     if (savedType === 'phone') return true
     if (savedType === 'board') return false
     return false
@@ -263,16 +271,17 @@ export function usePanoSync({
         // Token may have just been rewritten by the standby/pairing flow: re-read once and retry
         res = await send(readStoredToken())
       }
+      const data = await res.json().catch(() => ({}))
       if (res.ok) {
-        const data = await res.json()
         if (data.state?.version) {
           lastAppliedVersionRef.current = Math.max(lastAppliedVersionRef.current, data.state.version)
         }
       } else if (res.status === 403 || res.status === 410) {
         if (onSessionClosed) onSessionClosed()
       } else {
-        console.warn('[usePanoSync] Dispatch rejected:', res.status, action.type)
-        toast.error('Tahtaya iletilemedi, yeniden senkronize ediliyor...')
+        const errCode = data.code || data.error || 'error'
+        console.warn('[usePanoSync] Dispatch rejected:', res.status, errCode, action.type)
+        toast.error(`Tahtaya iletilemedi (${res.status}: ${errCode})`)
         resyncFromServer()
       }
     } catch (err) {
@@ -347,98 +356,79 @@ export function usePanoSync({
   }, [deviceId, findClassroom])
   applyRemoteRef.current = handleRemoteState
 
-  // 8. Realtime SSE with auto-reconnect (exponential backoff) + fast fallback polling.
-  // FIX: EventSource never reconnects after a non-200 (e.g. 401), so we reconnect manually.
+  // 8. Primary Realtime Serverless Polling (700-1000ms active, 3s hidden) with since=<version>
   useEffect(() => {
     if (!activeSessionId) return
 
-    let sse: EventSource | null = null
-    let fallbackPollTimer: ReturnType<typeof setInterval> | null = null
-    let retryTimer: ReturnType<typeof setTimeout> | null = null
-    let retryDelay = 1000
+    let pollTimer: ReturnType<typeof setTimeout> | null = null
     let disposed = false
 
     const poll = async () => {
-      if (sseConnectedRef.current) return
+      if (disposed) return
       try {
+        const since = lastAppliedVersionRef.current
         const res = await fetch(
-          `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}`
+          `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}&since=${since}`
         )
         if (res.ok) {
           const data = await res.json()
-          if (Array.isArray(data.classrooms) && data.classrooms.length > 0) onClassroomsRef.current?.(data.classrooms)
-          if (data.state) handleRemoteState(data.state)
-        } else if (res.status === 403 || res.status === 410) {
-          if (onSessionClosed) onSessionClosed()
-        }
-      } catch (_) {}
-    }
-
-    const startFallbackPolling = () => {
-      if (fallbackPollTimer) return
-      fallbackPollTimer = setInterval(poll, 3000) // was 30s
-    }
-    const stopFallbackPolling = () => {
-      if (fallbackPollTimer) {
-        clearInterval(fallbackPollTimer)
-        fallbackPollTimer = null
-      }
-    }
-
-    const connect = () => {
-      if (disposed) return
-      try {
-        const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}&lastVersion=${lastAppliedVersionRef.current}`
-        sse = new EventSource(sseUrl)
-
-        sse.onopen = () => {
-          sseConnectedRef.current = true
-          retryDelay = 1000
-          stopFallbackPolling()
-        }
-
-        sse.addEventListener('state', (e: MessageEvent) => {
-          try {
-            sseConnectedRef.current = true
-            stopFallbackPolling()
-            handleRemoteState(JSON.parse(e.data) as PanoSharedState)
-          } catch (err) {
-            console.error('[usePanoSync] SSE parse state error:', err)
+          if (data.changed && data.state) {
+            if (Array.isArray(data.classrooms) && data.classrooms.length > 0) {
+              onClassroomsRef.current?.(data.classrooms)
+            }
+            handleRemoteState(data.state)
           }
-        })
-
-        sse.addEventListener('session_closed', () => {
+        } else if (res.status === 403 || res.status === 410) {
           disposed = true
           if (onSessionClosed) onSessionClosed()
-        })
-
-        sse.onerror = () => {
-          sseConnectedRef.current = false
-          startFallbackPolling()
-          if (sse && sse.readyState === EventSource.CLOSED && !disposed) {
-            sse.close()
-            retryTimer = setTimeout(connect, retryDelay)
-            retryDelay = Math.min(retryDelay * 2, 15000)
-          }
+          return
         }
-      } catch (err) {
-        console.warn('[usePanoSync] Stream initialization error:', err)
-        startFallbackPolling()
+      } catch (_) {
+        // ignore network error during polling
+      }
+
+      if (!disposed) {
+        const isHidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
+        const interval = isHidden ? 3000 : 850
+        pollTimer = setTimeout(poll, interval)
       }
     }
 
-    // Initial full sync (state + class list from the server) so phone and board share the same data
+    // Initial full resync to guarantee teacher class list and state are loaded
     resyncFromServer()
-    connect()
+
+    // Start primary serverless polling loop
+    pollTimer = setTimeout(poll, 850)
+
+    // Secondary Realtime SSE connection (for instant Redis events if configured)
+    let sse: EventSource | null = null
+    try {
+      const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}&lastVersion=${lastAppliedVersionRef.current}`
+      sse = new EventSource(sseUrl)
+
+      sse.addEventListener('state', (e: MessageEvent) => {
+        try {
+          const remoteState = JSON.parse(e.data) as PanoSharedState
+          handleRemoteState(remoteState)
+        } catch (_) {
+          // ignore parse error
+        }
+      })
+
+      sse.addEventListener('session_closed', () => {
+        disposed = true
+        if (onSessionClosed) onSessionClosed()
+      })
+    } catch (_) {
+      // ignore sse initialization error
+    }
 
     return () => {
       disposed = true
+      if (pollTimer) clearTimeout(pollTimer)
       if (sse) sse.close()
-      if (retryTimer) clearTimeout(retryTimer)
-      stopFallbackPolling()
-      sseConnectedRef.current = false
     }
-  }, [activeSessionId, deviceToken, getToken, handleRemoteState, onSessionClosed, resyncFromServer])
+  }, [activeSessionId, getToken, handleRemoteState, onSessionClosed, resyncFromServer])
 
   // 9. FAZ 3: Parent Listener for In-iframe Navigations (`pano:navigate`)
   useEffect(() => {

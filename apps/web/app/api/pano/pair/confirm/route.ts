@@ -3,6 +3,9 @@ import { pairPanoSession, recordFailedAttempt } from '@/lib/pano-pair/store'
 import { findDemoUser, createDemoJwt, DEMO_USERS } from '@services/auth/demoAuth'
 import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 // IP-based Rate Limiting (FAZ 5 Security)
 const ipRateLimits = new Map<string, { count: number; resetAt: number }>()
 
@@ -113,8 +116,14 @@ export async function POST(req: NextRequest) {
     })
   } catch (error: any) {
     console.error('[PanoPairConfirmAPI] Error:', error)
+    if (error?.code === 'store_unavailable' || error?.message?.includes('Veritabanı') || error?.message?.includes('MONGODB_')) {
+      return NextResponse.json(
+        { success: false, error: 'Veritabanı yapılandırılmamış (MongoDB bağlantısı kurulamadı)', code: 'store_unavailable' },
+        { status: 503 }
+      )
+    }
     return NextResponse.json(
-      { success: false, error: 'Sunucu hatası oluştu.' },
+      { success: false, error: 'Sunucu hatası oluştu.', code: 'server_error' },
       { status: 500 }
     )
   }

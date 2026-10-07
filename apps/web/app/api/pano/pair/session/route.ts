@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createPanoSession, getPanoSession } from '@/lib/pano-pair/store'
 import os from 'os'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 function getLanIp(): string {
   try {
     const interfaces = os.networkInterfaces()
@@ -47,26 +50,46 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (error: any) {
-    console.error('[PanoSessionAPI] Create error:', error)
-    return NextResponse.json({ success: false, error: 'Oturum oluşturulamadı' }, { status: 500 })
+    console.error('[PanoSessionAPI] Create error:', error?.message || error)
+    if (error?.code === 'store_unavailable' || error?.message?.includes('Veritabanı') || error?.message?.includes('MONGODB_')) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message || 'Veritabanı yapılandırılmamış (MongoDB bağlantısı kurulamadı)',
+          code: 'store_unavailable',
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ success: false, error: 'Oturum oluşturulamadı', code: 'server_error' }, { status: 500 })
   }
 }
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId')
   if (!sessionId) {
-    return NextResponse.json({ success: false, error: 'sessionId gereklidir' }, { status: 400 })
+    return NextResponse.json({ success: false, error: 'sessionId gereklidir', code: 'bad_request' }, { status: 400 })
   }
 
-  const session = await getPanoSession(sessionId)
-  if (!session) {
-    return NextResponse.json({ success: false, error: 'Oturum bulunamadı veya süresi doldu' }, { status: 404 })
-  }
+  try {
+    const session = await getPanoSession(sessionId)
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Oturum bulunamadı veya süresi doldu', code: 'session_not_found' }, { status: 404 })
+    }
 
-  return NextResponse.json({
-    success: true,
-    status: session.status,
-    expiresAt: session.expiresAt,
-    teacherData: session.teacherData || null,
-  })
+    return NextResponse.json({
+      success: true,
+      status: session.status,
+      expiresAt: session.expiresAt,
+      teacherData: session.teacherData || null,
+    })
+  } catch (error: any) {
+    if (error?.code === 'store_unavailable' || error?.message?.includes('Veritabanı') || error?.message?.includes('MONGODB_')) {
+      return NextResponse.json(
+        { success: false, error: 'Veritabanı yapılandırılmamış', code: 'store_unavailable' },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ success: false, error: 'Sunucu hatası', code: 'server_error' }, { status: 500 })
+  }
 }

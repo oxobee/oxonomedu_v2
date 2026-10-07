@@ -13,7 +13,8 @@ import {
   Wifi,
   Radio,
   Clock,
-  KeyRound
+  KeyRound,
+  AlertTriangle
 } from 'lucide-react'
 import screenfull from 'screenfull'
 import toast from 'react-hot-toast'
@@ -34,6 +35,7 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
   const [isPairedSuccess, setIsPairedSuccess] = useState<boolean>(false)
   const [pairedTeacher, setPairedTeacher] = useState<TeacherPairData | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [dbError, setDbError] = useState<string | null>(null)
 
   const sseRef = useRef<EventSource | null>(null)
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -83,9 +85,19 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
 
     try {
       const res = await fetch('/api/pano/pair/session', { method: 'POST' })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
+
+      if (res.status === 503 || data.code === 'store_unavailable') {
+        const errorMsg = data.error || 'Veritabanı yapılandırılmamış (MongoDB bağlantısı kurulamadı)'
+        setDbError(errorMsg)
+        toast.error(errorMsg)
+        setIsLoading(false)
+        setIsRefreshing(false)
+        return
+      }
 
       if (data.success && data.session) {
+        setDbError(null)
         const sess = data.session
         setSessionId(sess.sessionId)
         setPairingCode(sess.code)
@@ -106,13 +118,14 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
         setQrDataUrl(url)
 
         if (sess.boardDeviceToken && typeof window !== 'undefined') {
+          sessionStorage.setItem('oxonom_pano_device_token', sess.boardDeviceToken)
           localStorage.setItem('oxonom_pano_device_token', sess.boardDeviceToken)
         }
 
         // Start Realtime SSE listening
         startRealtimeListening(sess.sessionId, sess.boardDeviceToken)
       } else {
-        toast.error('Tahta oturumu oluşturulamadı.')
+        toast.error(data.error || 'Tahta oturumu oluşturulamadı.')
       }
     } catch (err) {
       console.error('[PanoStandby] Session creation error:', err)
@@ -356,7 +369,29 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
           <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-rose-500/20 to-transparent rounded-tl-[2rem] pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-rose-500/20 to-transparent rounded-br-[2rem] pointer-events-none" />
 
-          <div className="grid grid-cols-1 md:grid-cols-11 gap-8 items-center relative z-10">
+          {dbError ? (
+            <div className="flex flex-col items-center justify-center p-8 sm:p-10 text-center relative z-10 space-y-4 max-w-xl mx-auto">
+              <div className="w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center shadow-lg">
+                <AlertTriangle className="w-8 h-8 animate-pulse" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl sm:text-2xl font-black text-white">Veritabanı Yapılandırılmamış (503)</h3>
+                <p className="text-sm text-rose-300 font-semibold">{dbError}</p>
+                <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                  Akıllı tahta eşleşmesi ve telefon kumandasının ortak çalışabilmesi için MongoDB Atlas bağlantısı zorunludur. Vercel üzerinde <strong>MONGODB_URI</strong> ortam değişkeninin tanımlı ve Atlas Network Access (0.0.0.0/0) erişiminin açık olduğunu doğrulayın.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => initSession(false)}
+                className="mt-3 px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30 transition-all cursor-pointer active:scale-95 flex items-center gap-2"
+              >
+                <RotateCw className="w-4 h-4" />
+                <span>Yeniden Bağlanmayı Dene</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-11 gap-8 items-center relative z-10">
             {/* LEFT COLUMN: QR CODE (5 cols) */}
             <div className="md:col-span-5 flex flex-col items-center text-center">
               <div className="relative group">
@@ -468,6 +503,7 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
               </div>
             </div>
           </div>
+          )}
         </motion.div>
       </div>
 

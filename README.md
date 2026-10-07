@@ -282,6 +282,35 @@ LearnHouze_v2.0/
      git push origin main --force
      ```
 
+### 🌐 Vercel Üzerinde Pano OS ve Kumanda Dağıtım Kurulumu
+
+Vercel Serverless mimarisinde akıllı tahta (`/pano`) ve telefon kumandasının (`/dash/connect-board`) gerçek zamanlı senkronize çalışabilmesi için aşağıdaki adımlar uygulanmalıdır:
+
+1. **MongoDB Atlas IP Erişimi (Network Access):**
+   - Vercel Serverless Function IP adresleri dinamiktir ve sürekli değişir.
+   - MongoDB Atlas -> **Network Access** -> **IP Access List** -> `0.0.0.0/0` (*Allow Access from Anywhere*) eklenmelidir. Aksi takdirde Vercel serverless fonksiyonları veritabanına bağlanamaz.
+
+2. **Vercel Ortam Değişkeni (Environment Variables):**
+   - Vercel Dashboard -> Proje Ayarları -> **Environment Variables** bölümüne gidin:
+     - **Key:** `MONGODB_URI`
+     - **Value:** `mongodb+srv://<kullanici>:<sifre>@<cluster>.mongodb.net/eduboard?retryWrites=true&w=majority`
+     - **Environments:** Mutlaka hem **Production** hem **Preview** seçeneklerini işaretleyin.
+
+3. **Yeniden Dağıtım (Redeploy):**
+   - Vercel'de ortam değişkeni eklendikten veya değiştirildikten sonra çalışan serverless örneklerinin güncellenmesi için mutlaka **Redeploy** yapılmalıdır.
+
+4. **Canlı Sağlık ve Bağlantı Kontrolü (Diagnostic):**
+   - Dağıtım sonrası `https://<domain>/api/pano/health` adresini ziyaret ederek çıktıyı kontrol edin:
+     ```json
+     {
+       "mongoConfigured": true,
+       "mongoPing": true,
+       "redisConfigured": false,
+       "env": "vercel"
+     }
+     ```
+   - `mongoPing: true` göründüğünde Pano eşleşme ve kumanda sistemi tüm serverless örneklerinde kesintisiz senkronizasyon sağlar.
+
 ---
 
 ## 📄 Lisans

@@ -309,13 +309,16 @@ export default function ConnectBoardClient({
         setSessionId(confirmedSessionId)
         if (typeof window !== 'undefined') {
           if (confirmedSessionId) {
+            sessionStorage.setItem('oxonom_pano_active_session_id', confirmedSessionId)
             localStorage.setItem('oxonom_pano_active_session_id', confirmedSessionId)
           }
           if (phoneToken) {
+            sessionStorage.setItem('oxonom_pano_device_token', phoneToken)
             localStorage.setItem('oxonom_pano_device_token', phoneToken)
           }
-          localStorage.setItem('oxonom_pano_paired_session', JSON.stringify(teacherData))
+          sessionStorage.setItem('oxonom_pano_device_type', 'phone')
           localStorage.setItem('oxonom_pano_device_type', 'phone')
+          localStorage.setItem('oxonom_pano_paired_session', JSON.stringify(teacherData))
         }
         toast.success('Akıllı tahta başarıyla eşleştirildi! Pano açılıyor...')
         if (onSuccess) onSuccess()
