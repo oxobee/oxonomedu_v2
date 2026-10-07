@@ -1268,18 +1268,14 @@ const EduOSWindow = ({
   let targetPath = windowState.currentPath || app.path || `/dash`
   const separator = targetPath.includes('?') ? '&' : '?'
 
-  // Path routing rules:
-  // - already has /orgs/ → use as-is
-  // - /board*, /games*, /dash*, /library* → top-level routes, no prefix needed
-  // - everything else → prepend /orgs/<orgslug>
-  const isTopLevelRoute =
-    targetPath.startsWith('/orgs/') ||
+  // Only /board/* and /games* are top-level routes without /orgs/ prefix.
+  // Everything else (including /dash/*, /library*, /orgs/*) needs the org prefix.
+  const isAlreadyOrgPath = targetPath.startsWith('/orgs/')
+  const isTrulyTopLevel =
     targetPath.startsWith('/board') ||
-    targetPath.startsWith('/games') ||
-    targetPath.startsWith('/dash') ||
-    targetPath.startsWith('/library')
+    targetPath.startsWith('/games')
 
-  const fullAppUrl = isTopLevelRoute
+  const fullAppUrl = isAlreadyOrgPath || isTrulyTopLevel
     ? `${targetPath}${separator}chrome=none&pano=1`
     : `/orgs/${orgslug}${targetPath}${separator}chrome=none&pano=1`
 
@@ -1392,7 +1388,7 @@ const EduOSWindow = ({
             <RotateCw className="w-3.5 h-3.5" />
           </button>
           <a
-            href={targetPath.startsWith('/orgs/') ? targetPath : targetPath.startsWith('/board') || targetPath.startsWith('/games') ? targetPath : `/orgs/${orgslug}${targetPath}`}
+            href={targetPath.startsWith('/orgs/') || targetPath.startsWith('/board') || targetPath.startsWith('/games') ? targetPath : `/orgs/${orgslug}${targetPath}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-7 h-7 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
