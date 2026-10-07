@@ -323,7 +323,7 @@ export default function ConnectBoardClient({
         toast.success('Akıllı tahta başarıyla eşleştirildi! Pano açılıyor...')
         if (onSuccess) onSuccess()
         setTimeout(() => {
-          router.push(`/pano?session=${encodeURIComponent(confirmedSessionId || '')}&device=phone${phoneToken ? `&token=${encodeURIComponent(phoneToken)}` : ''}`)
+          router.push('/dash')
         }, 1200)
       } else {
         setErrorMessage(data.error || 'Eşleştirme başarısız oldu. Lütfen kodu kontrol edin.')
