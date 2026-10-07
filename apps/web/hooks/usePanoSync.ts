@@ -15,7 +15,6 @@ export type PanoAction =
   | { type: 'TOGGLE_MAXIMIZE'; windowId: string }
   | { type: 'RELOAD_WINDOW'; windowId: string }
   | { type: 'FOCUS_WINDOW'; windowId: string }
-  | { type: 'NAVIGATE'; windowId: string; path: string }
   | { type: 'OPEN_MODAL'; modalId: string; payload?: any }
   | { type: 'CLOSE_MODAL' }
   | { type: 'LOCK' }
@@ -144,10 +143,6 @@ export function usePanoSync({
         setActiveWindowId(action.windowId)
         break
       }
-      case 'NAVIGATE': {
-        setOpenWindows(prev => prev.map(w => w.app.id === action.windowId ? { ...w, currentPath: action.path } : w))
-        break
-      }
       case 'OPEN_MODAL': {
         setIsClassModalOpen(action.modalId === 'class_selection')
         setIsNewBoardModalOpen(action.modalId === 'new_board')
@@ -196,7 +191,6 @@ export function usePanoSync({
   const handleCloseWindow = useCallback((appId: string) => dispatch({ type: 'CLOSE_WINDOW', windowId: appId }), [dispatch])
   const handleToggleMaximizeWindow = useCallback((appId: string) => dispatch({ type: 'TOGGLE_MAXIMIZE', windowId: appId }), [dispatch])
   const handleReloadWindow = useCallback((appId: string) => dispatch({ type: 'RELOAD_WINDOW', windowId: appId }), [dispatch])
-  const handleNavigateWindow = useCallback((appId: string, path: string) => dispatch({ type: 'NAVIGATE', windowId: appId, path }), [dispatch])
 
   const lockPano = useCallback(() => {
     setIsLocked(true)
@@ -244,7 +238,6 @@ export function usePanoSync({
     handleCloseWindow,
     handleToggleMaximizeWindow,
     handleReloadWindow,
-    handleNavigateWindow,
     lockPano,
     unlockPano,
     handleToggleBoardLockFromPhone,

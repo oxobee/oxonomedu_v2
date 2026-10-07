@@ -1243,14 +1243,13 @@ const ClassSelectionModal = ({
   )
 }
 
-// Embedded EduOS Application Window (NO HEADER & NO FOOTER inside iframe, RED CLOSE ONLY)
+// Embedded EduOS Application Window (Fullscreen modal embedding the target page with chrome=none)
 const EduOSWindow = ({
   windowState,
   orgslug,
   onClose,
   onToggleMaximize,
   onReload,
-  onNavigate,
   onUserActivity
 }: {
   windowState: WindowState
@@ -1258,14 +1257,13 @@ const EduOSWindow = ({
   onClose: () => void
   onToggleMaximize: () => void
   onReload: () => void
-  onNavigate?: (newPath: string) => void
   onUserActivity?: () => void
 }) => {
   const [iframeLoaded, setIframeLoaded] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const app = windowState.app
 
-  let targetPath = windowState.currentPath || app.path || `/dash`
+  const targetPath = windowState.currentPath || app.path || `/dash`
   const separator = targetPath.includes('?') ? '&' : '?'
 
   // Only /board/* and /games* are top-level routes without /orgs/ prefix.
@@ -1281,68 +1279,25 @@ const EduOSWindow = ({
 
   const IconComponent = (Icons as any)[app.icon || 'Board'] || Icons.Board
 
-  const checkIframeNavigation = () => {
-    try {
-      const iframe = iframeRef.current
-      if (!iframe) return
-      const win = iframe.contentWindow
-      if (win && win.location) {
-        let path = win.location.pathname
-        const search = win.location.search
-        if (path) {
-          if (path.startsWith(`/orgs/${orgslug}`)) {
-            path = path.replace(`/orgs/${orgslug}`, '')
-          }
-          const cleanSearch = (search || '')
-            .replace(/[?&]chrome=none/g, '')
-            .replace(/[?&]pano=1/g, '')
-            .replace(/^&/, '?')
-          const finalPath = path + (cleanSearch.startsWith('?') ? cleanSearch : cleanSearch ? `?${cleanSearch}` : '')
-          if (finalPath && finalPath !== windowState.currentPath && finalPath !== app.path && onNavigate) {
-            onNavigate(finalPath)
-          }
-        }
-      }
-    } catch (_) {}
-  }
-
   const attachIframeActivityListeners = () => {
     try {
       const iframe = iframeRef.current
       if (!iframe) return
       const doc = iframe.contentDocument
       const win = iframe.contentWindow
-      if (doc && win) {
-        if (onUserActivity) {
-          const events = ['mousemove', 'mousedown', 'mouseup', 'pointermove', 'pointerdown', 'pointerup', 'touchstart', 'touchmove', 'touchend', 'keydown', 'scroll', 'click']
-          events.forEach(ev => {
-            doc.addEventListener(ev, onUserActivity, { capture: true, passive: true })
-            win.addEventListener(ev, onUserActivity, { capture: true, passive: true })
-          })
-        }
-        checkIframeNavigation()
+      if (doc && win && onUserActivity) {
+        const events = ['mousemove', 'mousedown', 'mouseup', 'pointermove', 'pointerdown', 'pointerup', 'touchstart', 'touchmove', 'touchend', 'keydown', 'scroll', 'click']
+        events.forEach(ev => {
+          doc.addEventListener(ev, onUserActivity, { capture: true, passive: true })
+          win.addEventListener(ev, onUserActivity, { capture: true, passive: true })
+        })
       }
     } catch (_) {}
   }
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      attachIframeActivityListeners()
-      checkIframeNavigation()
-    }, 1500)
     attachIframeActivityListeners()
-    return () => clearInterval(interval)
-  }, [onUserActivity, windowState.iframeKey, windowState.currentPath])
-
-  useEffect(() => {
-    const handleMessage = (e: MessageEvent) => {
-      if (e.data && e.data.type === 'LH_NAVIGATE' && e.data.path && onNavigate) {
-        onNavigate(e.data.path)
-      }
-    }
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [onNavigate])
+  }, [windowState.iframeKey])
 
   return (
     <motion.div
@@ -1665,7 +1620,6 @@ export default function PanoClient() {
     handleCloseWindow,
     handleToggleMaximizeWindow,
     handleReloadWindow,
-    handleNavigateWindow,
     lockPano,
     unlockPano,
     handleToggleBoardLockFromPhone,
@@ -2801,7 +2755,6 @@ export default function PanoClient() {
             onClose={() => handleCloseWindow(activeWindow.app.id)}
             onToggleMaximize={() => handleToggleMaximizeWindow(activeWindow.app.id)}
             onReload={() => handleReloadWindow(activeWindow.app.id)}
-            onNavigate={(newPath) => handleNavigateWindow(activeWindow.app.id, newPath)}
             onUserActivity={recordActivity}
           />
         )}
