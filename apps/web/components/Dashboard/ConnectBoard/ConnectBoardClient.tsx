@@ -320,10 +320,10 @@ export default function ConnectBoardClient({
           localStorage.setItem('oxonom_pano_device_type', 'phone')
           localStorage.setItem('oxonom_pano_paired_session', JSON.stringify(teacherData))
         }
-        toast.success('Akıllı tahta başarıyla eşleştirildi! Pano açılıyor...')
+        toast.success('Akıllı tahta başarıyla eşleştirildi! Uzaktan kumanda açılıyor...')
         if (onSuccess) onSuccess()
         setTimeout(() => {
-          router.push('/dash')
+          router.push(`/remote?session=${encodeURIComponent(confirmedSessionId)}&token=${encodeURIComponent(phoneToken)}`)
         }, 1200)
       } else {
         setErrorMessage(data.error || 'Eşleştirme başarısız oldu. Lütfen kodu kontrol edin.')

@@ -91,6 +91,7 @@ export type PanoSessionEvent =
   | { type: 'paired'; teacherData: TeacherPairData; session: PanoPairSession }
   | { type: 'state'; state: PanoSharedState }
   | { type: 'session_closed'; sessionId: string; reason?: string }
+  | { type: 'remote_action'; action: any }
 
 export type SessionListener = (event: PanoSessionEvent) => void
 

@@ -103,8 +103,12 @@ export function usePanoSync({
       }
       case 'OPEN_APP': {
         if (!selectedClass) {
-          toast.error('Lütfen önce bir sınıf seçiniz.')
-          return
+          const list = classrooms && classrooms.length > 0 ? classrooms : defaultClassrooms
+          const fallbackClass = list[0] || null
+          if (fallbackClass) {
+            setSelectedClass(fallbackClass)
+            if (typeof window !== 'undefined') localStorage.setItem('oxonom_pano_selected_class_id', String(fallbackClass.id))
+          }
         }
         setOpenWindows(prev => {
           const existingIdx = prev.findIndex(w => w.app.id === action.app.id)
@@ -181,12 +185,8 @@ export function usePanoSync({
   }, [])
 
   const openAppInWindow = useCallback((app: AppItem) => {
-    if (!selectedClass) {
-      toast.error('Lütfen önce bir sınıf seçiniz.')
-      return
-    }
     dispatch({ type: 'OPEN_APP', app })
-  }, [selectedClass, dispatch])
+  }, [dispatch])
 
   const handleCloseWindow = useCallback((appId: string) => dispatch({ type: 'CLOSE_WINDOW', windowId: appId }), [dispatch])
   const handleToggleMaximizeWindow = useCallback((appId: string) => dispatch({ type: 'TOGGLE_MAXIMIZE', windowId: appId }), [dispatch])

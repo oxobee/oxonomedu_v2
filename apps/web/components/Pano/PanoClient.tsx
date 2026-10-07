@@ -47,6 +47,8 @@ import toast from 'react-hot-toast'
 import PanoStandbyScreen from './PanoStandbyScreen'
 import { TeacherPairData } from '@/lib/pano-pair/store'
 import { usePanoSync, AppItem, WindowState, ClassroomItem, PanoAction } from '@/hooks/usePanoSync'
+import screenfull from 'screenfull'
+import { RemoteActionMessage } from '@/lib/remote/protocol'
 
 // Pixel-perfect SVG Icons matching EduOS design
 const Icons = {
@@ -2052,59 +2054,8 @@ export default function PanoClient() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Check active teacher session (paired via QR/OTP or directly logged in)
-  const hasActiveTeacher = !forceStandby && (!!pairedSession || (!!user && isTeacher))
-
-  // While checking local storage on initial mount, show clean dark splash
-  if (!isSessionHydrated) {
-    return (
-      <div className="fixed inset-0 w-screen h-screen bg-[#070304] flex items-center justify-center select-none">
-        <div className="w-10 h-10 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
-  // 1. Akıllı Tahta Bekleme Ekranı (Standby Screen):
-  // Eğer sistemde aktif bir öğretmen oturumu yoksa, Standby Ekranı gösterilir!
-  if (!hasActiveTeacher) {
-    return <PanoStandbyScreen onPaired={handlePaired} />
-  }
-
-  // User Guard: Only Teachers can access Pano (if logged in with non-teacher account and not paired)
-  if (!pairedSession && user && (isStudent || isAdmin)) {
-    return (
-      <div className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center p-6 bg-slate-950 text-white font-sans select-none">
-        <div className="max-w-md w-full p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl flex flex-col items-center text-center">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-4">
-            <Lock className="w-8 h-8" />
-          </div>
-          <h2 className="text-xl font-black text-white mb-2">Pano Modu Öğretmenlere Özeldir</h2>
-          <p className="text-xs text-slate-400 leading-relaxed mb-6">
-            Oxonom Edu Pano OS akıllı tahta ve sınıf etkileşimi için yalnızca öğretmen profillerine açıktır.
-            {isStudent ? ' Öğrenci hesabınızla panoya erişemezsiniz.' : ' İdare ve müdür hesapları yönetim panelini kullanmalıdır.'}
-          </p>
-          <Link
-            href="/dash"
-            className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all text-center"
-          >
-            Yönetim Paneline Dön
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  const effectiveUser = pairedSession || user
-  const displayName =
-    (effectiveUser?.first_name ? `${effectiveUser.first_name} ${effectiveUser.last_name || ''}`.trim() : '') ||
-    effectiveUser?.full_name ||
-    effectiveUser?.name ||
-    selectedClass?.teacherName ||
-    effectiveUser?.username ||
-    'Öğretmen'
-
   // The 5 Apps requested in exact order: Akıllı Tahta - Ödevler - Modüller - Kaynaklar - Oyunlar
-  const apps: AppItem[] = [
+  const apps: AppItem[] = useMemo(() => [
     {
       id: 'board',
       type: 'app',
@@ -2154,7 +2105,287 @@ export default function PanoClient() {
       badge: 'Atölye',
       path: `/games`
     }
-  ]
+  ], [selectedClass])
+
+  // Check active teacher session (paired via QR/OTP or directly logged in)
+  const hasActiveTeacher = !forceStandby && (!!pairedSession || (!!user && isTeacher))
+  const [isPhoneConnected, setIsPhoneConnected] = useState(false)
+
+  // Handle incoming remote commands from paired mobile phone
+  const handleRemoteAction = useCallback((msg: RemoteActionMessage) => {
+    const { action, payload } = msg
+    recordActivity()
+
+    switch (action) {
+      case 'HOME': {
+        if (activeWindowId) {
+          handleCloseWindow(activeWindowId)
+        }
+        setIsClassModalOpen(false)
+        setIsNewBoardModalOpen(false)
+        setIsSettingsOpen(false)
+        toast('Ana Ekrana Dönüldü', { icon: '🏠' })
+        break
+      }
+      case 'BACK':
+      case 'CLOSE_WINDOW': {
+        if (activeWindowId) {
+          handleCloseWindow(activeWindowId)
+          toast('Pencere Kapatıldı', { icon: '◀️' })
+        } else if (isClassModalOpen) {
+          setIsClassModalOpen(false)
+        } else if (isNewBoardModalOpen) {
+          setIsNewBoardModalOpen(false)
+        } else if (isSettingsOpen) {
+          setIsSettingsOpen(false)
+        }
+        break
+      }
+      case 'RELOAD_WINDOW': {
+        if (activeWindowId) {
+          handleReloadWindow(activeWindowId)
+          toast('Pencere Yenilendi', { icon: '🔄' })
+        }
+        break
+      }
+      case 'FULLSCREEN': {
+        if (screenfull.isEnabled && !screenfull.isFullscreen) {
+          screenfull.request().catch(() => {})
+          toast('Tam Ekran Moduna Geçildi', { icon: '⛶' })
+        }
+        break
+      }
+      case 'EXIT_FULLSCREEN': {
+        if (screenfull.isEnabled && screenfull.isFullscreen) {
+          screenfull.exit().catch(() => {})
+          toast('Tam Ekrandan Çıkıldı', { icon: '🗗' })
+        }
+        break
+      }
+      case 'LOCK': {
+        lockPano()
+        toast('Tahta Kilitlendi', { icon: '🔒' })
+        break
+      }
+      case 'UNLOCK': {
+        unlockPano()
+        toast('Tahta Kilidi Açıldı', { icon: '🔓' })
+        break
+      }
+      case 'SELECT_CLASS': {
+        if (payload?.classId) {
+          const cls = classrooms.find(c => c.id === payload.classId) || DEFAULT_CLASSROOMS.find(c => c.id === payload.classId)
+          if (cls) {
+            handleSelectClass(cls)
+            toast.success(`${cls.name} sınıfı seçildi`)
+          }
+        } else {
+          setIsClassModalOpen(true)
+        }
+        break
+      }
+      case 'OPEN_WHITEBOARD': {
+        const defaultCls = selectedClass || classrooms[0] || DEFAULT_CLASSROOMS[0]
+        if (!selectedClass && defaultCls) {
+          handleSelectClass(defaultCls)
+        }
+        const boardApp = apps.find(a => a.id === 'board')
+        if (boardApp) {
+          openAppInWindow(boardApp)
+          toast.success('Akıllı Tahta Açıldı', { icon: '📋' })
+        }
+        break
+      }
+      case 'OPEN_ATTENDANCE': {
+        setIsClassModalOpen(true)
+        toast('Yoklama / Sınıf Seçimi', { icon: '👥' })
+        break
+      }
+      case 'OPEN_ASSIGNMENTS': {
+        const defaultCls = selectedClass || classrooms[0] || DEFAULT_CLASSROOMS[0]
+        if (!selectedClass && defaultCls) {
+          handleSelectClass(defaultCls)
+        }
+        const hwApp = apps.find(a => a.id === 'homework')
+        if (hwApp) {
+          openAppInWindow(hwApp)
+          toast.success('Ev Ödevleri Açıldı', { icon: '📝' })
+        }
+        break
+      }
+      case 'OPEN_PLAYGROUNDS': {
+        const defaultCls = selectedClass || classrooms[0] || DEFAULT_CLASSROOMS[0]
+        if (!selectedClass && defaultCls) {
+          handleSelectClass(defaultCls)
+        }
+        const pgApp = apps.find(a => a.id === 'playgrounds')
+        if (pgApp) {
+          openAppInWindow(pgApp)
+          toast.success('İnteraktif Modüller Açıldı', { icon: '✨' })
+        }
+        break
+      }
+      case 'OPEN_GAMES': {
+        const gamesApp = apps.find(a => a.id === 'games')
+        if (gamesApp) {
+          openAppInWindow(gamesApp)
+          toast.success('Eğitici Oyunlar Açıldı', { icon: '🎮' })
+        }
+        break
+      }
+      case 'OPEN_LIBRARY': {
+        const libApp = apps.find(a => a.id === 'library')
+        if (libApp) {
+          openAppInWindow(libApp)
+          toast.success('Kaynaklar Açıldı', { icon: '📚' })
+        }
+        break
+      }
+      case 'NEXT_PAGE':
+      case 'PREVIOUS_PAGE':
+      case 'PEN':
+      case 'ERASER':
+      case 'UNDO':
+      case 'REDO':
+      case 'ZOOM_IN':
+      case 'ZOOM_OUT': {
+        try {
+          const iframe = document.querySelector('iframe') as HTMLIFrameElement | null
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+              type: 'OXONOM_REMOTE_ACTION',
+              action,
+              payload,
+            }, '*')
+            if (action === 'NEXT_PAGE') {
+              iframe.contentWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', keyCode: 39, bubbles: true }))
+            } else if (action === 'PREVIOUS_PAGE') {
+              iframe.contentWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', keyCode: 37, bubbles: true }))
+            }
+          }
+        } catch (_) {}
+        window.dispatchEvent(new CustomEvent('oxonom_remote_action', { detail: { action, payload } }))
+        break
+      }
+    }
+  }, [
+    activeWindowId,
+    handleCloseWindow,
+    handleReloadWindow,
+    isClassModalOpen,
+    isNewBoardModalOpen,
+    isSettingsOpen,
+    lockPano,
+    unlockPano,
+    classrooms,
+    selectedClass,
+    handleSelectClass,
+    apps,
+    openAppInWindow,
+  ])
+
+  // Smart Board Realtime SSE Connection for Remote Phone Commands
+  useEffect(() => {
+    if (!activeSessionId || !hasActiveTeacher) return
+
+    let sse: EventSource | null = null
+    let isCancelled = false
+
+    const connectSSE = () => {
+      try {
+        const tok = typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_device_token') || '' : ''
+        const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}${tok ? `&token=${encodeURIComponent(tok)}` : ''}`
+        sse = new EventSource(sseUrl)
+
+        sse.onopen = () => {
+          if (!isCancelled) {
+            setIsPhoneConnected(true)
+          }
+        }
+
+        sse.addEventListener('remote_action', (event: MessageEvent) => {
+          if (isCancelled) return
+          try {
+            const actionMsg: RemoteActionMessage = JSON.parse(event.data)
+            handleRemoteAction(actionMsg)
+          } catch (err) {
+            console.error('[PanoClient] Failed to parse remote_action:', err)
+          }
+        })
+
+        sse.addEventListener('session_closed', () => {
+          if (isCancelled) return
+          setIsPhoneConnected(false)
+          handleRemoteSessionClosed()
+        })
+
+        sse.onerror = () => {
+          // SSE automatically reconnects in browser
+        }
+      } catch (err) {
+        console.warn('[PanoClient] SSE initialization error:', err)
+      }
+    }
+
+    connectSSE()
+
+    return () => {
+      isCancelled = true
+      if (sse) {
+        sse.close()
+      }
+    }
+  }, [activeSessionId, hasActiveTeacher, handleRemoteAction, handleRemoteSessionClosed])
+
+  // While checking local storage on initial mount, show clean dark splash
+  if (!isSessionHydrated) {
+    return (
+      <div className="fixed inset-0 w-screen h-screen bg-[#070304] flex items-center justify-center select-none">
+        <div className="w-10 h-10 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  // 1. Akıllı Tahta Bekleme Ekranı (Standby Screen):
+  // Eğer sistemde aktif bir öğretmen oturumu yoksa, Standby Ekranı gösterilir!
+  if (!hasActiveTeacher) {
+    return <PanoStandbyScreen onPaired={handlePaired} />
+  }
+
+  // User Guard: Only Teachers can access Pano (if logged in with non-teacher account and not paired)
+  if (!pairedSession && user && (isStudent || isAdmin)) {
+    return (
+      <div className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center p-6 bg-slate-950 text-white font-sans select-none">
+        <div className="max-w-md w-full p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl flex flex-col items-center text-center">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-4">
+            <Lock className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-black text-white mb-2">Pano Modu Öğretmenlere Özeldir</h2>
+          <p className="text-xs text-slate-400 leading-relaxed mb-6">
+            Oxonom Edu Pano OS akıllı tahta ve sınıf etkileşimi için yalnızca öğretmen profillerine açıktır.
+            {isStudent ? ' Öğrenci hesabınızla panoya erişemezsiniz.' : ' İdare ve müdür hesapları yönetim panelini kullanmalıdır.'}
+          </p>
+          <Link
+            href="/dash"
+            className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all text-center"
+          >
+            Yönetim Paneline Dön
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  const effectiveUser = pairedSession || user
+  const displayName =
+    (effectiveUser?.first_name ? `${effectiveUser.first_name} ${effectiveUser.last_name || ''}`.trim() : '') ||
+    effectiveUser?.full_name ||
+    effectiveUser?.name ||
+    selectedClass?.teacherName ||
+    effectiveUser?.username ||
+    'Öğretmen'
+
+  // apps is already memoized above and ready for rendering and remote control
 
 
   return (
@@ -2222,39 +2453,29 @@ export default function PanoClient() {
 
         {/* Right: Connection Status, Settings, Lock, Profile */}
         <div className="flex items-center gap-2.5 relative" ref={popupRef}>
-          {/* Realtime Connection Status Pill */}
+          {/* Realtime Phone Remote Connection Status Pill */}
           {activeSessionId && (
             <div
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide border shadow-xs transition-colors select-none ${
-                connectionStatus === 'connected'
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60'
-                  : connectionStatus === 'connecting'
-                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60'
-                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-800/60'
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide border shadow-xs transition-all select-none ${
+                isPhoneConnected
+                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 ring-1 ring-emerald-500/20'
+                  : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 border-slate-300/80 dark:border-slate-700/60'
               }`}
               title={
-                connectionStatus === 'connected'
-                  ? 'Gerçek zamanlı senkronizasyon aktif'
-                  : connectionStatus === 'connecting'
-                  ? 'Bağlantı kuruluyor...'
-                  : 'Bağlantı koptu, yeniden deneniyor'
+                isPhoneConnected
+                  ? 'Mobil uzaktan kumanda bağlı ve senkronize'
+                  : 'Akıllı tahta oturumu aktif - Kumanda bağlanabilir'
               }
             >
               <span
                 className={`w-2 h-2 rounded-full shrink-0 ${
-                  connectionStatus === 'connected'
-                    ? 'bg-emerald-500'
-                    : connectionStatus === 'connecting'
-                    ? 'bg-amber-500 animate-ping'
-                    : 'bg-rose-500 animate-pulse'
+                  isPhoneConnected
+                    ? 'bg-emerald-500 animate-pulse'
+                    : 'bg-slate-400 dark:bg-slate-500'
                 }`}
               />
               <span className="hidden sm:inline">
-                {connectionStatus === 'connected'
-                  ? (isPhone ? 'Tahtaya Bağlı' : 'Kumanda Bağlı')
-                  : connectionStatus === 'connecting'
-                  ? 'Bağlanıyor'
-                  : 'Koptu'}
+                {isPhoneConnected ? '📱 Telefon Bağlı' : '📱 Kumanda Bekleniyor'}
               </span>
             </div>
           )}

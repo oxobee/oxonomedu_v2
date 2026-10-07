@@ -131,6 +131,10 @@ export async function GET(req: NextRequest) {
                 )
               )
             }
+          } else if (event.type === 'remote_action' && event.action) {
+            controller.enqueue(
+              encoder.encode(`event: remote_action\ndata: ${JSON.stringify(event.action)}\n\n`)
+            )
           } else if (event.type === 'session_closed') {
             controller.enqueue(
               encoder.encode(`event: session_closed\ndata: ${JSON.stringify({ closed: true, reason: event.reason })}\n\n`)
