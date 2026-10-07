@@ -319,6 +319,12 @@ async function proxyRequest(
   if (isLoginPath && lookupUser) {
     const demoUser = findDemoUser(lookupUser)
     if (demoUser) {
+      if (demoUser.password && (!password || password !== demoUser.password)) {
+        return NextResponse.json(
+          { detail: { code: 'INVALID_CREDENTIALS', message: 'Giriş yapılamadı. Bilgilerinizi kontrol ediniz.' } },
+          { status: 401 }
+        )
+      }
       const token = createDemoJwt(demoUser)
       const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000
       const responseData = {
@@ -331,7 +337,9 @@ async function proxyRequest(
           last_name: demoUser.last_name,
           email_verified: true,
           is_superadmin: demoUser.is_superadmin,
-          is_demo: true,
+          is_demo: demoUser.is_demo ?? false,
+          role: demoUser.role?.name || (demoUser.role?.id === 3 ? 'Teacher' : 'Student'),
+          plan: demoUser.plan || (demoUser.role?.id === 3 ? 'premium' : 'student'),
         },
         tokens: {
           access_token: token,
@@ -382,6 +390,12 @@ async function proxyRequest(
     if (pathSegments === 'login') {
       const demoUser = findDemoUser(username)
       if (demoUser) {
+        if (demoUser.password && (!password || password !== demoUser.password)) {
+          return NextResponse.json(
+            { detail: { code: 'INVALID_CREDENTIALS', message: 'Giriş yapılamadı. Bilgilerinizi kontrol ediniz.' } },
+            { status: 401 }
+          )
+        }
         const token = createDemoJwt(demoUser)
         const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000
         const responseData = {
@@ -394,7 +408,9 @@ async function proxyRequest(
             last_name: demoUser.last_name,
             email_verified: true,
             is_superadmin: demoUser.is_superadmin,
-            is_demo: true,
+            is_demo: demoUser.is_demo ?? false,
+            role: demoUser.role?.name || (demoUser.role?.id === 3 ? 'Teacher' : 'Student'),
+            plan: demoUser.plan || (demoUser.role?.id === 3 ? 'premium' : 'student'),
           },
           tokens: {
             access_token: token,

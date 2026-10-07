@@ -171,6 +171,7 @@ export const TEACHER_RAW_LIST: { grade: string; orgId: number; teachers: { class
     grade: '8. Sınıf',
     orgId: 20,
     teachers: [
+      { className: '8-A', name: 'Canan KAYA' },
       { className: '8-A', name: 'Gülümser ERMEZ' },
       { className: '8-B', name: 'Berna SERBEST' },
       { className: '8-C', name: 'İbrahim Halil EKİNCİ' },

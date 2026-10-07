@@ -5,12 +5,14 @@ export interface DemoUser {
   user_uuid: string
   username: string
   email: string
+  password?: string
   first_name: string
   last_name: string
   email_verified: boolean
   is_superadmin: boolean
   is_demo: boolean
   avatar_image: string
+  plan?: string
   role: {
     id: number
     role_uuid: string
@@ -194,6 +196,132 @@ export const DEMO_USERS: Record<string, DemoUser> = {
       },
     },
   },
+  'kullaniciogretmen@oxonom.com': {
+    id: 101,
+    user_uuid: 'user_6ac64477ddbcafe83ec75c5d',
+    username: 'kullanici_ogretmen',
+    email: 'kullaniciogretmen@oxonom.com',
+    password: 'Ugur2803*',
+    first_name: 'Canan',
+    last_name: 'Kaya',
+    email_verified: true,
+    is_superadmin: false,
+    is_demo: false,
+    avatar_image: '',
+    plan: 'premium',
+    role: {
+      id: 3,
+      role_uuid: 'role_teacher',
+      name: 'Teacher',
+      rights: {
+        courses: { action_create: true, action_read: true, action_read_own: true, action_update: true, action_update_own: true, action_delete: true, action_delete_own: true },
+        users: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        usergroups: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        folders: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        media: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        organizations: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        coursechapters: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        activities: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        roles: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        dashboard: { action_access: true },
+        boards: { action_create: true, action_read: true, action_update: true, action_delete: true },
+      },
+    },
+  },
+  'kullanici_ogretmen': {
+    id: 101,
+    user_uuid: 'user_6ac64477ddbcafe83ec75c5d',
+    username: 'kullanici_ogretmen',
+    email: 'kullaniciogretmen@oxonom.com',
+    password: 'Ugur2803*',
+    first_name: 'Canan',
+    last_name: 'Kaya',
+    email_verified: true,
+    is_superadmin: false,
+    is_demo: false,
+    avatar_image: '',
+    plan: 'premium',
+    role: {
+      id: 3,
+      role_uuid: 'role_teacher',
+      name: 'Teacher',
+      rights: {
+        courses: { action_create: true, action_read: true, action_read_own: true, action_update: true, action_update_own: true, action_delete: true, action_delete_own: true },
+        users: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        usergroups: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        folders: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        media: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        organizations: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        coursechapters: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        activities: { action_create: true, action_read: true, action_update: true, action_delete: true },
+        roles: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        dashboard: { action_access: true },
+        boards: { action_create: true, action_read: true, action_update: true, action_delete: true },
+      },
+    },
+  },
+  'kullaniciogrenci@oxonom.com': {
+    id: 102,
+    user_uuid: 'user_6ac64477ddbcafe83ec75c5e',
+    username: 'kullanici_ogrenci',
+    email: 'kullaniciogrenci@oxonom.com',
+    password: 'Ugur2803*',
+    first_name: 'Kerem',
+    last_name: 'Yılmaz',
+    email_verified: true,
+    is_superadmin: false,
+    is_demo: false,
+    avatar_image: '',
+    plan: 'student',
+    role: {
+      id: 4,
+      role_uuid: 'role_student',
+      name: 'Student',
+      rights: {
+        courses: { action_create: false, action_read: true, action_read_own: false, action_update: false, action_update_own: false, action_delete: false, action_delete_own: false },
+        users: { action_create: false, action_read: false, action_update: false, action_delete: false },
+        usergroups: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        folders: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        media: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        organizations: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        coursechapters: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        activities: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        roles: { action_create: false, action_read: false, action_update: false, action_delete: false },
+        dashboard: { action_access: true },
+      },
+    },
+  },
+  'kullanici_ogrenci': {
+    id: 102,
+    user_uuid: 'user_6ac64477ddbcafe83ec75c5e',
+    username: 'kullanici_ogrenci',
+    email: 'kullaniciogrenci@oxonom.com',
+    password: 'Ugur2803*',
+    first_name: 'Kerem',
+    last_name: 'Yılmaz',
+    email_verified: true,
+    is_superadmin: false,
+    is_demo: false,
+    avatar_image: '',
+    plan: 'student',
+    role: {
+      id: 4,
+      role_uuid: 'role_student',
+      name: 'Student',
+      rights: {
+        courses: { action_create: false, action_read: true, action_read_own: false, action_update: false, action_update_own: false, action_delete: false, action_delete_own: false },
+        users: { action_create: false, action_read: false, action_update: false, action_delete: false },
+        usergroups: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        folders: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        media: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        organizations: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        coursechapters: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        activities: { action_create: false, action_read: true, action_update: false, action_delete: false },
+        roles: { action_create: false, action_read: false, action_update: false, action_delete: false },
+        dashboard: { action_access: true },
+      },
+    },
+  },
 }
 
 export function createDemoJwt(user: DemoUser): string {
@@ -261,6 +389,8 @@ export function findDemoUser(identifier: string): DemoUser | null {
 }
 
 export function getDemoSession(demoUser: DemoUser) {
+  const isDemo = demoUser.is_demo ?? false
+  const userPlan = demoUser.plan || (demoUser.role.id === 3 ? 'premium' : 'student')
   const neclaGorerOrg = {
     ...DEFAULT_FALLBACK_ORG,
     id: 10,
@@ -268,7 +398,14 @@ export function getDemoSession(demoUser: DemoUser) {
     name: 'Necla Görer İlkokulu',
     slug: 'neclagorer',
     description: '1, 2, 3 ve 4. Sınıflar — MEB Temel Eğitim & Akıllı İlkokul Portalı',
-    is_demo: true,
+    is_demo: isDemo,
+    config: {
+      ...DEFAULT_FALLBACK_ORG.config,
+      config: {
+        ...DEFAULT_FALLBACK_ORG.config.config,
+        plan: userPlan === 'premium' ? 'premium' : 'pro',
+      },
+    },
   }
   const fevziKutluOrg = {
     ...DEFAULT_FALLBACK_ORG,
@@ -277,12 +414,26 @@ export function getDemoSession(demoUser: DemoUser) {
     name: 'Şair Fevzi Kutlu Kalkancı Ortaokulu',
     slug: 'fevzikalkanci',
     description: '5, 6, 7 ve 8. Sınıflar — LGS Hazırlık & Akıllı Ortaokul Portalı',
-    is_demo: true,
+    is_demo: isDemo,
+    config: {
+      ...DEFAULT_FALLBACK_ORG.config,
+      config: {
+        ...DEFAULT_FALLBACK_ORG.config.config,
+        plan: userPlan === 'premium' ? 'premium' : 'pro',
+      },
+    },
   }
   const defaultOrg = {
     ...DEFAULT_FALLBACK_ORG,
     id: 1,
-    is_demo: true,
+    is_demo: isDemo,
+    config: {
+      ...DEFAULT_FALLBACK_ORG.config,
+      config: {
+        ...DEFAULT_FALLBACK_ORG.config.config,
+        plan: userPlan === 'premium' ? 'premium' : 'pro',
+      },
+    },
   }
   return {
     user: {
@@ -295,7 +446,8 @@ export function getDemoSession(demoUser: DemoUser) {
       email_verified: demoUser.email_verified,
       is_superadmin: demoUser.is_superadmin,
       avatar_image: demoUser.avatar_image,
-      is_demo: true,
+      is_demo: isDemo,
+      plan: userPlan,
     },
     roles: [
       {
