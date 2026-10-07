@@ -1267,11 +1267,21 @@ const EduOSWindow = ({
 
   let targetPath = windowState.currentPath || app.path || `/dash`
   const separator = targetPath.includes('?') ? '&' : '?'
-  const fullAppUrl = targetPath.startsWith('/orgs/')
+
+  // Path routing rules:
+  // - already has /orgs/ → use as-is
+  // - /board*, /games*, /dash*, /library* → top-level routes, no prefix needed
+  // - everything else → prepend /orgs/<orgslug>
+  const isTopLevelRoute =
+    targetPath.startsWith('/orgs/') ||
+    targetPath.startsWith('/board') ||
+    targetPath.startsWith('/games') ||
+    targetPath.startsWith('/dash') ||
+    targetPath.startsWith('/library')
+
+  const fullAppUrl = isTopLevelRoute
     ? `${targetPath}${separator}chrome=none&pano=1`
-    : targetPath.startsWith('/board') || targetPath.startsWith('/games')
-      ? `${targetPath}${separator}chrome=none&pano=1`
-      : `/orgs/${orgslug}${targetPath}${separator}chrome=none&pano=1`
+    : `/orgs/${orgslug}${targetPath}${separator}chrome=none&pano=1`
 
   const IconComponent = (Icons as any)[app.icon || 'Board'] || Icons.Board
 
