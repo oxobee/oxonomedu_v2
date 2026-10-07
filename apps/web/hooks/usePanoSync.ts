@@ -42,6 +42,8 @@ export interface UsePanoSyncOptions {
   classrooms: ClassroomItem[]
   defaultClassrooms?: ClassroomItem[]
   onSessionClosed?: () => void
+  /** Called with the server-side (single source of truth) class list for this session */
+  onClassrooms?: (classrooms: ClassroomItem[]) => void
 }
 
 export function usePanoSync({
@@ -49,6 +51,7 @@ export function usePanoSync({
   classrooms,
   defaultClassrooms = [],
   onSessionClosed,
+  onClassrooms,
 }: UsePanoSyncOptions) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -66,20 +69,23 @@ export function usePanoSync({
     return id
   })
 
-  const [deviceToken] = useState<string>(() => {
+  // FIX: the token used to be read once at mount and could be a random value that never matched the
+  // server-issued boardDeviceToken (written later by the Standby screen) -> 401 on every request.
+  // Now: state + always read fresh from localStorage right before each request. Never invent a token.
+  const readStoredToken = () =>
+    typeof window === 'undefined' ? '' : localStorage.getItem('oxonom_pano_device_token') || ''
+
+  const [deviceToken, setDeviceToken] = useState<string>(() => {
     if (typeof window === 'undefined') return ''
     const qToken = searchParams?.get('token')
     if (qToken) {
       localStorage.setItem('oxonom_pano_device_token', qToken)
       return qToken
     }
-    let tok = localStorage.getItem('oxonom_pano_device_token')
-    if (!tok) {
-      tok = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tok_${Math.random().toString(36).substring(2)}`
-      localStorage.setItem('oxonom_pano_device_token', tok)
-    }
-    return tok
+    return readStoredToken()
   })
+
+  const getToken = useCallback(() => readStoredToken() || deviceToken, [deviceToken])
 
   // 2. Device Role (Phone vs Board): Strictly based on ?device=phone|board or pairing role (NO innerWidth guessing)
   const isPhone = useMemo(() => {
@@ -119,6 +125,24 @@ export function usePanoSync({
     const list = classrooms && classrooms.length > 0 ? classrooms : defaultClassrooms
     return list.find(c => c.id === classId) || defaultClassrooms.find(c => c.id === classId) || null
   }, [classrooms, defaultClassrooms])
+
+  // Server is the source of truth: pull full state (+ class list) and force-apply it (used for rollback / reconnect)
+  const applyRemoteRef = useRef<(st: PanoSharedState, force?: boolean) => void>(() => {})
+  const onClassroomsRef = useRef(onClassrooms)
+  onClassroomsRef.current = onClassrooms
+
+  const resyncFromServer = useCallback(async () => {
+    if (!activeSessionId) return
+    try {
+      const res = await fetch(
+        `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}`
+      )
+      if (!res.ok) return
+      const data = await res.json()
+      if (Array.isArray(data.classrooms) && data.classrooms.length > 0) onClassroomsRef.current?.(data.classrooms)
+      if (data.state) applyRemoteRef.current(data.state, true)
+    } catch (_) {}
+  }, [activeSessionId, getToken])
 
   // 6. Action-based Dispatch with Optimistic Local Update & Atomic Monotonic Sync
   const dispatch = useCallback(async (action: PanoAction) => {
@@ -214,33 +238,49 @@ export function usePanoSync({
       }
     }
 
-    // Network transmission to server
-    try {
-      const res = await fetch('/api/pano/pair/state', {
+    // Network transmission to server (FIX: errors are no longer swallowed)
+    const outAction: PanoAction =
+      action.type === 'SELECT_CLASS' && action.classId !== null
+        ? { ...action, class: action.class ?? findClassroom(action.classId) }
+        : action
+
+    const send = async (token: string) =>
+      fetch('/api/pano/pair/state', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-device-token': deviceToken,
-        },
+        headers: { 'Content-Type': 'application/json', 'x-device-token': token },
         body: JSON.stringify({
           sessionId: activeSessionId,
           deviceId,
-          deviceToken,
+          deviceToken: token,
           deviceType: isPhone ? 'phone' : 'board',
-          action,
+          action: outAction,
         }),
       })
 
+    try {
+      let res = await send(getToken())
+      if (res.status === 401) {
+        // Token may have just been rewritten by the standby/pairing flow: re-read once and retry
+        res = await send(readStoredToken())
+      }
       if (res.ok) {
         const data = await res.json()
         if (data.state?.version) {
           lastAppliedVersionRef.current = Math.max(lastAppliedVersionRef.current, data.state.version)
         }
+      } else if (res.status === 403 || res.status === 410) {
+        if (onSessionClosed) onSessionClosed()
+      } else {
+        console.warn('[usePanoSync] Dispatch rejected:', res.status, action.type)
+        toast.error('Tahtaya iletilemedi, yeniden senkronize ediliyor...')
+        resyncFromServer()
       }
     } catch (err) {
       console.warn('[usePanoSync] Dispatch network error:', err)
+      toast.error('Bağlantı hatası: işlem tahtaya iletilemedi.')
+      resyncFromServer()
     }
-  }, [activeSessionId, deviceId, deviceToken, isPhone, selectedClass, findClassroom])
+  }, [activeSessionId, deviceId, getToken, isPhone, selectedClass, findClassroom, onSessionClosed])
 
   // 7. Apply Authoritative Remote State
   const handleRemoteState = useCallback((remoteState: PanoSharedState) => {
@@ -305,33 +345,39 @@ export function usePanoSync({
       console.error('[usePanoSync] Remote state application error:', err)
     }
   }, [deviceId, findClassroom])
+  applyRemoteRef.current = handleRemoteState
 
-  // 8. Realtime SSE Connection + Graceful Disconnect Fallback (30s Polling only when disconnected)
+  // 8. Realtime SSE with auto-reconnect (exponential backoff) + fast fallback polling.
+  // FIX: EventSource never reconnects after a non-200 (e.g. 401), so we reconnect manually.
   useEffect(() => {
     if (!activeSessionId) return
 
     let sse: EventSource | null = null
-    let fallbackPollTimer: NodeJS.Timeout | null = null
+    let fallbackPollTimer: ReturnType<typeof setInterval> | null = null
+    let retryTimer: ReturnType<typeof setTimeout> | null = null
+    let retryDelay = 1000
+    let disposed = false
+
+    const poll = async () => {
+      if (sseConnectedRef.current) return
+      try {
+        const res = await fetch(
+          `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}`
+        )
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data.classrooms) && data.classrooms.length > 0) onClassroomsRef.current?.(data.classrooms)
+          if (data.state) handleRemoteState(data.state)
+        } else if (res.status === 403 || res.status === 410) {
+          if (onSessionClosed) onSessionClosed()
+        }
+      } catch (_) {}
+    }
 
     const startFallbackPolling = () => {
       if (fallbackPollTimer) return
-      // FAZ 4: Polling only activates when SSE is broken, with 30s interval
-      fallbackPollTimer = setInterval(async () => {
-        if (sseConnectedRef.current) return
-        try {
-          const res = await fetch(
-            `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(deviceToken)}`
-          )
-          if (res.ok) {
-            const data = await res.json()
-            if (data.state) handleRemoteState(data.state)
-          } else if (res.status === 403 || res.status === 410) {
-            if (onSessionClosed) onSessionClosed()
-          }
-        } catch (_) {}
-      }, 30000)
+      fallbackPollTimer = setInterval(poll, 3000) // was 30s
     }
-
     const stopFallbackPolling = () => {
       if (fallbackPollTimer) {
         clearInterval(fallbackPollTimer)
@@ -339,45 +385,60 @@ export function usePanoSync({
       }
     }
 
-    try {
-      const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(deviceToken)}&lastVersion=${lastAppliedVersionRef.current}`
-      sse = new EventSource(sseUrl)
+    const connect = () => {
+      if (disposed) return
+      try {
+        const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}&lastVersion=${lastAppliedVersionRef.current}`
+        sse = new EventSource(sseUrl)
 
-      sse.onopen = () => {
-        sseConnectedRef.current = true
-        stopFallbackPolling()
-      }
-
-      sse.addEventListener('state', (e: MessageEvent) => {
-        try {
+        sse.onopen = () => {
           sseConnectedRef.current = true
+          retryDelay = 1000
           stopFallbackPolling()
-          const data: PanoSharedState = JSON.parse(e.data)
-          handleRemoteState(data)
-        } catch (err) {
-          console.error('[usePanoSync] SSE parse state error:', err)
         }
-      })
 
-      sse.addEventListener('session_closed', () => {
-        if (onSessionClosed) onSessionClosed()
-      })
+        sse.addEventListener('state', (e: MessageEvent) => {
+          try {
+            sseConnectedRef.current = true
+            stopFallbackPolling()
+            handleRemoteState(JSON.parse(e.data) as PanoSharedState)
+          } catch (err) {
+            console.error('[usePanoSync] SSE parse state error:', err)
+          }
+        })
 
-      sse.onerror = () => {
-        sseConnectedRef.current = false
+        sse.addEventListener('session_closed', () => {
+          disposed = true
+          if (onSessionClosed) onSessionClosed()
+        })
+
+        sse.onerror = () => {
+          sseConnectedRef.current = false
+          startFallbackPolling()
+          if (sse && sse.readyState === EventSource.CLOSED && !disposed) {
+            sse.close()
+            retryTimer = setTimeout(connect, retryDelay)
+            retryDelay = Math.min(retryDelay * 2, 15000)
+          }
+        }
+      } catch (err) {
+        console.warn('[usePanoSync] Stream initialization error:', err)
         startFallbackPolling()
       }
-    } catch (err) {
-      console.warn('[usePanoSync] Stream initialization error:', err)
-      startFallbackPolling()
     }
 
+    // Initial full sync (state + class list from the server) so phone and board share the same data
+    resyncFromServer()
+    connect()
+
     return () => {
+      disposed = true
       if (sse) sse.close()
+      if (retryTimer) clearTimeout(retryTimer)
       stopFallbackPolling()
       sseConnectedRef.current = false
     }
-  }, [activeSessionId, deviceToken, handleRemoteState, onSessionClosed])
+  }, [activeSessionId, deviceToken, getToken, handleRemoteState, onSessionClosed, resyncFromServer])
 
   // 9. FAZ 3: Parent Listener for In-iframe Navigations (`pano:navigate`)
   useEffect(() => {
@@ -458,6 +519,8 @@ export function usePanoSync({
   return {
     deviceId,
     deviceToken,
+    setDeviceToken,
+    resyncFromServer,
     isPhone,
     selectedClass,
     setSelectedClass,

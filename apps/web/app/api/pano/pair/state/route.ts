@@ -35,7 +35,9 @@ export async function GET(req: NextRequest) {
   }
 
   const state = await getPanoSharedState(sessionId)
-  return NextResponse.json({ success: true, state })
+  // Single source of truth for the class list: server-side teacher data (same list for board and phone)
+  const classrooms = session.teacherData?.classrooms || []
+  return NextResponse.json({ success: true, state, classrooms })
 }
 
 export async function POST(req: NextRequest) {

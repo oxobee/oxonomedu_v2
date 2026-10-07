@@ -48,6 +48,8 @@ export interface PanoSharedState {
   activeWindowId: string | null
   currentView: 'home' | 'window'
   selectedClassId: number | null
+  /** Full snapshot of the selected class so every device can render it without a local lookup */
+  selectedClass?: any | null
   isLocked: boolean
   ui?: {
     openModal: { id: string; payload?: any } | null
@@ -55,7 +57,7 @@ export interface PanoSharedState {
 }
 
 export type PanoAction =
-  | { type: 'SELECT_CLASS'; classId: number | null }
+  | { type: 'SELECT_CLASS'; classId: number | null; class?: any | null }
   | { type: 'OPEN_APP'; app: WindowStateItem['app'] }
   | { type: 'CLOSE_WINDOW'; windowId: string }
   | { type: 'TOGGLE_MAXIMIZE'; windowId: string }
@@ -477,12 +479,20 @@ export async function applyPanoAction(
   let nextActiveWindowId = current.activeWindowId ?? null
   let nextCurrentView = current.currentView || 'home'
   let nextSelectedClassId = current.selectedClassId ?? null
+  let nextSelectedClass: any | null = current.selectedClass ?? null
   let nextIsLocked = current.isLocked ?? false
   let nextUi = current.ui ? { ...current.ui } : { openModal: null }
 
   switch (action.type) {
     case 'SELECT_CLASS': {
       nextSelectedClassId = action.classId
+      // Single source of truth: prefer the snapshot sent by the device, else the server-side teacher class list
+      nextSelectedClass =
+        action.classId === null
+          ? null
+          : action.class ||
+            (session.teacherData?.classrooms || []).find((c: any) => c.id === action.classId) ||
+            null
       nextUi = { openModal: null }
       break
     }
@@ -580,6 +590,7 @@ export async function applyPanoAction(
             'sharedState.activeWindowId': nextActiveWindowId,
             'sharedState.currentView': nextCurrentView,
             'sharedState.selectedClassId': nextSelectedClassId,
+            'sharedState.selectedClass': nextSelectedClass,
             'sharedState.isLocked': nextIsLocked,
             'sharedState.ui': nextUi,
           },
@@ -603,6 +614,7 @@ export async function applyPanoAction(
     activeWindowId: nextActiveWindowId,
     currentView: nextCurrentView,
     selectedClassId: nextSelectedClassId,
+    selectedClass: nextSelectedClass,
     isLocked: nextIsLocked,
     ui: nextUi,
   }
@@ -648,6 +660,12 @@ export async function updatePanoSharedState(
   const nextCurrentView = patch.currentView !== undefined ? patch.currentView : (current.currentView || 'home')
   const nextSelectedClassId = patch.selectedClassId !== undefined ? patch.selectedClassId : (current.selectedClassId ?? null)
   const nextIsLocked = patch.isLocked !== undefined ? patch.isLocked : (current.isLocked ?? false)
+  const nextSelectedClass: any | null =
+    patch.selectedClassId === undefined
+      ? current.selectedClass ?? null
+      : patch.selectedClassId === null
+        ? null
+        : (session.teacherData?.classrooms || []).find((c: any) => c.id === patch.selectedClassId) || null
   const nextUi = patch.ui !== undefined ? patch.ui : (current.ui || { openModal: null })
 
   let assignedVersion = (current.version || 0) + 1
@@ -669,6 +687,7 @@ export async function updatePanoSharedState(
             'sharedState.activeWindowId': nextActiveWindowId,
             'sharedState.currentView': nextCurrentView,
             'sharedState.selectedClassId': nextSelectedClassId,
+            'sharedState.selectedClass': nextSelectedClass,
             'sharedState.isLocked': nextIsLocked,
             'sharedState.ui': nextUi,
           },
@@ -692,6 +711,7 @@ export async function updatePanoSharedState(
     activeWindowId: nextActiveWindowId,
     currentView: nextCurrentView,
     selectedClassId: nextSelectedClassId,
+    selectedClass: nextSelectedClass,
     isLocked: nextIsLocked,
     ui: nextUi,
   }

@@ -1445,6 +1445,7 @@ export default function PanoClient() {
   // Realtime Action-based Synchronization Hook (FAZ 2, FAZ 3, FAZ 4, FAZ 5)
   const {
     deviceId,
+    setDeviceToken,
     isPhone,
     selectedClass,
     setSelectedClass,
@@ -1476,10 +1477,15 @@ export default function PanoClient() {
     classrooms,
     defaultClassrooms: DEFAULT_CLASSROOMS,
     onSessionClosed: handleRemoteSessionClosed,
+    onClassrooms: setClassrooms,
   })
 
   // Handle successful pairing from Standby Screen
   const handlePaired = async (teacherData: TeacherPairData) => {
+    // FIX: Standby wrote the real boardDeviceToken to localStorage after the hook mounted; refresh hook state
+    if (typeof window !== 'undefined') {
+      setDeviceToken(localStorage.getItem('oxonom_pano_device_token') || '')
+    }
     setPairedSession(teacherData)
     setForceStandby(false)
 
