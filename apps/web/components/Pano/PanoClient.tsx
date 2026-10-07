@@ -126,6 +126,98 @@ const DEFAULT_CLASSROOMS: ClassroomItem[] = [
   { id: 105, name: '4-B Şubesi', gradeLevel: '4. Sınıf', studentCount: 31, boardCount: 4, attendance: '%95', teacherName: 'Mehmet Öğretmen', subject: 'Fen Bilimleri' }
 ]
 
+// Groups classrooms by grade level (numeric order) and sorts branches with Turkish collation,
+// so 28-31 branches stay readable and "10" never sorts before "9".
+const groupClassroomsByGrade = (list: ClassroomItem[]) => {
+  const groups = new Map<string, ClassroomItem[]>()
+  for (const c of list) {
+    const key = c.gradeLevel || 'Diğer'
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(c)
+  }
+  const gradeNum = (g: string) => parseInt(g, 10) || 999
+  return Array.from(groups.entries())
+    .sort((a, b) => gradeNum(a[0]) - gradeNum(b[0]) || a[0].localeCompare(b[0], 'tr'))
+    .map(([grade, items]) => ({
+      grade,
+      items: [...items].sort((x, y) => x.name.localeCompare(y.name, 'tr', { numeric: true })),
+    }))
+}
+
+/**
+ * 2D Geometric D-Pad / Arrow Key Navigation for Smartboard Remote Controls
+ */
+function handleGridArrowNav(e: React.KeyboardEvent, itemSelector: string) {
+  if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return
+  const currentEl = e.currentTarget as HTMLElement
+  const container = currentEl.closest('[data-grid-container]') || document
+  const items = Array.from(container.querySelectorAll<HTMLElement>(`[data-grid-item="${itemSelector}"]`))
+  if (items.length <= 1) return
+
+  const currentIndex = items.indexOf(currentEl)
+  if (currentIndex === -1) return
+
+  const currentRect = currentEl.getBoundingClientRect()
+  const currentCenter = {
+    x: currentRect.left + currentRect.width / 2,
+    y: currentRect.top + currentRect.height / 2,
+  }
+
+  let bestNext: HTMLElement | null = null
+  let bestDist = Infinity
+
+  for (const item of items) {
+    if (item === currentEl) continue
+    const rect = item.getBoundingClientRect()
+    const center = {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    }
+
+    const dx = center.x - currentCenter.x
+    const dy = center.y - currentCenter.y
+
+    let isCandidate = false
+
+    if (e.key === 'ArrowRight' && dx > 10 && Math.abs(dy) < rect.height * 0.8) {
+      isCandidate = true
+    } else if (e.key === 'ArrowLeft' && dx < -10 && Math.abs(dy) < rect.height * 0.8) {
+      isCandidate = true
+    } else if (e.key === 'ArrowDown' && dy > 10) {
+      isCandidate = true
+    } else if (e.key === 'ArrowUp' && dy < -10) {
+      isCandidate = true
+    }
+
+    if (isCandidate) {
+      const dist =
+        e.key === 'ArrowRight' || e.key === 'ArrowLeft'
+          ? Math.abs(dx) + Math.abs(dy) * 2
+          : Math.abs(dy) + Math.abs(dx) * 1.5
+
+      if (dist < bestDist) {
+        bestDist = dist
+        bestNext = item
+      }
+    }
+  }
+
+  // Fallback to sequential wrap-around if no geometric neighbor in that direction
+  if (!bestNext) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      bestNext = items[(currentIndex + 1) % items.length]
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      bestNext = items[(currentIndex - 1 + items.length) % items.length]
+    }
+  }
+
+  if (bestNext) {
+    e.preventDefault()
+    bestNext.focus()
+    bestNext.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }
+}
+
 const DEFAULT_PANO_QUOTES: QuoteItem[] = [
   { text: "“Hayatta en hakiki mürşit ilimdir, fendir.”", author: "Gazi Mustafa Kemal Atatürk" },
   { text: "“İlim ilim bilmektir, ilim kendin bilmektir. Sen kendin bilmezsin, ya nice okumaktır.”", author: "Yunus Emre" },
@@ -229,8 +321,21 @@ const GridItem = ({ item, onAction }: { item: AppItem; onAction: (app: AppItem) 
 
   return (
     <div
+      tabIndex={0}
+      role="button"
+      aria-label={item.title}
+      data-grid-item="app-item"
       onClick={() => onAction(item)}
-      className="flex flex-col items-center gap-2.5 sm:gap-3 w-full cursor-pointer group relative select-none"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onAction(item)
+        } else if (e.key.startsWith('Arrow')) {
+          handleGridArrowNav(e, 'app-item')
+        }
+      }}
+      onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+      className="flex flex-col items-center gap-2.5 sm:gap-3 w-full cursor-pointer group relative select-none rounded-3xl p-1 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 transition-all"
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
       <motion.div
@@ -668,7 +773,7 @@ const NeonGlass3DLockScreen = ({
               )}
 
               {/* Realistic Mechanical Keypad Grid (Wider, matching Image 1) */}
-              <div className="grid grid-cols-3 gap-3.5 sm:gap-4 w-full">
+              <div data-grid-container="lock-numpad" className="grid grid-cols-3 gap-3.5 sm:gap-4 w-full">
                 {[
                   { num: '1', sub: '' },
                   { num: '2', sub: 'ABC' },
@@ -683,8 +788,23 @@ const NeonGlass3DLockScreen = ({
                   <button
                     key={num}
                     type="button"
+                    tabIndex={0}
+                    data-grid-item="lock-numpad-key"
+                    aria-label={`Rakam ${num}`}
                     onClick={() => handleKeyClick(num)}
-                    className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-700/80 via-slate-800 to-slate-900 border-t border-l border-white/20 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_8px_15px_rgba(0,0,0,0.6)] active:translate-y-1 active:shadow-[0_0px_0_#1e0a0e,0_2px_5px_rgba(0,0,0,0.6)] active:border-rose-400/80 active:bg-rose-950/40 transition-all duration-75 text-white flex flex-col items-center justify-center cursor-pointer group"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleKeyClick(num)
+                      } else if (e.key.startsWith('Arrow')) {
+                        handleGridArrowNav(e, 'lock-numpad-key')
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault()
+                        setIsNumpadOpen(false)
+                      }
+                    }}
+                    onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                    className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-700/80 via-slate-800 to-slate-900 border-t border-l border-white/20 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_8px_15px_rgba(0,0,0,0.6)] active:translate-y-1 active:shadow-[0_0px_0_#1e0a0e,0_2px_5px_rgba(0,0,0,0.6)] active:border-rose-400/80 active:bg-rose-950/40 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-rose-500 focus-visible:ring-offset-2 transition-all duration-75 text-white flex flex-col items-center justify-center cursor-pointer group"
                   >
                     <span className="font-mono text-2xl font-black group-hover:text-rose-300 transition-colors drop-shadow-xs">
                       {num}
@@ -700,8 +820,23 @@ const NeonGlass3DLockScreen = ({
                 {/* Bottom row: Clear, 0, Delete */}
                 <button
                   type="button"
+                  tabIndex={0}
+                  data-grid-item="lock-numpad-key"
+                  aria-label="Temizle"
                   onClick={handleClear}
-                  className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-800/80 to-slate-900 border-t border-l border-white/10 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_6px_10px_rgba(0,0,0,0.5)] active:translate-y-1 active:shadow-none text-slate-400 hover:text-white text-sm font-bold flex items-center justify-center cursor-pointer transition-all"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleClear()
+                    } else if (e.key.startsWith('Arrow')) {
+                      handleGridArrowNav(e, 'lock-numpad-key')
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault()
+                      setIsNumpadOpen(false)
+                    }
+                  }}
+                  onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                  className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-800/80 to-slate-900 border-t border-l border-white/10 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_6px_10px_rgba(0,0,0,0.5)] active:translate-y-1 active:shadow-none focus:outline-hidden focus-visible:ring-4 focus-visible:ring-rose-500 focus-visible:ring-offset-2 text-slate-400 hover:text-white text-sm font-bold flex items-center justify-center cursor-pointer transition-all"
                   title="Temizle"
                 >
                   C
@@ -709,8 +844,23 @@ const NeonGlass3DLockScreen = ({
 
                 <button
                   type="button"
+                  tabIndex={0}
+                  data-grid-item="lock-numpad-key"
+                  aria-label="Rakam 0"
                   onClick={() => handleKeyClick('0')}
-                  className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-700/80 via-slate-800 to-slate-900 border-t border-l border-white/20 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_8px_15px_rgba(0,0,0,0.6)] active:translate-y-1 active:shadow-[0_0px_0_#1e0a0e,0_2px_5px_rgba(0,0,0,0.6)] active:border-rose-400/80 active:bg-rose-950/40 transition-all duration-75 text-white flex flex-col items-center justify-center cursor-pointer group"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleKeyClick('0')
+                    } else if (e.key.startsWith('Arrow')) {
+                      handleGridArrowNav(e, 'lock-numpad-key')
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault()
+                      setIsNumpadOpen(false)
+                    }
+                  }}
+                  onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                  className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-700/80 via-slate-800 to-slate-900 border-t border-l border-white/20 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_8px_15px_rgba(0,0,0,0.6)] active:translate-y-1 active:shadow-[0_0px_0_#1e0a0e,0_2px_5px_rgba(0,0,0,0.6)] active:border-rose-400/80 active:bg-rose-950/40 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-rose-500 focus-visible:ring-offset-2 transition-all duration-75 text-white flex flex-col items-center justify-center cursor-pointer group"
                 >
                   <span className="font-mono text-2xl font-black group-hover:text-rose-300 transition-colors drop-shadow-xs">
                     0
@@ -722,8 +872,23 @@ const NeonGlass3DLockScreen = ({
 
                 <button
                   type="button"
+                  tabIndex={0}
+                  data-grid-item="lock-numpad-key"
+                  aria-label="Sil"
                   onClick={handleDelete}
-                  className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-700/80 via-slate-800 to-slate-900 border-t border-l border-white/20 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_8px_15px_rgba(0,0,0,0.6)] active:translate-y-1 active:shadow-[0_0px_0_#1e0a0e,0_2px_5px_rgba(0,0,0,0.6)] active:border-rose-400/80 active:bg-rose-950/40 transition-all duration-75 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer group"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleDelete()
+                    } else if (e.key.startsWith('Arrow')) {
+                      handleGridArrowNav(e, 'lock-numpad-key')
+                    } else if (e.key === 'Escape') {
+                      e.preventDefault()
+                      setIsNumpadOpen(false)
+                    }
+                  }}
+                  onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                  className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-700/80 via-slate-800 to-slate-900 border-t border-l border-white/20 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_8px_15px_rgba(0,0,0,0.6)] active:translate-y-1 active:shadow-[0_0px_0_#1e0a0e,0_2px_5px_rgba(0,0,0,0.6)] active:border-rose-400/80 active:bg-rose-950/40 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-rose-500 focus-visible:ring-offset-2 transition-all duration-75 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer group"
                   title="Sil"
                 >
                   <Delete className="w-6 h-6 text-slate-400 group-hover:text-rose-400 transition-colors" />
@@ -989,6 +1154,18 @@ const ClassSelectionModal = ({
   selectedClassId: number
   onSelect: (item: ClassroomItem) => void
 }) => {
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   return (
@@ -1004,17 +1181,34 @@ const ClassSelectionModal = ({
           </p>
         </div>
 
-        <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
+        <div data-grid-container="modal-classes" className="p-6 space-y-3 max-h-[70vh] overflow-y-auto overscroll-contain">
           {classrooms.map((c) => {
             const isSelected = c.id === selectedClassId
             return (
               <div
                 key={c.id}
+                tabIndex={0}
+                role="button"
+                aria-label={`${c.name} seçimi`}
+                data-grid-item="modal-class-item"
                 onClick={() => {
                   onSelect(c)
                   onClose()
                 }}
-                className={`p-4 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onSelect(c)
+                    onClose()
+                  } else if (e.key.startsWith('Arrow')) {
+                    handleGridArrowNav(e, 'modal-class-item')
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault()
+                    onClose()
+                  }
+                }}
+                onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                className={`p-4 rounded-2xl border-2 flex items-center justify-between cursor-pointer focus:outline-hidden focus-visible:ring-4 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 transition-all ${
                   isSelected
                     ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-900 dark:text-white shadow-md'
                     : 'border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50'
@@ -1765,6 +1959,33 @@ export default function PanoClient() {
     }
   }
 
+  // Global D-pad / Keyboard Back & Escape Listener
+  useEffect(() => {
+    const handleGlobalBackEscape = (e: KeyboardEvent) => {
+      // Don't intercept when user is typing in form inputs
+      const active = document.activeElement
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT')) {
+        if (e.key === 'Escape') {
+          ;(active as HTMLElement).blur()
+        }
+        return
+      }
+
+      if (e.key === 'Escape') {
+        if (isClassModalOpen || isNewBoardModalOpen || isSettingsOpen) {
+          e.preventDefault()
+          dispatch({ type: 'CLOSE_MODAL' })
+        } else if (activeWindowId) {
+          e.preventDefault()
+          handleCloseWindow(activeWindowId)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleGlobalBackEscape)
+    return () => window.removeEventListener('keydown', handleGlobalBackEscape)
+  }, [isClassModalOpen, isNewBoardModalOpen, isSettingsOpen, activeWindowId, dispatch])
+
   // Auto-fullscreen on load / first touch
   useEffect(() => {
     const triggerFullscreen = async () => {
@@ -2146,8 +2367,8 @@ export default function PanoClient() {
 
       {/* 3. MAIN CONTENT: MANDATORY CLASS SELECTION (EĞER SINIF SEÇİLMEMİŞSE) VEYA PANO DESKTOP */}
       {!selectedClass ? (
-        <div className="flex-1 overflow-y-auto px-4 sm:px-8 md:px-12 py-8 flex flex-col items-center justify-center min-h-0">
-          <div className="max-w-4xl w-full mx-auto space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] px-4 sm:px-8 md:px-12 py-8 flex flex-col items-center">
+          <div data-grid-container="class-cards" className="max-w-6xl w-full mx-auto my-auto space-y-6">
             
             {/* Header Hero Card */}
             <motion.div
@@ -2181,47 +2402,68 @@ export default function PanoClient() {
             </motion.div>
 
             {/* Class Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(classrooms && classrooms.length > 0 ? classrooms : DEFAULT_CLASSROOMS).map((c) => (
-                <motion.div
-                  key={c.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleSelectClass(c)}
-                  className="p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40 border-2 border-slate-200/80 dark:border-slate-800 hover:border-indigo-600 dark:hover:border-indigo-500 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between text-left cursor-pointer group select-none"
-                >
-                  <div className="flex items-start justify-between gap-3 w-full mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-indigo-600/30 group-hover:scale-105 transition-transform">
-                        {c.name.split(' ')[0]}
-                      </div>
-                      <div>
-                        <h3 className="font-black text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                          {c.name}
-                        </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-                          {c.gradeLevel} • {c.teacherName || displayName}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-[11px] font-black px-2.5 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
-                      {c.attendance || '%100'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400 w-full">
-                    <div className="flex items-center gap-3 font-medium">
-                      <span>👥 <strong>{c.studentCount}</strong> Öğrenci</span>
-                      <span>📋 <strong>{c.boardCount}</strong> Tahta</span>
-                    </div>
-                    <span className="text-indigo-600 dark:text-indigo-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                      <span>Seç</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            {groupClassroomsByGrade(classrooms && classrooms.length > 0 ? classrooms : DEFAULT_CLASSROOMS).map((group) => (
+              <section key={group.grade} className="space-y-3">
+                <h2 className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-200 px-1 flex items-center gap-2">
+                  <span>{group.grade}</span>
+                  <span className="text-xs font-bold text-slate-400">({group.items.length} şube)</span>
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {group.items.map((c) => (
+                    <motion.div
+                        key={c.id}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`${c.name} - ${c.gradeLevel}`}
+                        data-grid-item="class-card"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleSelectClass(c)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            handleSelectClass(c)
+                          } else if (e.key.startsWith('Arrow')) {
+                            handleGridArrowNav(e, 'class-card')
+                          }
+                        }}
+                        onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                        className="p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40 border-2 border-slate-200/80 dark:border-slate-800 hover:border-indigo-600 dark:hover:border-indigo-500 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between text-left cursor-pointer group select-none focus:outline-hidden focus-visible:ring-4 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                      >
+                        <div className="flex items-start justify-between gap-3 w-full mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+                              {c.name.split(' ')[0]}
+                            </div>
+                            <div>
+                              <h3 className="font-black text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                {c.name}
+                              </h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+                                {c.gradeLevel} • {c.teacherName || displayName}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[11px] font-black px-2.5 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
+                            {c.attendance || '%100'}
+                          </span>
+                        </div>
+      
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400 w-full">
+                          <div className="flex items-center gap-3 font-medium">
+                            <span>👥 <strong>{c.studentCount}</strong> Öğrenci</span>
+                            <span>📋 <strong>{c.boardCount}</strong> Tahta</span>
+                          </div>
+                          <span className="text-indigo-600 dark:text-indigo-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                            <span>Seç</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </span>
+                        </div>
+                      </motion.div>
+                  ))}
+                </div>
+              </section>
+            ))}
 
             {/* Bottom Status Indicator */}
             <div className="text-center text-xs text-slate-400 dark:text-slate-500 flex items-center justify-center gap-2">
