@@ -105,8 +105,12 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
         })
         setQrDataUrl(url)
 
+        if (sess.boardDeviceToken && typeof window !== 'undefined') {
+          localStorage.setItem('oxonom_pano_device_token', sess.boardDeviceToken)
+        }
+
         // Start Realtime SSE listening
-        startRealtimeListening(sess.sessionId)
+        startRealtimeListening(sess.sessionId, sess.boardDeviceToken)
       } else {
         toast.error('Tahta oturumu oluşturulamadı.')
       }
@@ -120,9 +124,11 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
   }
 
   // Start Server-Sent Events with fallback Polling
-  const startRealtimeListening = (activeSessionId: string) => {
+  const startRealtimeListening = (activeSessionId: string, deviceToken?: string) => {
     try {
-      const sse = new EventSource(`/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}`)
+      const tok = deviceToken || (typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_device_token') || '' : '')
+      const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}${tok ? `&token=${encodeURIComponent(tok)}` : ''}`
+      const sse = new EventSource(sseUrl)
       sseRef.current = sse
 
       sse.addEventListener('paired', (event) => {

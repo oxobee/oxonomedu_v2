@@ -1,12 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { pairPanoSession } from '@/lib/pano-pair/store'
+import { pairPanoSession, recordFailedAttempt } from '@/lib/pano-pair/store'
 import { findDemoUser, createDemoJwt, DEMO_USERS } from '@services/auth/demoAuth'
 import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
+// IP-based Rate Limiting (FAZ 5 Security)
+const ipRateLimits = new Map<string, { count: number; resetAt: number }>()
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const record = ipRateLimits.get(ip)
+  if (!record || record.resetAt < now) {
+    ipRateLimits.set(ip, { count: 1, resetAt: now + 60000 })
+    return true
+  }
+  if (record.count >= 15) return false
+  record.count++
+  return true
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown'
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        { success: false, error: 'Çok fazla istek gönderildi. Lütfen bir dakika sonra tekrar deneyin.' },
+        { status: 429 }
+      )
+    }
+
     const body = await req.json()
-    const { code, sessionId, teacherData } = body
+    const { code, sessionId, teacherData, deviceToken } = body
 
     if (!code && !sessionId) {
       return NextResponse.json(
@@ -60,9 +83,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const result = await pairPanoSession({ code, sessionId }, teacherData)
+    const result = await pairPanoSession({ code, sessionId }, teacherData, deviceToken)
 
     if (!result.success) {
+      if (code) {
+        const failCheck = await recordFailedAttempt(code)
+        if (failCheck.locked) {
+          return NextResponse.json(
+            { success: false, error: '5 hatalı deneme nedeniyle bu eşleştirme kodu iptal edildi. Lütfen tahtadaki yeni kodu deneyin.' },
+            { status: 403 }
+          )
+        }
+      }
       return NextResponse.json(
         { success: false, error: result.error || 'Eşleştirme başarısız oldu.' },
         { status: 400 }
@@ -72,6 +104,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Akıllı tahta başarıyla eşleştirildi!',
+      sessionId: result.session?.sessionId,
+      phoneDeviceToken: result.phoneDeviceToken,
       session: {
         sessionId: result.session?.sessionId,
         status: result.session?.status,

@@ -288,6 +288,7 @@ export default function ConnectBoardClient({
     }
 
     try {
+      const existingDeviceToken = typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_device_token') || undefined : undefined
       const res = await fetch('/api/pano/pair/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -295,6 +296,7 @@ export default function ConnectBoardClient({
           code,
           sessionId: sessId || sessionId || undefined,
           teacherData,
+          deviceToken: existingDeviceToken,
         }),
       })
 
@@ -303,10 +305,14 @@ export default function ConnectBoardClient({
       if (data.success) {
         setIsSuccess(true)
         const confirmedSessionId = data.session?.sessionId || sessId || sessionId
+        const phoneToken = data.phoneDeviceToken || existingDeviceToken || ''
         setSessionId(confirmedSessionId)
         if (typeof window !== 'undefined') {
           if (confirmedSessionId) {
             localStorage.setItem('oxonom_pano_active_session_id', confirmedSessionId)
+          }
+          if (phoneToken) {
+            localStorage.setItem('oxonom_pano_device_token', phoneToken)
           }
           localStorage.setItem('oxonom_pano_paired_session', JSON.stringify(teacherData))
           localStorage.setItem('oxonom_pano_device_type', 'phone')
@@ -314,7 +320,7 @@ export default function ConnectBoardClient({
         toast.success('Akıllı tahta başarıyla eşleştirildi! Pano açılıyor...')
         if (onSuccess) onSuccess()
         setTimeout(() => {
-          router.push(`/pano?session=${encodeURIComponent(confirmedSessionId || '')}&device=phone`)
+          router.push(`/pano?session=${encodeURIComponent(confirmedSessionId || '')}&device=phone${phoneToken ? `&token=${encodeURIComponent(phoneToken)}` : ''}`)
         }, 1200)
       } else {
         setErrorMessage(data.error || 'Eşleştirme başarısız oldu. Lütfen kodu kontrol edin.')

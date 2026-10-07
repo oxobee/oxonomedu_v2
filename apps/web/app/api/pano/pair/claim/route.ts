@@ -38,17 +38,20 @@ export async function POST(req: NextRequest) {
     let refreshToken = teacherData.refreshToken
 
     if (!token) {
-      const demoUser =
-        findDemoUser(teacherData.email || teacherData.username || '') ||
-        DEMO_USERS['ogretmen@oxonom.com']
-      if (demoUser) {
-        token = createDemoJwt(demoUser)
-        refreshToken = token
-        if (!teacherData.first_name) teacherData.first_name = demoUser.first_name
-        if (!teacherData.last_name) teacherData.last_name = demoUser.last_name
-        if (!teacherData.email) teacherData.email = demoUser.email
-        if (!teacherData.username) teacherData.username = demoUser.username
-        if (!teacherData.id) teacherData.id = demoUser.id
+      // FAZ 5: In production, demo JWT fallback is strictly disabled!
+      if (process.env.NODE_ENV !== 'production') {
+        const demoUser =
+          findDemoUser(teacherData.email || teacherData.username || '') ||
+          DEMO_USERS['ogretmen@oxonom.com']
+        if (demoUser) {
+          token = createDemoJwt(demoUser)
+          refreshToken = token
+          if (!teacherData.first_name) teacherData.first_name = demoUser.first_name
+          if (!teacherData.last_name) teacherData.last_name = demoUser.last_name
+          if (!teacherData.email) teacherData.email = demoUser.email
+          if (!teacherData.username) teacherData.username = demoUser.username
+          if (!teacherData.id) teacherData.id = demoUser.id
+        }
       }
     }
 

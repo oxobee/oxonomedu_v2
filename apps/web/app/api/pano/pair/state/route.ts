@@ -4,6 +4,7 @@ import {
   updatePanoSharedState,
   applyPanoAction,
   getPanoSharedState,
+  verifyDeviceToken,
   PanoSharedState,
   PanoAction,
 } from '@/lib/pano-pair/store'
@@ -12,6 +13,12 @@ export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId')
   if (!sessionId) {
     return NextResponse.json({ success: false, error: 'sessionId gereklidir' }, { status: 400 })
+  }
+
+  const token = req.nextUrl.searchParams.get('token') || req.headers.get('x-device-token')
+  const isAuthorized = await verifyDeviceToken(sessionId, token)
+  if (!isAuthorized) {
+    return NextResponse.json({ success: false, error: 'Yetkisiz erişim: Geçersiz deviceToken' }, { status: 401 })
   }
 
   const session = await getPanoSession(sessionId)
@@ -34,7 +41,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}))
-    const { sessionId, deviceId, deviceType, state, action } = body
+    const { sessionId, deviceId, deviceToken, deviceType, state, action } = body
 
     if (!sessionId) {
       return NextResponse.json({ success: false, error: 'sessionId gereklidir' }, { status: 400 })
@@ -42,6 +49,13 @@ export async function POST(req: NextRequest) {
 
     if (!deviceId) {
       return NextResponse.json({ success: false, error: 'deviceId gereklidir' }, { status: 400 })
+    }
+
+    const headerToken = req.headers.get('x-device-token')
+    const effectiveToken = deviceToken || headerToken
+    const isAuthorized = await verifyDeviceToken(sessionId, effectiveToken)
+    if (!isAuthorized) {
+      return NextResponse.json({ success: false, error: 'Yetkisiz erişim: Geçersiz deviceToken' }, { status: 401 })
     }
 
     const session = await getPanoSession(sessionId)

@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
         sessionId: session.sessionId,
         code: session.code,
         expiresAt: session.expiresAt,
+        boardDeviceToken: session.boardDeviceToken,
         qrUrl,
       },
     })

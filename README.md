@@ -264,6 +264,24 @@ LearnHouze_v2.0/
 - Cross-Origin Resource Sharing (CORS) kısıtlamaları ve güvenli iframe sanal alanları (sandbox).
 - Güvenlik açığı bildirimleri için lütfen doğrudan proje yöneticisiyle iletişime geçiniz.
 
+### 🛡️ Pano Eşleşme Güvenliği & Hassas Bilgi Rotasyonu
+
+1. **MongoDB Atlas Parola Rotasyonu:**
+   - Eski versiyonlarda test amaçlı yer alan bağlantı dizesi kod tabanından tamamen kaldırılmış olup dinamik `MONGODB_URI` ortam değişkenine geçirilmiştir.
+   - Güvenlik gereği MongoDB Atlas panelinden ilgili veritabanı kullanıcısının şifresini derhal yenileyiniz ve yeni bağlantı dizesini sadece `.env` dosyasında ve Vercel / Render Environment Variables panelinde tanımlayınız.
+
+2. **Git Geçmişinden Eski Bağlantı Dizesini Temizleme:**
+   - Depo geçmişindeki eski referansları tamamen arındırmak için `git-filter-repo` veya `BFG Repo-Cleaner` çalıştırabilirsiniz:
+     ```bash
+     # git-filter-repo ile:
+     git filter-repo --replace-text <(echo 'mongodb+srv://...==>REDACTED')
+
+     # veya BFG ile:
+     bfg --replace-text passwords.txt
+     git reflog expire --expire=now --all && git gc --prune=now --aggressive
+     git push origin main --force
+     ```
+
 ---
 
 ## 📄 Lisans

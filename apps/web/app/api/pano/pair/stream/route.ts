@@ -1,5 +1,11 @@
 import { NextRequest } from 'next/server'
-import { getPanoSession, subscribePanoSession } from '@/lib/pano-pair/store'
+import {
+  getPanoSession,
+  subscribePanoSession,
+  createRedisSubscriber,
+  verifyDeviceToken,
+  PanoSessionEvent,
+} from '@/lib/pano-pair/store'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,23 +15,31 @@ export async function GET(req: NextRequest) {
     return new Response('sessionId gereklidir', { status: 400 })
   }
 
+  const token = req.nextUrl.searchParams.get('token') || req.headers.get('x-device-token')
+  const isAuthorized = await verifyDeviceToken(sessionId, token)
+  if (!isAuthorized) {
+    return new Response('Unauthorized deviceToken', { status: 401 })
+  }
+
   const session = await getPanoSession(sessionId)
   if (!session) {
     return new Response('Oturum bulunamadı veya süresi doldu', { status: 404 })
   }
 
-  let cleanup: (() => void) | null = null
+  const lastEventId = req.headers.get('last-event-id')
+  const qLastVersion = req.nextUrl.searchParams.get('lastVersion')
+  const clientLastVersion = Number(lastEventId || qLastVersion || 0)
+
+  let cleanupInProcess: (() => void) | null = null
+  let redisSub: any = null
   let pingInterval: NodeJS.Timeout | null = null
-  let syncInterval: NodeJS.Timeout | null = null
+  let fallbackSyncInterval: NodeJS.Timeout | null = null
 
   const stream = new ReadableStream({
-    start(controller) {
+    async start(controller) {
       const encoder = new TextEncoder()
-      let lastSentVersion = session.sharedState?.version || 0
+      let lastSentVersion = clientLastVersion
       let wasPaired = session.status === 'paired'
-
-      // Initial heartbeat ping
-      controller.enqueue(encoder.encode(`event: ping\ndata: {"time":${Date.now()}}\n\n`))
 
       // Keepalive heartbeat every 15s to keep SSE connection alive across firewalls/proxies
       pingInterval = setInterval(() => {
@@ -34,7 +48,7 @@ export async function GET(req: NextRequest) {
         } catch (_) {}
       }, 15000)
 
-      // If already paired before connection was opened
+      // Initial state push (Full state sent on initial connection or missed reconnect)
       if (session.status === 'paired' && session.teacherData) {
         controller.enqueue(
           encoder.encode(`event: paired\ndata: ${JSON.stringify(session.teacherData)}\n\n`)
@@ -42,91 +56,115 @@ export async function GET(req: NextRequest) {
         if (session.sharedState) {
           lastSentVersion = session.sharedState.version
           controller.enqueue(
-            encoder.encode(`event: state\ndata: ${JSON.stringify(session.sharedState)}\n\n`)
+            encoder.encode(
+              `id: ${session.sharedState.version}\nevent: state\ndata: ${JSON.stringify(session.sharedState)}\n\n`
+            )
           )
         }
       }
 
-      // Cross-container DB monitor: checks persistent MongoDB every 180ms for updates (< 300ms latency)
-      syncInterval = setInterval(async () => {
-        try {
-          const current = await getPanoSession(sessionId)
-          if (!current) return
-
-          // 1. Detection of pairing status change
-          if (!wasPaired && current.status === 'paired' && current.teacherData) {
-            wasPaired = true
-            controller.enqueue(
-              encoder.encode(`event: paired\ndata: ${JSON.stringify(current.teacherData)}\n\n`)
-            )
-            if (current.sharedState) {
-              lastSentVersion = current.sharedState.version
-              controller.enqueue(
-                encoder.encode(`event: state\ndata: ${JSON.stringify(current.sharedState)}\n\n`)
-              )
-            }
-          }
-
-          // 2. Detection of shared state version change from another serverless container
-          if (current.sharedState && current.sharedState.version > lastSentVersion) {
-            lastSentVersion = current.sharedState.version
-            controller.enqueue(
-              encoder.encode(`event: state\ndata: ${JSON.stringify(current.sharedState)}\n\n`)
-            )
-          }
-
-          // 3. Detection of session closure / logout
-          if (current.status === 'closed') {
-            controller.enqueue(
-              encoder.encode(`event: session_closed\ndata: ${JSON.stringify({ closed: true, reason: current.closedReason || 'logout' })}\n\n`)
-            )
-            if (syncInterval) clearInterval(syncInterval)
-            try { controller.close() } catch (_) {}
-          }
-        } catch (err) {
-          // Silently handle transient errors
-        }
-      }, 180)
-
-      // Instant in-process listener (0ms for requests hitting the same instance)
-      cleanup = subscribePanoSession(sessionId, (event) => {
+      const processEvent = (event: PanoSessionEvent) => {
         try {
           if (event.type === 'paired' && event.teacherData) {
             wasPaired = true
             controller.enqueue(
               encoder.encode(`event: paired\ndata: ${JSON.stringify(event.teacherData)}\n\n`)
             )
-            if (event.session.sharedState) {
+            if (event.session?.sharedState) {
               lastSentVersion = event.session.sharedState.version
               controller.enqueue(
-                encoder.encode(`event: state\ndata: ${JSON.stringify(event.session.sharedState)}\n\n`)
+                encoder.encode(
+                  `id: ${event.session.sharedState.version}\nevent: state\ndata: ${JSON.stringify(event.session.sharedState)}\n\n`
+                )
               )
             }
           } else if (event.type === 'state' && event.state) {
             if (event.state.version > lastSentVersion) {
               lastSentVersion = event.state.version
               controller.enqueue(
-                encoder.encode(`event: state\ndata: ${JSON.stringify(event.state)}\n\n`)
+                encoder.encode(
+                  `id: ${event.state.version}\nevent: state\ndata: ${JSON.stringify(event.state)}\n\n`
+                )
               )
             }
           } else if (event.type === 'session_closed') {
             controller.enqueue(
               encoder.encode(`event: session_closed\ndata: ${JSON.stringify({ closed: true, reason: event.reason })}\n\n`)
             )
-            if (syncInterval) clearInterval(syncInterval)
-            try {
-              controller.close()
-            } catch (_) {}
+            try { controller.close() } catch (_) {}
           }
         } catch (err) {
-          console.error('[PanoSSE] Enqueue error:', err)
+          console.error('[PanoSSE] processEvent error:', err)
         }
+      }
+
+      // 1. Instant in-process listener (0ms for same process)
+      cleanupInProcess = subscribePanoSession(sessionId, (event) => {
+        processEvent(event)
       })
+
+      // 2. Redis Pub/Sub subscription (FAZ 4)
+      try {
+        redisSub = createRedisSubscriber()
+        if (redisSub) {
+          await redisSub.subscribe(`pano:session:${sessionId}`)
+          redisSub.on('message', (_channel: string, message: string) => {
+            try {
+              const event: PanoSessionEvent = JSON.parse(message)
+              processEvent(event)
+            } catch (_) {}
+          })
+        }
+      } catch (err) {
+        console.warn('[PanoSSE] Redis subscriber error, activating graceful DB fallback:', err)
+        redisSub = null
+      }
+
+      // 3. Fallback: ONLY active if Redis is unavailable
+      if (!redisSub) {
+        fallbackSyncInterval = setInterval(async () => {
+          try {
+            const current = await getPanoSession(sessionId)
+            if (!current) return
+
+            if (!wasPaired && current.status === 'paired' && current.teacherData) {
+              wasPaired = true
+              processEvent({
+                type: 'paired',
+                teacherData: current.teacherData,
+                session: current,
+              })
+            }
+
+            if (current.sharedState && current.sharedState.version > lastSentVersion) {
+              processEvent({
+                type: 'state',
+                state: current.sharedState,
+              })
+            }
+
+            if (current.status === 'closed') {
+              processEvent({
+                type: 'session_closed',
+                sessionId,
+                reason: current.closedReason,
+              })
+              if (fallbackSyncInterval) clearInterval(fallbackSyncInterval)
+            }
+          } catch (_) {}
+        }, 1000)
+      }
     },
     cancel() {
       if (pingInterval) clearInterval(pingInterval)
-      if (syncInterval) clearInterval(syncInterval)
-      if (cleanup) cleanup()
+      if (fallbackSyncInterval) clearInterval(fallbackSyncInterval)
+      if (cleanupInProcess) cleanupInProcess()
+      if (redisSub) {
+        try {
+          redisSub.unsubscribe(`pano:session:${sessionId}`).catch(() => {})
+          redisSub.quit().catch(() => {})
+        } catch (_) {}
+      }
     },
   })
 

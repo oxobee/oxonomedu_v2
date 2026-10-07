@@ -1,7 +1,9 @@
 // Persistent Realtime Pairing & Shared State Store for Oxonom Smart Board (Pano OS)
-// Backed by MongoDB Atlas (Cloud) with in-memory caching and fallback
+// Backed by MongoDB Atlas (Cloud) & Redis Pub/Sub with in-memory caching and fallback
 
 import { MongoClient, Db, Collection } from 'mongodb'
+import crypto from 'crypto'
+import Redis from 'ioredis'
 
 export interface TeacherPairData {
   sessionId?: string
@@ -77,6 +79,9 @@ export interface PanoPairSession {
   pairedAt?: number
   closedAt?: number
   closedReason?: string
+  boardDeviceToken?: string
+  phoneDeviceToken?: string
+  failedAttempts?: number
 }
 
 export type PanoSessionEvent =
@@ -86,10 +91,49 @@ export type PanoSessionEvent =
 
 export type SessionListener = (event: PanoSessionEvent) => void
 
-// MongoDB Connection Pool
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  'mongodb+srv://oxobee_admin:OxonomEdu2026DbSecret@oxonomedu.miwnehh.mongodb.net/eduboard?retryWrites=true&w=majority'
+// MongoDB Connection Pool strictly from process.env.MONGODB_URI (FAZ 5 Security)
+const MONGODB_URI = process.env.MONGODB_URI || ''
+
+// Redis Configuration (FAZ 4 Realtime Infrastructure)
+const REDIS_URL = process.env.REDIS_URL || process.env.LEARNHOUSE_REDIS_URL || ''
+
+let redisPub: Redis | null = null
+
+export function getRedisPublisher(): Redis | null {
+  if (!REDIS_URL) return null
+  if (!redisPub) {
+    try {
+      redisPub = new Redis(REDIS_URL, {
+        maxRetriesPerRequest: 1,
+        enableOfflineQueue: false,
+        lazyConnect: true,
+      })
+      redisPub.connect().catch((err: any) => {
+        console.warn('[PanoRedis] Publisher connection fallback:', err.message)
+        redisPub = null
+      })
+    } catch (_) {
+      redisPub = null
+    }
+  }
+  return redisPub
+}
+
+export function createRedisSubscriber(): Redis | null {
+  if (!REDIS_URL) return null
+  try {
+    const sub = new Redis(REDIS_URL, {
+      maxRetriesPerRequest: 1,
+      enableOfflineQueue: false,
+    })
+    sub.on('error', (err: any) => {
+      console.warn('[PanoRedis] Subscriber error:', err.message)
+    })
+    return sub
+  } catch (_) {
+    return null
+  }
+}
 
 interface GlobalPanoStore {
   client?: MongoClient
@@ -112,6 +156,10 @@ if (!g._panoPairStore) {
 const store = g._panoPairStore
 
 async function getPanoCollection(): Promise<Collection<PanoPairSession> | null> {
+  if (!MONGODB_URI) {
+    return null
+  }
+
   try {
     if (!store.client) {
       store.client = new MongoClient(MONGODB_URI, {
@@ -131,13 +179,18 @@ async function getPanoCollection(): Promise<Collection<PanoPairSession> | null> 
   }
 }
 
-// Generate a random 6-digit code
+// Generate a random cryptographically secure 6-digit code (FAZ 5)
 function generateCode(): string {
-  return String(Math.floor(100000 + Math.random() * 900000))
+  try {
+    return String(crypto.randomInt(100000, 1000000))
+  } catch (_) {
+    return String(Math.floor(100000 + Math.random() * 900000))
+  }
 }
 
 export async function createPanoSession(ttlMs = 5 * 60 * 1000): Promise<PanoPairSession> {
-  const sessionId = `pano_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+  const sessionId = `pano_${crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).substring(2)}`}`
+  const boardDeviceToken = crypto.randomUUID ? crypto.randomUUID() : `board_${Math.random().toString(36).substring(2)}`
   const code = generateCode()
   const now = Date.now()
 
@@ -147,6 +200,8 @@ export async function createPanoSession(ttlMs = 5 * 60 * 1000): Promise<PanoPair
     createdAt: now,
     expiresAt: now + ttlMs,
     status: 'waiting',
+    boardDeviceToken,
+    failedAttempts: 0,
   }
 
   // Update memory cache
@@ -236,10 +291,42 @@ export async function getPanoSessionByCode(code: string): Promise<PanoPairSessio
   return getPanoSession(sessionId)
 }
 
+// Track failed code attempts with automatic lockout after 5 tries (FAZ 5)
+export async function recordFailedAttempt(code: string): Promise<{ locked: boolean; attempts: number }> {
+  const session = await getPanoSessionByCode(code)
+  if (!session) return { locked: false, attempts: 0 }
+
+  const attempts = (session.failedAttempts || 0) + 1
+  session.failedAttempts = attempts
+  if (attempts >= 5) {
+    session.status = 'expired'
+  }
+
+  store.memorySessions.set(session.sessionId, session)
+
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      await coll.updateOne(
+        { sessionId: session.sessionId },
+        {
+          $set: {
+            failedAttempts: attempts,
+            ...(attempts >= 5 ? { status: 'expired' } : {}),
+          },
+        }
+      )
+    }
+  } catch (_) {}
+
+  return { locked: attempts >= 5, attempts }
+}
+
 export async function pairPanoSession(
   identifier: { code?: string; sessionId?: string },
-  teacherData: TeacherPairData
-): Promise<{ success: boolean; session?: PanoPairSession; error?: string }> {
+  teacherData: TeacherPairData,
+  clientDeviceToken?: string
+): Promise<{ success: boolean; session?: PanoPairSession; phoneDeviceToken?: string; error?: string }> {
   let session: PanoPairSession | null = null
 
   if (identifier.sessionId) {
@@ -252,8 +339,8 @@ export async function pairPanoSession(
     return { success: false, error: 'Geçersiz veya süresi dolmuş eşleştirme kodu.' }
   }
 
-  if (session.status === 'expired') {
-    return { success: false, error: 'Eşleştirme kodunun süresi dolmuş. Lütfen tahtadaki yeni kodu deneyin.' }
+  if (session.status === 'expired' || (session.failedAttempts && session.failedAttempts >= 5)) {
+    return { success: false, error: 'Eşleştirme kodunun süresi dolmuş veya çok fazla hatalı deneme yapılmış.' }
   }
 
   const defaultSharedState: PanoSharedState = {
@@ -269,11 +356,15 @@ export async function pairPanoSession(
     ui: { openModal: null },
   }
 
+  const phoneDeviceToken = clientDeviceToken || (crypto.randomUUID ? crypto.randomUUID() : `phone_${Math.random().toString(36).substring(2)}`)
+
   const updatedSession: PanoPairSession = {
     ...session,
     status: 'paired',
     teacherData,
     sharedState: session.sharedState || defaultSharedState,
+    phoneDeviceToken,
+    failedAttempts: 0,
     pairedAt: Date.now(),
   }
 
@@ -291,6 +382,8 @@ export async function pairPanoSession(
             status: 'paired',
             teacherData,
             sharedState: updatedSession.sharedState,
+            phoneDeviceToken,
+            failedAttempts: 0,
             pairedAt: updatedSession.pairedAt,
           },
         }
@@ -300,14 +393,20 @@ export async function pairPanoSession(
     console.error('[PanoStore] pairPanoSession DB error:', err)
   }
 
-  // Notify in-process listeners
-  notifySessionListeners(session.sessionId, {
+  // FAZ 5 Security: Strip teacher JWT token and refreshToken before publishing over SSE
+  const { token, refreshToken, ...safeTeacherData } = teacherData
+
+  // Broadcast event (In-process + Redis)
+  await publishSessionEvent(session.sessionId, {
     type: 'paired',
-    teacherData,
-    session: updatedSession,
+    teacherData: safeTeacherData,
+    session: {
+      ...updatedSession,
+      teacherData: safeTeacherData,
+    },
   })
 
-  return { success: true, session: updatedSession }
+  return { success: true, session: updatedSession, phoneDeviceToken }
 }
 
 export function notifySessionListeners(sessionId: string, event: PanoSessionEvent): void {
@@ -321,6 +420,33 @@ export function notifySessionListeners(sessionId: string, event: PanoSessionEven
       }
     }
   }
+}
+
+// Publish session events to in-process listeners and Redis channel (FAZ 4)
+export async function publishSessionEvent(sessionId: string, event: PanoSessionEvent): Promise<void> {
+  // 1. In-process listeners
+  notifySessionListeners(sessionId, event)
+
+  // 2. Redis pub/sub
+  const pub = getRedisPublisher()
+  if (pub) {
+    try {
+      await pub.publish(`pano:session:${sessionId}`, JSON.stringify(event))
+    } catch (err) {
+      console.warn('[PanoRedis] Publish error:', err)
+    }
+  }
+}
+
+export async function verifyDeviceToken(sessionId: string, token: string | null | undefined): Promise<boolean> {
+  if (!token) return false
+  const session = await getPanoSession(sessionId)
+  if (!session) return false
+  if (!session.boardDeviceToken && !session.phoneDeviceToken) {
+    // Backward compatibility if session was created before device tokens
+    return true
+  }
+  return token === session.boardDeviceToken || token === session.phoneDeviceToken
 }
 
 export async function applyPanoAction(
@@ -484,8 +610,8 @@ export async function applyPanoAction(
   session.sharedState = nextState
   store.memorySessions.set(sessionId, session)
 
-  // Broadcast state event to in-process listeners
-  notifySessionListeners(sessionId, {
+  // Broadcast state event via in-process listeners & Redis pub/sub
+  await publishSessionEvent(sessionId, {
     type: 'state',
     state: nextState,
   })
@@ -573,8 +699,8 @@ export async function updatePanoSharedState(
   session.sharedState = nextState
   store.memorySessions.set(sessionId, session)
 
-  // Broadcast state event to in-process listeners
-  notifySessionListeners(sessionId, {
+  // Broadcast state event via in-process listeners & Redis pub/sub
+  await publishSessionEvent(sessionId, {
     type: 'state',
     state: nextState,
   })
@@ -612,8 +738,8 @@ export async function closePanoSession(sessionId: string, reason = 'user_logout'
     store.listeners.delete(sessionId)
   }
 
-  // Notify in-process listeners
-  notifySessionListeners(sessionId, {
+  // Broadcast closed event via in-process listeners & Redis pub/sub
+  await publishSessionEvent(sessionId, {
     type: 'session_closed',
     sessionId,
     reason,
