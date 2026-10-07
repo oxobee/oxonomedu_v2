@@ -519,10 +519,72 @@ export async function verifyDeviceToken(sessionId: string, token: string | null 
   const session = await getPanoSession(sessionId)
   if (!session) return false
   if (!session.boardDeviceToken && !session.phoneDeviceToken) {
-    // Backward compatibility if session was created before device tokens
-    return true
+    // Security (GÖREV 4-a): Never allow access if tokens are not defined in session
+    return false
   }
   return token === session.boardDeviceToken || token === session.phoneDeviceToken
+}
+
+// Short-lived single-use tickets for SSE stream auth (GÖREV 4-b)
+interface PanoTicket {
+  sessionId: string
+  deviceToken: string
+  expiresAt: number
+}
+const ticketStore = new Map<string, PanoTicket>()
+
+export async function createPanoTicket(sessionId: string, deviceToken: string, ttlMs = 30000): Promise<string> {
+  const ticket = crypto.randomUUID ? crypto.randomUUID() : `tkt_${Math.random().toString(36).substring(2)}`
+  const expiresAtMs = Date.now() + ttlMs
+  ticketStore.set(ticket, { sessionId, deviceToken, expiresAt: expiresAtMs })
+
+  try {
+    const db = await getPanoDb()
+    if (db) {
+      await db.collection('pano_tickets').insertOne({
+        ticket,
+        sessionId,
+        deviceToken,
+        expiresAt: new Date(expiresAtMs),
+        createdAt: new Date(),
+      })
+    }
+  } catch (_) {
+    // In-memory fallback
+  }
+
+  return ticket
+}
+
+export async function verifyAndConsumeTicket(sessionId: string, ticket: string): Promise<boolean> {
+  if (!ticket) return false
+
+  // Try Mongo first (works across Vercel serverless lambdas)
+  try {
+    const db = await getPanoDb()
+    if (db) {
+      const res = await db.collection('pano_tickets').findOneAndDelete({
+        ticket,
+        sessionId,
+        expiresAt: { $gt: new Date() },
+      })
+      if (res && (res.value || (res as any).deviceToken)) {
+        const doc = res.value || res
+        return verifyDeviceToken(sessionId, (doc as any).deviceToken)
+      }
+    }
+  } catch (_) {
+    // fallback to memory
+  }
+
+  // Fallback to memory
+  const entry = ticketStore.get(ticket)
+  if (!entry) return false
+  ticketStore.delete(ticket) // Single-use!
+  if (entry.expiresAt < Date.now() || entry.sessionId !== sessionId) {
+    return false
+  }
+  return verifyDeviceToken(sessionId, entry.deviceToken)
 }
 
 export async function applyPanoAction(

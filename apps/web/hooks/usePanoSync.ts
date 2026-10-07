@@ -37,6 +37,8 @@ export interface ClassroomItem {
   subject: string
 }
 
+export type PanoConnectionStatus = 'connected' | 'connecting' | 'disconnected'
+
 export interface UsePanoSyncOptions {
   activeSessionId: string | null
   classrooms: ClassroomItem[]
@@ -123,9 +125,10 @@ export function usePanoSync({
   const [isNewBoardModalOpen, setIsNewBoardModalOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
-  // 5. Version Tracking for Strict Monotonicity
+  // 5. Version Tracking for Strict Monotonicity & Connection Status
   const lastAppliedVersionRef = useRef<number>(0)
   const sseConnectedRef = useRef<boolean>(false)
+  const [connectionStatus, setConnectionStatus] = useState<PanoConnectionStatus>('connecting')
 
   // Helper to find classroom in dynamic list or fallback defaults
   const findClassroom = useCallback((classId: number | null): ClassroomItem | null => {
@@ -158,13 +161,26 @@ export function usePanoSync({
   const resyncFromServer = useCallback(async () => {
     if (!activeSessionId) return
     try {
+      const token = getTokenRef.current()
+      const headers: Record<string, string> = {}
+      if (token) headers['x-device-token'] = token
+
       const res = await fetch(
-        `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getTokenRef.current())}`
+        `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}`,
+        { headers }
       )
-      if (!res.ok) return
+      if (!res.ok) {
+        if (res.status === 403 || res.status === 410) {
+          onSessionClosedRef.current?.()
+        }
+        return
+      }
       const data = await res.json()
       pushClassrooms(data.classrooms)
-      if (data.state) applyRemoteRef.current(data.state, true)
+      if (data.state) {
+        applyRemoteRef.current(data.state, true)
+        setConnectionStatus('connected')
+      }
     } catch (_) {}
   }, [activeSessionId, pushClassrooms])
 
@@ -378,23 +394,42 @@ export function usePanoSync({
   }, [deviceId, findClassroom])
   applyRemoteRef.current = handleRemoteState
 
-  // 8. Realtime sync: polling is primary (serverless-safe), SSE is a bonus when available.
+  // 8. Realtime sync: coordinated SSE streaming + adaptive polling (serverless-safe).
   // IMPORTANT: depends ONLY on activeSessionId; everything else is read through refs.
   useEffect(() => {
-    if (!activeSessionId) return
+    if (!activeSessionId) {
+      setConnectionStatus('disconnected')
+      return
+    }
 
     let pollTimer: ReturnType<typeof setTimeout> | null = null
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
     let disposed = false
     let sse: EventSource | null = null
+    let consecutivePollErrors = 0
+    let sseRetryCount = 0
+
+    const schedulePoll = (ms: number) => {
+      if (disposed) return
+      if (pollTimer) clearTimeout(pollTimer)
+      pollTimer = setTimeout(poll, ms)
+    }
 
     const poll = async () => {
       if (disposed) return
       try {
         const since = lastAppliedVersionRef.current
+        const token = getTokenRef.current()
+        const headers: Record<string, string> = {}
+        if (token) headers['x-device-token'] = token
+
         const res = await fetch(
-          `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getTokenRef.current())}&since=${since}`
+          `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&since=${since}`,
+          { headers }
         )
         if (res.ok) {
+          consecutivePollErrors = 0
+          setConnectionStatus('connected')
           const data = await res.json()
           if (data.changed && data.state) {
             pushClassrooms(data.classrooms)
@@ -402,44 +437,169 @@ export function usePanoSync({
           }
         } else if (res.status === 403 || res.status === 410) {
           disposed = true
+          setConnectionStatus('disconnected')
           onSessionClosedRef.current?.()
           return
+        } else {
+          consecutivePollErrors += 1
+          if (consecutivePollErrors >= 3 && !sseConnectedRef.current) {
+            setConnectionStatus('disconnected')
+          }
         }
       } catch (_) {
-        // transient network error: keep polling
+        consecutivePollErrors += 1
+        if (consecutivePollErrors >= 3 && !sseConnectedRef.current) {
+          setConnectionStatus('disconnected')
+        }
       }
 
       if (!disposed) {
+        // Adaptive polling: slower heartbeat if SSE is actively connected, fast if SSE down
+        const isSseUp = sseConnectedRef.current
         const hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
-        pollTimer = setTimeout(poll, hidden ? 3000 : 850)
+        const delay = isSseUp ? 15000 : hidden ? 3000 : 850
+        schedulePoll(delay)
       }
     }
 
-    resyncFromServer()
-    pollTimer = setTimeout(poll, 850)
+    const connectSSE = async () => {
+      if (disposed) return
+      try {
+        if (sse) {
+          try { sse.close() } catch (_) {}
+          sse = null
+        }
 
-    try {
-      const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getTokenRef.current())}&lastVersion=${lastAppliedVersionRef.current}`
-      sse = new EventSource(sseUrl)
-      sse.addEventListener('state', (e: MessageEvent) => {
+        const token = getTokenRef.current()
+        let sseUrl = ''
+
+        // Acquire short-lived single-use ticket (GÖREV 4-b)
         try {
-          applyRemoteRef.current(JSON.parse(e.data) as PanoSharedState)
-        } catch (_) {}
-      })
-      sse.addEventListener('session_closed', () => {
-        disposed = true
-        onSessionClosedRef.current?.()
-      })
-      // Do not auto-retry SSE: polling already guarantees delivery
-      sse.onerror = () => {
-        try { sse?.close() } catch (_) {}
+          const ticketRes = await fetch('/api/pano/pair/ticket', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-device-token': token,
+            },
+            body: JSON.stringify({ sessionId: activeSessionId }),
+          })
+          if (ticketRes.ok) {
+            const ticketData = await ticketRes.json()
+            if (ticketData.ticket) {
+              sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}&ticket=${encodeURIComponent(ticketData.ticket)}&lastVersion=${lastAppliedVersionRef.current}`
+            }
+          }
+        } catch (_) {
+          // If ticket fetch fails, fallback to direct query token
+        }
+
+        if (!sseUrl) {
+          // Fallback if ticket route unavailable
+          sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(token)}&lastVersion=${lastAppliedVersionRef.current}`
+        }
+
+        if (disposed) return
+
+        const source = new EventSource(sseUrl)
+        sse = source
+
+        source.onopen = () => {
+          if (disposed) return
+          sseConnectedRef.current = true
+          sseRetryCount = 0
+          setConnectionStatus('connected')
+        }
+
+        source.addEventListener('state', (e: MessageEvent) => {
+          if (disposed) return
+          sseConnectedRef.current = true
+          sseRetryCount = 0
+          setConnectionStatus('connected')
+          try {
+            applyRemoteRef.current(JSON.parse(e.data) as PanoSharedState)
+          } catch (_) {}
+        })
+
+        source.addEventListener('session_closed', () => {
+          disposed = true
+          sseConnectedRef.current = false
+          setConnectionStatus('disconnected')
+          onSessionClosedRef.current?.()
+        })
+
+        source.onerror = () => {
+          if (disposed) return
+          sseConnectedRef.current = false
+          try { source.close() } catch (_) {}
+          sse = null
+
+          // Exponential backoff retry for SSE
+          const backoff = Math.min(1000 * Math.pow(1.5, sseRetryCount), 30000)
+          sseRetryCount += 1
+          if (reconnectTimer) clearTimeout(reconnectTimer)
+          reconnectTimer = setTimeout(connectSSE, backoff)
+        }
+      } catch (_) {
+        sseConnectedRef.current = false
+        const backoff = Math.min(1000 * Math.pow(1.5, sseRetryCount), 30000)
+        sseRetryCount += 1
+        if (reconnectTimer) clearTimeout(reconnectTimer)
+        reconnectTimer = setTimeout(connectSSE, backoff)
       }
-    } catch (_) {}
+    }
+
+    // Initial resync & bootstrap
+    resyncFromServer()
+    poll()
+    connectSSE()
+
+    // Page visibility listener: immediate poll & reconnect on tab focus
+    const handleVisibilityChange = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible' && !disposed) {
+        poll()
+        if (!sseConnectedRef.current) {
+          if (reconnectTimer) clearTimeout(reconnectTimer)
+          connectSSE()
+        }
+      }
+    }
+
+    // Online / offline listeners
+    const handleOnline = () => {
+      if (disposed) return
+      setConnectionStatus('connecting')
+      poll()
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      connectSSE()
+    }
+
+    const handleOffline = () => {
+      setConnectionStatus('disconnected')
+    }
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange)
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', handleOnline)
+      window.addEventListener('offline', handleOffline)
+    }
 
     return () => {
       disposed = true
+      sseConnectedRef.current = false
       if (pollTimer) clearTimeout(pollTimer)
-      if (sse) sse.close()
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      if (sse) {
+        try { sse.close() } catch (_) {}
+      }
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+      }
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('online', handleOnline)
+        window.removeEventListener('offline', handleOffline)
+      }
     }
   }, [activeSessionId, resyncFromServer, pushClassrooms])
 
@@ -524,6 +684,7 @@ export function usePanoSync({
     deviceToken,
     setDeviceToken,
     resyncFromServer,
+    connectionStatus,
     isPhone,
     selectedClass,
     setSelectedClass,

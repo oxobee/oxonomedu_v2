@@ -4,6 +4,7 @@ import {
   subscribePanoSession,
   createRedisSubscriber,
   verifyDeviceToken,
+  verifyAndConsumeTicket,
   PanoSessionEvent,
 } from '@/lib/pano-pair/store'
 
@@ -20,10 +21,15 @@ export async function GET(req: NextRequest) {
     })
   }
 
+  const ticket = req.nextUrl.searchParams.get('ticket')
   const token = req.nextUrl.searchParams.get('token') || req.headers.get('x-device-token')
   let isAuthorized = false
   try {
-    isAuthorized = await verifyDeviceToken(sessionId, token)
+    if (ticket) {
+      isAuthorized = await verifyAndConsumeTicket(sessionId, ticket)
+    } else {
+      isAuthorized = await verifyDeviceToken(sessionId, token)
+    }
   } catch (err: any) {
     if (err?.code === 'store_unavailable' || err?.message?.includes('Veritabanı') || err?.message?.includes('MONGODB_')) {
       return new Response(JSON.stringify({ error: 'Veritabanı yapılandırılmamış', code: 'store_unavailable' }), {
@@ -31,6 +37,11 @@ export async function GET(req: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
       })
     }
+    console.error('[PanoStreamAPI] verify error:', err)
+    return new Response(JSON.stringify({ error: 'Sunucu doğrulama hatası', code: 'server_error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   if (!isAuthorized) {

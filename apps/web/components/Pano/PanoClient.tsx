@@ -1640,6 +1640,7 @@ export default function PanoClient() {
   const {
     deviceId,
     setDeviceToken,
+    connectionStatus,
     isPhone,
     selectedClass,
     setSelectedClass,
@@ -2264,8 +2265,44 @@ export default function PanoClient() {
         {/* Center: Live Clock */}
         <Clock />
 
-        {/* Right: Settings, Lock, Profile */}
+        {/* Right: Connection Status, Settings, Lock, Profile */}
         <div className="flex items-center gap-2.5 relative" ref={popupRef}>
+          {/* Realtime Connection Status Pill */}
+          {activeSessionId && (
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide border shadow-xs transition-colors select-none ${
+                connectionStatus === 'connected'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60'
+                  : connectionStatus === 'connecting'
+                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60'
+                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-800/60'
+              }`}
+              title={
+                connectionStatus === 'connected'
+                  ? 'Gerçek zamanlı senkronizasyon aktif'
+                  : connectionStatus === 'connecting'
+                  ? 'Bağlantı kuruluyor...'
+                  : 'Bağlantı koptu, yeniden deneniyor'
+              }
+            >
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${
+                  connectionStatus === 'connected'
+                    ? 'bg-emerald-500'
+                    : connectionStatus === 'connecting'
+                    ? 'bg-amber-500 animate-ping'
+                    : 'bg-rose-500 animate-pulse'
+                }`}
+              />
+              <span className="hidden sm:inline">
+                {connectionStatus === 'connected'
+                  ? (isPhone ? 'Tahtaya Bağlı' : 'Kumanda Bağlı')
+                  : connectionStatus === 'connecting'
+                  ? 'Bağlanıyor'
+                  : 'Koptu'}
+              </span>
+            </div>
+          )}
           {/* Fullscreen Toggle Button */}
           <button
             onClick={toggleFullscreen}

@@ -27,6 +27,8 @@ export async function GET(req: NextRequest) {
     if (err?.code === 'store_unavailable' || err?.message?.includes('Veritabanı') || err?.message?.includes('MONGODB_')) {
       return NextResponse.json({ success: false, error: 'Veritabanı yapılandırılmamış', code: 'store_unavailable' }, { status: 503 })
     }
+    console.error('[PanoStateAPI] GET verifyDeviceToken error:', err)
+    return NextResponse.json({ success: false, error: 'Sunucu doğrulama hatası', code: 'server_error' }, { status: 500 })
   }
 
   if (!isAuthorized) {
@@ -95,6 +97,8 @@ export async function POST(req: NextRequest) {
       if (err?.code === 'store_unavailable' || err?.message?.includes('Veritabanı') || err?.message?.includes('MONGODB_')) {
         return NextResponse.json({ success: false, error: 'Veritabanı yapılandırılmamış', code: 'store_unavailable' }, { status: 503 })
       }
+      console.error('[PanoStateAPI] POST verifyDeviceToken error:', err)
+      return NextResponse.json({ success: false, error: 'Sunucu doğrulama hatası', code: 'server_error' }, { status: 500 })
     }
 
     if (!isAuthorized) {
