@@ -134,23 +134,39 @@ export function usePanoSync({
     return list.find(c => c.id === classId) || defaultClassrooms.find(c => c.id === classId) || null
   }, [classrooms, defaultClassrooms])
 
-  // Server is the source of truth: pull full state (+ class list) and force-apply it (used for rollback / reconnect)
+  // ---- Stable refs: the sync effect must NOT depend on changing callbacks (that caused an infinite
+  // resync/reconnect loop: onClassrooms -> new array -> new findClassroom -> new handler -> effect re-run).
   const applyRemoteRef = useRef<(st: PanoSharedState, force?: boolean) => void>(() => {})
   const onClassroomsRef = useRef(onClassrooms)
   onClassroomsRef.current = onClassrooms
+  const onSessionClosedRef = useRef(onSessionClosed)
+  onSessionClosedRef.current = onSessionClosed
+  const getTokenRef = useRef(getToken)
+  getTokenRef.current = getToken
+  const lastClassroomsSigRef = useRef<string>('')
 
+  // Only push the class list up when it really changed (avoids needless re-renders)
+  const pushClassrooms = useCallback((list: any) => {
+    if (!Array.isArray(list) || list.length === 0) return
+    const sig = list.map((c: any) => `${c.id}:${c.name}`).join('|')
+    if (sig === lastClassroomsSigRef.current) return
+    lastClassroomsSigRef.current = sig
+    onClassroomsRef.current?.(list)
+  }, [])
+
+  // Pull full state (+ class list) from the server and force-apply it (initial sync / rollback)
   const resyncFromServer = useCallback(async () => {
     if (!activeSessionId) return
     try {
       const res = await fetch(
-        `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}`
+        `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getTokenRef.current())}`
       )
       if (!res.ok) return
       const data = await res.json()
-      if (Array.isArray(data.classrooms) && data.classrooms.length > 0) onClassroomsRef.current?.(data.classrooms)
+      pushClassrooms(data.classrooms)
       if (data.state) applyRemoteRef.current(data.state, true)
     } catch (_) {}
-  }, [activeSessionId, getToken])
+  }, [activeSessionId, pushClassrooms])
 
   // 6. Action-based Dispatch with Optimistic Local Update & Atomic Monotonic Sync
   const dispatch = useCallback(async (action: PanoAction) => {
@@ -292,15 +308,19 @@ export function usePanoSync({
   }, [activeSessionId, deviceId, getToken, isPhone, selectedClass, findClassroom, onSessionClosed])
 
   // 7. Apply Authoritative Remote State
-  const handleRemoteState = useCallback((remoteState: PanoSharedState) => {
+  const handleRemoteState = useCallback((remoteState: PanoSharedState, force = false) => {
     if (!remoteState) return
 
-    // Ignore echo from this exact device
-    if (remoteState.sourceDeviceId === deviceId) return
-
-    // Monotonic versioning: ignore older or identical versions
-    if (remoteState.version <= lastAppliedVersionRef.current) return
-    lastAppliedVersionRef.current = remoteState.version
+    if (!force) {
+      // Ignore echo from this exact device (but still advance the version)
+      if (remoteState.sourceDeviceId === deviceId) {
+        lastAppliedVersionRef.current = Math.max(lastAppliedVersionRef.current, remoteState.version || 0)
+        return
+      }
+      // Monotonic versioning: ignore older or identical versions
+      if (remoteState.version <= lastAppliedVersionRef.current) return
+    }
+    lastAppliedVersionRef.current = Math.max(lastAppliedVersionRef.current, remoteState.version || 0)
 
     try {
       // Sync windows
@@ -313,16 +333,18 @@ export function usePanoSync({
         setActiveWindowId(remoteState.activeWindowId)
       }
 
-      // Sync selected class
+      // Sync selected class: prefer the server snapshot, never wipe the selection if a local lookup fails
       if (remoteState.selectedClassId !== undefined) {
         if (remoteState.selectedClassId === null) {
           setSelectedClass(null)
           if (typeof window !== 'undefined') localStorage.removeItem('oxonom_pano_selected_class_id')
         } else {
-          const found = findClassroom(remoteState.selectedClassId)
-          setSelectedClass(found)
-          if (found && typeof window !== 'undefined') {
-            localStorage.setItem('oxonom_pano_selected_class_id', String(found.id))
+          const found =
+            ((remoteState as any).selectedClass as ClassroomItem | null | undefined) ||
+            findClassroom(remoteState.selectedClassId)
+          if (found) {
+            setSelectedClass(found)
+            if (typeof window !== 'undefined') localStorage.setItem('oxonom_pano_selected_class_id', String(found.id))
           }
         }
       }
@@ -356,79 +378,70 @@ export function usePanoSync({
   }, [deviceId, findClassroom])
   applyRemoteRef.current = handleRemoteState
 
-  // 8. Primary Realtime Serverless Polling (700-1000ms active, 3s hidden) with since=<version>
+  // 8. Realtime sync: polling is primary (serverless-safe), SSE is a bonus when available.
+  // IMPORTANT: depends ONLY on activeSessionId; everything else is read through refs.
   useEffect(() => {
     if (!activeSessionId) return
 
     let pollTimer: ReturnType<typeof setTimeout> | null = null
     let disposed = false
+    let sse: EventSource | null = null
 
     const poll = async () => {
       if (disposed) return
       try {
         const since = lastAppliedVersionRef.current
         const res = await fetch(
-          `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}&since=${since}`
+          `/api/pano/pair/state?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getTokenRef.current())}&since=${since}`
         )
         if (res.ok) {
           const data = await res.json()
           if (data.changed && data.state) {
-            if (Array.isArray(data.classrooms) && data.classrooms.length > 0) {
-              onClassroomsRef.current?.(data.classrooms)
-            }
-            handleRemoteState(data.state)
+            pushClassrooms(data.classrooms)
+            applyRemoteRef.current(data.state)
           }
         } else if (res.status === 403 || res.status === 410) {
           disposed = true
-          if (onSessionClosed) onSessionClosed()
+          onSessionClosedRef.current?.()
           return
         }
       } catch (_) {
-        // ignore network error during polling
+        // transient network error: keep polling
       }
 
       if (!disposed) {
-        const isHidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
-        const interval = isHidden ? 3000 : 850
-        pollTimer = setTimeout(poll, interval)
+        const hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
+        pollTimer = setTimeout(poll, hidden ? 3000 : 850)
       }
     }
 
-    // Initial full resync to guarantee teacher class list and state are loaded
     resyncFromServer()
-
-    // Start primary serverless polling loop
     pollTimer = setTimeout(poll, 850)
 
-    // Secondary Realtime SSE connection (for instant Redis events if configured)
-    let sse: EventSource | null = null
     try {
-      const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getToken())}&lastVersion=${lastAppliedVersionRef.current}`
+      const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}&token=${encodeURIComponent(getTokenRef.current())}&lastVersion=${lastAppliedVersionRef.current}`
       sse = new EventSource(sseUrl)
-
       sse.addEventListener('state', (e: MessageEvent) => {
         try {
-          const remoteState = JSON.parse(e.data) as PanoSharedState
-          handleRemoteState(remoteState)
-        } catch (_) {
-          // ignore parse error
-        }
+          applyRemoteRef.current(JSON.parse(e.data) as PanoSharedState)
+        } catch (_) {}
       })
-
       sse.addEventListener('session_closed', () => {
         disposed = true
-        if (onSessionClosed) onSessionClosed()
+        onSessionClosedRef.current?.()
       })
-    } catch (_) {
-      // ignore sse initialization error
-    }
+      // Do not auto-retry SSE: polling already guarantees delivery
+      sse.onerror = () => {
+        try { sse?.close() } catch (_) {}
+      }
+    } catch (_) {}
 
     return () => {
       disposed = true
       if (pollTimer) clearTimeout(pollTimer)
       if (sse) sse.close()
     }
-  }, [activeSessionId, getToken, handleRemoteState, onSessionClosed, resyncFromServer])
+  }, [activeSessionId, resyncFromServer, pushClassrooms])
 
   // 9. FAZ 3: Parent Listener for In-iframe Navigations (`pano:navigate`)
   useEffect(() => {
