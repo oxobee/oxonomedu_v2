@@ -402,6 +402,11 @@ export function usePanoSync({
       return
     }
 
+    // CRITICAL: Reset version counter for the new session so we don't skip state
+    // delivery. Old session may have left lastAppliedVersionRef at e.g. 10; new
+    // session starts at version 1 → server returns changed:false → board never updates.
+    lastAppliedVersionRef.current = 0
+
     let pollTimer: ReturnType<typeof setTimeout> | null = null
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null
     let disposed = false
@@ -434,6 +439,12 @@ export function usePanoSync({
           if (data.changed && data.state) {
             pushClassrooms(data.classrooms)
             applyRemoteRef.current(data.state)
+          }
+        } else if (res.status === 401) {
+          // Token invalid – re-read from storage (may have been written after hook mounted)
+          consecutivePollErrors += 1
+          if (consecutivePollErrors >= 2) {
+            setConnectionStatus('disconnected')
           }
         } else if (res.status === 403 || res.status === 410) {
           disposed = true
