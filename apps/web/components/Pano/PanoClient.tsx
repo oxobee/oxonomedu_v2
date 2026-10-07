@@ -1416,18 +1416,22 @@ export default function PanoClient() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       const qSession = searchParams?.get('session')
+      const storedSession = localStorage.getItem('oxonom_pano_active_session_id')
       if (qSession) {
+        if (storedSession !== qSession) {
+          localStorage.removeItem('oxonom_pano_selected_class_id')
+        }
         localStorage.setItem('oxonom_pano_active_session_id', qSession)
         return qSession
       }
-      return localStorage.getItem('oxonom_pano_active_session_id')
+      return storedSession
     }
     return null
   })
 
-  // Class Selection State
+  // Class Selection State: Mandatory selection, defaults to null!
   const [classrooms, setClassrooms] = useState<ClassroomItem[]>(DEFAULT_CLASSROOMS)
-  const [selectedClass, setSelectedClass] = useState<ClassroomItem>(DEFAULT_CLASSROOMS[0])
+  const [selectedClass, setSelectedClass] = useState<ClassroomItem | null>(null)
   const [isClassModalOpen, setIsClassModalOpen] = useState(false)
 
   // Window Management
@@ -1490,16 +1494,25 @@ export default function PanoClient() {
         setActiveWindowId(remoteState.activeWindowId)
       }
 
-      // Sync selected class
-      if (remoteState.selectedClassId) {
-        setSelectedClass(prev => {
-          if (prev.id === remoteState.selectedClassId) return prev
-          const found = classrooms.find(c => c.id === remoteState.selectedClassId) || DEFAULT_CLASSROOMS.find(c => c.id === remoteState.selectedClassId)
-          if (found && typeof window !== 'undefined') {
-            localStorage.setItem('oxonom_pano_selected_class_id', String(found.id))
+      // Sync selected class (supports number | null)
+      if (remoteState.selectedClassId !== undefined) {
+        if (remoteState.selectedClassId === null) {
+          setSelectedClass(null)
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('oxonom_pano_selected_class_id')
           }
-          return found || prev
-        })
+        } else {
+          setSelectedClass(prev => {
+            if (prev?.id === remoteState.selectedClassId) return prev
+            const availableClasses = (classrooms && classrooms.length > 0) ? classrooms : []
+            const found = availableClasses.find(c => c.id === remoteState.selectedClassId)
+            if (found && typeof window !== 'undefined') {
+              localStorage.setItem('oxonom_pano_selected_class_id', String(found.id))
+            }
+            return found || null
+          })
+        }
+        setIsClassModalOpen(false)
       }
 
       // Sync lock state
@@ -1531,6 +1544,7 @@ export default function PanoClient() {
 
     setPairedSession(null)
     setActiveSessionId(null)
+    setSelectedClass(null)
     setOpenWindows([])
     setActiveWindowId(null)
     setIsLocked(false)
@@ -1634,10 +1648,12 @@ export default function PanoClient() {
 
     if (teacherData.classrooms && Array.isArray(teacherData.classrooms) && teacherData.classrooms.length > 0) {
       setClassrooms(teacherData.classrooms)
-      setSelectedClass(teacherData.classrooms[0])
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('oxonom_pano_selected_class_id', String(teacherData.classrooms[0].id))
-      }
+    }
+
+    // Mandatory class selection: do not auto-select any class on pairing
+    setSelectedClass(null)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('oxonom_pano_selected_class_id')
     }
 
     setIsLocked(false)
@@ -1693,6 +1709,7 @@ export default function PanoClient() {
 
     setPairedSession(null)
     setActiveSessionId(null)
+    setSelectedClass(null)
     setOpenWindows([])
     setActiveWindowId(null)
     setIsLocked(false)
@@ -1761,7 +1778,6 @@ export default function PanoClient() {
           }
           if (parsed.classrooms && Array.isArray(parsed.classrooms) && parsed.classrooms.length > 0) {
             setClassrooms(parsed.classrooms)
-            setSelectedClass(parsed.classrooms[0])
           }
 
           // Ensure cookies are intact on the board browser even after browser restart
@@ -1800,10 +1816,24 @@ export default function PanoClient() {
 
       const savedClassId = localStorage.getItem('oxonom_pano_selected_class_id')
       if (savedClassId) {
-        const found = DEFAULT_CLASSROOMS.find(c => c.id === Number(savedClassId))
-        if (found) setSelectedClass(found)
-      } else if (savedPair) {
-        setIsClassModalOpen(true)
+        let teacherClasses = classrooms
+        if (savedPair) {
+          try {
+            const p = JSON.parse(savedPair)
+            if (p.classrooms && Array.isArray(p.classrooms) && p.classrooms.length > 0) {
+              teacherClasses = p.classrooms
+            }
+          } catch (_) {}
+        }
+        const found = teacherClasses.find((c: ClassroomItem) => c.id === Number(savedClassId))
+        if (found) {
+          setSelectedClass(found)
+        } else {
+          setSelectedClass(null)
+          localStorage.removeItem('oxonom_pano_selected_class_id')
+        }
+      } else {
+        setSelectedClass(null)
       }
     }
   }, [])
@@ -1820,6 +1850,7 @@ export default function PanoClient() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('oxonom_pano_selected_class_id', String(cls.id))
     }
+    setIsClassModalOpen(false)
     syncStateToServer({ selectedClassId: cls.id })
   }
 
@@ -1889,6 +1920,10 @@ export default function PanoClient() {
 
   // Window Actions
   const openAppInWindow = (app: AppItem) => {
+    if (!selectedClass) {
+      toast.error('Lütfen önce bir sınıf seçiniz.')
+      return
+    }
     const existing = openWindows.find(w => w.app.id === app.id)
     const nextWindows = existing ? openWindows : [...openWindows, { app, isMaximized: true, iframeKey: 1 }]
     setOpenWindows(nextWindows)
@@ -2030,11 +2065,12 @@ export default function PanoClient() {
   const [isNewBoardModalOpen, setIsNewBoardModalOpen] = useState(false)
 
   const handleNewBoardCreated = (createdBoard: any) => {
+    if (!selectedClass) return
     const cleanUuid = (createdBoard.board_uuid || `board_${createdBoard.id}`).replace('board_', '')
-    setSelectedClass(prev => ({
+    setSelectedClass(prev => prev ? ({
       ...prev,
       boardCount: (prev.boardCount || 0) + 1
-    }))
+    }) : null)
     setClassrooms(prev => prev.map(c => c.id === selectedClass.id ? { ...c, boardCount: (c.boardCount || 0) + 1 } : c))
 
     openAppInWindow({
@@ -2109,7 +2145,7 @@ export default function PanoClient() {
     (effectiveUser?.first_name ? `${effectiveUser.first_name} ${effectiveUser.last_name || ''}`.trim() : '') ||
     effectiveUser?.full_name ||
     effectiveUser?.name ||
-    selectedClass.teacherName ||
+    selectedClass?.teacherName ||
     effectiveUser?.username ||
     'Öğretmen'
 
@@ -2122,8 +2158,8 @@ export default function PanoClient() {
       icon: 'Board',
       color: 'bg-blue-600',
       iconColor: 'text-white',
-      badge: `${selectedClass.boardCount} Tahta`,
-      path: `/dash/boards?usergroupId=${selectedClass.id}`
+      badge: selectedClass ? `${selectedClass.boardCount} Tahta` : undefined,
+      path: selectedClass ? `/dash/boards?usergroupId=${selectedClass.id}` : `/dash/boards`
     },
     {
       id: 'homework',
@@ -2133,7 +2169,7 @@ export default function PanoClient() {
       color: 'bg-purple-600',
       iconColor: 'text-white',
       badge: '3 Aktif',
-      path: `/dash/assignments?usergroupId=${selectedClass.id}`
+      path: selectedClass ? `/dash/assignments?usergroupId=${selectedClass.id}` : `/dash/assignments`
     },
     {
       id: 'playgrounds',
@@ -2332,9 +2368,96 @@ export default function PanoClient() {
         </div>
       </div>
 
-      {/* 3. MAIN DESKTOP CONTENT */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-8 md:px-12 py-6">
-        <div className="max-w-6xl mx-auto w-full space-y-6">
+      {/* 3. MAIN CONTENT: MANDATORY CLASS SELECTION (EĞER SINIF SEÇİLMEMİŞSE) VEYA PANO DESKTOP */}
+      {!selectedClass ? (
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 md:px-12 py-8 flex flex-col items-center justify-center min-h-0">
+          <div className="max-w-4xl w-full mx-auto space-y-6">
+            
+            {/* Header Hero Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/60 dark:border-slate-800 shadow-[0_12px_40px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.4)] p-6 sm:p-8 text-center space-y-3"
+            >
+              {/* Ambient decorative glow */}
+              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-gradient-to-tr from-blue-500/10 via-emerald-500/10 to-transparent blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-16 h-16 rounded-2xl bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shadow-inner mb-3">
+                  <School className="w-8 h-8" />
+                </div>
+
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-black tracking-wide mb-2 shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
+                  {isPhone ? '📱 KUMANDA MODU • ZORUNLU SINIF SEÇİMİ' : '🖥️ AKILLI TAHTA • ZORUNLU SINIF SEÇİMİ'}
+                </div>
+
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
+                  Ders Başlıyor! Lütfen Sınıfınızı Seçin
+                </h1>
+
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed mt-1">
+                  İşlem yapmak istediğiniz şubeye dokunun. Seçiminiz akıllı tahta ve kumanda telefonunuz arasında anlık olarak senkronize edilecek (&lt; 300 ms) ve Pano OS ders alanı açılacaktır.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Class Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(classrooms && classrooms.length > 0 ? classrooms : DEFAULT_CLASSROOMS).map((c) => (
+                <motion.div
+                  key={c.id}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleSelectClass(c)}
+                  className="p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40 border-2 border-slate-200/80 dark:border-slate-800 hover:border-indigo-600 dark:hover:border-indigo-500 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between text-left cursor-pointer group select-none"
+                >
+                  <div className="flex items-start justify-between gap-3 w-full mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+                        {c.name.split(' ')[0]}
+                      </div>
+                      <div>
+                        <h3 className="font-black text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                          {c.name}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+                          {c.gradeLevel} • {c.teacherName || displayName}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-black px-2.5 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
+                      {c.attendance || '%100'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400 w-full">
+                    <div className="flex items-center gap-3 font-medium">
+                      <span>👥 <strong>{c.studentCount}</strong> Öğrenci</span>
+                      <span>📋 <strong>{c.boardCount}</strong> Tahta</span>
+                    </div>
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                      <span>Seç</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Bottom Status Indicator */}
+            <div className="text-center text-xs text-slate-400 dark:text-slate-500 flex items-center justify-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <span>Canlı eşleşme aktif • Tahtadan veya telefondan yapılan seçim anında her iki ekranda da açılır.</span>
+            </div>
+
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-8 md:px-12 py-6">
+          <div className="max-w-6xl mx-auto w-full space-y-6">
 
           {/* Top Row: Greeting & Compact Weather */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -2583,13 +2706,14 @@ export default function PanoClient() {
 
         </div>
       </div>
+      )}
 
       {/* 4. INITIAL & ON-DEMAND CLASS SELECTION MODAL */}
       <ClassSelectionModal
         isOpen={isClassModalOpen}
         onClose={() => setIsClassModalOpen(false)}
         classrooms={classrooms}
-        selectedClassId={selectedClass.id}
+        selectedClassId={selectedClass?.id || 0}
         onSelect={handleSelectClass}
       />
 
@@ -2597,8 +2721,8 @@ export default function PanoClient() {
       <NewBoardModal
         isOpen={isNewBoardModalOpen}
         onClose={() => setIsNewBoardModalOpen(false)}
-        className={selectedClass.name}
-        classId={selectedClass.id}
+        className={selectedClass?.name || ''}
+        classId={selectedClass?.id || 0}
         orgId={org?.id || 1}
         onBoardCreated={handleNewBoardCreated}
       />

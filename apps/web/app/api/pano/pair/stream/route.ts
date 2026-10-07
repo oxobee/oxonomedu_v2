@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      // Cross-container DB monitor: checks persistent MongoDB every 800ms for updates
+      // Cross-container DB monitor: checks persistent MongoDB every 180ms for updates (< 300ms latency)
       syncInterval = setInterval(async () => {
         try {
           const current = await getPanoSession(sessionId)
@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
         } catch (err) {
           // Silently handle transient errors
         }
-      }, 800)
+      }, 180)
 
       // Instant in-process listener (0ms for requests hitting the same instance)
       cleanup = subscribePanoSession(sessionId, (event) => {

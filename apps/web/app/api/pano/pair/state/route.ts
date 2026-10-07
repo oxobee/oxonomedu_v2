@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       patch.currentView = state.currentView
     }
 
-    if (typeof state.selectedClassId === 'number') {
+    if (typeof state.selectedClassId === 'number' || state.selectedClassId === null) {
       patch.selectedClassId = state.selectedClassId
     }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { pairPanoSession } from '@/lib/pano-pair/store'
 import { findDemoUser, createDemoJwt, DEMO_USERS } from '@services/auth/demoAuth'
+import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,6 +42,22 @@ export async function POST(req: NextRequest) {
 
     if (!teacherData.orgSlug) {
       teacherData.orgSlug = 'neclagorer'
+    }
+
+    if (!teacherData.classrooms || !Array.isArray(teacherData.classrooms) || teacherData.classrooms.length === 0) {
+      const orgClassrooms = ALL_CLASSROOMS.filter(c => c.school_slug === teacherData.orgSlug || (teacherData.orgSlug === 'neclagorer' ? c.org_id === 10 : c.org_id === 20))
+      if (orgClassrooms.length > 0) {
+        teacherData.classrooms = orgClassrooms.map(c => ({
+          id: c.id,
+          name: c.name,
+          gradeLevel: c.grade_level,
+          studentCount: c.student_count || 30,
+          boardCount: c.boards_count || 4,
+          attendance: '%100',
+          teacherName: c.teacher_name,
+          subject: 'Sınıf Öğretmeni',
+        }))
+      }
     }
 
     const result = await pairPanoSession({ code, sessionId }, teacherData)

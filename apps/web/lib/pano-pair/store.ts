@@ -15,7 +15,7 @@ export interface TeacherPairData {
   refreshToken?: string
   orgSlug?: string
   lock_pin?: string
-  selectedClassId?: number
+  selectedClassId?: number | null
   classrooms?: any[]
   settings?: any
 }
@@ -44,7 +44,7 @@ export interface PanoSharedState {
   openWindows: WindowStateItem[]
   activeWindowId: string | null
   currentView: 'home' | 'window'
-  selectedClassId: number
+  selectedClassId: number | null
   isLocked: boolean
 }
 
@@ -246,7 +246,7 @@ export async function pairPanoSession(
     openWindows: [],
     activeWindowId: null,
     currentView: 'home',
-    selectedClassId: teacherData.selectedClassId || (teacherData.classrooms?.[0]?.id) || 101,
+    selectedClassId: teacherData.selectedClassId ?? null,
     isLocked: false,
   }
 
@@ -326,7 +326,7 @@ export async function updatePanoSharedState(
     openWindows: patch.openWindows !== undefined ? patch.openWindows : (session.sharedState?.openWindows || []),
     activeWindowId: patch.activeWindowId !== undefined ? patch.activeWindowId : (session.sharedState?.activeWindowId ?? null),
     currentView: patch.currentView !== undefined ? patch.currentView : (session.sharedState?.currentView || 'home'),
-    selectedClassId: patch.selectedClassId !== undefined ? patch.selectedClassId : (session.sharedState?.selectedClassId || 101),
+    selectedClassId: patch.selectedClassId !== undefined ? patch.selectedClassId : (session.sharedState?.selectedClassId ?? null),
     isLocked: patch.isLocked !== undefined ? patch.isLocked : (session.sharedState?.isLocked ?? false),
   }
 
