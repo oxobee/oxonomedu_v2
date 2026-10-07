@@ -71,9 +71,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (!teacherData.classrooms || !Array.isArray(teacherData.classrooms) || teacherData.classrooms.length === 0) {
-      const orgClassrooms = ALL_CLASSROOMS.filter(c => c.school_slug === teacherData.orgSlug || (teacherData.orgSlug === 'neclagorer' ? c.org_id === 10 : c.org_id === 20))
-      if (orgClassrooms.length > 0) {
-        teacherData.classrooms = orgClassrooms.map(c => ({
+      // Demo: send ALL classrooms across all schools so teacher sees the full list (58 classes)
+      const allOrgClassrooms = ALL_CLASSROOMS
+      if (allOrgClassrooms.length > 0) {
+        teacherData.classrooms = allOrgClassrooms.map(c => ({
           id: c.id,
           name: c.name,
           gradeLevel: c.grade_level,

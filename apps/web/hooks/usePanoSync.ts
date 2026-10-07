@@ -195,7 +195,7 @@ export function usePanoSync({
           setSelectedClass(null)
           if (typeof window !== 'undefined') localStorage.removeItem('oxonom_pano_selected_class_id')
         } else {
-          const found = findClassroom(action.classId)
+          const found = (action as any).class || findClassroom(action.classId)
           if (found) {
             setSelectedClass(found)
             if (typeof window !== 'undefined') localStorage.setItem('oxonom_pano_selected_class_id', String(found.id))
@@ -454,10 +454,11 @@ export function usePanoSync({
       }
 
       if (!disposed) {
-        // Adaptive polling: slower heartbeat if SSE is actively connected, fast if SSE down
-        const isSseUp = sseConnectedRef.current
+        // Always poll at 800ms on Vercel/serverless: SSE opens on a different lambda instance
+        // than where the phone posts state, so SSE events never arrive on the board tab.
+        // Fast polling is the only reliable real-time mechanism without Redis pub/sub.
         const hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
-        const delay = isSseUp ? 15000 : hidden ? 3000 : 850
+        const delay = hidden ? 3000 : 800
         schedulePoll(delay)
       }
     }
@@ -634,7 +635,7 @@ export function usePanoSync({
 
   // Common UI Actions
   const handleSelectClass = useCallback((cls: ClassroomItem) => {
-    dispatch({ type: 'SELECT_CLASS', classId: cls.id })
+    dispatch({ type: 'SELECT_CLASS', classId: cls.id, class: cls })
   }, [dispatch])
 
   const openAppInWindow = useCallback((app: AppItem) => {
