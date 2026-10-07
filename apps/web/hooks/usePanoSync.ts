@@ -6,7 +6,21 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
-import { PanoAction, WindowStateItem } from '@/lib/pano-pair/store'
+
+// Local type — mirrors store.ts PanoAction but doesn't import server code into client bundle
+export type PanoAction =
+  | { type: 'SELECT_CLASS'; classId: number | null; class?: any | null }
+  | { type: 'OPEN_APP'; app: { id: string; type: 'widget' | 'app'; widgetType?: string; title: string; icon?: string; color?: string; iconColor?: string; badge?: string; path?: string } }
+  | { type: 'CLOSE_WINDOW'; windowId: string }
+  | { type: 'TOGGLE_MAXIMIZE'; windowId: string }
+  | { type: 'RELOAD_WINDOW'; windowId: string }
+  | { type: 'FOCUS_WINDOW'; windowId: string }
+  | { type: 'NAVIGATE'; windowId: string; path: string }
+  | { type: 'OPEN_MODAL'; modalId: string; payload?: any }
+  | { type: 'CLOSE_MODAL' }
+  | { type: 'LOCK' }
+  | { type: 'UNLOCK' }
+  | { type: 'GO_HOME' }
 
 export interface AppItem {
   id: string
@@ -20,8 +34,11 @@ export interface AppItem {
   path?: string
 }
 
-export interface WindowState extends WindowStateItem {
+export interface WindowState {
   app: AppItem
+  isMaximized: boolean
+  iframeKey: number
+  currentPath?: string
 }
 
 export interface ClassroomItem {

@@ -45,8 +45,8 @@ import {
 import { createBoard } from '@services/boards/boards'
 import toast from 'react-hot-toast'
 import PanoStandbyScreen from './PanoStandbyScreen'
-import { TeacherPairData, PanoSharedState, PanoAction, WindowStateItem } from '@/lib/pano-pair/store'
-import { usePanoSync, AppItem, WindowState, ClassroomItem } from '@/hooks/usePanoSync'
+import { TeacherPairData } from '@/lib/pano-pair/store'
+import { usePanoSync, AppItem, WindowState, ClassroomItem, PanoAction } from '@/hooks/usePanoSync'
 
 // Pixel-perfect SVG Icons matching EduOS design
 const Icons = {
