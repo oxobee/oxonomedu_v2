@@ -34,6 +34,7 @@ export interface WindowStateItem {
   }
   isMaximized: boolean
   iframeKey: number
+  currentPath?: string
 }
 
 export interface PanoSharedState {
@@ -46,7 +47,24 @@ export interface PanoSharedState {
   currentView: 'home' | 'window'
   selectedClassId: number | null
   isLocked: boolean
+  ui?: {
+    openModal: { id: string; payload?: any } | null
+  }
 }
+
+export type PanoAction =
+  | { type: 'SELECT_CLASS'; classId: number | null }
+  | { type: 'OPEN_APP'; app: WindowStateItem['app'] }
+  | { type: 'CLOSE_WINDOW'; windowId: string }
+  | { type: 'TOGGLE_MAXIMIZE'; windowId: string }
+  | { type: 'RELOAD_WINDOW'; windowId: string }
+  | { type: 'FOCUS_WINDOW'; windowId: string }
+  | { type: 'NAVIGATE'; windowId: string; path: string }
+  | { type: 'OPEN_MODAL'; modalId: string; payload?: any }
+  | { type: 'CLOSE_MODAL' }
+  | { type: 'LOCK' }
+  | { type: 'UNLOCK' }
+  | { type: 'GO_HOME' }
 
 export interface PanoPairSession {
   sessionId: string
@@ -248,6 +266,7 @@ export async function pairPanoSession(
     currentView: 'home',
     selectedClassId: teacherData.selectedClassId ?? null,
     isLocked: false,
+    ui: { openModal: null },
   }
 
   const updatedSession: PanoPairSession = {
@@ -304,6 +323,176 @@ export function notifySessionListeners(sessionId: string, event: PanoSessionEven
   }
 }
 
+export async function applyPanoAction(
+  sessionId: string,
+  action: PanoAction,
+  sourceDeviceId: string,
+  updatedBy: 'board' | 'phone' = 'phone'
+): Promise<PanoSharedState | null> {
+  const session = await getPanoSession(sessionId)
+  if (!session || session.status !== 'paired') {
+    return null
+  }
+
+  const current = session.sharedState || {
+    version: 1,
+    updatedAt: Date.now(),
+    sourceDeviceId,
+    updatedBy,
+    openWindows: [],
+    activeWindowId: null,
+    currentView: 'home',
+    selectedClassId: session.teacherData?.selectedClassId ?? null,
+    isLocked: false,
+    ui: { openModal: null },
+  }
+
+  let nextOpenWindows = [...(current.openWindows || [])]
+  let nextActiveWindowId = current.activeWindowId ?? null
+  let nextCurrentView = current.currentView || 'home'
+  let nextSelectedClassId = current.selectedClassId ?? null
+  let nextIsLocked = current.isLocked ?? false
+  let nextUi = current.ui ? { ...current.ui } : { openModal: null }
+
+  switch (action.type) {
+    case 'SELECT_CLASS': {
+      nextSelectedClassId = action.classId
+      nextUi = { openModal: null }
+      break
+    }
+    case 'OPEN_APP': {
+      const existingIdx = nextOpenWindows.findIndex(w => w.app.id === action.app.id)
+      if (existingIdx >= 0) {
+        nextOpenWindows = nextOpenWindows.map((w, idx) =>
+          idx === existingIdx
+            ? { ...w, currentPath: action.app.path || w.currentPath || w.app.path || '/dash' }
+            : w
+        )
+      } else {
+        nextOpenWindows.push({
+          app: action.app,
+          isMaximized: true,
+          iframeKey: 1,
+          currentPath: action.app.path || '/dash',
+        })
+      }
+      nextActiveWindowId = action.app.id
+      nextCurrentView = 'window'
+      nextUi = { openModal: null }
+      break
+    }
+    case 'CLOSE_WINDOW': {
+      nextOpenWindows = nextOpenWindows.filter(w => w.app.id !== action.windowId)
+      if (nextActiveWindowId === action.windowId) {
+        nextActiveWindowId = nextOpenWindows.length > 0 ? nextOpenWindows[nextOpenWindows.length - 1].app.id : null
+      }
+      nextCurrentView = nextActiveWindowId ? 'window' : 'home'
+      break
+    }
+    case 'TOGGLE_MAXIMIZE': {
+      nextOpenWindows = nextOpenWindows.map(w =>
+        w.app.id === action.windowId ? { ...w, isMaximized: !w.isMaximized } : w
+      )
+      break
+    }
+    case 'RELOAD_WINDOW': {
+      nextOpenWindows = nextOpenWindows.map(w =>
+        w.app.id === action.windowId ? { ...w, iframeKey: (w.iframeKey || 1) + 1 } : w
+      )
+      break
+    }
+    case 'FOCUS_WINDOW': {
+      nextActiveWindowId = action.windowId
+      nextCurrentView = 'window'
+      break
+    }
+    case 'NAVIGATE': {
+      nextOpenWindows = nextOpenWindows.map(w =>
+        w.app.id === action.windowId ? { ...w, currentPath: action.path } : w
+      )
+      break
+    }
+    case 'OPEN_MODAL': {
+      nextUi = { openModal: { id: action.modalId, payload: action.payload } }
+      break
+    }
+    case 'CLOSE_MODAL': {
+      nextUi = { openModal: null }
+      break
+    }
+    case 'LOCK': {
+      nextIsLocked = true
+      break
+    }
+    case 'UNLOCK': {
+      nextIsLocked = false
+      break
+    }
+    case 'GO_HOME': {
+      nextActiveWindowId = null
+      nextCurrentView = 'home'
+      break
+    }
+  }
+
+  // Atomic update using MongoDB findOneAndUpdate + $inc
+  let assignedVersion = (current.version || 0) + 1
+  const updatedAt = Date.now()
+
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      const res = await coll.findOneAndUpdate(
+        { sessionId },
+        {
+          $inc: { 'sharedState.version': 1 },
+          $set: {
+            'sharedState.updatedAt': updatedAt,
+            'sharedState.sourceDeviceId': sourceDeviceId,
+            'sharedState.updatedBy': updatedBy,
+            'sharedState.openWindows': nextOpenWindows,
+            'sharedState.activeWindowId': nextActiveWindowId,
+            'sharedState.currentView': nextCurrentView,
+            'sharedState.selectedClassId': nextSelectedClassId,
+            'sharedState.isLocked': nextIsLocked,
+            'sharedState.ui': nextUi,
+          },
+        },
+        { returnDocument: 'after' }
+      )
+      if (res?.sharedState?.version) {
+        assignedVersion = res.sharedState.version
+      }
+    }
+  } catch (err) {
+    console.error('[PanoStore] applyPanoAction DB error:', err)
+  }
+
+  const nextState: PanoSharedState = {
+    version: assignedVersion,
+    updatedAt,
+    sourceDeviceId,
+    updatedBy,
+    openWindows: nextOpenWindows,
+    activeWindowId: nextActiveWindowId,
+    currentView: nextCurrentView,
+    selectedClassId: nextSelectedClassId,
+    isLocked: nextIsLocked,
+    ui: nextUi,
+  }
+
+  session.sharedState = nextState
+  store.memorySessions.set(sessionId, session)
+
+  // Broadcast state event to in-process listeners
+  notifySessionListeners(sessionId, {
+    type: 'state',
+    state: nextState,
+  })
+
+  return nextState
+}
+
 export async function updatePanoSharedState(
   sessionId: string,
   patch: Partial<PanoSharedState>,
@@ -315,36 +504,74 @@ export async function updatePanoSharedState(
     return null
   }
 
-  const currentVersion = session.sharedState?.version || 0
-  const nextVersion = currentVersion + 1
-
-  const nextState: PanoSharedState = {
-    version: nextVersion,
+  const current = session.sharedState || {
+    version: 1,
     updatedAt: Date.now(),
     sourceDeviceId,
     updatedBy,
-    openWindows: patch.openWindows !== undefined ? patch.openWindows : (session.sharedState?.openWindows || []),
-    activeWindowId: patch.activeWindowId !== undefined ? patch.activeWindowId : (session.sharedState?.activeWindowId ?? null),
-    currentView: patch.currentView !== undefined ? patch.currentView : (session.sharedState?.currentView || 'home'),
-    selectedClassId: patch.selectedClassId !== undefined ? patch.selectedClassId : (session.sharedState?.selectedClassId ?? null),
-    isLocked: patch.isLocked !== undefined ? patch.isLocked : (session.sharedState?.isLocked ?? false),
+    openWindows: [],
+    activeWindowId: null,
+    currentView: 'home',
+    selectedClassId: session.teacherData?.selectedClassId ?? null,
+    isLocked: false,
+    ui: { openModal: null },
   }
 
-  session.sharedState = nextState
-  store.memorySessions.set(sessionId, session)
+  const nextOpenWindows = patch.openWindows !== undefined ? patch.openWindows : (current.openWindows || [])
+  const nextActiveWindowId = patch.activeWindowId !== undefined ? patch.activeWindowId : (current.activeWindowId ?? null)
+  const nextCurrentView = patch.currentView !== undefined ? patch.currentView : (current.currentView || 'home')
+  const nextSelectedClassId = patch.selectedClassId !== undefined ? patch.selectedClassId : (current.selectedClassId ?? null)
+  const nextIsLocked = patch.isLocked !== undefined ? patch.isLocked : (current.isLocked ?? false)
+  const nextUi = patch.ui !== undefined ? patch.ui : (current.ui || { openModal: null })
 
-  // Persist to MongoDB
+  let assignedVersion = (current.version || 0) + 1
+  const updatedAt = Date.now()
+
+  // Atomic update using MongoDB findOneAndUpdate + $inc
   try {
     const coll = await getPanoCollection()
     if (coll) {
-      await coll.updateOne(
+      const res = await coll.findOneAndUpdate(
         { sessionId },
-        { $set: { sharedState: nextState } }
+        {
+          $inc: { 'sharedState.version': 1 },
+          $set: {
+            'sharedState.updatedAt': updatedAt,
+            'sharedState.sourceDeviceId': sourceDeviceId,
+            'sharedState.updatedBy': updatedBy,
+            'sharedState.openWindows': nextOpenWindows,
+            'sharedState.activeWindowId': nextActiveWindowId,
+            'sharedState.currentView': nextCurrentView,
+            'sharedState.selectedClassId': nextSelectedClassId,
+            'sharedState.isLocked': nextIsLocked,
+            'sharedState.ui': nextUi,
+          },
+        },
+        { returnDocument: 'after' }
       )
+      if (res?.sharedState?.version) {
+        assignedVersion = res.sharedState.version
+      }
     }
   } catch (err) {
     console.error('[PanoStore] updatePanoSharedState DB error:', err)
   }
+
+  const nextState: PanoSharedState = {
+    version: assignedVersion,
+    updatedAt,
+    sourceDeviceId,
+    updatedBy,
+    openWindows: nextOpenWindows,
+    activeWindowId: nextActiveWindowId,
+    currentView: nextCurrentView,
+    selectedClassId: nextSelectedClassId,
+    isLocked: nextIsLocked,
+    ui: nextUi,
+  }
+
+  session.sharedState = nextState
+  store.memorySessions.set(sessionId, session)
 
   // Broadcast state event to in-process listeners
   notifySessionListeners(sessionId, {

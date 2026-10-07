@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPanoSession, updatePanoSharedState, getPanoSharedState, PanoSharedState } from '@/lib/pano-pair/store'
+import {
+  getPanoSession,
+  updatePanoSharedState,
+  applyPanoAction,
+  getPanoSharedState,
+  PanoSharedState,
+  PanoAction,
+} from '@/lib/pano-pair/store'
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId')
@@ -27,7 +34,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}))
-    const { sessionId, deviceId, deviceType, state } = body
+    const { sessionId, deviceId, deviceType, state, action } = body
 
     if (!sessionId) {
       return NextResponse.json({ success: false, error: 'sessionId gereklidir' }, { status: 400 })
@@ -50,48 +57,71 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Oturum henüz eşleştirilmemiş' }, { status: 403 })
     }
 
-    if (!state || typeof state !== 'object') {
-      return NextResponse.json({ success: false, error: 'Geçersiz state verisi' }, { status: 400 })
+    // 1. FAZ 2 Action-based Synchronization
+    if (action && typeof action === 'object' && typeof action.type === 'string') {
+      const updated = await applyPanoAction(
+        sessionId,
+        action as PanoAction,
+        String(deviceId),
+        deviceType === 'board' ? 'board' : 'phone'
+      )
+
+      if (!updated) {
+        return NextResponse.json({ success: false, error: 'Aksiyon uygulanamadı' }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        success: true,
+        state: updated,
+      })
     }
 
-    // Sanitize and validate patch fields
-    const patch: Partial<PanoSharedState> = {}
+    // 2. Backward compatibility: If state patch is provided
+    if (state && typeof state === 'object') {
+      const patch: Partial<PanoSharedState> = {}
 
-    if (Array.isArray(state.openWindows)) {
-      patch.openWindows = state.openWindows
+      if (Array.isArray(state.openWindows)) {
+        patch.openWindows = state.openWindows
+      }
+
+      if (state.activeWindowId !== undefined) {
+        patch.activeWindowId = state.activeWindowId ? String(state.activeWindowId) : null
+      }
+
+      if (state.currentView === 'home' || state.currentView === 'window') {
+        patch.currentView = state.currentView
+      }
+
+      if (typeof state.selectedClassId === 'number' || state.selectedClassId === null) {
+        patch.selectedClassId = state.selectedClassId
+      }
+
+      if (typeof state.isLocked === 'boolean') {
+        patch.isLocked = state.isLocked
+      }
+
+      if (state.ui && typeof state.ui === 'object') {
+        patch.ui = state.ui
+      }
+
+      const updated = await updatePanoSharedState(
+        sessionId,
+        patch,
+        String(deviceId),
+        deviceType === 'board' ? 'board' : 'phone'
+      )
+
+      if (!updated) {
+        return NextResponse.json({ success: false, error: 'State güncellenemedi' }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        success: true,
+        state: updated,
+      })
     }
 
-    if (state.activeWindowId !== undefined) {
-      patch.activeWindowId = state.activeWindowId ? String(state.activeWindowId) : null
-    }
-
-    if (state.currentView === 'home' || state.currentView === 'window') {
-      patch.currentView = state.currentView
-    }
-
-    if (typeof state.selectedClassId === 'number' || state.selectedClassId === null) {
-      patch.selectedClassId = state.selectedClassId
-    }
-
-    if (typeof state.isLocked === 'boolean') {
-      patch.isLocked = state.isLocked
-    }
-
-    const updated = await updatePanoSharedState(
-      sessionId,
-      patch,
-      String(deviceId),
-      deviceType === 'board' ? 'board' : 'phone'
-    )
-
-    if (!updated) {
-      return NextResponse.json({ success: false, error: 'State güncellenemedi' }, { status: 500 })
-    }
-
-    return NextResponse.json({
-      success: true,
-      state: updated,
-    })
+    return NextResponse.json({ success: false, error: 'Aksiyon veya state verisi gereklidir' }, { status: 400 })
   } catch (error: any) {
     console.error('[PanoStateAPI] Error:', error)
     return NextResponse.json({ success: false, error: 'Sunucu hatası oluştu' }, { status: 500 })

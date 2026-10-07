@@ -45,7 +45,7 @@ import {
 import { createBoard } from '@services/boards/boards'
 import toast from 'react-hot-toast'
 import PanoStandbyScreen from './PanoStandbyScreen'
-import { TeacherPairData, PanoSharedState } from '@/lib/pano-pair/store'
+import { TeacherPairData, PanoSharedState, PanoAction, WindowStateItem } from '@/lib/pano-pair/store'
 
 // Pixel-perfect SVG Icons matching EduOS design
 const Icons = {
@@ -120,6 +120,7 @@ interface WindowState {
   app: AppItem
   isMaximized: boolean
   iframeKey: number
+  currentPath?: string
 }
 
 interface ClassroomItem {
@@ -1083,6 +1084,7 @@ const EduOSWindow = ({
   onClose,
   onToggleMaximize,
   onReload,
+  onNavigate,
   onUserActivity
 }: {
   windowState: WindowState
@@ -1090,13 +1092,14 @@ const EduOSWindow = ({
   onClose: () => void
   onToggleMaximize: () => void
   onReload: () => void
+  onNavigate?: (newPath: string) => void
   onUserActivity?: () => void
 }) => {
   const [iframeLoaded, setIframeLoaded] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const app = windowState.app
 
-  let targetPath = app.path || `/dash`
+  let targetPath = windowState.currentPath || app.path || `/dash`
   const separator = targetPath.includes('?') ? '&' : '?'
   const fullAppUrl = targetPath.startsWith('/orgs/')
     ? `${targetPath}${separator}chrome=none&pano=1`
@@ -1106,27 +1109,68 @@ const EduOSWindow = ({
 
   const IconComponent = (Icons as any)[app.icon || 'Board'] || Icons.Board
 
+  const checkIframeNavigation = () => {
+    try {
+      const iframe = iframeRef.current
+      if (!iframe) return
+      const win = iframe.contentWindow
+      if (win && win.location) {
+        let path = win.location.pathname
+        const search = win.location.search
+        if (path) {
+          if (path.startsWith(`/orgs/${orgslug}`)) {
+            path = path.replace(`/orgs/${orgslug}`, '')
+          }
+          const cleanSearch = (search || '')
+            .replace(/[?&]chrome=none/g, '')
+            .replace(/[?&]pano=1/g, '')
+            .replace(/^&/, '?')
+          const finalPath = path + (cleanSearch.startsWith('?') ? cleanSearch : cleanSearch ? `?${cleanSearch}` : '')
+          if (finalPath && finalPath !== windowState.currentPath && finalPath !== app.path && onNavigate) {
+            onNavigate(finalPath)
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
   const attachIframeActivityListeners = () => {
     try {
       const iframe = iframeRef.current
       if (!iframe) return
       const doc = iframe.contentDocument
       const win = iframe.contentWindow
-      if (doc && win && onUserActivity) {
-        const events = ['mousemove', 'mousedown', 'mouseup', 'pointermove', 'pointerdown', 'pointerup', 'touchstart', 'touchmove', 'touchend', 'keydown', 'scroll', 'click']
-        events.forEach(ev => {
-          doc.addEventListener(ev, onUserActivity, { capture: true, passive: true })
-          win.addEventListener(ev, onUserActivity, { capture: true, passive: true })
-        })
+      if (doc && win) {
+        if (onUserActivity) {
+          const events = ['mousemove', 'mousedown', 'mouseup', 'pointermove', 'pointerdown', 'pointerup', 'touchstart', 'touchmove', 'touchend', 'keydown', 'scroll', 'click']
+          events.forEach(ev => {
+            doc.addEventListener(ev, onUserActivity, { capture: true, passive: true })
+            win.addEventListener(ev, onUserActivity, { capture: true, passive: true })
+          })
+        }
+        checkIframeNavigation()
       }
     } catch (_) {}
   }
 
   useEffect(() => {
-    const interval = setInterval(attachIframeActivityListeners, 2000)
+    const interval = setInterval(() => {
+      attachIframeActivityListeners()
+      checkIframeNavigation()
+    }, 1500)
     attachIframeActivityListeners()
     return () => clearInterval(interval)
-  }, [onUserActivity, windowState.iframeKey])
+  }, [onUserActivity, windowState.iframeKey, windowState.currentPath])
+
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data && e.data.type === 'LH_NAVIGATE' && e.data.path && onNavigate) {
+        onNavigate(e.data.path)
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [onNavigate])
 
   return (
     <motion.div
@@ -1433,6 +1477,7 @@ export default function PanoClient() {
   const [classrooms, setClassrooms] = useState<ClassroomItem[]>(DEFAULT_CLASSROOMS)
   const [selectedClass, setSelectedClass] = useState<ClassroomItem | null>(null)
   const [isClassModalOpen, setIsClassModalOpen] = useState(false)
+  const [isNewBoardModalOpen, setIsNewBoardModalOpen] = useState(false)
 
   // Window Management
   const [openWindows, setOpenWindows] = useState<WindowState[]>([])
@@ -1440,13 +1485,102 @@ export default function PanoClient() {
 
   // Sync state tracking refs
   const lastAppliedVersionRef = useRef<number>(0)
-  const isApplyingRemoteUpdateRef = useRef<boolean>(false)
 
-  // Send local state changes to server for two-way synchronization
-  const syncStateToServer = useCallback(async (patch: Partial<PanoSharedState>) => {
+  // Action-based Dispatch with Optimistic Local Update & Monotonic Version Sync
+  const dispatch = useCallback(async (action: PanoAction) => {
     if (!activeSessionId) return
-    if (isApplyingRemoteUpdateRef.current) return
 
+    // 1. Optimistic Local Update (0ms immediate responsiveness)
+    switch (action.type) {
+      case 'SELECT_CLASS': {
+        if (action.classId === null) {
+          setSelectedClass(null)
+          if (typeof window !== 'undefined') localStorage.removeItem('oxonom_pano_selected_class_id')
+        } else {
+          const found = classrooms.find(c => c.id === action.classId) || DEFAULT_CLASSROOMS.find(c => c.id === action.classId)
+          if (found) {
+            setSelectedClass(found)
+            if (typeof window !== 'undefined') localStorage.setItem('oxonom_pano_selected_class_id', String(found.id))
+          }
+        }
+        setIsClassModalOpen(false)
+        break
+      }
+      case 'OPEN_APP': {
+        if (!selectedClass) {
+          toast.error('Lütfen önce bir sınıf seçiniz.')
+          return
+        }
+        setOpenWindows(prev => {
+          const existingIdx = prev.findIndex(w => w.app.id === action.app.id)
+          if (existingIdx >= 0) {
+            return prev.map((w, idx) =>
+              idx === existingIdx
+                ? { ...w, currentPath: action.app.path || w.currentPath || w.app.path || '/dash' }
+                : w
+            )
+          }
+          return [...prev, { app: action.app, isMaximized: true, iframeKey: 1, currentPath: action.app.path || '/dash' }]
+        })
+        setActiveWindowId(action.app.id)
+        setIsClassModalOpen(false)
+        setIsNewBoardModalOpen(false)
+        setIsSettingsOpen(false)
+        break
+      }
+      case 'CLOSE_WINDOW': {
+        setOpenWindows(prev => {
+          const remaining = prev.filter(w => w.app.id !== action.windowId)
+          setActiveWindowId(curr => (curr === action.windowId ? (remaining.length > 0 ? remaining[remaining.length - 1].app.id : null) : curr))
+          return remaining
+        })
+        break
+      }
+      case 'TOGGLE_MAXIMIZE': {
+        setOpenWindows(prev => prev.map(w => w.app.id === action.windowId ? { ...w, isMaximized: !w.isMaximized } : w))
+        break
+      }
+      case 'RELOAD_WINDOW': {
+        setOpenWindows(prev => prev.map(w => w.app.id === action.windowId ? { ...w, iframeKey: (w.iframeKey || 1) + 1 } : w))
+        break
+      }
+      case 'FOCUS_WINDOW': {
+        setActiveWindowId(action.windowId)
+        break
+      }
+      case 'NAVIGATE': {
+        setOpenWindows(prev => prev.map(w => w.app.id === action.windowId ? { ...w, currentPath: action.path } : w))
+        break
+      }
+      case 'OPEN_MODAL': {
+        setIsClassModalOpen(action.modalId === 'class_selection')
+        setIsNewBoardModalOpen(action.modalId === 'new_board')
+        setIsSettingsOpen(action.modalId === 'settings')
+        break
+      }
+      case 'CLOSE_MODAL': {
+        setIsClassModalOpen(false)
+        setIsNewBoardModalOpen(false)
+        setIsSettingsOpen(false)
+        break
+      }
+      case 'LOCK': {
+        setIsLocked(true)
+        if (typeof window !== 'undefined') localStorage.setItem('oxonom_pano_is_locked', 'true')
+        break
+      }
+      case 'UNLOCK': {
+        setIsLocked(false)
+        if (typeof window !== 'undefined') localStorage.removeItem('oxonom_pano_is_locked')
+        break
+      }
+      case 'GO_HOME': {
+        setActiveWindowId(null)
+        break
+      }
+    }
+
+    // 2. Dispatch action to server
     try {
       const res = await fetch('/api/pano/pair/state', {
         method: 'POST',
@@ -1455,19 +1589,20 @@ export default function PanoClient() {
           sessionId: activeSessionId,
           deviceId,
           deviceType: isPhone ? 'phone' : 'board',
-          state: patch,
+          action,
         }),
       })
+
       if (res.ok) {
         const data = await res.json()
         if (data.state?.version) {
-          lastAppliedVersionRef.current = data.state.version
+          lastAppliedVersionRef.current = Math.max(lastAppliedVersionRef.current, data.state.version)
         }
       }
     } catch (err) {
-      console.warn('[PanoSync] State push error:', err)
+      console.warn('[PanoDispatch] Error:', err)
     }
-  }, [activeSessionId, deviceId, isPhone])
+  }, [activeSessionId, deviceId, isPhone, selectedClass, classrooms])
 
   // Apply authoritative remote state received from server
   const handleRemoteState = useCallback((remoteState: PanoSharedState) => {
@@ -1476,12 +1611,9 @@ export default function PanoClient() {
     // 1. Ignore echo from this exact device
     if (remoteState.sourceDeviceId === deviceId) return
 
-    // 2. Ignore older or identical version (monotonic version control)
+    // 2. Monotonic versioning: ignore older or identical version
     if (remoteState.version <= lastAppliedVersionRef.current) return
     lastAppliedVersionRef.current = remoteState.version
-
-    // 3. Mark applying remote update to block outgoing sync loop
-    isApplyingRemoteUpdateRef.current = true
 
     try {
       // Sync windows
@@ -1505,14 +1637,13 @@ export default function PanoClient() {
           setSelectedClass(prev => {
             if (prev?.id === remoteState.selectedClassId) return prev
             const availableClasses = (classrooms && classrooms.length > 0) ? classrooms : []
-            const found = availableClasses.find(c => c.id === remoteState.selectedClassId)
+            const found = availableClasses.find(c => c.id === remoteState.selectedClassId) || DEFAULT_CLASSROOMS.find(c => c.id === remoteState.selectedClassId)
             if (found && typeof window !== 'undefined') {
               localStorage.setItem('oxonom_pano_selected_class_id', String(found.id))
             }
             return found || null
           })
         }
-        setIsClassModalOpen(false)
       }
 
       // Sync lock state
@@ -1526,10 +1657,20 @@ export default function PanoClient() {
           }
         }
       }
-    } finally {
-      setTimeout(() => {
-        isApplyingRemoteUpdateRef.current = false
-      }, 50)
+
+      // Sync UI Modals
+      if (remoteState.ui?.openModal) {
+        const mId = remoteState.ui.openModal.id
+        setIsClassModalOpen(mId === 'class_selection')
+        setIsNewBoardModalOpen(mId === 'new_board')
+        setIsSettingsOpen(mId === 'settings')
+      } else if (remoteState.ui && remoteState.ui.openModal === null) {
+        setIsClassModalOpen(false)
+        setIsNewBoardModalOpen(false)
+        setIsSettingsOpen(false)
+      }
+    } catch (err) {
+      console.error('[PanoRemote] Error applying remote state:', err)
     }
   }, [classrooms, deviceId])
 
@@ -1729,36 +1870,21 @@ export default function PanoClient() {
   }
 
   const lockPano = () => {
-    setIsLocked(true)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('oxonom_pano_is_locked', 'true')
-    }
-    syncStateToServer({ isLocked: true })
+    dispatch({ type: 'LOCK' })
   }
 
   const unlockPano = () => {
-    setIsLocked(false)
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('oxonom_pano_is_locked')
-    }
-    syncStateToServer({ isLocked: false })
+    dispatch({ type: 'UNLOCK' })
   }
 
   // Toggle board lock from phone (locks board, leaves phone functional)
   const handleToggleBoardLockFromPhone = () => {
     const nextLocked = !isLocked
-    setIsLocked(nextLocked)
-    if (typeof window !== 'undefined') {
-      if (nextLocked) {
-        localStorage.setItem('oxonom_pano_is_locked', 'true')
-      } else {
-        localStorage.removeItem('oxonom_pano_is_locked')
-      }
-    }
-    syncStateToServer({ isLocked: nextLocked })
     if (nextLocked) {
+      dispatch({ type: 'LOCK' })
       toast('Akıllı tahta kilitlendi 🔒', { icon: '🔒' })
     } else {
+      dispatch({ type: 'UNLOCK' })
       toast.success('Akıllı tahtanın kilidi açıldı 🔓')
     }
   }
@@ -1846,12 +1972,7 @@ export default function PanoClient() {
   }
 
   const handleSelectClass = (cls: ClassroomItem) => {
-    setSelectedClass(cls)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('oxonom_pano_selected_class_id', String(cls.id))
-    }
-    setIsClassModalOpen(false)
-    syncStateToServer({ selectedClassId: cls.id })
+    dispatch({ type: 'SELECT_CLASS', classId: cls.id })
   }
 
   // User Activity Tracker for Auto-Lock
@@ -1924,45 +2045,23 @@ export default function PanoClient() {
       toast.error('Lütfen önce bir sınıf seçiniz.')
       return
     }
-    const existing = openWindows.find(w => w.app.id === app.id)
-    const nextWindows = existing ? openWindows : [...openWindows, { app, isMaximized: true, iframeKey: 1 }]
-    setOpenWindows(nextWindows)
-    setActiveWindowId(app.id)
-    syncStateToServer({
-      openWindows: nextWindows,
-      activeWindowId: app.id,
-      currentView: 'window',
-    })
+    dispatch({ type: 'OPEN_APP', app })
   }
 
   const handleCloseWindow = (appId: string) => {
-    const remaining = openWindows.filter(w => w.app.id !== appId)
-    const nextActiveId = activeWindowId === appId
-      ? (remaining.length > 0 ? remaining[remaining.length - 1].app.id : null)
-      : activeWindowId
-    setOpenWindows(remaining)
-    setActiveWindowId(nextActiveId)
-    syncStateToServer({
-      openWindows: remaining,
-      activeWindowId: nextActiveId,
-      currentView: nextActiveId ? 'window' : 'home',
-    })
+    dispatch({ type: 'CLOSE_WINDOW', windowId: appId })
   }
 
   const handleToggleMaximizeWindow = (appId: string) => {
-    const nextWindows = openWindows.map(w => w.app.id === appId ? { ...w, isMaximized: !w.isMaximized } : w)
-    setOpenWindows(nextWindows)
-    syncStateToServer({
-      openWindows: nextWindows,
-    })
+    dispatch({ type: 'TOGGLE_MAXIMIZE', windowId: appId })
   }
 
   const handleReloadWindow = (appId: string) => {
-    const nextWindows = openWindows.map(w => w.app.id === appId ? { ...w, iframeKey: w.iframeKey + 1 } : w)
-    setOpenWindows(nextWindows)
-    syncStateToServer({
-      openWindows: nextWindows,
-    })
+    dispatch({ type: 'RELOAD_WINDOW', windowId: appId })
+  }
+
+  const handleNavigateWindow = (appId: string, path: string) => {
+    dispatch({ type: 'NAVIGATE', windowId: appId, path })
   }
 
   // Native Fullscreen State & Toggle
@@ -2061,9 +2160,6 @@ export default function PanoClient() {
     }
   }, [])
 
-  // New Blank Board Modal State & Handler
-  const [isNewBoardModalOpen, setIsNewBoardModalOpen] = useState(false)
-
   const handleNewBoardCreated = (createdBoard: any) => {
     if (!selectedClass) return
     const cleanUuid = (createdBoard.board_uuid || `board_${createdBoard.id}`).replace('board_', '')
@@ -2073,14 +2169,17 @@ export default function PanoClient() {
     }) : null)
     setClassrooms(prev => prev.map(c => c.id === selectedClass.id ? { ...c, boardCount: (c.boardCount || 0) + 1 } : c))
 
-    openAppInWindow({
-      id: `board_${cleanUuid}`,
-      type: 'app',
-      title: `${createdBoard.name} (${selectedClass.name})`,
-      icon: 'Board',
-      color: 'bg-blue-600',
-      iconColor: 'text-white',
-      path: `/board/${cleanUuid}`
+    dispatch({
+      type: 'OPEN_APP',
+      app: {
+        id: `board_${cleanUuid}`,
+        type: 'app',
+        title: `${createdBoard.name} (${selectedClass.name})`,
+        icon: 'Board',
+        color: 'bg-blue-600',
+        iconColor: 'text-white',
+        path: `/board/${cleanUuid}`
+      }
     })
   }
 
@@ -2325,14 +2424,14 @@ export default function PanoClient() {
                 </div>
                 <div className="p-1.5 space-y-0.5">
                   <button
-                    onClick={() => { setIsSettingsOpen(true); setIsProfileOpen(false); }}
+                    onClick={() => { dispatch({ type: 'OPEN_MODAL', modalId: 'settings' }); setIsProfileOpen(false); }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer text-left"
                   >
                     <Sliders className="w-3.5 h-3.5 text-indigo-500" />
                     <span>Pano Ayarları</span>
                   </button>
                   <button
-                    onClick={() => { setIsClassModalOpen(true); setIsProfileOpen(false); }}
+                    onClick={() => { dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' }); setIsProfileOpen(false); }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer text-left"
                   >
                     <School className="w-3.5 h-3.5 text-indigo-500" />
@@ -2505,7 +2604,7 @@ export default function PanoClient() {
                     Aktif Sınıf
                   </span>
                   <button
-                    onClick={() => setIsClassModalOpen(true)}
+                    onClick={() => dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' })}
                     className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs group"
                   >
                     <span>Şube Değiştir</span>
@@ -2694,7 +2793,7 @@ export default function PanoClient() {
                   item={item}
                   onAction={(app) => {
                     if (app.id === 'board') {
-                      setIsNewBoardModalOpen(true)
+                      dispatch({ type: 'OPEN_MODAL', modalId: 'new_board' })
                     } else {
                       openAppInWindow(app)
                     }
@@ -2711,7 +2810,7 @@ export default function PanoClient() {
       {/* 4. INITIAL & ON-DEMAND CLASS SELECTION MODAL */}
       <ClassSelectionModal
         isOpen={isClassModalOpen}
-        onClose={() => setIsClassModalOpen(false)}
+        onClose={() => dispatch({ type: 'CLOSE_MODAL' })}
         classrooms={classrooms}
         selectedClassId={selectedClass?.id || 0}
         onSelect={handleSelectClass}
@@ -2720,7 +2819,7 @@ export default function PanoClient() {
       {/* NEW BLANK BOARD MODAL */}
       <NewBoardModal
         isOpen={isNewBoardModalOpen}
-        onClose={() => setIsNewBoardModalOpen(false)}
+        onClose={() => dispatch({ type: 'CLOSE_MODAL' })}
         className={selectedClass?.name || ''}
         classId={selectedClass?.id || 0}
         orgId={org?.id || 1}
@@ -2730,7 +2829,7 @@ export default function PanoClient() {
       {/* 5. PANO SETTINGS MODAL */}
       <PanoSettingsModal
         isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+        onClose={() => dispatch({ type: 'CLOSE_MODAL' })}
         settings={settings}
         onSave={saveSettings}
       />
@@ -2745,6 +2844,7 @@ export default function PanoClient() {
             onClose={() => handleCloseWindow(activeWindow.app.id)}
             onToggleMaximize={() => handleToggleMaximizeWindow(activeWindow.app.id)}
             onReload={() => handleReloadWindow(activeWindow.app.id)}
+            onNavigate={(newPath) => handleNavigateWindow(activeWindow.app.id, newPath)}
             onUserActivity={recordActivity}
           />
         )}
