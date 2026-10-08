@@ -33,9 +33,11 @@ import {
   DialogTitle,
 } from '@components/ui/dialog'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'next/navigation'
 import { getUserGroups } from '@services/usergroups/usergroups'
 import { getBoards } from '@services/boards/boards'
 import { asArray } from '@services/utils/ts/requests'
+import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 import {
   getSchoolAssignments,
   getStudentAssignments,
@@ -53,6 +55,8 @@ export default function SchoolAssignmentsPage() {
   const queryClient = useQueryClient()
   const access_token = session?.data?.tokens?.access_token
   const user = session?.data?.user
+  const searchParams = useSearchParams()
+  const usergroupIdParam = searchParams?.get('usergroupId')
 
   // Check if current user is student
   const isActualStudent =
@@ -70,8 +74,17 @@ export default function SchoolAssignmentsPage() {
   const [selectedAssignmentForDo, setSelectedAssignmentForDo] = useState<SchoolAssignmentItem | null>(null)
   const [selectedAssignmentForSubmissions, setSelectedAssignmentForSubmissions] = useState<SchoolAssignmentItem | null>(null)
 
-  // Filters state
-  const [selectedUsergroupId, setSelectedUsergroupId] = useState<number | null>(null)
+  // Filters state - initialize from query param if available
+  const [selectedUsergroupId, setSelectedUsergroupId] = useState<number | null>(() =>
+    usergroupIdParam ? Number(usergroupIdParam) : null
+  )
+
+  React.useEffect(() => {
+    if (usergroupIdParam) {
+      setSelectedUsergroupId(Number(usergroupIdParam))
+    }
+  }, [usergroupIdParam])
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedGradeLevel, setSelectedGradeLevel] = useState<string>('all')
   const [selectedSubject, setSelectedSubject] = useState<string>('all')
@@ -87,7 +100,11 @@ export default function SchoolAssignmentsPage() {
     queryFn: () => getUserGroups(org?.id, access_token),
     enabled: !!(org?.id && access_token),
   })
-  const classrooms = asArray<any>(rawUserGroups?.data || rawUserGroups)
+  const classrooms = useMemo(() => {
+    const list = asArray<any>(rawUserGroups?.data || rawUserGroups)
+    if (list && list.length > 0) return list
+    return ALL_CLASSROOMS
+  }, [rawUserGroups])
 
   // 2. Fetch boards
   const { data: rawBoards } = useQuery({
@@ -133,8 +150,8 @@ export default function SchoolAssignmentsPage() {
     isLoading: isLoadingStudentAssignments,
     refetch: refetchStudentAssignments,
   } = useQuery({
-    queryKey: ['student-school-assignments', org?.id],
-    queryFn: () => getStudentAssignments(org?.id, access_token),
+    queryKey: ['student-school-assignments', org?.id, selectedUsergroupId],
+    queryFn: () => getStudentAssignments(org?.id, access_token, selectedUsergroupId),
     enabled: !!(org?.id && access_token && viewMode === 'student'),
   })
 

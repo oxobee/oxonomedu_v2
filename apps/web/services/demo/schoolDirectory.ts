@@ -407,15 +407,26 @@ export function generateAssignmentSubmissionsData(
   const targetClass = classItem || ALL_CLASSROOMS[0]
   const students = generateClassStudents(targetClass)
 
-  const dueDate = dueDateStr
-    ? new Date(dueDateStr).getTime()
-    : new Date('2026-10-15T23:59:00').getTime()
+  // Retrieve real grades stored by teacher and real student submissions
+  let storedGrades: Record<string | number, { score: number; teacher_feedback?: string; submission_id?: number; graded_at?: string }> = {}
+  let singleSubmission: any = null
+  if (typeof window !== 'undefined') {
+    try {
+      const gRaw = localStorage.getItem(`oxonom_grades_${assignmentUuid}`)
+      if (gRaw) storedGrades = JSON.parse(gRaw)
+    } catch (_) {}
+    try {
+      const sRaw = localStorage.getItem(`oxonom_submission_${assignmentUuid}`)
+      if (sRaw) singleSubmission = JSON.parse(sRaw)
+    } catch (_) {}
+  }
 
   const studentRows = students.map((std, idx) => {
     const isErcil = std.username === 'demo_ogrenci' || std.name.includes('Erçil')
+    const gradeRecord = storedGrades[std.id] || storedGrades[std.username]
 
-    // Students 25..29 (5 students): NOT SUBMITTED (Teslim Etmeyenler)
-    if (idx >= 25) {
+    // 1. If teacher gave a grade:
+    if (gradeRecord && typeof gradeRecord.score === 'number') {
       return {
         user_id: std.id,
         name: std.name,
@@ -423,42 +434,44 @@ export function generateAssignmentSubmissionsData(
         avatar_image: (std as any).avatar_image || null,
         classroom_name: targetClass.name,
         classroom_id: targetClass.id,
-        submission_id: null,
-        status: 'PENDING' as const,
-        submission_date: null,
-        score: null,
-        teacher_feedback: null,
-        student_content: null,
+        submission_id: gradeRecord.submission_id || 500 + idx,
+        status: 'GRADED' as const,
+        submission_date: gradeRecord.graded_at || new Date().toISOString(),
+        score: gradeRecord.score,
+        teacher_feedback: gradeRecord.teacher_feedback || null,
+        student_content: {
+          type: 'text_and_board',
+          text: `${std.name} ödev teslim dokümanı ve tahta çalışması.`,
+        },
         is_late: false,
         late_duration_text: '',
       }
     }
 
-    // Students 20..24 (5 students): LATE SUBMISSION (Geç Teslim)
-    const isLateStudent = idx >= 20 && idx < 25
-    let submissionDate: string
-    let isLate = false
-    let lateText = ''
-
-    if (isLateStudent) {
-      isLate = true
-      const lateHours = [2, 14, 28, 49, 73][idx - 20] || (idx - 19) * 12
-      const lateMs = lateHours * 3600 * 1000 + 15 * 60 * 1000
-      submissionDate = new Date(dueDate + lateMs).toISOString()
-      const diffDays = Math.floor(lateHours / 24)
-      const remHours = lateHours % 24
-      lateText = diffDays > 0
-        ? (remHours > 0 ? `${diffDays} gün ${remHours} saat geç` : `${diffDays} gün geç`)
-        : `${lateHours} saat geç`
-    } else {
-      // Delivered before due date (Zamanında Teslim)
-      const earlyHours = (idx + 1) * 7 + 3
-      submissionDate = new Date(dueDate - earlyHours * 3600 * 1000).toISOString()
+    // 2. If student submitted via UI (e.g. Erçil Evren demo submission)
+    if (isErcil && singleSubmission) {
+      return {
+        user_id: std.id,
+        name: std.name,
+        username: std.username,
+        avatar_image: (std as any).avatar_image || null,
+        classroom_name: targetClass.name,
+        classroom_id: targetClass.id,
+        submission_id: singleSubmission.submission_id || 500 + idx,
+        status: (singleSubmission.is_late ? 'LATE' : 'SUBMITTED') as 'LATE' | 'SUBMITTED',
+        submission_date: singleSubmission.submission_date || new Date().toISOString(),
+        score: null, // NOT GRADED UNTIL TEACHER GRADES IT
+        teacher_feedback: null,
+        student_content: singleSubmission.student_content || {
+          type: 'text_and_board',
+          text: `${std.name} ödev teslim dokümanı ve tahta çalışması.`,
+        },
+        is_late: Boolean(singleSubmission.is_late),
+        late_duration_text: singleSubmission.late_duration_text || '',
+      }
     }
 
-    const isGraded = idx < 16
-    const score = isErcil ? 95 : (84 + (idx % 16))
-
+    // 3. Otherwise: NOT SUBMITTED (Teslim Etmedi / PENDING), NO SCORE!
     return {
       user_id: std.id,
       name: std.name,
@@ -466,21 +479,14 @@ export function generateAssignmentSubmissionsData(
       avatar_image: (std as any).avatar_image || null,
       classroom_name: targetClass.name,
       classroom_id: targetClass.id,
-      submission_id: 500 + idx,
-      status: (isGraded ? 'GRADED' : isLate ? 'LATE' : 'SUBMITTED') as 'GRADED' | 'LATE' | 'SUBMITTED',
-      submission_date: submissionDate,
-      score: isGraded ? score : null,
-      is_late: isLate,
-      late_duration_text: lateText,
-      teacher_feedback: isErcil
-        ? 'Harika bir çalışma Erçil Evren, tebrikler!'
-        : isGraded
-        ? (idx % 3 === 0 ? 'Özenli ve eksiksiz hazırlanmış, tebrikler.' : idx % 3 === 1 ? 'Adımlar ve çözümler gayet net ve başarılı.' : 'Ders içi gayretin ödeve çok güzel yansımış.')
-        : null,
-      student_content: {
-        type: 'text_and_board',
-        text: `${std.name} ödev teslim dokümanı ve tahta çalışması.`,
-      },
+      submission_id: null,
+      status: 'PENDING' as const,
+      submission_date: null,
+      score: null,
+      teacher_feedback: null,
+      student_content: null,
+      is_late: false,
+      late_duration_text: '',
     }
   })
 
@@ -488,7 +494,7 @@ export function generateAssignmentSubmissionsData(
   const gradedCount = studentRows.filter((s) => s.status === 'GRADED').length
 
   return {
-    total_students: 30,
+    total_students: students.length,
     submitted_count: submittedCount,
     graded_count: gradedCount,
     students: studentRows,
@@ -749,10 +755,68 @@ export const ALL_CLASSROOM_BOARDS = ALL_CLASSROOMS.flatMap((c) =>
   }))
 )
 
-// Generate classroom homework (All assigned to Demo Student: Erçil Evren UĞURLU)
+// Generate classroom homework
 export function generateClassroomAssignments(classItem: ClassroomItem) {
   const isPrimary = classItem.org_id === 10
+
+  const resolveAssignmentMeta = (asgUuid: string) => {
+    let totalSubs = 0
+    let gradedSubs = 0
+    let subStatus: 'PENDING' | 'SUBMITTED' | 'LATE' | 'GRADED' = 'PENDING'
+    let subScore: number | null = null
+    let subFeedback: string | null = null
+    let subDate: string | null = null
+
+    if (typeof window !== 'undefined') {
+      try {
+        const sRaw = localStorage.getItem(`oxonom_submission_${asgUuid}`)
+        if (sRaw) {
+          const sParsed = JSON.parse(sRaw)
+          totalSubs = 1
+          subStatus = sParsed.is_late ? 'LATE' : 'SUBMITTED'
+          subDate = sParsed.submission_date || null
+        }
+      } catch (_) {}
+
+      try {
+        const gRaw = localStorage.getItem(`oxonom_grades_${asgUuid}`)
+        if (gRaw) {
+          const gParsed = JSON.parse(gRaw)
+          const gradesList = Object.values(gParsed) as any[]
+          if (gradesList.length > 0) {
+            gradedSubs = gradesList.length
+            totalSubs = Math.max(totalSubs, gradedSubs)
+            const demoGrade = gParsed[DEMO_STUDENT.id] || gParsed[DEMO_STUDENT.username]
+            if (demoGrade && typeof demoGrade.score === 'number') {
+              subStatus = 'GRADED'
+              subScore = demoGrade.score
+              subFeedback = demoGrade.teacher_feedback || null
+              subDate = demoGrade.graded_at || subDate
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    return {
+      total_submissions: totalSubs,
+      graded_submissions: gradedSubs,
+      average_score: null,
+      submission: {
+        id: totalSubs > 0 ? 501 : null,
+        status: subStatus,
+        submission_date: subDate,
+        score: subScore,
+        teacher_feedback: subFeedback,
+      },
+    }
+  }
+
   if (isPrimary) {
+    const meta1 = resolveAssignmentMeta(`asg_${classItem.id}_1`)
+    const meta2 = resolveAssignmentMeta(`asg_${classItem.id}_2`)
+    const meta3 = resolveAssignmentMeta(`asg_${classItem.id}_3`)
+
     return [
       {
         id: classItem.id * 10 + 1,
@@ -771,16 +835,7 @@ export function generateClassroomAssignments(classItem: ClassroomItem) {
         usergroup_ids: [classItem.id],
         student_name: DEMO_STUDENT.name,
         student_no: DEMO_STUDENT.studentNo,
-        total_submissions: 30,
-        graded_submissions: 29,
-        average_score: 95,
-        submission: {
-          id: 501,
-          status: 'GRADED',
-          score: 100,
-          teacher_feedback: `Tebrikler Erçil Evren! Çok akıcı ve hatasız bir okuma gerçekleştirdin. — ${classItem.teacher_name}`,
-          graded_at: '2026-10-02T14:30:00',
-        },
+        ...meta1,
       },
       {
         id: classItem.id * 10 + 2,
@@ -800,15 +855,7 @@ export function generateClassroomAssignments(classItem: ClassroomItem) {
         usergroup_ids: [classItem.id],
         student_name: DEMO_STUDENT.name,
         student_no: DEMO_STUDENT.studentNo,
-        total_submissions: 30,
-        graded_submissions: 28,
-        average_score: 92,
-        submission: {
-          id: 502,
-          status: 'SUBMITTED',
-          score: null,
-          teacher_feedback: null,
-        },
+        ...meta2,
       },
       {
         id: classItem.id * 10 + 3,
@@ -827,19 +874,16 @@ export function generateClassroomAssignments(classItem: ClassroomItem) {
         usergroup_ids: [classItem.id],
         student_name: DEMO_STUDENT.name,
         student_no: DEMO_STUDENT.studentNo,
-        total_submissions: 30,
-        graded_submissions: 25,
-        average_score: 90,
-        submission: {
-          id: 503,
-          status: 'PENDING',
-          score: null,
-        },
+        ...meta3,
       },
     ]
   }
 
   // Middle School (5-8)
+  const metaM1 = resolveAssignmentMeta(`asg_${classItem.id}_1`)
+  const metaM2 = resolveAssignmentMeta(`asg_${classItem.id}_2`)
+  const metaM3 = resolveAssignmentMeta(`asg_${classItem.id}_3`)
+
   return [
     {
       id: classItem.id * 10 + 1,
@@ -859,16 +903,7 @@ export function generateClassroomAssignments(classItem: ClassroomItem) {
       usergroup_ids: [classItem.id],
       student_name: DEMO_STUDENT.name,
       student_no: DEMO_STUDENT.studentNo,
-      total_submissions: 30,
-      graded_submissions: 30,
-      average_score: 88,
-      submission: {
-        id: 601,
-        status: 'GRADED',
-        score: 98,
-        teacher_feedback: `Mükemmel mantık kurgusu Erçil Evren! — ${classItem.teacher_name}`,
-        graded_at: '2026-10-02T15:00:00',
-      },
+      ...metaM1,
     },
     {
       id: classItem.id * 10 + 2,
@@ -887,14 +922,7 @@ export function generateClassroomAssignments(classItem: ClassroomItem) {
       usergroup_ids: [classItem.id],
       student_name: DEMO_STUDENT.name,
       student_no: DEMO_STUDENT.studentNo,
-      total_submissions: 30,
-      graded_submissions: 27,
-      average_score: 86,
-      submission: {
-        id: 602,
-        status: 'SUBMITTED',
-        score: null,
-      },
+      ...metaM2,
     },
     {
       id: classItem.id * 10 + 3,
@@ -913,14 +941,7 @@ export function generateClassroomAssignments(classItem: ClassroomItem) {
       usergroup_ids: [classItem.id],
       student_name: DEMO_STUDENT.name,
       student_no: DEMO_STUDENT.studentNo,
-      total_submissions: 30,
-      graded_submissions: 24,
-      average_score: 91,
-      submission: {
-        id: 603,
-        status: 'PENDING',
-        score: null,
-      },
+      ...metaM3,
     },
   ]
 }

@@ -112,18 +112,19 @@ export default function AssignmentSubmissionsModal({
 
   const handleSaveGrade = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedStudent?.submission_id) {
-      toast.error('Bu öğrenci henüz ödev teslim etmemiştir.')
-      return
-    }
+    if (!selectedStudent) return
+
+    const subId = selectedStudent.submission_id || 500 + selectedStudent.user_id
 
     setIsGrading(true)
     try {
       await gradeSubmission(
-        selectedStudent.submission_id,
+        subId,
         {
           score: Number(gradeScore),
           teacher_feedback: gradeFeedback,
+          assignment_uuid: assignment.assignment_uuid,
+          user_id: selectedStudent.user_id,
         },
         accessToken
       )
@@ -132,9 +133,11 @@ export default function AssignmentSubmissionsModal({
       refetch()
       onGraded?.()
       queryClient.invalidateQueries({ queryKey: ['school-assignments'] })
+      queryClient.invalidateQueries({ queryKey: ['school-assignment-submissions'] })
       // Update local state
       setSelectedStudent({
         ...selectedStudent,
+        submission_id: subId,
         status: 'GRADED',
         score: Number(gradeScore),
         teacher_feedback: gradeFeedback,
@@ -474,59 +477,60 @@ export default function AssignmentSubmissionsModal({
                 </div>
 
                 {/* PUANLAMA VE GERİ BİLDİRİM FORMU */}
-                {selectedStudent.status !== 'PENDING' ? (
-                  <form onSubmit={handleSaveGrade} className="space-y-3 p-4 bg-indigo-50/40 border border-indigo-100 rounded-2xl">
+                <form onSubmit={handleSaveGrade} className="space-y-3 p-4 bg-indigo-50/40 border border-indigo-100 rounded-2xl">
+                  <div className="flex items-center justify-between">
                     <span className="font-bold text-indigo-950 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                       <GraduationCap size={15} className="text-indigo-600" />
                       Değerlendirme & Puanlama
                     </span>
-
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <label className="block font-semibold text-gray-700 mb-1">
-                          Puan (Max: {assignment.max_score}) *
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          min={0}
-                          max={assignment.max_score}
-                          value={gradeScore}
-                          onChange={(e) => setGradeScore(Number(e.target.value))}
-                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl font-bold text-indigo-700 outline-none focus:ring-2 focus:ring-indigo-500/20"
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <label className="block font-semibold text-gray-700 mb-1">
-                          Öğretmen Geri Bildirim Notu
-                        </label>
-                        <textarea
-                          rows={2}
-                          placeholder="Öğrenciye çözümüne dair yönlendirici geri bildirim yazın..."
-                          value={gradeFeedback}
-                          onChange={(e) => setGradeFeedback(e.target.value)}
-                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end pt-1">
-                      <button
-                        type="submit"
-                        disabled={isGrading}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                      >
-                        {isGrading ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-                        <span>Puan ve Geri Bildirimi Kaydet</span>
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-2xl text-center text-gray-500">
-                    Öğrenci henüz teslim yapmadığı için puanlama formu kapalıdır.
+                    {selectedStudent.status === 'PENDING' && (
+                      <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                        Sınıf içi / Fiziksel Teslim Notlandırma
+                      </span>
+                    )}
                   </div>
-                )}
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">
+                        Puan (Max: {assignment.max_score}) *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        min={0}
+                        max={assignment.max_score}
+                        value={gradeScore}
+                        onChange={(e) => setGradeScore(Number(e.target.value))}
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl font-bold text-indigo-700 outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <label className="block font-semibold text-gray-700 mb-1">
+                        Öğretmen Geri Bildirim Notu
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="Öğrenciye çözümüne dair yönlendirici geri bildirim yazın..."
+                        value={gradeFeedback}
+                        onChange={(e) => setGradeFeedback(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="submit"
+                      disabled={isGrading}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      {isGrading ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                      <span>Puan ve Geri Bildirimi Kaydet</span>
+                    </button>
+                  </div>
+                </form>
               </div>
             ) : (
               <div className="h-full min-h-[300px] flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-2xl text-center text-gray-400 space-y-2">

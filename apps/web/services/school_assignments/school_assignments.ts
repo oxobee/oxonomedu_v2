@@ -4,7 +4,11 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests'
-import { generateAssignmentSubmissionsData } from '@services/demo/schoolDirectory'
+import {
+  generateAssignmentSubmissionsData,
+  ALL_CLASSROOMS,
+  generateClassroomAssignments,
+} from '@services/demo/schoolDirectory'
 import { createBoard } from '@services/boards/boards'
 
 export const CUSTOM_ASSIGNMENTS_STORAGE_KEY = 'oxonom_custom_school_assignments_v2'
@@ -261,19 +265,19 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     subject: 'Matematik',
     tool_type: 'WHITEBOARD',
     board_uuid: 'board_6be7ebed-4c00-4243-9a9b-ffef9933803b',
+    usergroup_ids: [101],
+    classes: [{ id: 101, name: '1-A Şubesi', code: '1-A' }],
     due_date: '2026-10-15T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Özlem ZOR',
-    total_submissions: 28,
-    graded_submissions: 26,
-    average_score: 94,
+    total_submissions: 0,
+    graded_submissions: 0,
+    average_score: null,
     submission: {
-      id: 501,
-      status: 'SUBMITTED',
-      submission_date: '2026-10-02T14:30:00',
-      score: 95,
-      teacher_feedback: 'Harika bir çalışma Erçil Evren, tebrikler!',
+      id: null,
+      status: 'PENDING',
+      score: null,
     },
   },
   {
@@ -285,19 +289,19 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     grade_category: 'İlkokul',
     subject: 'Türkçe',
     tool_type: 'READING',
+    usergroup_ids: [101],
+    classes: [{ id: 101, name: '1-A Şubesi', code: '1-A' }],
     due_date: '2026-10-16T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Özlem ZOR',
-    total_submissions: 26,
-    graded_submissions: 24,
-    average_score: 92,
+    total_submissions: 0,
+    graded_submissions: 0,
+    average_score: null,
     submission: {
-      id: 502,
-      status: 'SUBMITTED',
-      submission_date: '2026-10-02T15:10:00',
-      score: 92,
-      teacher_feedback: 'Okuma akıcılığın harika gelişiyor.',
+      id: null,
+      status: 'PENDING',
+      score: null,
     },
   },
   {
@@ -309,16 +313,19 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     grade_category: 'İlkokul',
     subject: 'Türkçe',
     tool_type: 'WORKSHEET',
+    usergroup_ids: [101],
+    classes: [{ id: 101, name: '1-A Şubesi', code: '1-A' }],
     due_date: '2026-10-18T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Özlem ZOR',
-    total_submissions: 25,
-    graded_submissions: 22,
-    average_score: 90,
+    total_submissions: 0,
+    graded_submissions: 0,
+    average_score: null,
     submission: {
       id: null,
       status: 'PENDING',
+      score: null,
     },
   },
   {
@@ -331,13 +338,20 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     subject: 'Matematik',
     tool_type: 'WHITEBOARD',
     board_uuid: 'board_2aa88e1a-dcc0-451b-9924-4b075f3f8e2e',
+    usergroup_ids: [201],
+    classes: [{ id: 201, name: '5-A Şubesi', code: '5-A' }],
     due_date: '2026-10-20T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Esin AKKAN',
-    total_submissions: 29,
-    graded_submissions: 27,
-    average_score: 88,
+    total_submissions: 0,
+    graded_submissions: 0,
+    average_score: null,
+    submission: {
+      id: null,
+      status: 'PENDING',
+      score: null,
+    },
   },
   {
     id: 105,
@@ -348,13 +362,20 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     grade_category: 'Ortaokul',
     subject: 'Fen Bilimleri',
     tool_type: 'QUIZ',
+    usergroup_ids: [202],
+    classes: [{ id: 202, name: '6-A Şubesi', code: '6-A' }],
     due_date: '2026-10-22T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Murat ESEN',
-    total_submissions: 30,
-    graded_submissions: 29,
-    average_score: 95,
+    total_submissions: 0,
+    graded_submissions: 0,
+    average_score: null,
+    submission: {
+      id: null,
+      status: 'PENDING',
+      score: null,
+    },
   },
   {
     id: 106,
@@ -366,13 +387,20 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     subject: 'Sosyal Bilgiler',
     tool_type: 'WHITEBOARD',
     board_uuid: 'board_93a22f1c-4071-4fbc-b42a-82411a2a9faf',
+    usergroup_ids: [203],
+    classes: [{ id: 203, name: '7-A Şubesi', code: '7-A' }],
     due_date: '2026-10-25T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Makbule YILDIRIM',
-    total_submissions: 27,
-    graded_submissions: 25,
-    average_score: 87,
+    total_submissions: 0,
+    graded_submissions: 0,
+    average_score: null,
+    submission: {
+      id: null,
+      status: 'PENDING',
+      score: null,
+    },
   },
   {
     id: 107,
@@ -384,13 +412,20 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     subject: 'Matematik',
     tool_type: 'WHITEBOARD',
     board_uuid: 'board_2ec16e01-3744-4a40-93dc-228016b8a937',
+    usergroup_ids: [204],
+    classes: [{ id: 204, name: '8-A Şubesi', code: '8-A' }],
     due_date: '2026-10-26T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Gülümser ERMEZ',
-    total_submissions: 30,
-    graded_submissions: 30,
-    average_score: 91,
+    total_submissions: 0,
+    graded_submissions: 0,
+    average_score: null,
+    submission: {
+      id: null,
+      status: 'PENDING',
+      score: null,
+    },
   },
 ]
 
@@ -426,7 +461,16 @@ export async function getSchoolAssignments(
   } catch (_e) {}
 
   if (list.length === 0) {
-    list = [...DEFAULT_SCHOOL_ASSIGNMENTS]
+    if (filters.usergroup_id) {
+      const targetClass = ALL_CLASSROOMS.find((c) => c.id === filters.usergroup_id)
+      if (targetClass) {
+        list = generateClassroomAssignments(targetClass) as any
+      } else {
+        list = DEFAULT_SCHOOL_ASSIGNMENTS.filter((a) => !a.usergroup_ids || a.usergroup_ids.includes(filters.usergroup_id!))
+      }
+    } else {
+      list = [...DEFAULT_SCHOOL_ASSIGNMENTS]
+    }
   }
 
   // Merge client-side stored custom assignments
@@ -470,13 +514,15 @@ export async function getSchoolAssignmentDetail(
 
 export async function getStudentAssignments(
   orgId: number,
-  accessToken: string
+  accessToken: string,
+  usergroupId?: number | null
 ): Promise<SchoolAssignmentItem[]> {
   let list = DEFAULT_SCHOOL_ASSIGNMENTS
   try {
     const targetOrgId = orgId || 1
+    const param = usergroupId ? `&usergroup_id=${usergroupId}` : ''
     const result = await fetch(
-      `${getAPIUrl()}school_assignments/student/my_assignments?org_id=${targetOrgId}`,
+      `${getAPIUrl()}school_assignments/student/my_assignments?org_id=${targetOrgId}${param}`,
       RequestBodyWithAuthHeader('GET', null, null, accessToken || '')
     )
     if (result.ok) {
@@ -485,33 +531,61 @@ export async function getStudentAssignments(
     }
   } catch (_e) {}
 
+  if (usergroupId) {
+    const targetClass = ALL_CLASSROOMS.find((c) => c.id === usergroupId)
+    if (targetClass) {
+      list = generateClassroomAssignments(targetClass) as any
+    } else {
+      list = DEFAULT_SCHOOL_ASSIGNMENTS.filter((a) => !a.usergroup_ids || a.usergroup_ids.includes(usergroupId))
+    }
+  }
+
   // Merge stored custom assignments
   const stored = getStoredCustomAssignments(orgId)
+  const filteredStored = usergroupId
+    ? stored.filter((a) => !a.usergroup_ids || a.usergroup_ids.length === 0 || a.usergroup_ids.includes(usergroupId))
+    : stored
   const existingUuids = new Set(list.map((a) => a.assignment_uuid))
-  const newFromStored = stored.filter((a) => !existingUuids.has(a.assignment_uuid))
+  const newFromStored = filteredStored.filter((a) => !existingUuids.has(a.assignment_uuid))
   list = [...newFromStored, ...list]
 
   if (typeof window !== 'undefined') {
     try {
       list = list.map((asg) => {
+        let sub = asg.submission
         const saved = localStorage.getItem(`oxonom_submission_${asg.assignment_uuid}`)
         if (saved) {
           const parsed = JSON.parse(saved)
-          return {
-            ...asg,
-            submission: {
-              id: parsed.submission_id || 501,
-              status: parsed.status || (parsed.is_late ? 'LATE' : 'SUBMITTED'),
-              submission_date: parsed.submission_date,
-              is_late: Boolean(parsed.is_late),
-              late_duration_text: parsed.late_duration_text || '',
-              student_content: parsed.student_content,
-              score: asg.submission?.score ?? null,
-              teacher_feedback: asg.submission?.teacher_feedback ?? null,
-            },
+          sub = {
+            id: parsed.submission_id || 501,
+            status: parsed.status || (parsed.is_late ? 'LATE' : 'SUBMITTED'),
+            submission_date: parsed.submission_date,
+            is_late: Boolean(parsed.is_late),
+            late_duration_text: parsed.late_duration_text || '',
+            student_content: parsed.student_content,
+            score: asg.submission?.score ?? null,
+            teacher_feedback: asg.submission?.teacher_feedback ?? null,
           }
         }
-        return asg
+        // Also check teacher grade
+        const savedGrades = localStorage.getItem(`oxonom_grades_${asg.assignment_uuid}`)
+        if (savedGrades) {
+          const parsedG = JSON.parse(savedGrades)
+          const myGrade = parsedG[1001] || parsedG['ogrenci']
+          if (myGrade && typeof myGrade.score === 'number') {
+            sub = {
+              ...(sub || { id: 501 }),
+              status: 'GRADED',
+              score: myGrade.score,
+              teacher_feedback: myGrade.teacher_feedback || null,
+              graded_at: myGrade.graded_at || null,
+            }
+          }
+        }
+        return {
+          ...asg,
+          submission: sub,
+        }
       })
     } catch {}
   }
@@ -583,10 +657,12 @@ export async function getAssignmentSubmissions(
     (a) => a.assignment_uuid === assignmentUuid || String(a.id) === assignmentUuid
   ) || DEFAULT_SCHOOL_ASSIGNMENTS[0]
 
+  const targetClass = usergroupId ? ALL_CLASSROOMS.find((c) => c.id === usergroupId) : undefined
+
   let studentsData: StudentSubmissionRow[] = []
   let totalStudents = 30
-  let submittedCount = 25
-  let gradedCount = 16
+  let submittedCount = 0
+  let gradedCount = 0
 
   try {
     const param = usergroupId ? `?usergroup_id=${usergroupId}` : ''
@@ -606,7 +682,7 @@ export async function getAssignmentSubmissions(
   } catch (_e) {}
 
   if (studentsData.length === 0) {
-    const fallbackData = generateAssignmentSubmissionsData(assignmentUuid, undefined, match?.due_date)
+    const fallbackData = generateAssignmentSubmissionsData(assignmentUuid, targetClass, match?.due_date)
     studentsData = fallbackData.students as any
     totalStudents = fallbackData.total_students
     submittedCount = fallbackData.submitted_count
@@ -635,7 +711,32 @@ export async function getAssignmentSubmissions(
         })
       }
     } catch {}
+
+    // Merge any browser teacher grades
+    try {
+      const gradesRaw = localStorage.getItem(`oxonom_grades_${assignmentUuid}`)
+      if (gradesRaw) {
+        const parsedGrades = JSON.parse(gradesRaw)
+        studentsData = studentsData.map((s) => {
+          const g = parsedGrades[s.user_id] || parsedGrades[s.username]
+          if (g && typeof g.score === 'number') {
+            return {
+              ...s,
+              status: 'GRADED',
+              score: g.score,
+              teacher_feedback: g.teacher_feedback || null,
+              submission_id: g.submission_id || s.submission_id || 500 + s.user_id,
+              submission_date: g.graded_at || s.submission_date || new Date().toISOString(),
+            }
+          }
+          return s
+        })
+      }
+    } catch {}
   }
+
+  submittedCount = studentsData.filter((s) => s.status !== 'PENDING').length
+  gradedCount = studentsData.filter((s) => s.status === 'GRADED').length
 
   return {
     assignment: match,
@@ -651,12 +752,37 @@ export async function gradeSubmission(
   payload: {
     score: number
     teacher_feedback?: string
+    assignment_uuid?: string
+    user_id?: number
   },
   accessToken: string
 ) {
-  const result = await fetch(
-    `${getAPIUrl()}school_assignments/submissions/${submissionId}/grade`,
-    RequestBodyWithAuthHeader('POST', payload, null, accessToken)
-  )
-  return errorHandling(result)
+  if (typeof window !== 'undefined' && payload.assignment_uuid && payload.user_id) {
+    try {
+      const key = `oxonom_grades_${payload.assignment_uuid}`
+      const existing = JSON.parse(localStorage.getItem(key) || '{}')
+      existing[payload.user_id] = {
+        score: payload.score,
+        teacher_feedback: payload.teacher_feedback || null,
+        submission_id: submissionId,
+        graded_at: new Date().toISOString(),
+      }
+      localStorage.setItem(key, JSON.stringify(existing))
+      window.dispatchEvent(
+        new CustomEvent('oxonom_assignments_updated', {
+          detail: { assignmentUuid: payload.assignment_uuid, userId: payload.user_id },
+        })
+      )
+    } catch (_) {}
+  }
+
+  try {
+    const result = await fetch(
+      `${getAPIUrl()}school_assignments/submissions/${submissionId}/grade`,
+      RequestBodyWithAuthHeader('POST', payload, null, accessToken)
+    )
+    return await errorHandling(result)
+  } catch (_e) {
+    return { success: true, message: 'Not ve değerlendirme başarıyla kaydedildi.' }
+  }
 }

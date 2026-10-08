@@ -810,8 +810,13 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
     }
 
     // 5. Single assignment detail or full list
-    const classAssignments = generateClassroomAssignments(activeClassItem)
-    const allAssignments = [...SERVER_CUSTOM_ASSIGNMENTS, ...classAssignments]
+    const usergroupIdParam = request.nextUrl.searchParams.get('usergroup_id')
+    const targetClass = usergroupIdParam ? (ALL_CLASSROOMS.find((c) => c.id === Number(usergroupIdParam)) || activeClassItem) : activeClassItem
+    const classAssignments = generateClassroomAssignments(targetClass)
+    const customFiltered = usergroupIdParam
+      ? SERVER_CUSTOM_ASSIGNMENTS.filter((a: any) => !a.usergroup_ids || a.usergroup_ids.length === 0 || a.usergroup_ids.includes(Number(usergroupIdParam)))
+      : SERVER_CUSTOM_ASSIGNMENTS
+    const allAssignments = [...customFiltered, ...classAssignments]
     const parts = path.split('/')
     const asgId = parts[parts.length - 1]
     if (asgId && asgId !== 'school_assignments' && asgId !== 'assignments' && asgId !== 'org') {

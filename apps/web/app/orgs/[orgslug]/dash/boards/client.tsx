@@ -41,6 +41,7 @@ import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
+import BoardSettingsModal from '@components/Dashboard/Boards/BoardSettingsModal'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -275,6 +276,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
   const [selectedSubject, setSelectedSubject] = useState<string>('all')
   const [selectedDate, setSelectedDate] = useState<string>('all')
   const [selectedBoards, setSelectedBoards] = useState<Set<string>>(new Set())
+  const [settingsBoard, setSettingsBoard] = useState<any | null>(null)
   const [activeClassCode, setActiveClassCode] = useState<string>('1-A')
 
   // Resolve active classroom for student
@@ -748,6 +750,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                 onToggleSelect={toggleBoardSelection}
                 onDuplicate={handleDuplicateBoard}
                 onDelete={handleDeleteBoard}
+                onOpenSettings={(b) => setSettingsBoard(b)}
               />
             ))}
 
@@ -794,6 +797,20 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
             {t('boards.pagination.page_of', { current: currentPage, total: totalPages, defaultValue: `Sayfa ${currentPage} / ${totalPages}` })}
           </div>
         )}
+
+        {settingsBoard && (
+          <BoardSettingsModal
+            board={settingsBoard}
+            isOpen={!!settingsBoard}
+            onClose={() => setSettingsBoard(null)}
+            accessToken={access_token}
+            orgslug={orgslug}
+            onDeleteBoard={handleDeleteBoard}
+            onBoardUpdated={(_updatedBoard) => {
+              queryClient.invalidateQueries({ queryKey: queryKeys.boards.list(orgslug) })
+            }}
+          />
+        )}
       </div>
     </FeatureGate>
   )
@@ -809,6 +826,7 @@ function BoardCard({
   onToggleSelect,
   onDuplicate,
   onDelete,
+  onOpenSettings,
 }: {
   board: any
   orgslug: string
@@ -819,18 +837,15 @@ function BoardCard({
   onToggleSelect: (_boardUuid: string) => void
   onDuplicate: (_boardUuid: string) => Promise<void>
   onDelete: (_boardUuid: string) => Promise<void>
+  onOpenSettings: (board: any) => void
 }) {
   const { t } = useTranslation()
   const thumbnailImage = board.thumbnail_image
     ? getBoardThumbnailMediaDirectory(orgUuid, board.board_uuid, board.thumbnail_image)
     : ''
 
-  // For students: Clicking opens the board directly.
-  // For teachers/admins: Clicking opens settings.
+  // For students & teachers: Clicking opens the board directly.
   const boardOpenLink = `/board/${board.board_uuid.replace('board_', '')}`
-  const targetLink = isStudent
-    ? boardOpenLink
-    : getUriWithOrg(orgslug, `/dash/boards/${board.board_uuid.replace('board_', '')}/general`)
 
   const handleSelectClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -881,6 +896,7 @@ function BoardCard({
           orgId={orgId}
           onDuplicate={onDuplicate}
           onDelete={onDelete}
+          onOpenSettings={onOpenSettings}
         />
       )}
 
@@ -969,7 +985,7 @@ function BoardCard({
             <span>{board.member_count || 24} Öğrenci</span>
           </div>
 
-          {/* Action buttons: BOTH students and teachers can open the board directly! */}
+          {/* Action buttons */}
           <div className="flex items-center gap-2">
             <Link
               href={boardOpenLink}
@@ -980,14 +996,19 @@ function BoardCard({
             </Link>
 
             {!isStudent && (
-              <Link
-                href={targetLink}
-                className="text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1 px-2 py-1.5 rounded-xl hover:bg-gray-100"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onOpenSettings(board)
+                }}
+                className="text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1 px-2 py-1.5 rounded-xl hover:bg-gray-100 cursor-pointer"
                 title="Pano Ayarları"
               >
                 <span>Ayarlar</span>
                 <Settings2 size={12} />
-              </Link>
+              </button>
             )}
           </div>
         </div>
@@ -996,12 +1017,13 @@ function BoardCard({
   )
 }
 
-function BoardCardOptions({ board, orgslug, orgId, onDuplicate, onDelete }: {
+function BoardCardOptions({ board, orgslug, orgId, onDuplicate, onDelete, onOpenSettings }: {
   board: any
   orgslug: string
   orgId: number
   onDuplicate: (_boardUuid: string) => Promise<void>
   onDelete: (_boardUuid: string) => Promise<void>
+  onOpenSettings: (board: any) => void
 }) {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -1030,10 +1052,14 @@ function BoardCardOptions({ board, orgslug, orgId, onDuplicate, onDelete }: {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={getUriWithOrg(orgslug, `/dash/boards/${board.board_uuid.replace('board_', '')}/general`)} className="flex items-center gap-2 cursor-pointer text-xs font-semibold py-2 px-3 rounded-xl">
+              <button
+                type="button"
+                onClick={() => onOpenSettings(board)}
+                className="w-full text-start flex items-center gap-2 cursor-pointer text-xs font-semibold py-2 px-3 rounded-xl hover:bg-gray-50"
+              >
                 <Settings2 className="h-4 w-4 text-gray-500" />
                 <span>Pano Ayarları</span>
-              </Link>
+              </button>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <ConfirmationModal

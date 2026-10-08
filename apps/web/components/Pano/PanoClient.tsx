@@ -2097,8 +2097,18 @@ export default function PanoClient() {
     return (selectedClass.boardCount && selectedClass.boardCount > computedTotal) ? selectedClass.boardCount : computedTotal
   }, [selectedClass])
 
+  const [assignmentsUpdatedTrigger, setAssignmentsUpdatedTrigger] = useState(0)
+
+  useEffect(() => {
+    const handleUpdated = () => {
+      setAssignmentsUpdatedTrigger((prev) => prev + 1)
+    }
+    window.addEventListener('oxonom_assignments_updated', handleUpdated)
+    return () => window.removeEventListener('oxonom_assignments_updated', handleUpdated)
+  }, [])
+
   const liveAssignmentCount = useMemo(() => {
-    if (!selectedClass) return 3
+    if (!selectedClass) return 0
     let count = 0
     try {
       const classItem = ALL_CLASSROOMS.find(c => c.id === selectedClass.id) || {
@@ -2112,24 +2122,24 @@ export default function PanoClient() {
       const asgs = generateClassroomAssignments(classItem as any)
       count = asgs.length
     } catch (_) {
-      count = 3
+      count = 0
     }
     if (typeof window !== 'undefined') {
       try {
-        const raw = localStorage.getItem('oxonom_custom_assignments')
+        const raw = localStorage.getItem('oxonom_custom_school_assignments_v2')
         if (raw) {
           const parsed = JSON.parse(raw)
           if (Array.isArray(parsed)) {
             const customClassAsgs = parsed.filter((a: any) =>
-              !a.usergroup_ids || a.usergroup_ids.includes(selectedClass.id)
+              !a.usergroup_ids || a.usergroup_ids.length === 0 || a.usergroup_ids.includes(selectedClass.id)
             )
             count += customClassAsgs.length
           }
         }
       } catch (_) {}
     }
-    return Math.max(3, count)
-  }, [selectedClass])
+    return count
+  }, [selectedClass, assignmentsUpdatedTrigger])
 
   const [savedAttendanceRate, setSavedAttendanceRate] = useState<string | null>(null)
 

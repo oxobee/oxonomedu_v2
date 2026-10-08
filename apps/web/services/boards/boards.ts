@@ -276,6 +276,9 @@ export async function updateBoard(
     features?: any
     share_type?: string
     share_code?: string | null
+    board_date?: string
+    creation_date?: string
+    has_code?: boolean
   },
   access_token?: string
 ) {
@@ -285,8 +288,50 @@ export async function updateBoard(
     (b) => b.board_uuid === boardUuid || b.board_uuid === `board_${clean}`
   )
   if (found) {
-    const updated = { ...found, ...data, update_date: new Date().toISOString() }
+    const updated = {
+      ...found,
+      ...data,
+      features: {
+        ...(found.features || {}),
+        ...(data.features || {}),
+        ...(data.board_date ? { board_date: data.board_date } : {}),
+      },
+      update_date: new Date().toISOString(),
+    }
     saveStoredCustomBoard(updated)
+  }
+
+  // Update in-memory caches so UI updates immediately
+  const clsIndex = ALL_CLASSROOM_BOARDS.findIndex(
+    (b: any) => b.board_uuid === boardUuid || b.board_uuid === `board_${clean}`
+  )
+  if (clsIndex !== -1) {
+    (ALL_CLASSROOM_BOARDS as any)[clsIndex] = {
+      ...ALL_CLASSROOM_BOARDS[clsIndex],
+      ...data,
+      features: {
+        ...((ALL_CLASSROOM_BOARDS[clsIndex] as any).features || {}),
+        ...(data.features || {}),
+        ...(data.board_date ? { board_date: data.board_date } : {}),
+      },
+      update_date: new Date().toISOString(),
+    }
+  }
+
+  const syncIndex = SYNCED_BOARDS.findIndex(
+    (b: any) => b.board_uuid === boardUuid || b.board_uuid === `board_${clean}`
+  )
+  if (syncIndex !== -1) {
+    (SYNCED_BOARDS as any)[syncIndex] = {
+      ...SYNCED_BOARDS[syncIndex],
+      ...data,
+      features: {
+        ...((SYNCED_BOARDS[syncIndex] as any).features || {}),
+        ...(data.features || {}),
+        ...(data.board_date ? { board_date: data.board_date } : {}),
+      },
+      update_date: new Date().toISOString(),
+    }
   }
 
   try {
