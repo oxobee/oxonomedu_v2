@@ -1324,10 +1324,10 @@ const EduOSWindow = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95, y: 15 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95, y: 15 }}
-      transition={{ type: "spring", duration: 0.35, bounce: 0.1 }}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.12, ease: "easeOut" }}
       onPointerDownCapture={onUserActivity}
       onMouseMoveCapture={onUserActivity}
       onTouchStartCapture={onUserActivity}
@@ -1395,6 +1395,7 @@ const EduOSWindow = ({
           ref={iframeRef}
           key={windowState.iframeKey}
           src={fullAppUrl}
+          loading="eager"
           onLoad={() => {
             setIframeLoaded(true)
             attachIframeActivityListeners()
@@ -2812,7 +2813,8 @@ export default function PanoClient() {
         {/* Right: Connection Status, Settings, Lock, Profile */}
         <div className="flex items-center gap-2.5 relative" ref={popupRef}>
           {/* Realtime Phone Remote Connection Status Pill (Interactive Modal Trigger) */}
-          {activeSessionId && (
+          {/* Mobil Uzaktan Kumanda Butonu (Kullanıcı İsteği ile Şimdilik Gizlendi) */}
+          {false && activeSessionId && (
             <button
               type="button"
               onClick={() => setIsRemotePairModalOpen(true)}
@@ -3426,20 +3428,35 @@ export default function PanoClient() {
         )}
       </AnimatePresence>
 
-      {/* 6. MACOS APPLICATION WINDOW MODAL (PENCERE İÇERİSİNDE AÇILAN EKRAN - HEADER VE FOOTER OLMADAN) */}
-      <AnimatePresence>
-        {activeWindow && (
-          <EduOSWindow
-            key={activeWindow.app.id}
-            windowState={activeWindow}
-            orgslug={orgslug}
-            onClose={() => handleCloseWindow(activeWindow.app.id)}
-            onToggleMaximize={() => handleToggleMaximizeWindow(activeWindow.app.id)}
-            onReload={() => handleReloadWindow(activeWindow.app.id)}
-            onUserActivity={recordActivity}
-          />
-        )}
-      </AnimatePresence>
+      {/* 6. APPLICATION WINDOWS WITH FAST KEEP-ALIVE CACHE (HIZ OPTİMİZASYONU) */}
+      {openWindows.map((win) => {
+        const isVisible = activeWindowId === win.app.id
+        return (
+          <div
+            key={win.app.id}
+            style={{ display: isVisible ? 'block' : 'none' }}
+          >
+            <EduOSWindow
+              windowState={win}
+              orgslug={orgslug}
+              onClose={() => handleCloseWindow(win.app.id)}
+              onToggleMaximize={() => handleToggleMaximizeWindow(win.app.id)}
+              onReload={() => handleReloadWindow(win.app.id)}
+              onUserActivity={recordActivity}
+            />
+          </div>
+        )
+      })}
+
+      {/* Background Pre-Warming of Shortcut Routes for 0-latency Window Opens */}
+      {selectedClass && (
+        <div className="hidden" aria-hidden="true">
+          <link rel="prefetch" href={`/orgs/${orgslug}/dash/classrooms/${selectedClass.id}?tab=attendance&onlyTab=1&chrome=none&pano=1`} />
+          <link rel="prefetch" href={`/orgs/${orgslug}/dash/boards?usergroupId=${selectedClass.id}&chrome=none&pano=1`} />
+          <link rel="prefetch" href={`/orgs/${orgslug}/dash/assignments?usergroupId=${selectedClass.id}&chrome=none&pano=1`} />
+          <link rel="prefetch" href={`/games?chrome=none&pano=1`} />
+        </div>
+      )}
 
       {/* 7. MOBILE BOTTOM DOCK (ÖĞRETMEN TELEFONU KONTROL DOCK'U) */}
       {isPhone && (

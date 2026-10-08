@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -15,7 +15,10 @@ import {
   Tv,
   ExternalLink,
   ChevronRight,
-  Maximize2
+  Maximize2,
+  LogOut,
+  GraduationCap,
+  Clock,
 } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useAuth } from '@components/Contexts/AuthContext'
@@ -27,6 +30,18 @@ interface ConnectBoardClientProps {
   initialSessionId?: string
   onSuccess?: () => void
   isModal?: boolean
+}
+
+interface ActiveBoardItem {
+  sessionId: string
+  code: string
+  status: string
+  pairedAt?: number | string
+  expiresAt?: number | string
+  className?: string | null
+  classId?: number | string | null
+  teacherName?: string
+  boardName?: string
 }
 
 export default function ConnectBoardClient({
@@ -54,6 +69,11 @@ export default function ConnectBoardClient({
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
+
+  // Active smart boards state
+  const [activeBoards, setActiveBoards] = useState<ActiveBoardItem[]>([])
+  const [isLoadingBoards, setIsLoadingBoards] = useState<boolean>(false)
+  const [loggingOutSessionId, setLoggingOutSessionId] = useState<string | null>(null)
 
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -245,6 +265,80 @@ export default function ConnectBoardClient({
     }
   }
 
+  // Active boards fetcher
+  const fetchActiveBoards = useCallback(async () => {
+    try {
+      setIsLoadingBoards(true)
+      const storedSessionId = typeof window !== 'undefined'
+        ? (localStorage.getItem('oxonom_pano_active_session_id') || sessionStorage.getItem('oxonom_pano_active_session_id') || '')
+        : ''
+
+      const params = new URLSearchParams()
+      if (user?.id) params.set('teacherId', String(user.id))
+      if (user?.email) params.set('email', user.email)
+      if (storedSessionId) params.set('sessionId', storedSessionId)
+      if (sessionId) params.set('sessionId', sessionId)
+
+      const res = await fetch(`/api/pano/pair/active-boards?${params.toString()}`)
+      const data = await res.json()
+      if (data.success && Array.isArray(data.boards)) {
+        setActiveBoards(data.boards)
+      }
+    } catch (err) {
+      console.error('[fetchActiveBoards] Error:', err)
+    } finally {
+      setIsLoadingBoards(false)
+    }
+  }, [user?.id, user?.email, sessionId])
+
+  // Polling every 3.5 seconds so board class selection / logout appears live on phone
+  useEffect(() => {
+    fetchActiveBoards()
+    const timer = setInterval(() => {
+      fetchActiveBoards()
+    }, 3500)
+    return () => clearInterval(timer)
+  }, [fetchActiveBoards])
+
+  // Teacher board logout handler
+  const handleLogoutBoard = async (sessId: string) => {
+    if (!confirm('Bu akıllı tahtadaki oturumunuzu kapatmak istediğinize emin misiniz?')) {
+      return
+    }
+    setLoggingOutSessionId(sessId)
+    try {
+      const res = await fetch('/api/pano/pair/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: sessId,
+          role: 'phone',
+          target: 'board_only',
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success('Akıllı tahta oturumu kapatıldı.')
+        setActiveBoards((prev) => prev.filter((b) => b.sessionId !== sessId))
+        if (typeof window !== 'undefined') {
+          const stored = localStorage.getItem('oxonom_pano_active_session_id')
+          if (stored === sessId) {
+            localStorage.removeItem('oxonom_pano_active_session_id')
+            sessionStorage.removeItem('oxonom_pano_active_session_id')
+          }
+        }
+      } else {
+        toast.error(data.error || 'Çıkış yapılamadı.')
+      }
+    } catch (err) {
+      console.error('[LogoutBoard] Error:', err)
+      toast.error('Bağlantı hatası.')
+    } finally {
+      setLoggingOutSessionId(null)
+      fetchActiveBoards()
+    }
+  }
+
   // Teacher Pair Confirmation
   const handleConfirmPair = async (codeToSubmit?: string, sessId?: string) => {
     const code = codeToSubmit || digits.join('')
@@ -320,11 +414,9 @@ export default function ConnectBoardClient({
           localStorage.setItem('oxonom_pano_device_type', 'phone')
           localStorage.setItem('oxonom_pano_paired_session', JSON.stringify(teacherData))
         }
-        toast.success('Akıllı tahta başarıyla eşleştirildi! Uzaktan kumanda açılıyor...')
+        toast.success('Akıllı tahta başarıyla eşleştirildi! Tahtada sınıfınızı seçebilirsiniz.')
         if (onSuccess) onSuccess()
-        setTimeout(() => {
-          router.push(`/remote?session=${encodeURIComponent(confirmedSessionId)}&token=${encodeURIComponent(phoneToken)}`)
-        }, 1200)
+        fetchActiveBoards()
       } else {
         setErrorMessage(data.error || 'Eşleştirme başarısız oldu. Lütfen kodu kontrol edin.')
         toast.error(data.error || 'Eşleştirme başarısız.')
@@ -341,7 +433,110 @@ export default function ConnectBoardClient({
   }
 
   return (
-    <div className={`w-full max-w-xl mx-auto ${isModal ? 'p-1' : 'p-4 sm:p-6'}`}>
+    <div className={`w-full max-w-xl mx-auto space-y-6 ${isModal ? 'p-1' : 'p-4 sm:p-6'}`}>
+      {/* ACTIVE SMART BOARDS LIST */}
+      {activeBoards.length > 0 && (
+        <div className="bg-white dark:bg-[#121215] rounded-3xl border border-emerald-500/30 dark:border-emerald-500/20 shadow-xl overflow-hidden">
+          <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-950 via-slate-900 to-black text-white flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                <Tv className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
+                  <span>Açık Akıllı Tahtalarım</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    {activeBoards.length} Aktif
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-300">
+                  Şu an açık olan ve hesabınızla eşleşmiş tahtalar
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => fetchActiveBoards()}
+              disabled={isLoadingBoards}
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all cursor-pointer"
+              title="Yenile"
+            >
+              <RotateCw className={`w-4 h-4 ${isLoadingBoards ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+
+          <div className="p-4 sm:p-5 space-y-3">
+            {activeBoards.map((board) => (
+              <div
+                key={board.sessionId}
+                className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 flex flex-col gap-3 transition-all hover:border-emerald-500/40"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      {board.boardName || 'Oxonom Akıllı Tahta'}
+                    </span>
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-lg bg-gray-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-bold">
+                      Kod: {board.code}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+                    Çevrimiçi
+                  </span>
+                </div>
+
+                {/* Sınıf / Şube Bilgisi */}
+                {board.className ? (
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200">
+                    <GraduationCap className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                        Giriş Yapılan Şube
+                      </div>
+                      <div className="text-sm font-black text-emerald-950 dark:text-emerald-100">
+                        {board.className}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-900 dark:text-amber-200">
+                    <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                        Şube Durumu
+                      </div>
+                      <div className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                        Tahtada sınıf seçimi bekleniyor...
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Çıkış Yap Butonu */}
+                <button
+                  type="button"
+                  onClick={() => handleLogoutBoard(board.sessionId)}
+                  disabled={loggingOutSessionId === board.sessionId}
+                  className="w-full py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 active:bg-rose-200 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {loggingOutSessionId === board.sessionId ? (
+                    <RotateCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <LogOut className="w-4 h-4" />
+                  )}
+                  <span>Tahtadan Çıkış Yap</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CONNECT TO BOARD CARD */}
       <div className="bg-white dark:bg-[#121215] rounded-3xl border border-gray-200/80 dark:border-white/10 shadow-xl overflow-hidden">
         {/* Header Banner */}
         <div className="p-6 bg-gradient-to-br from-indigo-900 via-slate-900 to-black text-white relative overflow-hidden">
@@ -352,7 +547,7 @@ export default function ConnectBoardClient({
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-                <span>Tahtaya Bağlan</span>
+                <span>{activeBoards.length > 0 ? 'Yeni Bir Tahtaya Bağlan' : 'Tahtaya Bağlan'}</span>
                 <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
                   CANLI
                 </span>
@@ -410,7 +605,7 @@ export default function ConnectBoardClient({
                   Tahtaya Bağlanıldı!
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-300 max-w-sm mb-6 leading-relaxed">
-                  Akıllı tahta artık <strong>{user?.first_name || 'Öğretmen'}</strong> profiliniz ve sınıflarınızla senkronize çalışıyor.
+                  Akıllı tahta artık <strong>{user?.first_name || 'Öğretmen'}</strong> profiliniz ve sınıflarınızla senkronize çalışıyor. Tahtada sınıfınızı seçebilirsiniz.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs">
@@ -420,19 +615,9 @@ export default function ConnectBoardClient({
                       setIsSuccess(false)
                       setDigits(['', '', '', '', '', ''])
                     }}
-                    className="w-full py-3 px-4 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-slate-700 dark:text-white text-xs font-bold transition-all cursor-pointer"
-                  >
-                    Başka Tahta Eşleştir
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      router.push(`/pano?session=${encodeURIComponent(sessionId || '')}&device=phone`)
-                    }}
                     className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <span>Pano'yu Aç</span>
+                    <span>Tahtaları Görüntüle</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>

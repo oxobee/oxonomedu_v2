@@ -9,19 +9,22 @@ import {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}))
-    const { sessionId } = body
+    const { sessionId, role, target } = body
 
     if (sessionId) {
       await closePanoSession(sessionId)
     }
 
     const response = NextResponse.json({ success: true, message: 'Tahta oturumu sonlandırıldı.' })
-    const cookieOptions = getCookieOptions(req)
 
-    response.cookies.set(ACCESS_TOKEN_COOKIE, '', { ...cookieOptions, maxAge: 0 })
-    response.cookies.set(REFRESH_TOKEN_COOKIE, '', { ...cookieOptions, maxAge: 0 })
-    response.cookies.set('LH_session', '', { ...cookieOptions, httpOnly: false, maxAge: 0 })
-    response.cookies.set('LH_org', '', { ...cookieOptions, httpOnly: false, maxAge: 0 })
+    // Only clear browser cookies if the board itself is logging out (not a mobile remote logout)
+    if (role !== 'phone' && target !== 'board_only') {
+      const cookieOptions = getCookieOptions(req)
+      response.cookies.set(ACCESS_TOKEN_COOKIE, '', { ...cookieOptions, maxAge: 0 })
+      response.cookies.set(REFRESH_TOKEN_COOKIE, '', { ...cookieOptions, maxAge: 0 })
+      response.cookies.set('LH_session', '', { ...cookieOptions, httpOnly: false, maxAge: 0 })
+      response.cookies.set('LH_org', '', { ...cookieOptions, httpOnly: false, maxAge: 0 })
+    }
 
     return response
   } catch (error: any) {

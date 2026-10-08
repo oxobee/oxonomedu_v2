@@ -88,6 +88,8 @@ export function usePanoSync({
   const handleSelectClass = useCallback((cls: ClassroomItem | null) => {
     setSelectedClass(cls)
     setIsClassModalOpen(false)
+    setOpenWindows([])
+    setActiveWindowId(null)
     if (typeof window !== 'undefined') {
       if (cls) {
         localStorage.setItem('oxonom_pano_selected_class_id', String(cls.id))
@@ -151,11 +153,8 @@ export function usePanoSync({
         break
       }
       case 'CLOSE_WINDOW': {
-        setOpenWindows(prev => {
-          const remaining = prev.filter(w => w.app.id !== action.windowId)
-          setActiveWindowId(curr => curr === action.windowId ? (remaining.length > 0 ? remaining[remaining.length - 1].app.id : null) : curr)
-          return remaining
-        })
+        // Fast keep-alive: do not destroy iframe DOM, simply return to desktop
+        setActiveWindowId(null)
         break
       }
       case 'TOGGLE_MAXIMIZE': {

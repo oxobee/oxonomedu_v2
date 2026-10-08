@@ -1101,3 +1101,63 @@ export async function closePanoSession(sessionId: string, reason = 'user_logout'
     console.error('[PanoStore] closePanoSession DB error:', err)
   }
 }
+
+export async function getActivePanoSessionsForTeacher(
+  teacherId?: number | string | null,
+  email?: string | null,
+  activeSessionIdFallback?: string | null
+): Promise<PanoPairSession[]> {
+  const now = Date.now()
+  const results: Map<string, PanoPairSession> = new Map()
+
+  // 1. Check in MongoDB
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      const orClauses: any[] = []
+      if (teacherId) orClauses.push({ 'teacherData.id': Number(teacherId) }, { 'teacherData.id': String(teacherId) })
+      if (email) orClauses.push({ 'teacherData.email': email.toLowerCase() })
+      if (activeSessionIdFallback) orClauses.push({ sessionId: activeSessionIdFallback })
+
+      const query: any = {
+        status: { $in: ['paired', 'waiting'] },
+        expiresAt: { $gt: now },
+      }
+      if (orClauses.length > 0) {
+        query.$or = orClauses
+      }
+
+      const docs = await coll.find(query).sort({ pairedAt: -1, createdAt: -1 }).limit(20).toArray()
+      for (const d of docs) {
+        const { _id, ...clean } = d as any
+        results.set(clean.sessionId, clean as PanoPairSession)
+      }
+    }
+  } catch (_) {}
+
+  // 2. Check in memory store
+  for (const s of store.memorySessions.values()) {
+    if ((s.status === 'paired' || s.status === 'waiting') && s.expiresAt > now) {
+      const matchesTeacher =
+        (teacherId && (String(s.teacherData?.id) === String(teacherId))) ||
+        (email && s.teacherData?.email?.toLowerCase() === email.toLowerCase()) ||
+        (activeSessionIdFallback && s.sessionId === activeSessionIdFallback)
+
+      if (matchesTeacher || (!teacherId && !email && s.status === 'paired')) {
+        results.set(s.sessionId, s)
+      }
+    }
+  }
+
+  // 3. Fallback for specific sessionId
+  if (activeSessionIdFallback && !results.has(activeSessionIdFallback)) {
+    try {
+      const s = await getPanoSession(activeSessionIdFallback)
+      if (s && (s.status === 'paired' || s.status === 'waiting') && s.expiresAt > now) {
+        results.set(s.sessionId, s)
+      }
+    } catch (_) {}
+  }
+
+  return Array.from(results.values())
+}
