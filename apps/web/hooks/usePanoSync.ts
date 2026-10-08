@@ -95,12 +95,13 @@ export function usePanoSync({
         localStorage.removeItem('oxonom_pano_selected_class_id')
       }
     }
-    if (activeSessionId) {
+    const sId = activeSessionId || (typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_active_session_id') : null)
+    if (sId) {
       fetch('/api/pano/pair/state', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sessionId: activeSessionId,
+          sessionId: sId,
           patch: {
             selectedClassId: cls ? cls.id : null,
             selectedClass: cls || null,

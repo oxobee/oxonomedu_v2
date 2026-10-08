@@ -337,7 +337,17 @@ export default function ClassDetailClient({ orgslug, classroomId }: ClassDetailC
 
   // Save Attendance
   const handleSaveAttendance = () => {
-    toast.success(`${attendanceDate} tarihli yoklama kaydedildi!`)
+    if (typeof window !== 'undefined' && classroomId) {
+      localStorage.setItem(`oxonom_attendance_${classroomId}`, JSON.stringify({
+        rate: attendanceStats.rate,
+        date: attendanceDate,
+        present: attendanceStats.present,
+        absent: attendanceStats.absent,
+        total: students.length,
+      }))
+      window.dispatchEvent(new CustomEvent('oxonom_attendance_updated'))
+    }
+    toast.success(`${attendanceDate} tarihli yoklama kaydedildi! (Katılım: %${attendanceStats.rate})`)
   }
 
   // Filter students

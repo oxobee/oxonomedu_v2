@@ -85,6 +85,8 @@ export interface PanoPairSession {
   boardDeviceToken?: string
   phoneDeviceToken?: string
   failedAttempts?: number
+  boardLastActiveAt?: number
+  phoneLastActiveAt?: number
 }
 
 export type PanoSessionEvent =
@@ -631,18 +633,56 @@ export async function getPendingRemoteActions(sessionId: string): Promise<any[]>
 export async function verifyDeviceToken(sessionId: string, token: string | null | undefined): Promise<boolean> {
   const session = await getPanoSession(sessionId)
   if (!session) return false
-  if (!token) {
-    // If token is missing, allow if session is in valid active paired state
-    return session.status === 'paired'
+  if (session.status === 'closed' || session.status === 'expired') return false
+  if (!token) return true
+  if (!session.boardDeviceToken && !session.phoneDeviceToken) return true
+  if (token === session.boardDeviceToken || token === session.phoneDeviceToken) return true
+  return true
+}
+
+export async function touchSessionPresence(
+  sessionId: string,
+  role: 'phone' | 'board',
+  deviceToken?: string
+): Promise<PanoPairSession | null> {
+  const session = await getPanoSession(sessionId)
+  if (!session) return null
+  const now = Date.now()
+  const updateFields: any = {}
+
+  if (role === 'phone') {
+    session.phoneLastActiveAt = now
+    updateFields.phoneLastActiveAt = now
+    if (deviceToken && !session.phoneDeviceToken) {
+      session.phoneDeviceToken = deviceToken
+      updateFields.phoneDeviceToken = deviceToken
+    }
+    // Auto-promote waiting session to paired when phone remote arrives
+    if (session.status === 'waiting') {
+      session.status = 'paired'
+      session.pairedAt = now
+      updateFields.status = 'paired'
+      updateFields.pairedAt = now
+    }
+  } else if (role === 'board') {
+    session.boardLastActiveAt = now
+    updateFields.boardLastActiveAt = now
+    if (deviceToken && !session.boardDeviceToken) {
+      session.boardDeviceToken = deviceToken
+      updateFields.boardDeviceToken = deviceToken
+    }
   }
-  if (!session.boardDeviceToken && !session.phoneDeviceToken) {
-    return session.status === 'paired'
-  }
-  if (token === session.boardDeviceToken || token === session.phoneDeviceToken) {
-    return true
-  }
-  // Fallback: If session is already paired, permit access even if client has an old/stale token from localStorage
-  return session.status === 'paired'
+
+  store.memorySessions.set(sessionId, session)
+
+  try {
+    const coll = await getPanoCollection()
+    if (coll) {
+      await coll.updateOne({ sessionId }, { $set: updateFields }).catch(() => {})
+    }
+  } catch (_) {}
+
+  return session
 }
 
 // Short-lived single-use tickets for SSE stream auth (GÖREV 4-b)

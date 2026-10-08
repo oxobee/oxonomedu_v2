@@ -3,6 +3,7 @@ import {
   verifyDeviceToken,
   getPanoSession,
   getRecentRemoteActions,
+  touchSessionPresence,
 } from '@/lib/pano-pair/store'
 
 export const runtime = 'nodejs'
@@ -16,6 +17,11 @@ export async function GET(req: NextRequest) {
     }
 
     const token = req.nextUrl.searchParams.get('token') || req.headers.get('x-device-token')
+    const role = (req.nextUrl.searchParams.get('role') || 'unknown') as 'phone' | 'board' | 'unknown'
+
+    if (role === 'phone' || role === 'board') {
+      await touchSessionPresence(sessionId, role, token || undefined)
+    }
 
     let isAuthorized = false
     try {
@@ -35,15 +41,21 @@ export async function GET(req: NextRequest) {
     }
 
     const qSince = req.nextUrl.searchParams.get('since')
-    const sinceTimestamp = qSince ? Number(qSince) : Date.now() - 5000
+    const sinceTimestamp = qSince ? Number(qSince) : Date.now() - 15000
 
     const actions = await getRecentRemoteActions(sessionId, sinceTimestamp)
+
+    const isPhoneConnected = Boolean(
+      (session.phoneLastActiveAt && Date.now() - session.phoneLastActiveAt < 25000) ||
+      session.status === 'paired'
+    )
 
     return NextResponse.json({
       success: true,
       status: session.status,
       sharedState: session.sharedState,
       actions: actions || [],
+      isPhoneConnected,
       serverTime: Date.now(),
     })
   } catch (err: any) {

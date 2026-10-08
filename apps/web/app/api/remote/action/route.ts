@@ -3,6 +3,7 @@ import {
   verifyDeviceToken,
   getPanoSession,
   queueRemoteAction,
+  touchSessionPresence,
 } from '@/lib/pano-pair/store'
 import {
   ALLOWED_REMOTE_ACTIONS,
@@ -65,7 +66,8 @@ export async function POST(req: NextRequest) {
       sourceDeviceId: token ? 'phone' : 'unknown',
     }
 
-    // 5. Queue into MongoDB and broadcast in real time
+    // 5. Queue into MongoDB, update phone presence, and broadcast in real time
+    await touchSessionPresence(sessionId, 'phone', token)
     await queueRemoteAction(sessionId, actionMessage)
 
     return NextResponse.json({

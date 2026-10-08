@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
           name: c.name,
           gradeLevel: c.grade_level,
           studentCount: c.student_count || 30,
-          boardCount: c.boards_count || 4,
+          boardCount: c.boards_count || 5,
           attendance: '%100',
           teacherName: c.teacher_name,
           subject: 'Sınıf Öğretmeni',

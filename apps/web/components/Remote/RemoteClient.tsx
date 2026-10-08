@@ -188,6 +188,12 @@ export default function RemoteClient() {
       sse.onopen = () => {
         if (!isMounted) return
         setConnectionStatus('connected')
+        // Ping phone presence immediately
+        fetch(
+          `/api/remote/pending?sessionId=${encodeURIComponent(sessionId)}${
+            token ? `&token=${encodeURIComponent(token)}` : ''
+          }&role=phone`
+        ).catch(() => {})
       }
 
       sse.addEventListener('remote_connected', () => {
@@ -265,7 +271,7 @@ export default function RemoteClient() {
         const res = await fetch(
           `/api/remote/pending?sessionId=${encodeURIComponent(sessionId)}${
             token ? `&token=${encodeURIComponent(token)}` : ''
-          }&since=${lastPollTime}`
+          }&role=phone&since=${lastPollTime}`
         )
         if (res.ok) {
           const data = await res.json()
@@ -358,7 +364,7 @@ export default function RemoteClient() {
     setSelectedClassId(cls.id)
     setSelectedClass(cls)
     setClassName(cls.name)
-    await handleAction('SELECT_CLASS', { classId: cls.id, className: cls.name })
+    await handleAction('SELECT_CLASS', { classId: cls.id, className: cls.name, class: cls })
     toast.success(`${cls.name} seçildi! Kumanda aktif.`)
   }
 
