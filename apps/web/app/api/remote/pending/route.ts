@@ -19,6 +19,11 @@ export async function GET(req: NextRequest) {
     const token = req.nextUrl.searchParams.get('token') || req.headers.get('x-device-token')
     const role = (req.nextUrl.searchParams.get('role') || 'unknown') as 'phone' | 'board' | 'unknown'
 
+    const session = await getPanoSession(sessionId)
+    if (!session || session.status === 'closed' || session.status === 'expired') {
+      return NextResponse.json({ error: 'Oturum kapalı', code: 'session_closed' }, { status: 410 })
+    }
+
     if (role === 'phone' || role === 'board') {
       await touchSessionPresence(sessionId, role, token || undefined)
     }
@@ -33,11 +38,6 @@ export async function GET(req: NextRequest) {
 
     if (!isAuthorized) {
       return NextResponse.json({ error: 'Yetkisiz erişim' }, { status: 401 })
-    }
-
-    const session = await getPanoSession(sessionId)
-    if (!session || session.status === 'closed') {
-      return NextResponse.json({ error: 'Oturum kapalı', code: 'session_closed' }, { status: 410 })
     }
 
     const qSince = req.nextUrl.searchParams.get('since')

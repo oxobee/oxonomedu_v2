@@ -20,6 +20,14 @@ import {
   Search,
   User,
   XCircle,
+  FileText,
+  HelpCircle,
+  Eye,
+  EyeOff,
+  Sparkles,
+  BookOpen,
+  MessageSquare,
+  AlertCircle,
 } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -32,6 +40,14 @@ import {
 } from '@services/school_assignments/school_assignments'
 import AssignmentFileViewer from './AssignmentFileViewer'
 import AudioReviewPlayer from './AudioReviewPlayer'
+
+const QUICK_SCORES = [100, 95, 90, 85, 75, 60, 50]
+const QUICK_FEEDBACKS = [
+  '👏 Harika bir çalışma, tebrik ederim!',
+  '👍 Çözüm adımların doğru ve anlaşılır, eline sağlık.',
+  '💡 Çözümün genel olarak başarılı, küçük işlem hatalarına dikkat etmelisin.',
+  '📝 Eksik kısımları tamamlayıp tekrar incelemen faydalı olacaktır.',
+]
 
 interface AssignmentSubmissionsModalProps {
   isOpen: boolean
@@ -53,6 +69,7 @@ export default function AssignmentSubmissionsModal({
   const [searchQuery, setSearchQuery] = useState('')
   const [submissionFilter, setSubmissionFilter] = useState<'all' | 'ontime' | 'late' | 'pending'>('all')
   const [selectedStudent, setSelectedStudent] = useState<StudentSubmissionRow | null>(null)
+  const [isPreviewBoardOpen, setIsPreviewBoardOpen] = useState(false)
 
   // Grading form state
   const [gradeScore, setGradeScore] = useState<number>(100)
@@ -106,8 +123,37 @@ export default function AssignmentSubmissionsModal({
   const handleSelectStudent = (s: StudentSubmissionRow) => {
     if (!s) return
     setSelectedStudent(s)
+    setIsPreviewBoardOpen(false)
     setGradeScore(s.score ?? 100)
     setGradeFeedback(s.teacher_feedback || '')
+  }
+
+  const studentBoardUuid = selectedStudent
+    ? selectedStudent.student_content?.board_uuid ||
+      `board_${assignment.assignment_uuid.replace(/[^a-zA-Z0-9]/g, '').slice(0, 16)}_std_${selectedStudent.user_id}`
+    : ''
+  const studentBoardTitle = selectedStudent
+    ? selectedStudent.student_content?.board_title ||
+      `${selectedStudent.name} — ${assignment.title} Çözümü`
+    : ''
+
+  const handleOpenStudentBoard = (openInNewTab: boolean = true) => {
+    if (!selectedStudent || !assignment) return
+    if (typeof window !== 'undefined') {
+      try {
+        const studentDataKey = `oxonom_board_data_${studentBoardUuid}`
+        const existing = localStorage.getItem(studentDataKey)
+        if (!existing && assignment.board_uuid) {
+          const masterData = localStorage.getItem(`oxonom_board_data_${assignment.board_uuid}`)
+          if (masterData) {
+            localStorage.setItem(studentDataKey, masterData)
+          }
+        }
+      } catch (_) {}
+    }
+    if (openInNewTab) {
+      window.open(`/board/${studentBoardUuid}`, '_blank')
+    }
   }
 
   const handleSaveGrade = async (e: React.FormEvent) => {
@@ -413,71 +459,250 @@ export default function AssignmentSubmissionsModal({
                 </div>
 
                 {/* ÖĞRENCİ ÇÖZÜM İÇERİĞİ */}
-                <div className="space-y-3 p-4 bg-white border border-gray-200 rounded-2xl">
-                  <span className="font-bold text-gray-800 uppercase tracking-wider text-[11px]">
-                    Öğrenci Yanıtı & Çözüm Detayları
-                  </span>
+                <div className="space-y-3.5 p-4 bg-white border border-gray-200 rounded-2xl shadow-xs">
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                    <span className="font-bold text-gray-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <FileText size={14} className="text-indigo-600" />
+                      Öğrenci Yanıtı & Çözüm Detayları
+                    </span>
+                    <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2 py-0.5 rounded-md">
+                      Kategori: {assignment.tool_type}
+                    </span>
+                  </div>
 
-                  {/* WHITEBOARD ÖDEVİ TAHTA BAĞLANTISI */}
+                  {/* 1. WHITEBOARD ÖDEVİ DETAYI & BİREYSEL TAHTA */}
                   {assignment.tool_type === 'WHITEBOARD' && (
-                    <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-indigo-950 font-bold">
-                        <PenTool size={16} className="text-indigo-600" />
-                        <span>Akıllı Tahta Çözümü</span>
+                    <div className="p-3.5 bg-indigo-50/70 border border-indigo-200/90 rounded-2xl space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <PenTool size={16} className="text-indigo-600 shrink-0" />
+                            <h5 className="font-bold text-indigo-950 text-xs truncate">
+                              Bireysel Çözüm Tahtası: {selectedStudent.name}
+                            </h5>
+                          </div>
+                          <p className="text-[11px] text-indigo-900/70 mt-0.5">
+                            Öğrenciye özel tahsis edilen bireysel tahta kopyası. Çizimler diğer öğrencilerden bağımsızdır.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleOpenStudentBoard(false)
+                              setIsPreviewBoardOpen(!isPreviewBoardOpen)
+                            }}
+                            className="px-3 py-1.5 bg-white hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl border border-indigo-200 text-xs flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
+                          >
+                            {isPreviewBoardOpen ? <EyeOff size={13} /> : <Eye size={13} />}
+                            <span>{isPreviewBoardOpen ? 'Önizlemeyi Gizle' : 'Pencerede İncele'}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenStudentBoard(true)}
+                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
+                          >
+                            <span>Yeni Sekmede Aç</span>
+                            <ExternalLink size={13} />
+                          </button>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const boardUuid =
-                            selectedStudent.student_content?.board_uuid || assignment.board_uuid
-                          if (boardUuid) {
-                            window.open(`/board/${boardUuid}`, '_blank')
-                          } else {
-                            toast.error('Tahta bağlantısı bulunamadı.')
-                          }
-                        }}
-                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
-                      >
-                        <span>Tahtayı Aç ve İncele</span>
-                        <ExternalLink size={13} />
-                      </button>
+
+                      {/* İnteraktif Önizleme Penceresi */}
+                      {isPreviewBoardOpen && (
+                        <div className="rounded-xl overflow-hidden border border-indigo-200 shadow-inner bg-slate-900">
+                          <div className="px-3 py-1.5 bg-indigo-950/80 text-white flex items-center justify-between text-[11px]">
+                            <span className="font-semibold flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                              Canlı Tahta Önizleme: {studentBoardTitle}
+                            </span>
+                            <span className="text-indigo-300 font-mono text-[10px]">
+                              {studentBoardUuid}
+                            </span>
+                          </div>
+                          <div className="w-full h-[420px] bg-white">
+                            <iframe
+                              src={`/board/${studentBoardUuid}?chrome=none&pano=1`}
+                              title={studentBoardTitle}
+                              className="w-full h-full border-0"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {/* ÖĞRENCİ SES KAYDI (SESLİ GÖREV / OKUMA) */}
-                  {selectedStudent.student_content?.audio_url && (
-                    <AudioReviewPlayer
-                      audioUrl={selectedStudent.student_content.audio_url}
-                      audioName={selectedStudent.student_content.audio_name || 'Öğrenci Ses Kaydı'}
-                      studentName={selectedStudent.name}
-                    />
+                  {/* 2. WORKSHEET / ÇALIŞMA KAĞIDI DETAYI */}
+                  {assignment.tool_type === 'WORKSHEET' && (
+                    <div className="space-y-3">
+                      {assignment.tool_data?.file_url && (
+                        <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1.5">
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                            Öğretmenin Verdiği Orijinal Çalışma Kağıdı / Soru Dokümanı
+                          </span>
+                          <AssignmentFileViewer
+                            fileUrl={assignment.tool_data.file_url}
+                            fileName={assignment.tool_data.file_name || 'Ödev Çalışma Kağıdı'}
+                            fileType={assignment.tool_data.file_type}
+                            fileSize={assignment.tool_data.file_size}
+                            title="Orijinal Soru Dokümanı"
+                          />
+                        </div>
+                      )}
+
+                      {selectedStudent.student_content?.file_url ? (
+                        <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-1.5">
+                          <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">
+                            Öğrencinin Yüklediği Çözüm Dosyası / Doküman
+                          </span>
+                          <AssignmentFileViewer
+                            fileUrl={selectedStudent.student_content.file_url}
+                            fileName={selectedStudent.student_content.file_name || 'Öğrenci Teslim Dosyası'}
+                            fileType={selectedStudent.student_content.file_type}
+                            fileSize={selectedStudent.student_content.file_size}
+                            title={`${selectedStudent.name} — Çözüm Dosyası`}
+                          />
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
+                          <AlertCircle size={15} className="text-amber-600 shrink-0" />
+                          <span>Öğrenci harici bir doküman dosyası yüklemedi; yalnızca metin notuyla teslim etti.</span>
+                        </div>
+                      )}
+                    </div>
                   )}
 
-                  {/* ÖĞRENCİ ÇALIŞMA DOSYASI / PDF / GÖRSEL */}
-                  {selectedStudent.student_content?.file_url && (
-                    <AssignmentFileViewer
-                      fileUrl={selectedStudent.student_content.file_url}
-                      fileName={selectedStudent.student_content.file_name || 'Öğrenci Teslim Dosyası'}
-                      fileType={selectedStudent.student_content.file_type}
-                      fileSize={selectedStudent.student_content.file_size}
-                      title={`${selectedStudent.name} — Çözüm Dosyası`}
-                    />
+                  {/* 3. READING / SESLİ OKUMA DETAYI */}
+                  {assignment.tool_type === 'READING' && (
+                    <div className="space-y-3">
+                      {assignment.tool_data?.text_to_read && (
+                        <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-xl space-y-1">
+                          <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider block flex items-center gap-1">
+                            <BookOpen size={12} className="text-purple-600" />
+                            Okunması İstenen Metin
+                          </span>
+                          <p className="text-xs text-purple-950/80 leading-relaxed max-h-28 overflow-y-auto whitespace-pre-line bg-white/70 p-2.5 rounded-lg border border-purple-100">
+                            {assignment.tool_data.text_to_read}
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedStudent.student_content?.audio_url ? (
+                        <div className="p-3 bg-white border border-purple-200 rounded-xl space-y-1.5">
+                          <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider block">
+                            Öğrenci Ses Kaydı & Dinleme Kontrolü
+                          </span>
+                          <AudioReviewPlayer
+                            audioUrl={selectedStudent.student_content.audio_url}
+                            audioName={selectedStudent.student_content.audio_name || 'Öğrenci Okuma Kaydı'}
+                            studentName={selectedStudent.name}
+                          />
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
+                          <AlertCircle size={15} className="text-amber-600 shrink-0" />
+                          <span>Öğrenci ses kaydı iletmedi.</span>
+                        </div>
+                      )}
+                    </div>
                   )}
 
-                  {/* METİN CEVABI */}
+                  {/* 4. QUIZ / TEST SORULARI DETAYI */}
+                  {assignment.tool_type === 'QUIZ' && (
+                    <div className="p-3 bg-amber-50/60 border border-amber-200 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                          <HelpCircle size={15} className="text-amber-600" />
+                          Test Soruları & Öğrenci Cevapları ({assignment.tool_data?.questions?.length || 0} Soru)
+                        </span>
+                      </div>
+
+                      <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                        {(assignment.tool_data?.questions || []).map((q: any, qIdx: number) => {
+                          const studentAns =
+                            selectedStudent.student_content?.quiz_answers?.[q.id] ??
+                            selectedStudent.student_content?.quiz_answers?.[qIdx]
+                          const isCorrect = q.correct_answer ? studentAns === q.correct_answer : null
+
+                          return (
+                            <div
+                              key={q.id || qIdx}
+                              className="p-3 bg-white border border-amber-200/80 rounded-xl space-y-1.5 text-xs"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <span className="font-bold text-gray-900">
+                                  {qIdx + 1}. {q.question}
+                                </span>
+                                {isCorrect !== null && (
+                                  <span
+                                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                      isCorrect
+                                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                        : 'bg-rose-100 text-rose-800 border border-rose-300'
+                                    }`}
+                                  >
+                                    {isCorrect ? '✓ Doğru' : '✕ Yanlış'}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] pt-1">
+                                {(q.options || []).map((opt: string, optIdx: number) => {
+                                  const isOptSelected = studentAns === opt
+                                  const isOptCorrect = q.correct_answer === opt
+                                  let optStyle = 'bg-gray-50 border-gray-200 text-gray-600'
+                                  if (isOptSelected && isOptCorrect) {
+                                    optStyle = 'bg-emerald-100 border-emerald-300 font-bold text-emerald-950'
+                                  } else if (isOptSelected && !isOptCorrect) {
+                                    optStyle = 'bg-rose-100 border-rose-300 font-bold text-rose-950'
+                                  } else if (isOptCorrect) {
+                                    optStyle = 'bg-emerald-50 border-emerald-200 font-medium text-emerald-800'
+                                  }
+
+                                  return (
+                                    <div
+                                      key={optIdx}
+                                      className={`p-1.5 rounded-lg border flex items-center justify-between ${optStyle}`}
+                                    >
+                                      <span>{opt}</span>
+                                      {isOptSelected && (
+                                        <span className="text-[9px] uppercase tracking-wider font-extrabold px-1 rounded bg-white/80">
+                                          Öğrenci Yanıtı
+                                        </span>
+                                      )}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ÖĞRENCİ AÇIKLAMA NOTU */}
                   {selectedStudent.student_content?.notes ? (
-                    <div className="p-3 bg-gray-50 border border-gray-100 rounded-xl whitespace-pre-line text-gray-800 leading-relaxed">
-                      {selectedStudent.student_content.notes}
+                    <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block flex items-center gap-1">
+                        <MessageSquare size={12} className="text-gray-500" />
+                        Öğrencinin İlettiği Not & Çözüm Açıklaması
+                      </span>
+                      <p className="text-xs text-gray-800 whitespace-pre-line leading-relaxed bg-white p-2.5 rounded-lg border border-gray-100">
+                        "{selectedStudent.student_content.notes}"
+                      </p>
                     </div>
                   ) : selectedStudent.status === 'PENDING' ? (
-                    <p className="text-gray-400 italic">Öğrenci henüz bir çözüm veya not girmedi.</p>
-                  ) : !selectedStudent.student_content?.audio_url && !selectedStudent.student_content?.file_url ? (
-                    <p className="text-gray-400 italic">Metin açıklaması eklenmedi.</p>
+                    <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-400 italic text-xs">
+                      Öğrenci henüz sisteme bir yanıt veya açıklama notu iletmedi.
+                    </div>
                   ) : null}
                 </div>
 
                 {/* PUANLAMA VE GERİ BİLDİRİM FORMU */}
-                <form onSubmit={handleSaveGrade} className="space-y-3 p-4 bg-indigo-50/40 border border-indigo-100 rounded-2xl">
+                <form onSubmit={handleSaveGrade} className="space-y-3.5 p-4 bg-indigo-50/40 border border-indigo-100 rounded-2xl">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-indigo-950 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                       <GraduationCap size={15} className="text-indigo-600" />
@@ -490,24 +715,52 @@ export default function AssignmentSubmissionsModal({
                     )}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
+                  {/* Hızlı Puan Butonları */}
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
+                      Hızlı Puan Seçimi
+                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {QUICK_SCORES.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setGradeScore(Math.min(s, assignment.max_score || 100))}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                            gradeScore === s
+                              ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                              : 'bg-white hover:bg-indigo-50 text-indigo-700 border-indigo-200'
+                          }`}
+                        >
+                          {s} Puan
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label className="block font-semibold text-gray-700 mb-1">
-                        Puan (Max: {assignment.max_score}) *
+                      <label className="block font-semibold text-gray-700 mb-1 text-xs">
+                        Verilen Puan (Max: {assignment.max_score}) *
                       </label>
-                      <input
-                        type="number"
-                        required
-                        min={0}
-                        max={assignment.max_score}
-                        value={gradeScore}
-                        onChange={(e) => setGradeScore(Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl font-bold text-indigo-700 outline-none focus:ring-2 focus:ring-indigo-500/20"
-                      />
+                      <div className="relative">
+                        <input
+                          type="number"
+                          required
+                          min={0}
+                          max={assignment.max_score}
+                          value={gradeScore}
+                          onChange={(e) => setGradeScore(Number(e.target.value))}
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl font-bold text-indigo-700 outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                        />
+                        <span className="absolute right-3 top-2.5 text-xs text-gray-400 font-bold">
+                          / {assignment.max_score}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="col-span-2">
-                      <label className="block font-semibold text-gray-700 mb-1">
+                    <div className="sm:col-span-2 space-y-1.5">
+                      <label className="block font-semibold text-gray-700 mb-1 text-xs">
                         Öğretmen Geri Bildirim Notu
                       </label>
                       <textarea
@@ -515,8 +768,26 @@ export default function AssignmentSubmissionsModal({
                         placeholder="Öğrenciye çözümüne dair yönlendirici geri bildirim yazın..."
                         value={gradeFeedback}
                         onChange={(e) => setGradeFeedback(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20"
+                        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-xs"
                       />
+
+                      {/* Hazır Geri Bildirim Butonları */}
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <span className="text-[10px] text-gray-400 font-semibold flex items-center gap-1">
+                          <Sparkles size={11} className="text-amber-500" /> Hazır Şablonlar:
+                        </span>
+                        {QUICK_FEEDBACKS.map((fb, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setGradeFeedback(fb)}
+                            className="text-[10px] bg-white hover:bg-indigo-50 text-gray-600 hover:text-indigo-700 border border-gray-200 rounded-md px-1.5 py-0.5 cursor-pointer truncate max-w-[200px]"
+                            title={fb}
+                          >
+                            {fb}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -524,10 +795,10 @@ export default function AssignmentSubmissionsModal({
                     <button
                       type="submit"
                       disabled={isGrading}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 text-xs"
                     >
-                      {isGrading ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-                      <span>Puan ve Geri Bildirimi Kaydet</span>
+                      {isGrading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                      <span>Puanı ve Geri Bildirimi Kaydet</span>
                     </button>
                   </div>
                 </form>

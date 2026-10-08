@@ -98,12 +98,14 @@ export function usePanoSync({
       }
     }
     const sId = activeSessionId || (typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_active_session_id') : null)
+    const tok = typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_device_token') : null
     if (sId) {
       fetch('/api/pano/pair/state', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: sId,
+          token: tok || undefined,
           patch: {
             selectedClassId: cls ? cls.id : null,
             selectedClass: cls || null,

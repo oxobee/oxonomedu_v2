@@ -54,8 +54,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'sessionId ve patch gereklidir' }, { status: 400 })
     }
 
-    const isAuthorized = await verifyDeviceToken(sessionId, token)
-    if (!isAuthorized && !req.cookies.get('LH_session')?.value) {
+    const resolvedToken = token || req.nextUrl.searchParams.get('token') || req.headers.get('x-device-token')
+    let isAuthorized = await verifyDeviceToken(sessionId, resolvedToken)
+    if (!isAuthorized && (req.cookies.get('LH_session')?.value || req.cookies.get('LH_access')?.value)) {
+      isAuthorized = true
+    }
+    if (!isAuthorized) {
       return NextResponse.json({ success: false, error: 'Yetkisiz erişim' }, { status: 401 })
     }
 

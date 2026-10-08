@@ -32,6 +32,7 @@ import {
   submitSchoolAssignment,
   formatDueDate,
 } from '@services/school_assignments/school_assignments'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
 import AssignmentFileViewer from './AssignmentFileViewer'
 import VoiceRecordingStudio from './VoiceRecordingStudio'
 import AudioReviewPlayer from './AudioReviewPlayer'
@@ -51,6 +52,11 @@ export default function DoAssignmentModal({
   assignment,
   accessToken,
 }: DoAssignmentModalProps) {
+  const session = useLHSession() as any
+  const user = session?.data?.user
+  const studentId = user?.id || 101
+  const studentName = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || 'Öğrenci' : 'Öğrenci'
+
   const [studentText, setStudentText] = useState('')
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({})
   const [studentFile, setStudentFile] = useState<{
@@ -75,12 +81,53 @@ export default function DoAssignmentModal({
   const isSubmitted = submission?.status === 'SUBMITTED' || submission?.status === 'GRADED'
   const isGraded = submission?.status === 'GRADED'
 
+  // Individual Forked Student Board UUID
+  const studentBoardUuid =
+    submission?.student_content?.board_uuid ||
+    `board_${assignment.assignment_uuid.replace(/[^a-zA-Z0-9]/g, '').slice(0, 16)}_std_${studentId}`
+  const studentBoardTitle = `${studentName} — ${assignment.title} Çözümü`
+
   const handleOpenBoard = () => {
-    if (assignment.board_uuid) {
-      window.open(`/board/${assignment.board_uuid}`, '_blank')
-    } else {
-      toast.error('Bu ödeve bağlı bir tahta bulunamadı.')
+    if (!assignment) return
+
+    // Fork teacher's master board if not already forked in localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        const studentDataKey = `oxonom_board_data_${studentBoardUuid}`
+        const existingStudentData = localStorage.getItem(studentDataKey)
+
+        if (!existingStudentData && assignment.board_uuid) {
+          const teacherDataKey = `oxonom_board_data_${assignment.board_uuid}`
+          const masterData = localStorage.getItem(teacherDataKey)
+          if (masterData) {
+            localStorage.setItem(studentDataKey, masterData)
+          }
+        }
+
+        // Register student personal board into local board catalogue
+        const rawCustom = localStorage.getItem('oxonom_custom_boards')
+        let customList: any[] = rawCustom ? JSON.parse(rawCustom) : []
+        if (!customList.some((b) => b.board_uuid === studentBoardUuid)) {
+          const newStudentBoard = {
+            id: Date.now(),
+            board_uuid: studentBoardUuid,
+            title: studentBoardTitle,
+            description: `${assignment.title} ödevi için ${studentName} kişisel çözüm tahtası`,
+            is_encrypted: false,
+            is_public: false,
+            status: 'active',
+            usergroup_id: assignment.usergroup_ids?.[0] || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+          customList.unshift(newStudentBoard)
+          localStorage.setItem('oxonom_custom_boards', JSON.stringify(customList))
+          window.dispatchEvent(new CustomEvent('oxonom_boards_updated'))
+        }
+      } catch (_) {}
     }
+
+    window.open(`/board/${studentBoardUuid}`, '_blank')
   }
 
   const handleStudentFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,7 +170,10 @@ export default function DoAssignmentModal({
       }
 
       if (assignment.tool_type === 'WHITEBOARD') {
-        content.board_uuid = assignment.board_uuid
+        content.board_uuid = studentBoardUuid
+        content.board_title = studentBoardTitle
+        content.student_id = studentId
+        content.student_name = studentName
       } else if (assignment.tool_type === 'QUIZ') {
         content.quiz_answers = quizAnswers
       } else if (assignment.tool_type === 'WORKSHEET') {
@@ -263,19 +313,26 @@ export default function DoAssignmentModal({
                   <PenTool size={15} className="text-indigo-600" />
                   İnteraktif Akıllı Tahta Üzerinde Çözüm
                 </span>
-                <span className="text-[11px] text-indigo-700 font-medium">Canlı Tahta</span>
+                <span className="text-[10px] font-bold text-indigo-700 bg-indigo-100/90 border border-indigo-200 px-2 py-0.5 rounded-md">
+                  Kişisel Tahtanız Tanımlandı
+                </span>
               </div>
 
-              <p className="text-xs text-indigo-900/80 leading-relaxed">
-                Bu ödev için akıllı tahta hazırlanmıştır. Çözümünüzü, formülleri ve grafik çizimlerinizi doğrudan tahta üzerinde yapabilirsiniz.
-              </p>
+              <div className="p-3 bg-white/80 border border-indigo-100/80 rounded-xl space-y-1">
+                <div className="flex items-center gap-1.5 text-indigo-900 font-bold text-xs">
+                  <span>🎨 {studentBoardTitle}</span>
+                </div>
+                <p className="text-[11px] text-gray-600 leading-relaxed">
+                  Öğretmeninizin hazırladığı ana tahta şablonu sizin adınıza bireysel olarak ayrılmıştır. Yaptığınız tüm çizimler ve çözüm adımları yalnızca size aittir; diğer öğrencilerle karışmaz.
+                </p>
+              </div>
 
               <button
                 type="button"
                 onClick={handleOpenBoard}
                 className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Akıllı Tahtayı Aç ve Çöz</span>
+                <span>Bireysel Çözüm Tahtamı Aç</span>
                 <ExternalLink size={14} />
               </button>
 

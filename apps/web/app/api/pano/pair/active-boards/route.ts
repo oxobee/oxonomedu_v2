@@ -34,8 +34,10 @@ export async function GET(req: NextRequest) {
       expiresAt: s.expiresAt,
       className:
         s.sharedState?.selectedClass?.name ||
+        s.sharedState?.selectedClass?.title ||
+        (s.teacherData as any)?.activeClassName ||
         (s.sharedState?.selectedClassId ? `Sınıf #${s.sharedState.selectedClassId}` : null),
-      classId: s.sharedState?.selectedClassId || null,
+      classId: s.sharedState?.selectedClassId || s.teacherData?.selectedClassId || null,
       teacherName: `${s.teacherData?.first_name || ''} ${s.teacherData?.last_name || ''}`.trim() || 'Öğretmen',
       boardName: 'Oxonom Akıllı Tahta',
     }))

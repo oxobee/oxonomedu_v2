@@ -31,13 +31,34 @@ import {
   getSyncedSuperadminUsers,
 } from '@services/demo/databaseSync'
 
+import { MongoClient } from 'mongodb'
+
 const GAMES_CACHE_FILE = '/tmp/oxonom_admin_games.json'
 const CATEGORIES_CACHE_FILE = '/tmp/oxonom_admin_categories.json'
 const GAMES_DELETED_FILE = '/tmp/oxonom_deleted_games.json'
 
+const MONGODB_URI = process.env.MONGODB_URI || ''
+let _gamesMongoClient: MongoClient | null = null
+
+async function getGamesMongoDb() {
+  if (!MONGODB_URI) return null
+  if (!_gamesMongoClient) {
+    try {
+      _gamesMongoClient = new MongoClient(MONGODB_URI)
+      await _gamesMongoClient.connect()
+    } catch (err: any) {
+      console.warn('[GamesMongo] Connection error:', err?.message || err)
+      _gamesMongoClient = null
+    }
+  }
+  return _gamesMongoClient ? _gamesMongoClient.db() : null
+}
+
+let IN_MEMORY_GAMES_CACHE: any[] | null = null
+let IN_MEMORY_CATEGORIES_CACHE: any[] | null = null
 let SERVER_DELETED_GAMES = new Set<string>()
 
-function loadDeletedGameUuids(req?: NextRequest): Set<string> {
+async function loadDeletedGameUuids(req?: NextRequest): Promise<Set<string>> {
   const set = new Set<string>([
     ...SERVER_DELETED_GAMES,
     ...Array.from(PERMANENTLY_REMOVED_GAMES),
@@ -47,6 +68,17 @@ function loadDeletedGameUuids(req?: NextRequest): Set<string> {
       const data = JSON.parse(fs.readFileSync(GAMES_DELETED_FILE, 'utf8'))
       if (Array.isArray(data)) {
         data.forEach((id: any) => id && set.add(String(id)))
+      }
+    }
+  } catch (_) {}
+
+  // Check MongoDB
+  try {
+    const db = await getGamesMongoDb()
+    if (db) {
+      const doc = await db.collection('oxonom_deleted_games').findOne({ _id: 'deleted_uuids' as any })
+      if (doc && Array.isArray((doc as any).uuids)) {
+        ;(doc as any).uuids.forEach((id: any) => id && set.add(String(id)))
       }
     }
   } catch (_) {}
@@ -76,14 +108,34 @@ function loadDeletedGameUuids(req?: NextRequest): Set<string> {
   return set
 }
 
-function saveDeletedGameUuids(deletedSet: Set<string>) {
+async function saveDeletedGameUuids(deletedSet: Set<string>) {
   SERVER_DELETED_GAMES = new Set(deletedSet)
   try {
     fs.writeFileSync(GAMES_DELETED_FILE, JSON.stringify(Array.from(deletedSet)), 'utf8')
   } catch (_) {}
+  try {
+    const db = await getGamesMongoDb()
+    if (db) {
+      await db.collection('oxonom_deleted_games').updateOne(
+        { _id: 'deleted_uuids' as any },
+        { $set: { uuids: Array.from(deletedSet), updatedAt: Date.now() } },
+        { upsert: true }
+      )
+    }
+  } catch (_) {}
 }
 
-function loadLiveGames(req?: NextRequest): any[] {
+async function loadLiveGames(req?: NextRequest): Promise<any[]> {
+  if (IN_MEMORY_GAMES_CACHE && IN_MEMORY_GAMES_CACHE.length > 0) {
+    const deleted = await loadDeletedGameUuids(req)
+    return IN_MEMORY_GAMES_CACHE.filter(
+      (g: any) =>
+        !deleted.has(String(g.game_uuid)) &&
+        !deleted.has(String(g.id)) &&
+        (!g.slug || !deleted.has(String(g.slug)))
+    )
+  }
+
   let list: any[] = []
   try {
     if (fs.existsSync(GAMES_CACHE_FILE)) {
@@ -92,11 +144,28 @@ function loadLiveGames(req?: NextRequest): any[] {
     }
   } catch (_) {}
 
+  // Fallback to MongoDB
+  if (list.length === 0) {
+    try {
+      const db = await getGamesMongoDb()
+      if (db) {
+        const doc = await db.collection('oxonom_admin_games').findOne({ _id: 'live_games' as any })
+        if (doc && Array.isArray((doc as any).games) && (doc as any).games.length > 0) {
+          list = (doc as any).games
+          try {
+            fs.writeFileSync(GAMES_CACHE_FILE, JSON.stringify(list), 'utf8')
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+  }
+
   if (list.length === 0) {
     list = [...SYNCED_GAMES]
   }
 
-  const deleted = loadDeletedGameUuids(req)
+  IN_MEMORY_GAMES_CACHE = list
+  const deleted = await loadDeletedGameUuids(req)
   return list.filter(
     (g: any) =>
       !deleted.has(String(g.game_uuid)) &&
@@ -105,29 +174,71 @@ function loadLiveGames(req?: NextRequest): any[] {
   )
 }
 
-function saveLiveGames(games: any[]) {
+async function saveLiveGames(games: any[]) {
+  IN_MEMORY_GAMES_CACHE = games
   try {
     fs.writeFileSync(GAMES_CACHE_FILE, JSON.stringify(games), 'utf8')
   } catch (_) {}
+  try {
+    const db = await getGamesMongoDb()
+    if (db) {
+      await db.collection('oxonom_admin_games').updateOne(
+        { _id: 'live_games' as any },
+        { $set: { games, updatedAt: Date.now() } },
+        { upsert: true }
+      )
+    }
+  } catch (_) {}
 }
 
-function loadLiveCategories(): any[] {
+async function loadLiveCategories(): Promise<any[]> {
+  if (IN_MEMORY_CATEGORIES_CACHE && IN_MEMORY_CATEGORIES_CACHE.length > 0) {
+    return IN_MEMORY_CATEGORIES_CACHE
+  }
   try {
     if (fs.existsSync(CATEGORIES_CACHE_FILE)) {
       const data = JSON.parse(fs.readFileSync(CATEGORIES_CACHE_FILE, 'utf8'))
-      if (Array.isArray(data) && data.length > 0) return data
+      if (Array.isArray(data) && data.length > 0) {
+        IN_MEMORY_CATEGORIES_CACHE = data
+        return data
+      }
     }
   } catch (_) {}
-  return [...SYNCED_CATEGORIES]
+
+  // Fallback to MongoDB
+  try {
+    const db = await getGamesMongoDb()
+    if (db) {
+      const doc = await db.collection('oxonom_admin_categories').findOne({ _id: 'live_categories' as any })
+      if (doc && Array.isArray((doc as any).categories) && (doc as any).categories.length > 0) {
+        IN_MEMORY_CATEGORIES_CACHE = (doc as any).categories
+        return (doc as any).categories
+      }
+    }
+  } catch (_) {}
+
+  IN_MEMORY_CATEGORIES_CACHE = [...SYNCED_CATEGORIES]
+  return IN_MEMORY_CATEGORIES_CACHE
 }
 
-function saveLiveCategories(categories: any[]) {
+async function saveLiveCategories(categories: any[]) {
+  IN_MEMORY_CATEGORIES_CACHE = categories
   try {
     fs.writeFileSync(CATEGORIES_CACHE_FILE, JSON.stringify(categories), 'utf8')
   } catch (_) {}
+  try {
+    const db = await getGamesMongoDb()
+    if (db) {
+      await db.collection('oxonom_admin_categories').updateOne(
+        { _id: 'live_categories' as any },
+        { $set: { categories, updatedAt: Date.now() } },
+        { upsert: true }
+      )
+    }
+  } catch (_) {}
 }
 
-let ADMIN_GAMES_STORE: any[] = loadLiveGames()
+let ADMIN_GAMES_STORE: any[] = []
 let ORG_MENU_CONFIGS: Record<string, any> = {}
 let SERVER_FALLBACK_BOARDS: any[] = []
 let SERVER_CUSTOM_ASSIGNMENTS: any[] = []
@@ -878,12 +989,12 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
       try {
         const body = await request.json()
         if (Array.isArray(body.deleted_uuids)) {
-          const currentDeleted = loadDeletedGameUuids(request)
+          const currentDeleted = await loadDeletedGameUuids(request)
           body.deleted_uuids.forEach((id: any) => id && currentDeleted.add(String(id)))
-          saveDeletedGameUuids(currentDeleted)
+          await saveDeletedGameUuids(currentDeleted)
         }
         if (Array.isArray(body.games)) {
-          const currentGames = loadLiveGames(request)
+          const currentGames = await loadLiveGames(request)
           const merged = [...currentGames]
           for (const g of body.games) {
             const idx = merged.findIndex(
@@ -898,7 +1009,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
               merged.unshift(g)
             }
           }
-          saveLiveGames(merged)
+          await saveLiveGames(merged)
         }
         return NextResponse.json({ success: true }, { status: 200 })
       } catch {
@@ -907,8 +1018,8 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
     }
     return NextResponse.json(
       {
-        games: loadLiveGames(request),
-        deleted_uuids: Array.from(loadDeletedGameUuids(request)),
+        games: await loadLiveGames(request),
+        deleted_uuids: Array.from(await loadDeletedGameUuids(request)),
       },
       { status: 200 }
     )
@@ -916,7 +1027,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
 
   // 1. Games Admin Categories (CRUD)
   if (path.startsWith('/api/v1/games/admin/categories')) {
-    const currentCategories = loadLiveCategories()
+    const currentCategories = await loadLiveCategories()
     const subPath = path.split('/api/v1/games/admin/categories')[1] || ''
     const catIdStr = subPath.replace(/^\//, '').split('?')[0]
     const catId = catIdStr ? Number(catIdStr) : null
@@ -937,7 +1048,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
           target_org_ids: body.target_org_ids || null,
         }
         currentCategories.push(newCat)
-        saveLiveCategories(currentCategories)
+        await saveLiveCategories(currentCategories)
         return NextResponse.json(newCat, { status: 201 })
       } catch {
         return NextResponse.json({ error: 'Kategori oluşturulamadı' }, { status: 400 })
@@ -954,10 +1065,10 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
             ...body,
             id: catId,
           }
-          saveLiveCategories(currentCategories)
+          await saveLiveCategories(currentCategories)
 
           // Also update category name and icon in any games referencing this category
-          const currentGames = loadLiveGames(request)
+          const currentGames = await loadLiveGames(request)
           let gamesUpdated = false
           currentGames.forEach((g: any) => {
             if (g.category_id === catId) {
@@ -966,7 +1077,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
               gamesUpdated = true
             }
           })
-          if (gamesUpdated) saveLiveGames(currentGames)
+          if (gamesUpdated) await saveLiveGames(currentGames)
 
           return NextResponse.json(currentCategories[idx], { status: 200 })
         }
@@ -978,7 +1089,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
 
     if (request.method === 'DELETE' && catId) {
       const filtered = currentCategories.filter((c: any) => c.id !== catId)
-      saveLiveCategories(filtered)
+      await saveLiveCategories(filtered)
       return NextResponse.json({ success: true, message: 'Kategori silindi' }, { status: 200 })
     }
 
@@ -987,7 +1098,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
 
   // 2. Games Public Categories
   if (path.startsWith('/api/v1/games/categories')) {
-    const currentCategories = loadLiveCategories()
+    const currentCategories = await loadLiveCategories()
     return NextResponse.json(currentCategories, { status: 200 })
   }
 
@@ -996,8 +1107,8 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
     const catId = request.nextUrl.searchParams.get('category_id')
     const status = request.nextUrl.searchParams.get('status')
     const search = request.nextUrl.searchParams.get('search')?.toLowerCase() || ''
-    const currentGames = loadLiveGames(request)
-    const currentCategories = loadLiveCategories()
+    const currentGames = await loadLiveGames(request)
+    const currentCategories = await loadLiveCategories()
 
     let list = currentGames.map((g: any) => {
       const cat = currentCategories.find((c: any) => c.id === g.category_id)
@@ -1032,8 +1143,8 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
   if (path.startsWith('/api/v1/games/admin/create')) {
     try {
       const body = await request.json()
-      const currentGames = loadLiveGames(request)
-      const currentCategories = loadLiveCategories()
+      const currentGames = await loadLiveGames(request)
+      const currentCategories = await loadLiveCategories()
       const cat = currentCategories.find((c: any) => c.id === body.category_id) || currentCategories[0]
 
       const newId = currentGames.length > 0 ? Math.max(...currentGames.map((g: any) => g.id || 0)) + 1 : Date.now()
@@ -1070,7 +1181,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
         update_date: new Date().toISOString(),
       }
       currentGames.unshift(newGame)
-      saveLiveGames(currentGames)
+      await saveLiveGames(currentGames)
       return NextResponse.json(newGame, { status: 201 })
     } catch {
       return NextResponse.json({ error: 'Oyun oluşturulamadı' }, { status: 400 })
@@ -1081,18 +1192,18 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
   if (path.startsWith('/api/v1/games/admin/')) {
     const rawUuid = path.split('/api/v1/games/admin/')[1]?.split('/')[0]?.split('?')[0] || ''
     const uuid = decodeURIComponent(rawUuid)
-    const currentGames = loadLiveGames(request)
-    const currentCategories = loadLiveCategories()
+    const currentGames = await loadLiveGames(request)
+    const currentCategories = await loadLiveCategories()
 
     if (request.method === 'DELETE') {
-      const currentDeleted = loadDeletedGameUuids(request)
+      const currentDeleted = await loadDeletedGameUuids(request)
       if (uuid) currentDeleted.add(String(uuid))
-      saveDeletedGameUuids(currentDeleted)
+      await saveDeletedGameUuids(currentDeleted)
 
       const filtered = currentGames.filter(
         (g: any) => g.game_uuid !== uuid && String(g.id) !== uuid && g.slug !== uuid
       )
-      saveLiveGames(filtered)
+      await saveLiveGames(filtered)
 
       const response = NextResponse.json({ success: true, message: 'Oyun başarıyla silindi' }, { status: 200 })
       try {
@@ -1137,7 +1248,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
             } catch (_) {}
           }
           currentGames[idx] = updated
-          saveLiveGames(currentGames)
+          await saveLiveGames(currentGames)
           return NextResponse.json(updated, { status: 200 })
         } else {
           // If not in current array, insert it
@@ -1168,7 +1279,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
             ...body,
           }
           currentGames.unshift(newGame)
-          saveLiveGames(currentGames)
+          await saveLiveGames(currentGames)
           return NextResponse.json(newGame, { status: 200 })
         }
       } catch {
@@ -1186,8 +1297,8 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
     const gradeParam = request.nextUrl.searchParams.get('grade_level') || undefined
     const searchParam = request.nextUrl.searchParams.get('search')?.toLowerCase() || ''
 
-    const currentGames = loadLiveGames(request)
-    const currentCategories = loadLiveCategories()
+    const currentGames = await loadLiveGames(request)
+    const currentCategories = await loadLiveCategories()
 
     // Filter published games
     let filtered = currentGames.filter((g: any) => g.status === 'published')
@@ -1243,12 +1354,12 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
     const uuidIndex = parts.indexOf('games') + 1
     const rawUuid = parts[uuidIndex]?.split('?')[0] || ''
     const uuid = decodeURIComponent(rawUuid)
-    const currentGames = loadLiveGames(request)
+    const currentGames = await loadLiveGames(request)
     const game = currentGames.find((g: any) => g.game_uuid === uuid || g.slug === uuid || String(g.id) === uuid)
 
     if (game) {
       game.play_count = (game.play_count || 0) + 1
-      saveLiveGames(currentGames)
+      await saveLiveGames(currentGames)
 
       let html = (game.html_content && game.html_content.trim().length > 0)
         ? game.html_content

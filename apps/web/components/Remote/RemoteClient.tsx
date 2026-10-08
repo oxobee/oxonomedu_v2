@@ -444,12 +444,26 @@ export default function RemoteClient() {
   }
 
   // 8. Handle Disconnect
-  const handleDisconnect = () => {
-    if (confirm('Kumanda bağlantısını sonlandırmak istiyor musunuz?')) {
+  const handleDisconnect = async () => {
+    if (confirm('Akıllı tahta oturumunu kapatmak ve bağlantıyı kesmek istiyor musunuz?')) {
+      try {
+        if (sessionId) {
+          await fetch('/api/pano/pair/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              role: 'phone',
+              target: 'both',
+            }),
+          })
+        }
+      } catch (_) {}
       if (sseRef.current) {
         sseRef.current.close()
       }
       setConnectionStatus('disconnected')
+      toast.success('Akıllı tahta oturumu kapatıldı.')
       router.push('/dash/connect-board')
     }
   }

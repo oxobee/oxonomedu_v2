@@ -1570,7 +1570,12 @@ export default function PanoClient() {
   const [settings, setSettings] = useState<PanoSettings>(DEFAULT_SETTINGS)
   // Paired Session Management (Standby Screen & QR/OTP Pairing)
   const [isSessionHydrated, setIsSessionHydrated] = useState(false)
-  const [forceStandby, setForceStandby] = useState(false)
+  const [forceStandby, setForceStandby] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('oxonom_pano_force_standby') === 'true'
+    }
+    return false
+  })
   const searchParams = useSearchParams()
 
   // Active Pano Session ID for shared state sync
@@ -1601,18 +1606,25 @@ export default function PanoClient() {
       localStorage.removeItem('oxonom_pano_is_locked')
       localStorage.removeItem('oxonom_pano_selected_class_id')
       localStorage.removeItem('oxonom_pano_device_token')
+      localStorage.setItem('oxonom_pano_force_standby', 'true')
+    }
+
+    if (typeof document !== 'undefined') {
+      document.cookie = 'LH_session=; path=/; max-age=0'
+      document.cookie = 'LH_org=; path=/; max-age=0'
     }
 
     setPairedSession(null)
     setActiveSessionId(null)
+    sessionInitializedRef.current = false
+    setForceStandby(true)
+    setIsProfileOpen(false)
 
     const isCurrentPhone = searchParams?.get('device') === 'phone' || (typeof window !== 'undefined' && (sessionStorage.getItem('oxonom_pano_device_type') === 'phone' || localStorage.getItem('oxonom_pano_device_type') === 'phone'))
     if (isCurrentPhone) {
       toast('Akıllı tahta oturumu sonlandırıldı.', { icon: 'ℹ️' })
       router.push('/dash/connect-board')
     } else {
-      setForceStandby(true)
-      setIsProfileOpen(false)
       toast('Öğretmen oturumu kapattı.', { icon: 'ℹ️' })
     }
 
@@ -1664,6 +1676,9 @@ export default function PanoClient() {
     setPairedSession(teacherData)
     setIsPhoneConnected(true)
     setForceStandby(false)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('oxonom_pano_force_standby')
+    }
 
     const sId = (teacherData as any).sessionId || searchParams?.get('session') || ''
     if (sId) {
@@ -1739,6 +1754,7 @@ export default function PanoClient() {
       localStorage.removeItem('oxonom_pano_active_session_id')
       localStorage.removeItem('oxonom_pano_is_locked')
       localStorage.removeItem('oxonom_pano_selected_class_id')
+      localStorage.setItem('oxonom_pano_force_standby', 'true')
     }
 
     if (typeof document !== 'undefined') {
@@ -1753,6 +1769,7 @@ export default function PanoClient() {
     setActiveWindowId(null)
     setIsLocked(false)
     setIsProfileOpen(false)
+    sessionInitializedRef.current = false
 
     if (session?.update) {
       session.update(true).catch(() => {})
@@ -2077,7 +2094,56 @@ export default function PanoClient() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Live Dynamic Class Stats (User Rule: "şubede mevcut tahta sayısını güncel olarak göstermiyor aslında 5 tahta olmasına rağmen sabit 4 yazıyor. Ödevler ve yoklamayı da kontrol et sabitse veriler güncel olsun")
+  // Live Dynamic Class Stats (User Rule: "Pano ekranında veriler hep güncel olmalı sayfayı yenilemek gerekmemeli")
+  const [dataSyncTrigger, setDataSyncTrigger] = useState(0)
+
+  useEffect(() => {
+    const handleSync = () => {
+      setDataSyncTrigger((prev) => prev + 1)
+    }
+
+    // Custom App Events
+    window.addEventListener('oxonom_assignments_updated', handleSync)
+    window.addEventListener('oxonom_boards_updated', handleSync)
+    window.addEventListener('oxonom_attendance_updated', handleSync)
+    window.addEventListener('oxonom_pano_sync', handleSync)
+
+    // Storage Event (catches changes made by child iframes or other tabs to localStorage)
+    const handleStorage = (e: StorageEvent) => {
+      if (
+        !e.key ||
+        e.key.includes('board') ||
+        e.key.includes('assignment') ||
+        e.key.includes('attendance') ||
+        e.key.includes('pano')
+      ) {
+        handleSync()
+      }
+    }
+    window.addEventListener('storage', handleStorage)
+
+    // Window PostMessage Event from embedded iframe widgets
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data && (e.data.type === 'oxonom_data_updated' || e.data.type === 'oxonom_assignments_updated' || e.data.type === 'oxonom_boards_updated')) {
+        handleSync()
+      }
+    }
+    window.addEventListener('message', handleMessage)
+
+    // Heartbeat: every 2.5 seconds to guarantee 100% up-to-date live data without manual F5
+    const heartbeat = setInterval(handleSync, 2500)
+
+    return () => {
+      window.removeEventListener('oxonom_assignments_updated', handleSync)
+      window.removeEventListener('oxonom_boards_updated', handleSync)
+      window.removeEventListener('oxonom_attendance_updated', handleSync)
+      window.removeEventListener('oxonom_pano_sync', handleSync)
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener('message', handleMessage)
+      clearInterval(heartbeat)
+    }
+  }, [])
+
   const liveBoardCount = useMemo(() => {
     if (!selectedClass) return 5
     const defaultCount = ALL_CLASSROOM_BOARDS.filter(b => b.usergroup_id === selectedClass.id).length
@@ -2095,17 +2161,7 @@ export default function PanoClient() {
     }
     const computedTotal = Math.max(5, (defaultCount || 5) + customCount)
     return (selectedClass.boardCount && selectedClass.boardCount > computedTotal) ? selectedClass.boardCount : computedTotal
-  }, [selectedClass])
-
-  const [assignmentsUpdatedTrigger, setAssignmentsUpdatedTrigger] = useState(0)
-
-  useEffect(() => {
-    const handleUpdated = () => {
-      setAssignmentsUpdatedTrigger((prev) => prev + 1)
-    }
-    window.addEventListener('oxonom_assignments_updated', handleUpdated)
-    return () => window.removeEventListener('oxonom_assignments_updated', handleUpdated)
-  }, [])
+  }, [selectedClass, dataSyncTrigger])
 
   const liveAssignmentCount = useMemo(() => {
     if (!selectedClass) return 0
@@ -2139,7 +2195,7 @@ export default function PanoClient() {
       } catch (_) {}
     }
     return count
-  }, [selectedClass, assignmentsUpdatedTrigger])
+  }, [selectedClass, dataSyncTrigger])
 
   const [savedAttendanceRate, setSavedAttendanceRate] = useState<string | null>(null)
 
@@ -2161,9 +2217,7 @@ export default function PanoClient() {
       setSavedAttendanceRate(null)
     }
     checkAttendance()
-    window.addEventListener('oxonom_attendance_updated', checkAttendance)
-    return () => window.removeEventListener('oxonom_attendance_updated', checkAttendance)
-  }, [selectedClass])
+  }, [selectedClass, dataSyncTrigger])
 
   const liveAttendanceRate = useMemo(() => {
     if (savedAttendanceRate) return savedAttendanceRate
@@ -2684,7 +2738,7 @@ export default function PanoClient() {
                 handleRemoteActionRef.current(act)
               }
             }
-          } else if (res.status === 410) {
+          } else if (res.status === 410 || res.status === 401 || res.status === 404) {
             setIsPhoneConnected(false)
             handleRemoteSessionClosed()
           }

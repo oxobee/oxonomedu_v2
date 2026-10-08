@@ -24,6 +24,7 @@ import {
   X,
   RefreshCw,
   Smartphone,
+  Lock,
 } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useAuth } from '@components/Contexts/AuthContext'
@@ -83,6 +84,7 @@ export default function ConnectBoardClient({
   const [activeBoards, setActiveBoards] = useState<ActiveBoardItem[]>([])
   const [isLoadingBoards, setIsLoadingBoards] = useState<boolean>(false)
   const [loggingOutSessionId, setLoggingOutSessionId] = useState<string | null>(null)
+  const [lockingSessionId, setLockingSessionId] = useState<string | null>(null)
 
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -446,6 +448,34 @@ export default function ConnectBoardClient({
     }
   }
 
+  // Teacher board lock handler
+  const handleLockBoard = async (sessId: string) => {
+    setLockingSessionId(sessId)
+    try {
+      const phoneToken = typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_device_token') || '' : ''
+      const res = await fetch('/api/remote/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: sessId,
+          action: 'LOCK',
+          token: phoneToken || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success('Akıllı tahta kilitlendi!')
+      } else {
+        toast.error(data.error || 'Tahta kilitlenemedi.')
+      }
+    } catch (err) {
+      console.error('[LockBoard] Error:', err)
+      toast.error('Bağlantı hatası.')
+    } finally {
+      setLockingSessionId(null)
+    }
+  }
+
   // Teacher Pair Confirmation
   const handleConfirmPair = async (codeToSubmit?: string, sessId?: string) => {
     const code = codeToSubmit || digits.join('')
@@ -623,20 +653,37 @@ export default function ConnectBoardClient({
                   </div>
                 )}
 
-                {/* Çıkış Yap Butonu */}
-                <button
-                  type="button"
-                  onClick={() => handleLogoutBoard(board.sessionId)}
-                  disabled={loggingOutSessionId === board.sessionId}
-                  className="w-full py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 active:bg-rose-200 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  {loggingOutSessionId === board.sessionId ? (
-                    <RotateCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <LogOut className="w-4 h-4" />
-                  )}
-                  <span>Tahtadan Çıkış Yap</span>
-                </button>
+                {/* Tahtayı Kilitle & Tahtadan Çıkış Yap Butonları */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleLockBoard(board.sessionId)}
+                    disabled={lockingSessionId === board.sessionId}
+                    className="py-2.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 active:bg-amber-200 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-900/50 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    title="Açık olan oturumdaki tahtayı kilit ekranına al"
+                  >
+                    {lockingSessionId === board.sessionId ? (
+                      <RotateCw className="w-4 h-4 animate-spin text-amber-600" />
+                    ) : (
+                      <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    )}
+                    <span>Tahtayı Kilitle</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleLogoutBoard(board.sessionId)}
+                    disabled={loggingOutSessionId === board.sessionId}
+                    className="py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 active:bg-rose-200 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {loggingOutSessionId === board.sessionId ? (
+                      <RotateCw className="w-4 h-4 animate-spin text-rose-600" />
+                    ) : (
+                      <LogOut className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                    )}
+                    <span>Tahtadan Çıkış Yap</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -700,34 +747,40 @@ export default function ConnectBoardClient({
           <AnimatePresence mode="wait">
             {isSuccess ? (
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="py-8 text-center flex flex-col items-center"
+                exit={{ opacity: 0, scale: 0.96 }}
+                className="py-4 flex flex-col items-center justify-center text-center"
               >
-                <div className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 border-2 border-emerald-300 dark:border-emerald-800 shadow-lg shadow-emerald-500/20 animate-bounce">
-                  <CheckCircle2 className="w-12 h-12" />
-                </div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-1.5">
-                  Tahtaya Bağlanıldı!
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 max-w-sm mb-6 leading-relaxed">
-                  Akıllı tahta artık <strong>{user?.first_name || 'Öğretmen'}</strong> profiliniz ve sınıflarınızla senkronize çalışıyor. Tahtada sınıfınızı seçebilirsiniz.
-                </p>
-
-                <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSuccess(false)
-                      setDigits(['', '', '', '', '', ''])
-                    }}
-                    className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <span>Tahtaları Görüntüle</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSuccess(false)
+                    setDigits(['', '', '', '', '', ''])
+                    fetchActiveBoards()
+                  }}
+                  className="w-full p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-lg shadow-emerald-600/20 border border-emerald-400/40 flex items-center justify-between gap-3 group transition-all cursor-pointer active:scale-[0.99]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shrink-0 shadow-inner">
+                      <CheckCircle2 className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-sm sm:text-base font-black tracking-tight flex items-center gap-2">
+                        <span>Tahtaya Bağlanıldı</span>
+                        <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-white/25 text-white">
+                          Aktif
+                        </span>
+                      </div>
+                      <p className="text-xs text-white/80 font-medium mt-0.5">
+                        Oturum başarıyla senkronize edildi. Detayları görmek ve yönetmek için tıklayın.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-2 rounded-xl bg-white/10 group-hover:bg-white/20 transition-colors shrink-0">
+                    <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </button>
               </motion.div>
             ) : activeTab === 'otp' ? (
               <motion.div

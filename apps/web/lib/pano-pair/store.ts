@@ -977,11 +977,13 @@ export async function updatePanoSharedState(
   const nextSelectedClassId = patch.selectedClassId !== undefined ? patch.selectedClassId : (current.selectedClassId ?? null)
   const nextIsLocked = patch.isLocked !== undefined ? patch.isLocked : (current.isLocked ?? false)
   const nextSelectedClass: any | null =
-    patch.selectedClassId === undefined
-      ? current.selectedClass ?? null
-      : patch.selectedClassId === null
-        ? null
-        : (session.teacherData?.classrooms || []).find((c: any) => c.id === patch.selectedClassId) || null
+    patch.selectedClass !== undefined
+      ? patch.selectedClass
+      : patch.selectedClassId === undefined
+        ? current.selectedClass ?? null
+        : patch.selectedClassId === null
+          ? null
+          : (session.teacherData?.classrooms || []).find((c: any) => c.id === patch.selectedClassId) || null
   const nextUi = patch.ui !== undefined ? patch.ui : (current.ui || { openModal: null })
 
   let assignedVersion = (current.version || 0) + 1
@@ -1006,6 +1008,8 @@ export async function updatePanoSharedState(
             'sharedState.selectedClass': nextSelectedClass,
             'sharedState.isLocked': nextIsLocked,
             'sharedState.ui': nextUi,
+            'teacherData.selectedClassId': nextSelectedClassId,
+            'teacherData.activeClassName': nextSelectedClass?.name || null,
           },
         },
         { returnDocument: 'after' }
@@ -1034,6 +1038,10 @@ export async function updatePanoSharedState(
   }
 
   session.sharedState = nextState
+  if (session.teacherData) {
+    session.teacherData.selectedClassId = nextSelectedClassId
+    ;(session.teacherData as any).activeClassName = nextSelectedClass?.name || null
+  }
   store.memorySessions.set(sessionId, session)
 
   // Broadcast state event via in-process listeners & Redis pub/sub
@@ -1070,9 +1078,15 @@ export async function closePanoSession(sessionId: string, reason = 'user_logout'
   const sess = store.memorySessions.get(sessionId)
   if (sess) {
     sess.status = 'closed'
+    sess.closedAt = Date.now()
+    sess.closedReason = reason
     store.codeToSessionId.delete(sess.code)
-    store.memorySessions.delete(sessionId)
-    store.listeners.delete(sessionId)
+    store.memorySessions.set(sessionId, sess)
+    // Clean up memory after 5 minutes so concurrent and reconnecting callers observe status: closed
+    setTimeout(() => {
+      store.memorySessions.delete(sessionId)
+      store.listeners.delete(sessionId)
+    }, 300000)
   }
 
   // Broadcast closed event via in-process listeners & Redis pub/sub
