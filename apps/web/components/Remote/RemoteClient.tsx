@@ -24,6 +24,8 @@ import {
   ArrowRight,
   Sparkles,
   Lock,
+  Radio,
+  Smartphone,
 } from 'lucide-react'
 import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
@@ -47,6 +49,44 @@ export default function RemoteClient() {
   const [selectedClass, setSelectedClass] = useState<any | null>(null)
   const [classrooms, setClassrooms] = useState<any[]>(ALL_CLASSROOMS)
   const [classSearch, setClassSearch] = useState<string>('')
+  const [pinInput, setPinInput] = useState<string>('')
+  const [isConnectingPin, setIsConnectingPin] = useState<boolean>(false)
+
+  // PIN code connection handler (direct 6-digit entry)
+  const handleConnectWithPin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    const cleanPin = pinInput.replace(/[^0-9]/g, '')
+    if (cleanPin.length !== 6) {
+      toast.error('Lütfen tahtadaki 6 haneli kodu eksiksiz girin.')
+      return
+    }
+    setIsConnectingPin(true)
+    try {
+      const res = await fetch(`/api/pano/pair/session?code=${cleanPin}`)
+      const data = await res.json()
+      if (res.ok && data.success && data.session) {
+        const sess = data.session
+        setSessionId(sess.sessionId)
+        if (sess.boardDeviceToken) setToken(sess.boardDeviceToken)
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('oxonom_pano_active_session_id', sess.sessionId)
+          localStorage.setItem('oxonom_pano_active_session_id', sess.sessionId)
+          if (sess.boardDeviceToken) {
+            sessionStorage.setItem('oxonom_pano_device_token', sess.boardDeviceToken)
+            localStorage.setItem('oxonom_pano_device_token', sess.boardDeviceToken)
+          }
+        }
+        setConnectionStatus('connecting')
+        toast.success('Akıllı tahtaya bağlanılıyor...')
+      } else {
+        toast.error(data.error || 'Geçersiz eşleştirme kodu veya oturum süresi dolmuş.')
+      }
+    } catch (_) {
+      toast.error('Bağlantı hatası oluştu.')
+    } finally {
+      setIsConnectingPin(false)
+    }
+  }
 
   // Shortcuts
   const [shortcuts, setShortcuts] = useState<RemoteShortcutItem[]>(DEFAULT_REMOTE_SHORTCUTS)
@@ -431,23 +471,63 @@ export default function RemoteClient() {
   if (!sessionId || connectionStatus === 'disconnected') {
     return (
       <main className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center select-none">
-        <div className="w-20 h-20 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center text-rose-400 mb-6 shadow-2xl">
-          <Tv className="w-10 h-10" />
+        <div className="w-16 h-16 rounded-3xl bg-indigo-950/60 border border-indigo-800/60 flex items-center justify-center text-indigo-400 mb-4 shadow-2xl">
+          <Smartphone className="w-8 h-8" />
         </div>
         <h1 className="text-xl sm:text-2xl font-black tracking-tight mb-2">
-          Tahta Bağlantısı Bulunamadı
+          Akıllı Tahta Kumandası
         </h1>
-        <p className="text-sm text-slate-400 max-w-sm mb-8 leading-relaxed">
-          Akıllı tahtayı telefonunuzla yönetmek için tahtada görüntülenen QR kodu okutun veya 6 haneli kodu girin.
+        <p className="text-xs sm:text-sm text-slate-400 max-w-sm mb-6 leading-relaxed">
+          Akıllı tahtayı telefonunuzla yönetmek için tahtada görünen 6 haneli kodu girin veya QR kodu okutun.
         </p>
+
+        {/* 6-Digit PIN Entry Form */}
+        <form onSubmit={handleConnectWithPin} className="w-full max-w-xs space-y-3 mb-5">
+          <div className="relative">
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={7}
+              placeholder="941 161"
+              value={pinInput}
+              onChange={(e) => {
+                const val = e.target.value.replace(/[^0-9]/g, '')
+                if (val.length <= 6) {
+                  if (val.length > 3) {
+                    setPinInput(`${val.slice(0, 3)} ${val.slice(3)}`)
+                  } else {
+                    setPinInput(val)
+                  }
+                }
+              }}
+              className="w-full text-center tracking-[0.3em] font-mono font-black text-2xl py-3.5 px-4 rounded-2xl bg-slate-900 border-2 border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 text-white placeholder-slate-600 outline-none transition-all shadow-inner"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isConnectingPin || pinInput.replace(/[^0-9]/g, '').length !== 6}
+            className="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-40 text-white font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-indigo-950/50 cursor-pointer transition-all disabled:cursor-not-allowed"
+          >
+            <Radio className="w-4 h-4 animate-pulse" />
+            <span>{isConnectingPin ? 'Bağlanılıyor...' : 'Kodu Doğrula & Bağlan'}</span>
+          </button>
+        </form>
+
+        <div className="w-full max-w-xs flex items-center gap-3 my-2 text-slate-600 text-xs font-bold uppercase tracking-wider">
+          <div className="h-px bg-slate-800 flex-1" />
+          <span>veya</span>
+          <div className="h-px bg-slate-800 flex-1" />
+        </div>
 
         <button
           type="button"
           onClick={() => router.push('/dash/connect-board')}
-          className="w-full max-w-xs py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-black text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-indigo-950/50 cursor-pointer transition-all"
+          className="w-full max-w-xs py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-850 active:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs flex items-center justify-center gap-2 border border-slate-800 shadow-md cursor-pointer transition-all"
         >
-          <QrCode className="w-5 h-5" />
-          <span>QR Kodu Tara / Bağlan</span>
+          <QrCode className="w-4 h-4 text-indigo-400" />
+          <span>Kamera ile QR Kod Oku</span>
         </button>
       </main>
     )

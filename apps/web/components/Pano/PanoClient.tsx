@@ -2231,68 +2231,125 @@ export default function PanoClient() {
   useEffect(() => { isLockedRef.current = isLocked }, [isLocked])
   useEffect(() => { appsRef.current = apps }, [apps])
 
-  // Remote Control Pairing Modal & QR state
   const [isRemotePairModalOpen, setIsRemotePairModalOpen] = useState(false)
   const [remoteQrDataUrl, setRemoteQrDataUrl] = useState('')
   const [pairingCode, setPairingCode] = useState('')
+  const sessionInitializedRef = useRef(false)
+  const isEnsuringSessionRef = useRef(false)
 
-  // Ensure board has an active verified session for remote pairing
+  // Ensure board has a STABLE active verified session for remote pairing (One-shot, non-looping)
   useEffect(() => {
     if (!hasActiveTeacher) return
+    if (sessionInitializedRef.current) return
+
     let isCancelled = false
     const ensureValidSession = async () => {
-      if (activeSessionId) {
-        try {
-          const chk = await fetch(`/api/pano/pair/session?sessionId=${encodeURIComponent(activeSessionId)}`)
-          if (chk.ok) {
-            const data = await chk.json()
-            if (data.success && data.session && data.session.status !== 'closed' && data.session.status !== 'expired') {
-              if (data.session.code && !isCancelled) setPairingCode(data.session.code)
-              return
-            }
-          }
-        } catch (_) {}
-      }
+      if (isEnsuringSessionRef.current) return
+      isEnsuringSessionRef.current = true
+
       try {
-        const res = await fetch('/api/pano/pair/session', { method: 'POST' })
+        const storedSessionId =
+          activeSessionId ||
+          (typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_active_session_id') : null)
+
+        if (storedSessionId) {
+          try {
+            const chk = await fetch(`/api/pano/pair/session?sessionId=${encodeURIComponent(storedSessionId)}`)
+            if (chk.ok) {
+              const data = await chk.json()
+              const sessionObj = data.session || (data.success && data.status ? data : null)
+              if (sessionObj && sessionObj.status !== 'closed' && sessionObj.status !== 'expired') {
+                if (!isCancelled) {
+                  if (sessionObj.code) setPairingCode(sessionObj.code)
+                  if (!activeSessionId) setActiveSessionId(storedSessionId)
+                  sessionInitializedRef.current = true
+                }
+                return
+              }
+            }
+          } catch (_) {}
+        }
+
+        // Only create a new session if no valid active session exists
+        const teacherPayload = pairedSession || (user ? {
+          id: user.id,
+          username: user.username || user.email,
+          email: user.email,
+          first_name: user.first_name || 'Öğretmen',
+          last_name: user.last_name || '',
+          orgSlug: orgslug,
+          classrooms: classrooms,
+          selectedClassId: selectedClassRef.current?.id || null,
+          activeClassName: selectedClassRef.current?.name || '',
+        } : null)
+
+        const res = await fetch('/api/pano/pair/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            teacherData: teacherPayload,
+            ttlMs: 45 * 60 * 1000,
+          }),
+        })
+
         if (res.ok) {
           const data = await res.json()
           if (data.success && data.session && !isCancelled) {
-            setActiveSessionId(data.session.sessionId)
+            const newSessId = data.session.sessionId
+            setActiveSessionId(newSessId)
             if (data.session.code) setPairingCode(data.session.code)
+            sessionInitializedRef.current = true
             if (typeof window !== 'undefined') {
-              localStorage.setItem('oxonom_pano_active_session_id', data.session.sessionId)
+              localStorage.setItem('oxonom_pano_active_session_id', newSessId)
               if (data.session.boardDeviceToken) {
                 localStorage.setItem('oxonom_pano_device_token', data.session.boardDeviceToken)
               }
             }
           }
         }
-      } catch (_) {}
+      } catch (_) {
+      } finally {
+        isEnsuringSessionRef.current = false
+      }
     }
+
     ensureValidSession()
     return () => { isCancelled = true }
-  }, [hasActiveTeacher, activeSessionId])
+  }, [hasActiveTeacher])
 
   // Generate QR code for remote control pairing whenever activeSessionId is available or modal opens
   useEffect(() => {
     if (!activeSessionId) return
+    let isCancelled = false
+
+    if (isRemotePairModalOpen && !pairingCode) {
+      fetch(`/api/pano/pair/session?sessionId=${encodeURIComponent(activeSessionId)}`)
+        .then(r => r.json())
+        .then(d => {
+          if (!isCancelled && d.code) setPairingCode(d.code)
+        })
+        .catch(() => {})
+    }
+
     const updateQr = async () => {
       try {
         const origin = typeof window !== 'undefined' ? window.location.origin : ''
         const tok = typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_device_token') || '' : ''
         const qrTarget = `${origin}/remote?session=${encodeURIComponent(activeSessionId)}${tok ? `&token=${encodeURIComponent(tok)}` : ''}`
         const url = await QRCode.toDataURL(qrTarget, {
-          width: 280,
+          width: 320,
           margin: 1.5,
           color: { dark: '#09090b', light: '#ffffff' },
           errorCorrectionLevel: 'M',
         })
-        setRemoteQrDataUrl(url)
+        if (!isCancelled) {
+          setRemoteQrDataUrl(url)
+        }
       } catch (_) {}
     }
     updateQr()
-  }, [activeSessionId, isRemotePairModalOpen])
+    return () => { isCancelled = true }
+  }, [activeSessionId, isRemotePairModalOpen, pairingCode])
 
   // Handle incoming remote commands from paired mobile phone
   const handleRemoteAction = useCallback((msg: RemoteActionMessage) => {
@@ -2389,10 +2446,12 @@ export default function PanoClient() {
             ALL_CLASSROOMS.find(c => String(c.id) === String(targetId)) ||
             DEFAULT_CLASSROOMS.find(c => String(c.id) === String(targetId))
           if (cls) {
+            selectedClassRef.current = cls
             handleSelectClass(cls)
             toast.success(`${cls.name} sınıfı seçildi`)
           }
         } else {
+          selectedClassRef.current = null
           handleSelectClass(null as any)
           setIsClassModalOpen(true)
         }

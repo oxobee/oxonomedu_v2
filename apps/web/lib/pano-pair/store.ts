@@ -261,7 +261,10 @@ function generateCode(): string {
   }
 }
 
-export async function createPanoSession(ttlMs = 5 * 60 * 1000): Promise<PanoPairSession> {
+export async function createPanoSession(
+  ttlMs = 45 * 60 * 1000,
+  initialTeacherData?: TeacherPairData | null
+): Promise<PanoPairSession> {
   const sessionId = `pano_${crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).substring(2)}`}`
   const boardDeviceToken = crypto.randomUUID ? crypto.randomUUID() : `board_${Math.random().toString(36).substring(2)}`
   const code = generateCode()
@@ -277,6 +280,22 @@ export async function createPanoSession(ttlMs = 5 * 60 * 1000): Promise<PanoPair
     status: 'waiting',
     boardDeviceToken,
     failedAttempts: 0,
+    teacherData: initialTeacherData || undefined,
+  }
+
+  if (initialTeacherData) {
+    session.sharedState = {
+      version: 1,
+      updatedAt: now,
+      sourceDeviceId: 'system',
+      updatedBy: 'board',
+      openWindows: [],
+      activeWindowId: null,
+      currentView: 'home',
+      selectedClassId: (initialTeacherData as any)?.selectedClassId ?? null,
+      isLocked: false,
+      ui: { openModal: null },
+    }
   }
 
   // Update memory cache

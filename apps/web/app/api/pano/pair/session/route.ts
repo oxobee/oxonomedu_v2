@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createPanoSession, getPanoSession } from '@/lib/pano-pair/store'
+import { createPanoSession, getPanoSession, getPanoSessionByCode } from '@/lib/pano-pair/store'
 import os from 'os'
 
 export const runtime = 'nodejs'
@@ -21,7 +21,10 @@ function getLanIp(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await createPanoSession()
+    const body = await req.json().catch(() => ({}))
+    const initialTeacherData = body?.teacherData || null
+    const ttlMs = body?.ttlMs || 45 * 60 * 1000
+    const session = await createPanoSession(ttlMs, initialTeacherData)
     let host = req.headers.get('host') || 'localhost:3010'
     const protocol = req.headers.get('x-forwarded-proto') || 'http'
 
@@ -67,19 +70,31 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId')
-  if (!sessionId) {
-    return NextResponse.json({ success: false, error: 'sessionId gereklidir', code: 'bad_request' }, { status: 400 })
+  const code = req.nextUrl.searchParams.get('code')
+
+  if (!sessionId && !code) {
+    return NextResponse.json({ success: false, error: 'sessionId veya code gereklidir', code: 'bad_request' }, { status: 400 })
   }
 
   try {
-    const session = await getPanoSession(sessionId)
+    const session = code ? await getPanoSessionByCode(code) : await getPanoSession(sessionId!)
     if (!session) {
       return NextResponse.json({ success: false, error: 'Oturum bulunamadı veya süresi doldu', code: 'session_not_found' }, { status: 404 })
     }
 
     return NextResponse.json({
       success: true,
+      session: {
+        sessionId: session.sessionId,
+        code: session.code,
+        status: session.status,
+        expiresAt: session.expiresAt,
+        boardDeviceToken: session.boardDeviceToken,
+        teacherData: session.teacherData || null,
+        sharedState: session.sharedState || null,
+      },
       status: session.status,
+      code: session.code,
       expiresAt: session.expiresAt,
       teacherData: session.teacherData || null,
     })
