@@ -2110,9 +2110,47 @@ export default function PanoClient() {
   // Check active teacher session (paired via QR/OTP or directly logged in)
   const hasActiveTeacher = !forceStandby && (!!pairedSession || (!!user && isTeacher))
   const [isPhoneConnected, setIsPhoneConnected] = useState(false)
+  const processedActionIds = useRef<Set<string>>(new Set())
+
+  // Ensure board has an active session for remote pairing even if logged in directly
+  useEffect(() => {
+    if (!hasActiveTeacher) return
+    if (!activeSessionId) {
+      const initBoardSession = async () => {
+        try {
+          const res = await fetch('/api/pano/pair/session', { method: 'POST' })
+          if (res.ok) {
+            const data = await res.json()
+            if (data.success && data.session) {
+              setActiveSessionId(data.session.sessionId)
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('oxonom_pano_active_session_id', data.session.sessionId)
+                if (data.session.boardDeviceToken) {
+                  localStorage.setItem('oxonom_pano_device_token', data.session.boardDeviceToken)
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+      initBoardSession()
+    }
+  }, [hasActiveTeacher, activeSessionId])
 
   // Handle incoming remote commands from paired mobile phone
   const handleRemoteAction = useCallback((msg: RemoteActionMessage) => {
+    if (!msg || !msg.action) return
+
+    // Deduplication check: ignore if this action was already processed
+    if (msg.id) {
+      if (processedActionIds.current.has(msg.id)) return
+      processedActionIds.current.add(msg.id)
+      if (processedActionIds.current.size > 300) {
+        const first = Array.from(processedActionIds.current).slice(0, 100)
+        first.forEach(id => processedActionIds.current.delete(id))
+      }
+    }
+
     const { action, payload } = msg
     recordActivity()
 
@@ -2284,16 +2322,19 @@ export default function PanoClient() {
     openAppInWindow,
   ])
 
-  // Smart Board Realtime SSE Connection for Remote Phone Commands
+  // Smart Board Realtime SSE Connection + Fast HTTP Polling for Remote Phone Commands (Dual-Channel)
   useEffect(() => {
     if (!activeSessionId || !hasActiveTeacher) return
 
     let sse: EventSource | null = null
+    let pollInterval: NodeJS.Timeout | null = null
     let isCancelled = false
+    let lastPollTime = Date.now() - 3000
+
+    const tok = typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_device_token') || '' : ''
 
     const connectSSE = () => {
       try {
-        const tok = typeof window !== 'undefined' ? localStorage.getItem('oxonom_pano_device_token') || '' : ''
         const sseUrl = `/api/pano/pair/stream?sessionId=${encodeURIComponent(activeSessionId)}${tok ? `&token=${encodeURIComponent(tok)}` : ''}`
         sse = new EventSource(sseUrl)
 
@@ -2308,6 +2349,7 @@ export default function PanoClient() {
           try {
             const actionMsg: RemoteActionMessage = JSON.parse(event.data)
             handleRemoteAction(actionMsg)
+            setIsPhoneConnected(true)
           } catch (err) {
             console.error('[PanoClient] Failed to parse remote_action:', err)
           }
@@ -2320,19 +2362,48 @@ export default function PanoClient() {
         })
 
         sse.onerror = () => {
-          // SSE automatically reconnects in browser
+          // SSE automatically reconnects in browser; backup polling ensures zero latency
         }
       } catch (err) {
         console.warn('[PanoClient] SSE initialization error:', err)
       }
     }
 
+    // Backup Fast HTTP Polling (every 300ms) to guarantee cross-lambda delivery on Serverless
+    const startPollingBackup = () => {
+      pollInterval = setInterval(async () => {
+        if (isCancelled) return
+        try {
+          const res = await fetch(`/api/remote/pending?sessionId=${encodeURIComponent(activeSessionId)}${tok ? `&token=${encodeURIComponent(tok)}` : ''}&since=${lastPollTime}`)
+          if (res.ok) {
+            const data = await res.json()
+            if (data.serverTime) {
+              lastPollTime = Math.max(lastPollTime, data.serverTime - 1000)
+            }
+            if (Array.isArray(data.actions) && data.actions.length > 0) {
+              setIsPhoneConnected(true)
+              for (const act of data.actions) {
+                handleRemoteAction(act)
+              }
+            }
+          } else if (res.status === 410) {
+            setIsPhoneConnected(false)
+            handleRemoteSessionClosed()
+          }
+        } catch (_) {}
+      }, 300)
+    }
+
     connectSSE()
+    startPollingBackup()
 
     return () => {
       isCancelled = true
       if (sse) {
         sse.close()
+      }
+      if (pollInterval) {
+        clearInterval(pollInterval)
       }
     }
   }, [activeSessionId, hasActiveTeacher, handleRemoteAction, handleRemoteSessionClosed])

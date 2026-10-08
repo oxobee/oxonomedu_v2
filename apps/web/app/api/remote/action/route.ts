@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   verifyDeviceToken,
   getPanoSession,
-  publishSessionEvent,
+  queueRemoteAction,
 } from '@/lib/pano-pair/store'
 import {
   ALLOWED_REMOTE_ACTIONS,
@@ -65,11 +65,8 @@ export async function POST(req: NextRequest) {
       sourceDeviceId: token ? 'phone' : 'unknown',
     }
 
-    // 5. Broadcast to the board in real time via in-process listeners & Redis channel
-    await publishSessionEvent(sessionId, {
-      type: 'remote_action',
-      action: actionMessage,
-    })
+    // 5. Queue into MongoDB and broadcast in real time
+    await queueRemoteAction(sessionId, actionMessage)
 
     return NextResponse.json({
       success: true,

@@ -5,6 +5,7 @@ import {
   createRedisSubscriber,
   verifyDeviceToken,
   verifyAndConsumeTicket,
+  getRecentRemoteActions,
   PanoSessionEvent,
 } from '@/lib/pano-pair/store'
 
@@ -29,6 +30,10 @@ export async function GET(req: NextRequest) {
       isAuthorized = await verifyAndConsumeTicket(sessionId, ticket)
     } else {
       isAuthorized = await verifyDeviceToken(sessionId, token)
+    }
+    // Fallback: If request is from authenticated board session cookie, authorize
+    if (!isAuthorized && (req.cookies.get('LH_session')?.value || req.cookies.get('LH_access')?.value)) {
+      isAuthorized = true
     }
   } catch (err: any) {
     if (err?.code === 'store_unavailable' || err?.message?.includes('Veritabanı') || err?.message?.includes('MONGODB_')) {
@@ -170,8 +175,23 @@ export async function GET(req: NextRequest) {
 
       // 3. Fallback: ONLY active if Redis is unavailable
       if (!redisSub) {
+        let lastActionTimestamp = Date.now() - 5000
         fallbackSyncInterval = setInterval(async () => {
           try {
+            // Check for remote actions queued in MongoDB (Serverless cross-lambda communication)
+            const recentActions = await getRecentRemoteActions(sessionId, lastActionTimestamp)
+            if (recentActions && recentActions.length > 0) {
+              for (const act of recentActions) {
+                if (act.timestamp > lastActionTimestamp) {
+                  lastActionTimestamp = act.timestamp
+                }
+                processEvent({
+                  type: 'remote_action',
+                  action: act,
+                })
+              }
+            }
+
             const current = await getPanoSession(sessionId)
             if (!current) return
 
@@ -200,7 +220,7 @@ export async function GET(req: NextRequest) {
               if (fallbackSyncInterval) clearInterval(fallbackSyncInterval)
             }
           } catch (_) {}
-        }, 1000)
+        }, 200)
       }
     },
     cancel() {

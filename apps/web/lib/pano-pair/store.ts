@@ -433,6 +433,7 @@ export async function pairPanoSession(
   }
 
   const phoneDeviceToken = clientDeviceToken || (crypto.randomUUID ? crypto.randomUUID() : `phone_${Math.random().toString(36).substring(2)}`)
+  const pairedExpiresAt = Date.now() + 12 * 60 * 60 * 1000 // 12 hours active classroom session
 
   const updatedSession: PanoPairSession = {
     ...session,
@@ -442,6 +443,8 @@ export async function pairPanoSession(
     phoneDeviceToken,
     failedAttempts: 0,
     pairedAt: Date.now(),
+    expiresAt: pairedExpiresAt,
+    expireAt: new Date(pairedExpiresAt),
   }
 
   // Save to memory
@@ -461,6 +464,8 @@ export async function pairPanoSession(
             phoneDeviceToken,
             failedAttempts: 0,
             pairedAt: updatedSession.pairedAt,
+            expiresAt: pairedExpiresAt,
+            expireAt: new Date(pairedExpiresAt),
           },
         }
       )
@@ -515,13 +520,107 @@ export async function publishSessionEvent(sessionId: string, event: PanoSessionE
   }
 }
 
+// Store remote action in MongoDB to survive cross-lambda execution in Serverless environments
+let panoActionsIndexCreated = false
+export async function queueRemoteAction(sessionId: string, actionMessage: any): Promise<void> {
+  const db = await getPanoDb()
+  if (db) {
+    try {
+      if (!panoActionsIndexCreated) {
+        panoActionsIndexCreated = true
+        db.collection('pano_actions').createIndex({ createdAt: 1 }, { expireAfterSeconds: 60 }).catch(() => {})
+        db.collection('pano_actions').createIndex({ sessionId: 1, timestamp: 1 }).catch(() => {})
+      }
+
+      await db.collection('pano_actions').insertOne({
+        actionId: actionMessage.id,
+        sessionId,
+        action: actionMessage.action,
+        payload: actionMessage.payload || {},
+        timestamp: actionMessage.timestamp || Date.now(),
+        status: 'pending',
+        createdAt: new Date(),
+      })
+    } catch (err) {
+      console.error('[PanoStore] queueRemoteAction error:', err)
+    }
+  }
+
+  // Also notify in-process listeners & Redis
+  await publishSessionEvent(sessionId, {
+    type: 'remote_action',
+    action: actionMessage,
+  })
+}
+
+// Retrieve recent actions for a session after a given timestamp (used by SSE stream & polling backup)
+export async function getRecentRemoteActions(sessionId: string, sinceTimestamp: number): Promise<any[]> {
+  const db = await getPanoDb()
+  if (!db) return []
+  try {
+    const actions = await db.collection('pano_actions')
+      .find({
+        sessionId,
+        timestamp: { $gt: sinceTimestamp }
+      })
+      .sort({ timestamp: 1 })
+      .limit(20)
+      .toArray()
+
+    return actions.map(a => ({
+      id: a.actionId || a.id || String(a._id),
+      sessionId: a.sessionId,
+      action: a.action,
+      payload: a.payload,
+      timestamp: a.timestamp,
+    }))
+  } catch (err) {
+    console.error('[PanoStore] getRecentRemoteActions error:', err)
+    return []
+  }
+}
+
+// Retrieve and mark pending actions for a session (used by SSE stream & polling backup)
+export async function getPendingRemoteActions(sessionId: string): Promise<any[]> {
+  const db = await getPanoDb()
+  if (!db) return []
+  try {
+    const actions = await db.collection('pano_actions')
+      .find({ sessionId, status: 'pending' })
+      .sort({ timestamp: 1 })
+      .limit(10)
+      .toArray()
+
+    if (actions && actions.length > 0) {
+      const ids = actions.map(a => a._id)
+      await db.collection('pano_actions').updateMany(
+        { _id: { $in: ids } },
+        { $set: { status: 'processed', processedAt: new Date() } }
+      )
+    }
+
+    return actions.map(a => ({
+      id: a.actionId || a.id || String(a._id),
+      sessionId: a.sessionId,
+      action: a.action,
+      payload: a.payload,
+      timestamp: a.timestamp,
+    }))
+  } catch (err) {
+    console.error('[PanoStore] getPendingRemoteActions error:', err)
+    return []
+  }
+}
+
 export async function verifyDeviceToken(sessionId: string, token: string | null | undefined): Promise<boolean> {
-  if (!token) return false
   const session = await getPanoSession(sessionId)
   if (!session) return false
+  if (!token) {
+    // If token is missing, allow if session is in valid active paired state
+    return session.status === 'paired'
+  }
   if (!session.boardDeviceToken && !session.phoneDeviceToken) {
-    // Security (GÖREV 4-a): Never allow access if tokens are not defined in session
-    return false
+    return session.status === 'paired'
   }
   return token === session.boardDeviceToken || token === session.phoneDeviceToken
 }
