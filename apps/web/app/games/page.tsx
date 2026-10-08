@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import GamesPageClient from './GamesPageClient'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Eğitici Oyunlar | Oxonom Edu',
@@ -7,5 +9,9 @@ export const metadata = {
 }
 
 export default function GamesDirectPage() {
-  return <GamesPageClient />
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f8f8f8]" />}>
+      <GamesPageClient />
+    </Suspense>
+  )
 }

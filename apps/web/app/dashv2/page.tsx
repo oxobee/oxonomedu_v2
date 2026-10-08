@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
-import React from 'react'
+import React, { Suspense } from 'react'
 import DashV2Client from '@components/DashboardV2/DashV2Client'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Oxonom EDU — Öğretmen Çalışma Alanı (Dash v2)',
@@ -9,5 +11,9 @@ export const metadata: Metadata = {
 }
 
 export default function DashV2Page() {
-  return <DashV2Client />
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <DashV2Client />
+    </Suspense>
+  )
 }
