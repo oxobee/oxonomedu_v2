@@ -18,6 +18,7 @@ interface RemoteStatusBarProps {
   isFullscreen: boolean
   onToggleFullscreen: () => void
   onDisconnect: () => void
+  onChangeClass?: () => void
 }
 
 export default function RemoteStatusBar({
@@ -27,6 +28,7 @@ export default function RemoteStatusBar({
   isFullscreen,
   onToggleFullscreen,
   onDisconnect,
+  onChangeClass,
 }: RemoteStatusBarProps) {
   const getStatusBadge = () => {
     switch (status) {
@@ -89,6 +91,18 @@ export default function RemoteStatusBar({
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0">
+        {/* Change Class Button */}
+        {onChangeClass && (
+          <button
+            type="button"
+            onClick={onChangeClass}
+            className="px-2.5 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 active:scale-95 text-indigo-300 hover:text-white flex items-center gap-1.5 text-[11px] font-bold transition-all cursor-pointer border border-indigo-500/30"
+            title="Sınıfı Değiştir"
+          >
+            <span>Sınıf Değiştir</span>
+          </button>
+        )}
+
         {/* Fullscreen Button */}
         <button
           type="button"

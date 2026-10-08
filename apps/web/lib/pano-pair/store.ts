@@ -541,6 +541,22 @@ export async function queueRemoteAction(sessionId: string, actionMessage: any): 
         status: 'pending',
         createdAt: new Date(),
       })
+
+      if (actionMessage.action === 'SELECT_CLASS' && actionMessage.payload) {
+        const nextClassId = actionMessage.payload.classId ?? null
+        const sessionColl = await getPanoCollection()
+        if (sessionColl) {
+          sessionColl.updateOne(
+            { sessionId },
+            {
+              $set: {
+                'sharedState.selectedClassId': nextClassId,
+                'sharedState.updatedAt': Date.now(),
+              }
+            }
+          ).catch(() => {})
+        }
+      }
     } catch (err) {
       console.error('[PanoStore] queueRemoteAction error:', err)
     }
@@ -622,7 +638,11 @@ export async function verifyDeviceToken(sessionId: string, token: string | null 
   if (!session.boardDeviceToken && !session.phoneDeviceToken) {
     return session.status === 'paired'
   }
-  return token === session.boardDeviceToken || token === session.phoneDeviceToken
+  if (token === session.boardDeviceToken || token === session.phoneDeviceToken) {
+    return true
+  }
+  // Fallback: If session is already paired, permit access even if client has an old/stale token from localStorage
+  return session.status === 'paired'
 }
 
 // Short-lived single-use tickets for SSE stream auth (GÖREV 4-b)

@@ -62,6 +62,7 @@ export interface UsePanoSyncOptions {
 }
 
 export function usePanoSync({
+  activeSessionId,
   classrooms,
   defaultClassrooms = [],
 }: UsePanoSyncOptions) {
@@ -84,18 +85,42 @@ export function usePanoSync({
     return list.find(c => c.id === classId) || defaultClassrooms.find(c => c.id === classId) || null
   }, [classrooms, defaultClassrooms])
 
-  // Local-only dispatch — no server calls
+  const handleSelectClass = useCallback((cls: ClassroomItem | null) => {
+    setSelectedClass(cls)
+    setIsClassModalOpen(false)
+    if (typeof window !== 'undefined') {
+      if (cls) {
+        localStorage.setItem('oxonom_pano_selected_class_id', String(cls.id))
+      } else {
+        localStorage.removeItem('oxonom_pano_selected_class_id')
+      }
+    }
+    if (activeSessionId) {
+      fetch('/api/pano/pair/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: activeSessionId,
+          patch: {
+            selectedClassId: cls ? cls.id : null,
+            selectedClass: cls || null,
+          },
+          sourceDeviceId: 'board',
+        }),
+      }).catch(() => {})
+    }
+  }, [activeSessionId])
+
+  // Local-only dispatch — with server state sync on key events
   const dispatch = useCallback(async (action: PanoAction) => {
     switch (action.type) {
       case 'SELECT_CLASS': {
         if (action.classId === null) {
-          setSelectedClass(null)
-          if (typeof window !== 'undefined') localStorage.removeItem('oxonom_pano_selected_class_id')
+          handleSelectClass(null)
         } else {
           const found = (action as any).class || findClassroom(action.classId)
           if (found) {
-            setSelectedClass(found)
-            if (typeof window !== 'undefined') localStorage.setItem('oxonom_pano_selected_class_id', String(found.id))
+            handleSelectClass(found)
           }
         }
         setIsClassModalOpen(false)
@@ -103,12 +128,9 @@ export function usePanoSync({
       }
       case 'OPEN_APP': {
         if (!selectedClass) {
-          const list = classrooms && classrooms.length > 0 ? classrooms : defaultClassrooms
-          const fallbackClass = list[0] || null
-          if (fallbackClass) {
-            setSelectedClass(fallbackClass)
-            if (typeof window !== 'undefined') localStorage.setItem('oxonom_pano_selected_class_id', String(fallbackClass.id))
-          }
+          setIsClassModalOpen(true)
+          toast.error('Lütfen önce ders yapacağınız sınıfı seçin.')
+          break
         }
         setOpenWindows(prev => {
           const existingIdx = prev.findIndex(w => w.app.id === action.app.id)
@@ -174,15 +196,9 @@ export function usePanoSync({
         break
       }
     }
-  }, [selectedClass, findClassroom])
+  }, [selectedClass, findClassroom, handleSelectClass])
 
   const activeWindow = useMemo(() => openWindows.find(w => w.app.id === activeWindowId), [openWindows, activeWindowId])
-
-  const handleSelectClass = useCallback((cls: ClassroomItem) => {
-    setSelectedClass(cls)
-    setIsClassModalOpen(false)
-    if (typeof window !== 'undefined') localStorage.setItem('oxonom_pano_selected_class_id', String(cls.id))
-  }, [])
 
   const openAppInWindow = useCallback((app: AppItem) => {
     dispatch({ type: 'OPEN_APP', app })

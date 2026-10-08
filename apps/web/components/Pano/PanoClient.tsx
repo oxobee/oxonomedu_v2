@@ -1640,6 +1640,7 @@ export default function PanoClient() {
   // Handle successful pairing from Standby Screen
   const handlePaired = async (teacherData: TeacherPairData) => {
     setPairedSession(teacherData)
+    setIsPhoneConnected(true)
     setForceStandby(false)
 
     const sId = (teacherData as any).sessionId || searchParams?.get('session') || ''
@@ -2109,7 +2110,12 @@ export default function PanoClient() {
 
   // Check active teacher session (paired via QR/OTP or directly logged in)
   const hasActiveTeacher = !forceStandby && (!!pairedSession || (!!user && isTeacher))
-  const [isPhoneConnected, setIsPhoneConnected] = useState(false)
+  const [isPhoneConnected, setIsPhoneConnected] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return Boolean(localStorage.getItem('oxonom_pano_paired_session'))
+    }
+    return false
+  })
   const processedActionIds = useRef<Set<string>>(new Set())
 
   // Ensure board has an active session for remote pairing even if logged in directly
@@ -2153,6 +2159,13 @@ export default function PanoClient() {
 
     const { action, payload } = msg
     recordActivity()
+
+    // Sınıf seçilmeden kumanda aktif olmasın — sadece SELECT_CLASS veya sistem komutlarına izin ver
+    if (!selectedClass && action !== 'SELECT_CLASS' && action !== 'LOCK' && action !== 'UNLOCK' && action !== 'HOME') {
+      setIsClassModalOpen(true)
+      toast.error('Lütfen önce ders yapacağınız sınıfı seçin.')
+      return
+    }
 
     switch (action) {
       case 'HOME': {
@@ -2218,14 +2231,16 @@ export default function PanoClient() {
             toast.success(`${cls.name} sınıfı seçildi`)
           }
         } else {
+          handleSelectClass(null as any)
           setIsClassModalOpen(true)
         }
         break
       }
       case 'OPEN_WHITEBOARD': {
-        const defaultCls = selectedClass || classrooms[0] || DEFAULT_CLASSROOMS[0]
-        if (!selectedClass && defaultCls) {
-          handleSelectClass(defaultCls)
+        if (!selectedClass) {
+          setIsClassModalOpen(true)
+          toast.error('Lütfen önce ders yapacağınız sınıfı seçin.')
+          break
         }
         const boardApp = apps.find(a => a.id === 'board')
         if (boardApp) {
@@ -2240,9 +2255,10 @@ export default function PanoClient() {
         break
       }
       case 'OPEN_ASSIGNMENTS': {
-        const defaultCls = selectedClass || classrooms[0] || DEFAULT_CLASSROOMS[0]
-        if (!selectedClass && defaultCls) {
-          handleSelectClass(defaultCls)
+        if (!selectedClass) {
+          setIsClassModalOpen(true)
+          toast.error('Lütfen önce ders yapacağınız sınıfı seçin.')
+          break
         }
         const hwApp = apps.find(a => a.id === 'homework')
         if (hwApp) {
@@ -2252,9 +2268,10 @@ export default function PanoClient() {
         break
       }
       case 'OPEN_PLAYGROUNDS': {
-        const defaultCls = selectedClass || classrooms[0] || DEFAULT_CLASSROOMS[0]
-        if (!selectedClass && defaultCls) {
-          handleSelectClass(defaultCls)
+        if (!selectedClass) {
+          setIsClassModalOpen(true)
+          toast.error('Lütfen önce ders yapacağınız sınıfı seçin.')
+          break
         }
         const pgApp = apps.find(a => a.id === 'playgrounds')
         if (pgApp) {
@@ -2264,6 +2281,11 @@ export default function PanoClient() {
         break
       }
       case 'OPEN_GAMES': {
+        if (!selectedClass) {
+          setIsClassModalOpen(true)
+          toast.error('Lütfen önce ders yapacağınız sınıfı seçin.')
+          break
+        }
         const gamesApp = apps.find(a => a.id === 'games')
         if (gamesApp) {
           openAppInWindow(gamesApp)
@@ -2272,6 +2294,11 @@ export default function PanoClient() {
         break
       }
       case 'OPEN_LIBRARY': {
+        if (!selectedClass) {
+          setIsClassModalOpen(true)
+          toast.error('Lütfen önce ders yapacağınız sınıfı seçin.')
+          break
+        }
         const libApp = apps.find(a => a.id === 'library')
         if (libApp) {
           openAppInWindow(libApp)
@@ -2339,10 +2366,20 @@ export default function PanoClient() {
         sse = new EventSource(sseUrl)
 
         sse.onopen = () => {
+          // Connected to stream
+        }
+
+        sse.addEventListener('remote_connected', () => {
           if (!isCancelled) {
             setIsPhoneConnected(true)
           }
-        }
+        })
+
+        sse.addEventListener('paired', () => {
+          if (!isCancelled) {
+            setIsPhoneConnected(true)
+          }
+        })
 
         sse.addEventListener('remote_action', (event: MessageEvent) => {
           if (isCancelled) return
@@ -2379,6 +2416,9 @@ export default function PanoClient() {
             const data = await res.json()
             if (data.serverTime) {
               lastPollTime = Math.max(lastPollTime, data.serverTime - 1000)
+            }
+            if (data.status === 'paired') {
+              setIsPhoneConnected(true)
             }
             if (Array.isArray(data.actions) && data.actions.length > 0) {
               setIsPhoneConnected(true)

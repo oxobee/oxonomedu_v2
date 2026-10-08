@@ -110,6 +110,9 @@ export async function GET(req: NextRequest) {
             )
           )
         }
+        controller.enqueue(
+          encoder.encode(`event: remote_connected\ndata: {"status":"paired"}\n\n`)
+        )
       }
 
       const processEvent = (event: PanoSessionEvent) => {
@@ -137,6 +140,9 @@ export async function GET(req: NextRequest) {
               )
             }
           } else if (event.type === 'remote_action' && event.action) {
+            controller.enqueue(
+              encoder.encode(`event: remote_connected\ndata: {"status":"paired"}\n\n`)
+            )
             controller.enqueue(
               encoder.encode(`event: remote_action\ndata: ${JSON.stringify(event.action)}\n\n`)
             )

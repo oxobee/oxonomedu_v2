@@ -41,6 +41,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      status: session.status,
+      sharedState: session.sharedState,
       actions: actions || [],
       serverTime: Date.now(),
     })
