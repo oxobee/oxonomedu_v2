@@ -19,6 +19,11 @@ import {
   LogOut,
   GraduationCap,
   Clock,
+  Settings,
+  AlertTriangle,
+  X,
+  RefreshCw,
+  Smartphone,
 } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useAuth } from '@components/Contexts/AuthContext'
@@ -70,6 +75,10 @@ export default function ConnectBoardClient({
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
 
+  // Camera permission modal state (especially for iPhone Safari)
+  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState<boolean>(false)
+  const [isRequestingPermission, setIsRequestingPermission] = useState<boolean>(false)
+
   // Active smart boards state
   const [activeBoards, setActiveBoards] = useState<ActiveBoardItem[]>([])
   const [isLoadingBoards, setIsLoadingBoards] = useState<boolean>(false)
@@ -99,6 +108,70 @@ export default function ConnectBoardClient({
     }
   }, [urlCode, urlSession, user])
 
+  // Handle direct camera permission request (executed from user click/touch)
+  const requestCameraPermissionDirectly = async () => {
+    setIsRequestingPermission(true)
+    setCameraError(null)
+
+    try {
+      if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+        setCameraError('Tarayıcınız kamera erişimini desteklemiyor.')
+        setIsPermissionModalOpen(true)
+        return
+      }
+
+      // Direct synchronous user-gesture getUserMedia call for iOS Safari
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+      })
+
+      // If granted, release the test stream
+      stream.getTracks().forEach((track) => track.stop())
+
+      // Camera permission acquired
+      setIsPermissionModalOpen(false)
+      setCameraError(null)
+      toast.success('Kamera izni verildi!')
+      startCamera()
+    } catch (err: any) {
+      console.warn('[Camera] Direct permission error:', err)
+      setIsCameraActive(false)
+      setIsPermissionModalOpen(true)
+      const isDenied = err?.name === 'NotAllowedError' || String(err).includes('Permission') || String(err).includes('NotAllowedError')
+      setCameraError(
+        isDenied
+          ? 'Kamera erişim izni reddedildi. Lütfen iPhone ayarlarından kamera iznini açın.'
+          : 'Kamera açılamadı. Lütfen izinleri kontrol edin.'
+      )
+    } finally {
+      setIsRequestingPermission(false)
+    }
+  }
+
+  // Handle switching to camera tab with direct user gesture
+  const handleSwitchToCamera = async () => {
+    setActiveTab('camera')
+    setCameraError(null)
+
+    // Quick direct permission check to catch iOS Safari prompt early
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+        })
+        stream.getTracks().forEach((t) => t.stop())
+        startCamera()
+      } catch (err: any) {
+        console.warn('[Camera] Tab switch permission check failed:', err)
+        setCameraError('Kamera izni gerekiyor. Lütfen kamera erişimine izin verin.')
+        setIsPermissionModalOpen(true)
+        startCamera()
+      }
+    } else {
+      startCamera()
+    }
+  }
+
   // Handle camera scanner
   const startCamera = async () => {
     setCameraError(null)
@@ -126,20 +199,54 @@ export default function ConnectBoardClient({
         aspectRatio: 1.0,
       }
 
-      await html5Qr.start(
-        { facingMode: 'environment' },
-        config,
-        (decodedText: string) => {
-          handleQrScanSuccess(decodedText)
-        },
-        () => {
-          // ignore frame errors while looking for QR
+      try {
+        await html5Qr.start(
+          { facingMode: 'environment' },
+          config,
+          (decodedText: string) => {
+            handleQrScanSuccess(decodedText)
+          },
+          () => {}
+        )
+      } catch (firstErr: any) {
+        console.warn('[Camera] Standard facingMode failed, checking available cameras:', firstErr)
+        // Fallback for iOS multi-camera or constraint issues
+        const cameras = await Html5Qrcode.getCameras().catch(() => [])
+        if (cameras && cameras.length > 0) {
+          const backCam =
+            cameras.find((c: any) =>
+              c.label?.toLowerCase().includes('back') ||
+              c.label?.toLowerCase().includes('arka') ||
+              c.label?.toLowerCase().includes('environment')
+            ) || cameras[cameras.length - 1]
+
+          await html5Qr.start(
+            backCam.id,
+            config,
+            (decodedText: string) => {
+              handleQrScanSuccess(decodedText)
+            },
+            () => {}
+          )
+        } else {
+          throw firstErr
         }
-      )
+      }
     } catch (err: any) {
       console.error('[Camera] Start error:', err)
-      setCameraError('Kamera başlatılamadı. Lütfen kamera erişim iznini kontrol edin veya 6 haneli kodu elle girin.')
+      const isDenied =
+        err?.name === 'NotAllowedError' ||
+        String(err).includes('NotAllowedError') ||
+        String(err).includes('Permission')
+
+      setCameraError(
+        isDenied
+          ? 'Kamera izni reddedildi. Lütfen iPhone ayarlarından izin verin.'
+          : 'Kamera başlatılamadı. Lütfen kamera iznini kontrol edin veya 6 haneli kodu elle girin.'
+      )
       setIsCameraActive(false)
+      // Automatically open permission popup to guide teacher
+      setIsPermissionModalOpen(true)
     }
   }
 
@@ -575,7 +682,7 @@ export default function ConnectBoardClient({
 
             <button
               type="button"
-              onClick={() => setActiveTab('camera')}
+              onClick={() => handleSwitchToCamera()}
               className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'camera'
                   ? 'bg-white text-slate-950 shadow-md scale-[1.02]'
@@ -747,28 +854,74 @@ export default function ConnectBoardClient({
                   <span className="absolute bottom-3 left-3 w-6 h-6 border-b-3 border-l-3 border-rose-500 rounded-bl-lg pointer-events-none z-20" />
                   <span className="absolute bottom-3 right-3 w-6 h-6 border-b-3 border-r-3 border-rose-500 rounded-br-lg pointer-events-none z-20" />
 
-                  {/* Scanning Laser Beam */}
-                  <div
-                    className="absolute inset-x-4 h-0.5 bg-gradient-to-r from-transparent via-rose-500 to-transparent pointer-events-none z-20"
-                    style={{
-                      animation: 'scan-beam 2s ease-in-out infinite',
-                    }}
-                  />
+                  {/* Scanning Laser Beam (only when active and no error) */}
+                  {isCameraActive && !cameraError && (
+                    <div
+                      className="absolute inset-x-4 h-0.5 bg-gradient-to-r from-transparent via-rose-500 to-transparent pointer-events-none z-20"
+                      style={{
+                        animation: 'scan-beam 2s ease-in-out infinite',
+                      }}
+                    />
+                  )}
+
+                  {/* Camera Error / Permission Overlay */}
+                  {cameraError && (
+                    <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-30 p-5 flex flex-col items-center justify-center text-center">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mb-2.5">
+                        <AlertTriangle className="w-6 h-6" />
+                      </div>
+                      <p className="text-xs font-bold text-white mb-1">
+                        Kamera İzni Bekleniyor
+                      </p>
+                      <p className="text-[11px] text-slate-300 max-w-[230px] mb-4 leading-relaxed">
+                        {cameraError}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setIsPermissionModalOpen(true)}
+                        className="py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Settings className="w-3.5 h-3.5" />
+                        <span>İzinleri Yönet / Aç</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {cameraError && (
-                  <p className="text-xs text-red-500 font-semibold max-w-xs leading-relaxed">
-                    {cameraError}
-                  </p>
-                )}
+                {/* Camera Permission Actions */}
+                {cameraError ? (
+                  <div className="flex flex-col items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => requestCameraPermissionDirectly()}
+                      disabled={isRequestingPermission}
+                      className="py-2.5 px-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {isRequestingPermission ? (
+                        <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Camera className="w-3.5 h-3.5" />
+                      )}
+                      <span>İzni Doğrudan İste ve Tekrar Dene</span>
+                    </button>
 
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('otp')}
-                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-bold"
-                >
-                  Kod ile girmeyi tercih ediyorum &rarr;
-                </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('otp')}
+                      className="text-xs text-slate-500 dark:text-slate-400 hover:underline font-semibold"
+                    >
+                      Kod ile girmeyi tercih ediyorum &rarr;
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('otp')}
+                    className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-bold"
+                  >
+                    Kod ile girmeyi tercih ediyorum &rarr;
+                  </button>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -783,6 +936,109 @@ export default function ConnectBoardClient({
           <span>Oxonom Edu Pano OS</span>
         </div>
       </div>
+
+      {/* IPHONE / SAFARI CAMERA PERMISSION MODAL */}
+      <AnimatePresence>
+        {isPermissionModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-md bg-white dark:bg-[#18181b] rounded-t-3xl sm:rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden p-6 text-slate-900 dark:text-white relative"
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setIsPermissionModalOpen(false)}
+                className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Icon & Title */}
+              <div className="flex items-center gap-3.5 mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <Camera className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black tracking-tight">
+                    Kamera İzni Gerekli
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Tahtadaki QR kodu tarayabilmek için kameraya izin verin.
+                  </p>
+                </div>
+              </div>
+
+              {/* Instructions Box */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 space-y-3 mb-5">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <Smartphone className="w-4 h-4 text-indigo-500 shrink-0" />
+                  <span>iPhone (Safari) İçin İzin Adımları:</span>
+                </div>
+                <ol className="space-y-2 text-xs text-slate-600 dark:text-slate-300 list-decimal list-inside pl-1 leading-relaxed">
+                  <li>
+                    Safari ekranının altındaki veya üstündeki <strong>aA</strong> (veya 🔒 kilit) simgesine dokunun.
+                  </li>
+                  <li>
+                    Menüden <strong>Web Sitesi Ayarları</strong>'nı seçin.
+                  </li>
+                  <li>
+                    <strong>Kamera</strong> seçeneğini <strong>İzin Ver</strong> (veya Sor) yapın.
+                  </li>
+                  <li>
+                    Aşağıdaki butona dokunun veya sayfayı yenileyin.
+                  </li>
+                </ol>
+              </div>
+
+              {/* Actions */}
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => requestCameraPermissionDirectly()}
+                  disabled={isRequestingPermission}
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] text-white font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isRequestingPermission ? (
+                    <RotateCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Camera className="w-4 h-4" />
+                  )}
+                  <span>İzni Doğrudan İste ve Kamerayı Aç</span>
+                </button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') window.location.reload()
+                    }}
+                    className="py-2.5 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Sayfayı Yenile</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsPermissionModalOpen(false)
+                      setActiveTab('otp')
+                    }}
+                    className="py-2.5 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <KeyRound className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Kod ile Gir</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <style jsx>{`
         @keyframes scan-beam {
