@@ -375,12 +375,22 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-[24px] font-extrabold tracking-[-0.02em] text-[#0F172A] m-0">
-                {identifier.includes('mudur') || identifier.includes('idare') ? 'Müdür Girişi' : 'Giriş Yap'}
+                {identifier.includes('mudur') || identifier.includes('idare')
+                  ? 'Müdür Girişi'
+                  : identifier.includes('ogrenci')
+                  ? 'Öğrenci Girişi'
+                  : identifier.includes('ogretmen')
+                  ? 'Öğretmen Girişi'
+                  : 'Giriş Yap'}
               </h2>
               <p className="text-[13px] text-[#5B6577] mt-1 mb-0 font-medium">
                 {identifier.includes('mudur') || identifier.includes('idare')
                   ? 'Okul Müdürü (Dr. Uğur UĞURLU) yönetim hesabı'
-                  : 'Hesabınıza erişmek için bilgilerinizi girin.'}
+                  : identifier.includes('ogrenci')
+                  ? 'Öğrenci (Erçil UĞURLU — 9-A) hesabı'
+                  : identifier.includes('ogretmen')
+                  ? 'Öğretmen (Ebru TEKNECİ — 9-A Rehberi) hesabı'
+                  : 'Oxonom Okulları hesabınıza erişmek için bilgilerinizi girin.'}
               </p>
             </div>
 
@@ -392,31 +402,43 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
             </span>
           </div>
 
-          {/* Quick Role Selection Tabs */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-gray-100 border border-gray-200">
+          {/* Quick Role Selection Tabs (3 Authentic Accounts) */}
+          <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-gray-100 border border-gray-200">
             <button
               type="button"
               onClick={handleFillDemoAdmin}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
                 identifier.includes('mudur') || identifier.includes('idare')
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
                   : 'text-gray-600 hover:text-gray-900 bg-white/50'
               }`}
             >
-              <ShieldCheck size={14} className={identifier.includes('mudur') || identifier.includes('idare') ? 'text-white' : 'text-emerald-600'} />
-              <span>👔 Okul Müdürü</span>
+              <ShieldCheck size={12} className={identifier.includes('mudur') || identifier.includes('idare') ? 'text-white' : 'text-emerald-600'} />
+              <span>👔 Müdür</span>
             </button>
             <button
               type="button"
               onClick={handleFillDemoTeacher}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                identifier === 'ogretmen@oxonom.com'
+              className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                identifier.includes('ogretmen')
                   ? 'bg-[#0A0D15] text-white shadow-sm'
                   : 'text-gray-600 hover:text-gray-900 bg-white/50'
               }`}
             >
-              <Sparkles size={14} className={identifier === 'ogretmen@oxonom.com' ? 'text-[#34D399]' : 'text-gray-500'} />
+              <Sparkles size={12} className={identifier.includes('ogretmen') ? 'text-[#34D399]' : 'text-gray-500'} />
               <span>👩‍🏫 Öğretmen</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleFillDemoStudent}
+              className={`py-2 px-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                identifier.includes('ogrenci')
+                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 bg-white/50'
+              }`}
+            >
+              <Rocket size={12} className={identifier.includes('ogrenci') ? 'text-white' : 'text-indigo-500'} />
+              <span>🎒 Öğrenci</span>
             </button>
           </div>
 

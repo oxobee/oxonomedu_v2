@@ -621,18 +621,8 @@ export default function MAdminCurriculumClient({
   const user = session?.data?.user
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
-    if (user?.school_org_id) return user.school_org_id
-    if (orgSlug === 'neclagorer') return 10
-    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci') return 20
-    return 30
-  })
-  const [selectedClass, setSelectedClass] = useState<string>(() => {
-    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30)
-    if (org === 10) return '1-A'
-    if (org === 20) return '7-A'
-    return '9-A'
-  })
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(30)
+  const [selectedClass, setSelectedClass] = useState<string>('9-A')
   const [activeDay, setActiveDay] = useState<DayKey>('mon')
 
   // Main View Tab: 'distribute' (Sürükle-Bırak Haftalık Çizelge) | 'catalog' (Ders Tanımları & Saatler)
@@ -644,9 +634,8 @@ export default function MAdminCurriculumClient({
   // Dragging state for desktop HTML5 drag & drop
   const [draggedCourseName, setDraggedCourseName] = useState<string | null>(null)
 
-  // Dynamic Periods State (Allows adding extra lesson periods via + button)
   const [periods, setPeriods] = useState<PeriodSlot[]>(() => {
-    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30)
+    const org = user?.school_org_id || 30
     return org === 10 ? PRIMARY_PERIODS : MIDDLE_PERIODS
   })
 
@@ -675,7 +664,7 @@ export default function MAdminCurriculumClient({
 
   // Courses Catalog State with localStorage
   const [coursesList, setCoursesList] = useState<CurriculumCourse[]>(() => {
-    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30)
+    const org = user?.school_org_id || 30
     if (typeof window !== 'undefined') {
       try {
         const savedCourses = localStorage.getItem(`oxonom_admin_curriculum_${org}`)
@@ -690,7 +679,7 @@ export default function MAdminCurriculumClient({
 
   // Schedule Entries State with localStorage (shares same key with /m-admin-schedule!)
   const [scheduleList, setScheduleList] = useState<ScheduleEntry[]>(() => {
-    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30)
+    const org = user?.school_org_id || 30
     if (typeof window !== 'undefined') {
       try {
         const savedSchedule = localStorage.getItem(`oxonom_admin_schedule_${org}`)
@@ -1151,41 +1140,14 @@ export default function MAdminCurriculumClient({
               </div>
             </div>
 
-            {/* School Tabs */}
-            <div className="grid grid-cols-3 gap-1.5 mt-2.5 p-1 rounded-2xl bg-white/5 border border-white/10">
-              <button
-                type="button"
-                onClick={() => setSelectedOrgId(30)}
-                className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  selectedOrgId === 30
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                Oxonom Okulları
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedOrgId(10)}
-                className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  selectedOrgId === 10
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                Necla Görer
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedOrgId(20)}
-                className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  selectedOrgId === 20
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                Fevzi Kutlu
-              </button>
+            {/* Institution Badge */}
+            <div className="flex items-center justify-between p-2.5 px-3.5 mt-2.5 rounded-2xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-black text-white">Oxonom Okulları</span>
+                <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10">MEB Onaylı</span>
+              </div>
+              <span className="text-[11px] font-semibold text-gray-400">9-A Şubesi · Anadolu Lisesi</span>
             </div>
 
             {/* ── 3. SINIF SEÇİN ALANI (FERAH, SADE, YATAY KAYDIRILABİLİR & ÇOKLU UYGULAMA) ── */}

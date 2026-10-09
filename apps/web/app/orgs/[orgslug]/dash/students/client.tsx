@@ -403,7 +403,7 @@ export default function StudentsClient({ orgslug }: { orgslug: string }) {
   })
 
   const [students, setStudents] = useState<StudentRecord[]>(() => {
-    const targetOrgId = orgslug === 'fevzikalkanci' ? 20 : 10
+    const targetOrgId = org?.id || 30
     const schoolClasses = ALL_CLASSROOMS.filter((c) => c.org_id === targetOrgId)
     return (schoolClasses.length > 0
       ? schoolClasses.flatMap((cls) => generateClassStudents(cls))
@@ -477,7 +477,7 @@ export default function StudentsClient({ orgslug }: { orgslug: string }) {
   // Synchronize students with real availableClasses and persist to localStorage
   React.useEffect(() => {
     if (typeof window === 'undefined') return
-    const targetOrgId = org?.id || (orgslug === 'fevzikalkanci' ? 20 : 10)
+    const targetOrgId = org?.id || 30
     const schoolClasses = ALL_CLASSROOMS.filter((c) => c.org_id === targetOrgId)
     const defaultRoster = (schoolClasses.length > 0
       ? schoolClasses.flatMap((cls) => generateClassStudents(cls))
@@ -518,7 +518,7 @@ export default function StudentsClient({ orgslug }: { orgslug: string }) {
   const saveStudentsList = (updated: StudentRecord[]) => {
     setStudents(updated)
     if (typeof window !== 'undefined') {
-      const targetOrgId = org?.id || (orgslug === 'fevzikalkanci' ? 20 : 10)
+      const targetOrgId = org?.id || 30
       const key = `oxonom_students_${targetOrgId}`
       localStorage.setItem(key, JSON.stringify(updated))
     }

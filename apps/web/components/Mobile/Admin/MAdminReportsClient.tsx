@@ -62,7 +62,7 @@ export default function MAdminReportsClient({
   const { theme, toggleTheme } = useMobileTheme()
 
   // ── FILTER & CONTEXT STATES ──
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(10) // 10: Necla Görer, 20: Fevzi Kalkancı
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(30)
   const [activeTab, setActiveTab] = useState<ReportTab>('overview')
   const [selectedTerm, setSelectedTerm] = useState<TermFilter>('term1')
   const [selectedGrade, setSelectedGrade] = useState<string>('all')
@@ -541,45 +541,14 @@ export default function MAdminReportsClient({
               </button>
             </div>
 
-            {/* School Switcher Tabs */}
-            <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/10 mt-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedOrgId(10)
-                  setSelectedGrade('all')
-                }}
-                className={`p-2 rounded-xl text-left transition-all cursor-pointer relative ${
-                  selectedOrgId === 10
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <School size={12} className={selectedOrgId === 10 ? 'text-white' : 'text-gray-500'} />
-                  <span className="text-[11px] font-extrabold truncate">Necla Görer İlkokulu</span>
-                </div>
-                <div className="text-[9.5px] opacity-80 mt-0.5">1, 2, 3 ve 4. Sınıflar</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedOrgId(20)
-                  setSelectedGrade('all')
-                }}
-                className={`p-2 rounded-xl text-left transition-all cursor-pointer relative ${
-                  selectedOrgId === 20
-                    ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <School size={12} className={selectedOrgId === 20 ? 'text-white' : 'text-gray-500'} />
-                  <span className="text-[11px] font-extrabold truncate">Fevzi Kutlu Ortaokulu</span>
-                </div>
-                <div className="text-[9.5px] opacity-80 mt-0.5">5, 6, 7 ve 8. Sınıflar</div>
-              </button>
+            {/* Institution Badge */}
+            <div className="flex items-center justify-between p-2.5 px-3.5 mt-3 rounded-2xl bg-black/40 border border-emerald-500/20">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-black text-white">Oxonom Okulları</span>
+                <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10">MEB Raporlama</span>
+              </div>
+              <span className="text-[11px] font-semibold text-gray-400">9-A Şubesi · Edebiyat Alanı</span>
             </div>
           </div>
         </div>

@@ -63,11 +63,7 @@ export default function MAdminTeachersClient({
 }: MAdminTeachersClientProps) {
   const { theme, toggleTheme } = useMobileTheme()
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
-    if (orgSlug === 'neclagorer') return 10
-    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 20
-    return 30
-  })
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(30)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedBranchFilter, setSelectedBranchFilter] = useState<string>('ALL')
 
@@ -471,47 +467,23 @@ export default function MAdminTeachersClient({
           </span>
         </div>
 
-        {/* ── 2. SCHOOL SELECTOR (İlkokul vs Ortaokul) ── */}
+        {/* ── 2. KURUM VERİTABANI VE İZOLASYON ALANI ── */}
         <section className="px-4 mt-3">
-          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-gray-100 dark:bg-[#121826] border border-gray-200 dark:border-gray-800">
-            <button
-              type="button"
-              onClick={() => setSelectedOrgId(30)}
-              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                selectedOrgId === 30
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
-                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-              }`}
-            >
-              <School size={13} className={selectedOrgId === 30 ? 'text-[#10B981]' : 'text-gray-400'} />
-              <span className="truncate">Oxonom</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedOrgId(10)}
-              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                selectedOrgId === 10
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
-                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-              }`}
-            >
-              <School size={13} className={selectedOrgId === 10 ? 'text-[#10B981]' : 'text-gray-400'} />
-              <span className="truncate">Necla Görer</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedOrgId(20)}
-              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                selectedOrgId === 20
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
-                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-              }`}
-            >
-              <School size={13} className={selectedOrgId === 20 ? 'text-indigo-500' : 'text-gray-400'} />
-              <span className="truncate">Fevzi Kutlu</span>
-            </button>
+          <div className="flex items-center justify-between p-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent border border-emerald-500/20 dark:border-emerald-500/30">
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-xs">
+                <School size={16} />
+              </span>
+              <div>
+                <div className="text-xs font-black text-gray-900 dark:text-white flex items-center gap-1.5">
+                  <span>Oxonom Okulları</span>
+                  <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black">Aktif Kurum</span>
+                </div>
+                <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                  9-A Sınıf Rehberi · Türk Dili ve Edebiyatı · 1 Kadrolu Öğretmen (Ebru TEKNECİ)
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 

@@ -41,6 +41,13 @@ export async function handleCommunityApi(request: NextRequest, path: string): Pr
     path.startsWith('/api/v1/communities/org/')
   ) {
     if (method === 'GET') {
+      if (path.startsWith('/api/v1/communities/org/')) {
+        const parts = path.split('/')
+        const orgId = Number(parts[parts.indexOf('org') + 1])
+        if (orgId) {
+          return NextResponse.json(communitiesStore.filter(c => c.org_id === orgId), { status: 200 })
+        }
+      }
       return NextResponse.json(communitiesStore, { status: 200 })
     }
 
@@ -52,7 +59,7 @@ export async function handleCommunityApi(request: NextRequest, path: string): Pr
         const newCommunity = {
           id: newId,
           community_uuid: newUuid,
-          org_id: body.org_id || 10,
+          org_id: body.org_id || 30,
           name: body.name || 'Yeni Veli & Sınıf Topluluğu',
           description: body.description || '',
           public: body.public !== undefined ? body.public : true,

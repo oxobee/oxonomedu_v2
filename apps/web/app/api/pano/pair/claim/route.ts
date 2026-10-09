@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       refreshToken = token
     }
 
-    const orgSlug = teacherData.orgSlug || 'neclagorer'
+    const orgSlug = teacherData.orgSlug || 'oxonom'
 
     const enrichedTeacherData: TeacherPairData = {
       ...teacherData,

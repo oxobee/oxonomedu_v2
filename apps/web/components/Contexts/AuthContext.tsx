@@ -642,7 +642,7 @@ export function SessionProvider({
                 user: teacherUser,
                 roles: [
                   {
-                    org: { id: 1, org_uuid: paired.orgSlug || 'neclagorer' },
+                    org: { id: 30, org_uuid: paired.orgSlug || 'oxonom' },
                     role: {
                       id: 3,
                       role_uuid: 'teacher',

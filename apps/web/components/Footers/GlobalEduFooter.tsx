@@ -28,7 +28,7 @@ import {
 
 export function GlobalEduFooter() {
   const org = useOrg() as any
-  const orgslug = org?.slug || 'neclagorer'
+  const orgslug = org?.slug || 'oxonom'
   const [currentYear, setCurrentYear] = useState(2026)
   const [pingMs, setPingMs] = useState(24)
 
@@ -64,7 +64,7 @@ export function GlobalEduFooter() {
     staleTime: 60 * 1000,
   })
 
-  const siteName = branding?.site_name || org?.name || 'Necla Görer İlkokulu & Şair Fevzi Kutlu Kalkancı Ortaokulu'
+  const siteName = branding?.site_name || org?.name || 'Oxonom Okulları'
   const siteLogo = branding?.site_logo || org?.logo_image || '/meb_logo.svg'
   const footerText =
     branding?.footer_text ||
@@ -201,7 +201,7 @@ export function GlobalEduFooter() {
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Necla Görer İlkokulu (1-4) & Şair Fevzi Kutlu Kalkancı Ortaokulu (5-8) Akıllı Kampüsü
+                Oxonom Okulları Akıllı Kampüsü
               </p>
             </div>
           </div>
@@ -209,26 +209,11 @@ export function GlobalEduFooter() {
           {/* Quick School Links */}
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              href="/orgs/neclagorer"
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition inline-flex items-center gap-1.5 ${
-                orgslug === 'neclagorer'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
-              }`}
+              href="/orgs/oxonom"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold transition inline-flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm"
             >
               <Buildings size={14} />
-              <span>Necla Görer İlkokulu</span>
-            </Link>
-            <Link
-              href="/orgs/fevzikalkanci"
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition inline-flex items-center gap-1.5 ${
-                orgslug === 'fevzikalkanci'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
-              }`}
-            >
-              <Buildings size={14} />
-              <span>Şair Fevzi Kutlu Kalkancı</span>
+              <span>Oxonom Okulları</span>
             </Link>
           </div>
         </div>

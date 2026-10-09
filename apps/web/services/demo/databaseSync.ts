@@ -38148,8 +38148,8 @@ export function getSyncedSuperadminOrgs(page = 1, limit = 20, search = '', plan 
     email: o.email || 'idare@oxonom.com',
     logo_image: o.logo_image || null,
     thumbnail_image: o.thumbnail_image || null,
-    user_count: o.user_count ?? (o.slug === 'neclagorer' ? 48 : o.slug === 'fevzikalkanci' ? 36 : 24),
-    course_count: o.course_count ?? (o.slug === 'neclagorer' ? 14 : o.slug === 'fevzikalkanci' ? 18 : 8),
+    user_count: o.user_count ?? (o.slug === 'oxonom' ? 3 : 3),
+    course_count: o.course_count ?? (o.slug === 'oxonom' ? 14 : 8),
     plan: o.plan || 'pro',
     active: o.active ?? true,
     custom_domains: o.custom_domains || [],
@@ -38237,9 +38237,9 @@ export function getSyncedSuperadminUsers(page = 1, limit = 20, search = '', supe
     org_count: u.org_count ?? (u.orgs?.length || 1),
     orgs: u.orgs && u.orgs.length > 0 ? u.orgs : [
       {
-        id: 10,
-        name: 'Necla Görer İlkokulu',
-        slug: 'neclagorer',
+        id: 30,
+        name: 'Oxonom Okulları',
+        slug: 'oxonom',
         role_name: u.is_superadmin ? 'Süper Admin' : 'Öğretmen',
       },
     ],

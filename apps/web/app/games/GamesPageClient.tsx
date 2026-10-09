@@ -9,7 +9,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 
 export default function GamesPageClient() {
   const org = useOrg() as any
-  const orgslug = org?.slug || 'neclagorer'
+  const orgslug = org?.slug || 'oxonom'
   const searchParams = useSearchParams()
 
   const [isIframe, setIsIframe] = useState(false)

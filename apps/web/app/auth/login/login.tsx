@@ -464,9 +464,9 @@ const LoginClient = (props: LoginClientProps) => {
                 name: 'Dr. Uğur UĞURLU',
                 role: 'admin',
                 title: 'Okul Müdürü · Kurum Yetkilisi',
-                schoolName: props.org?.slug === 'fevzikalkanci' ? 'Şair Fevzi Kutlu Kalkancı Ortaokulu' : 'Necla Görer İlkokulu',
-                tcNo: '10000000146',
-                phone: '+90 532 999 2200',
+                schoolName: 'Oxonom Okulları',
+                tcNo: '10000002803',
+                phone: '+90 532 999 2803',
                 loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
                 twoFactorActive: true,
               })
@@ -477,7 +477,7 @@ const LoginClient = (props: LoginClientProps) => {
         const params = new URLSearchParams(window.location.search)
         const hasCustomNext = params.get('next') || params.get('redirect')
         if (isAdmin && !hasCustomNext) {
-          const targetSlug = props.org?.slug || 'neclagorer'
+          const targetSlug = props.org?.slug || 'oxonom'
           window.location.href = `/orgs/${targetSlug}/m-admin?openAccount=true`
           return
         }
@@ -498,7 +498,7 @@ const LoginClient = (props: LoginClientProps) => {
     setShowErrorModal(false)
 
     const email = role === 'admin' 
-      ? 'idare@oxonom.com' 
+      ? 'mudur@oxonom.com' 
       : role === 'teacher' 
         ? 'ogretmen@oxonom.com' 
         : 'ogrenci@oxonom.com'
@@ -507,7 +507,7 @@ const LoginClient = (props: LoginClientProps) => {
     formik.setFieldValue('email', email)
     formik.setFieldValue('password', password)
 
-    const targetSlug = props.org?.slug || 'neclagorer'
+    const targetSlug = props.org?.slug || 'oxonom'
     const targetPath = role === 'student'
       ? '/home'
       : role === 'admin'
@@ -524,16 +524,16 @@ const LoginClient = (props: LoginClientProps) => {
           'oxonom_active_admin_session',
           JSON.stringify({
             id: 50,
-            email: 'idare@oxonom.com',
-            username: 'idare',
+            email: 'mudur@oxonom.com',
+            username: 'mudur',
             first_name: 'Dr. Uğur',
             last_name: 'UĞURLU',
             name: 'Dr. Uğur UĞURLU',
             role: 'admin',
             title: 'Okul Müdürü · Kurum Yetkilisi',
-            schoolName: targetSlug === 'fevzikalkanci' ? 'Şair Fevzi Kutlu Kalkancı Ortaokulu' : 'Necla Görer İlkokulu',
-            tcNo: '10000000146',
-            phone: '+90 532 999 2200',
+            schoolName: 'Oxonom Okulları',
+            tcNo: '10000002803',
+            phone: '+90 532 999 2803',
             loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
             twoFactorActive: true,
           })

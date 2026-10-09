@@ -297,11 +297,11 @@ export default function TeachersClient({ orgslug }: { orgslug: string }) {
     return []
   }, [rawClasses])
 
-  const orgId = org?.id || (orgslug === 'fevzikalkanci' ? 20 : 10)
+  const orgId = org?.id || 30
   const defaultOrgTeachers = useMemo(() => getOrgTeachers(orgId) as TeacherRecord[], [orgId])
 
   const [teachers, setTeachers] = useState<TeacherRecord[]>(() => {
-    const id = orgslug === 'fevzikalkanci' ? 20 : 10
+    const id = org?.id || 30
     return getOrgTeachers(id) as TeacherRecord[]
   })
 

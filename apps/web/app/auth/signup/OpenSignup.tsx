@@ -342,8 +342,8 @@ export default function OpenSignUpComponent({ org: propOrg }: OpenSignUpComponen
     const rawDigits = phone.replace(/\D/g, '') || parentPhone.replace(/\D/g, '')
     const finalEmail = authMode === 'email' && email ? email.trim() : `${rawDigits}@oxonom.edu`
     const finalUsername = rawDigits || `${firstName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${Date.now().toString().slice(-4)}`
-    const targetOrgId = verifiedClass?.org_id || org?.id || 10
-    const targetOrgSlug = verifiedClass?.org_slug || org?.slug || 'neclagorer'
+    const targetOrgId = verifiedClass?.org_id || org?.id || 30
+    const targetOrgSlug = verifiedClass?.org_slug || org?.slug || 'oxonom'
 
     const payload = {
       email: finalEmail,
@@ -1109,7 +1109,7 @@ export default function OpenSignUpComponent({ org: propOrg }: OpenSignUpComponen
           <div>
             <button
               type="button"
-              onClick={() => router.push(`/orgs/${verifiedClass?.org_slug || 'neclagorer'}/dash/students`)}
+              onClick={() => router.push(`/orgs/${verifiedClass?.org_slug || 'oxonom'}/dash/students`)}
               className="px-6 py-2.5 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-bold shadow-md transition-all cursor-pointer"
             >
               Hemen Panele Git →

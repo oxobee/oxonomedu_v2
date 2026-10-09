@@ -33,31 +33,31 @@ export async function deleteOrganizationFromBackend(
 }
 
 export const DEFAULT_FALLBACK_ORG = {
-  id: 1,
-  org_uuid: 'org_e6503d4f-caf3-4e73-bd09-bf9af570ffd9',
-  name: 'Necla Görer İlkokulu',
-  slug: 'neclagorer',
-  description: '1, 2, 3 ve 4. Sınıflar — MEB Temel Eğitim & Akıllı İlkokul Portalı',
-  about: 'Necla Görer İlkokulu resmi dijital eğitim kampüsü. 1. sınıftan 4. sınıfa kadar tüm şubeler, sınıf öğretmenleri, akıllı tahtalar ve ödev takip sistemi.',
+  id: 30,
+  org_uuid: 'org_oxonom_okullari',
+  name: 'Oxonom Okulları',
+  slug: 'oxonom',
+  description: '1 Okul, 1 Sınıf, 1 Müdür, 1 Öğretmen, 1 Öğrenci — Bütünleşik Dijital Kurum',
+  about: 'Oxonom Okulları; okul müdürü, sınıf rehber öğretmeni ve öğrencinin tamamen birbirine tanımlandığı, MEB müfredatına tam uyumlu yeni nesil akıllı eğitim kurumu.',
   socials: {},
   links: {},
   scripts: {},
-  logo_image: '/meb_logo.svg',
-  thumbnail_image: '8f7c922b-b2e1-5c27-876d-285dba4b13ff_thumbnail.webp',
+  logo_image: '/pwa-icon.svg',
+  thumbnail_image: '',
   previews: {},
   explore: true,
-  label: 'Necla Görer',
-  email: 'neclagorer@oxonom.com',
+  label: 'Oxonom Okulları',
+  email: 'bilgi@oxonom.com',
   is_demo: false,
   creation_date: '2026-09-30 10:00:43.058047',
   update_date: '2026-09-30 10:00:43.058056',
   config: {
-    id: 1,
-    org_id: 1,
+    id: 30,
+    org_id: 30,
     creation_date: '2026-09-30 10:00:43.515544',
     update_date: '2026-09-30 20:17:00.480975',
     config: {
-      plan: 'pro',
+      plan: 'premium',
       active: true,
       overrides: {},
       admin_toggles: {
@@ -86,27 +86,27 @@ export const DEFAULT_FALLBACK_ORG = {
           twitter_handle: '',
           default_og_image: '',
           noindex_communities: false,
-          default_meta_description: 'Yeni nesil akıllı eğitim ve dijital öğrenme portalı',
+          default_meta_description: 'Oxonom Okulları akıllı eğitim ve dijital öğrenme portalı',
           google_site_verification: '',
-          default_meta_title_suffix: 'Oxonom Edu',
+          default_meta_title_suffix: 'Oxonom Okulları',
         },
         menu: { items: [] },
         general: {
           font: '',
           color: '',
           watermark: false,
-          footer_text: 'Oxonom Edu — Geleceğin Eğitimi Burada Başlar',
-          favicon_image: '',
+          footer_text: 'Oxonom Okulları — Geleceğin Eğitimi Burada Başlar',
+          favicon_image: '/pwa-icon.svg',
           default_language: 'tr',
-          email_sender_name: 'Oxonom Edu',
-          square_logo_image: '',
+          email_sender_name: 'Oxonom Okulları',
+          square_logo_image: '/pwa-icon.svg',
         },
         landing: {},
         course_end: { message: '', button_link: '', button_text: '' },
         auth_branding: {
           text_color: 'light',
           background_type: 'gradient',
-          welcome_message: 'Oxonom Edu Eğitim Portalına Hoş Geldiniz',
+          welcome_message: 'Oxonom Okulları Portalı',
           background_image: '',
           unsplash_photo_url: '',
           unsplash_photographer_url: '',
@@ -140,36 +140,9 @@ export const DEFAULT_FALLBACK_ORG = {
   },
 }
 
-export const NECLA_GORER_FALLBACK_ORG = {
-  ...DEFAULT_FALLBACK_ORG,
-  id: 10,
-  org_uuid: 'org_necla_gorer_ilkokulu',
-  name: 'Necla Görer İlkokulu',
-  slug: 'neclagorer',
-  description: '1, 2, 3 ve 4. Sınıflar — MEB Temel Eğitim & Akıllı İlkokul Portalı',
-  about: 'Necla Görer İlkokulu resmi dijital eğitim kampüsü. 1. sınıftan 4. sınıfa kadar tüm şubeler, sınıf öğretmenleri, akıllı tahtalar ve ödev takip sistemi.',
-  label: 'Necla Görer',
-}
-
-export const FEVZI_KALKANCI_FALLBACK_ORG = {
-  ...DEFAULT_FALLBACK_ORG,
-  id: 20,
-  org_uuid: 'org_sfg_ortaokulu',
-  name: 'Şair Fevzi Kutlu Kalkancı Ortaokulu',
-  slug: 'fevzikalkanci',
-  description: '5, 6, 7 ve 8. Sınıflar — LGS Hazırlık & Akıllı Ortaokul Portalı',
-  about: 'Şair Fevzi Kutlu Kalkancı Ortaokulu resmi dijital eğitim kampüsü. 5. sınıftan 8. sınıfa kadar branş dersleri, LGS hazırlık denemeleri, akıllı tahtalar ve ödev platformu.',
-  label: 'Şair Fevzi Kutlu Kalkancı',
-}
+export const OXONOM_FALLBACK_ORG = DEFAULT_FALLBACK_ORG
 
 export function getFallbackOrgForSlug(slug?: string) {
-  const s = String(slug || '').toLowerCase().trim()
-  if (s === 'fevzikalkanci' || s.includes('fevzi') || s.includes('kalkanci') || s === '20') {
-    return FEVZI_KALKANCI_FALLBACK_ORG
-  }
-  if (s === 'neclagorer' || s.includes('necla') || s.includes('gorer') || s === '10' || s === 'demo') {
-    return NECLA_GORER_FALLBACK_ORG
-  }
   return DEFAULT_FALLBACK_ORG
 }
 
@@ -199,8 +172,7 @@ export async function getOrganizationContextInfoWithUUID(
   next: any,
   access_token?: string
 ) {
-  const isFevzi = org_uuid === 'org_sfg_ortaokulu'
-  const fallback = isFevzi ? FEVZI_KALKANCI_FALLBACK_ORG : NECLA_GORER_FALLBACK_ORG
+  const fallback = DEFAULT_FALLBACK_ORG
   try {
     const result = await fetch(
       `${getAPIUrl()}orgs/uuid/${org_uuid}`,

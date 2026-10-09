@@ -5,8 +5,8 @@ import MLoginClient from '@components/Mobile/MLoginClient'
 import { Suspense } from 'react'
 
 export const metadata: Metadata = {
-  title: 'Öğretmen Girişi — Oxonom EDU',
-  description: 'Oxonom EDU Mobil Öğretmen Giriş Alanı',
+  title: 'Giriş Yap — Oxonom Okulları',
+  description: 'Oxonom Okulları Dijital Kurum Giriş Portalı',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
 }
 
@@ -26,7 +26,7 @@ export default async function MobileLoginPage() {
 
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#0A0D15]" />}>
-      <MLoginClient org={org} orgslug={orgslug || 'neclagorer'} />
+      <MLoginClient org={org} orgslug={orgslug || 'oxonom'} />
     </Suspense>
   )
 }

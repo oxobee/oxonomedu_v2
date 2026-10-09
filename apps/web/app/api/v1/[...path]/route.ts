@@ -277,26 +277,14 @@ const SKIP_RESPONSE_HEADERS = new Set(['connection', 'keep-alive', 'transfer-enc
 const SCHOOL_LIST = [
   {
     ...DEFAULT_FALLBACK_ORG,
-    id: 10,
-    org_uuid: 'org_necla_gorer_ilkokulu',
-    name: 'Necla Görer İlkokulu',
-    slug: 'neclagorer',
-    logo_image: '/meb_logo.svg',
-    description: '1, 2, 3 ve 4. Sınıflar — MEB Temel Eğitim & Akıllı İlkokul Portalı',
-    about: 'Necla Görer İlkokulu resmi dijital eğitim kampüsü. 1. sınıftan 4. sınıfa kadar tüm şubeler, sınıf öğretmenleri, akıllı tahtalar ve ödev takip sistemi.',
-    grades: '1 - 4. Sınıflar (İlkokul)',
-    is_demo: false,
-  },
-  {
-    ...DEFAULT_FALLBACK_ORG,
-    id: 20,
-    org_uuid: 'org_sfg_ortaokulu',
-    name: 'Şair Fevzi Kutlu Kalkancı Ortaokulu',
-    slug: 'fevzikalkanci',
-    logo_image: '/meb_logo.svg',
-    description: '5, 6, 7 ve 8. Sınıflar — LGS Hazırlık & Akıllı Ortaokul Portalı',
-    about: 'Şair Fevzi Kutlu Kalkancı Ortaokulu resmi dijital eğitim kampüsü. 5. sınıftan 8. sınıfa kadar branş dersleri, LGS hazırlık denemeleri, akıllı tahtalar ve ödev platformu.',
-    grades: '5 - 8. Sınıflar (Ortaokul)',
+    id: 30,
+    org_uuid: 'org_oxonom_okullari',
+    name: 'Oxonom Okulları',
+    slug: 'oxonom',
+    logo_image: '/pwa-icon.svg',
+    description: '1 Okul, 1 Sınıf, 1 Müdür, 1 Öğretmen, 1 Öğrenci — Bütünleşik Dijital Kurum',
+    about: 'Oxonom Okulları; okul müdürü, sınıf rehber öğretmeni ve öğrencinin tamamen birbirine tanımlandığı akıllı eğitim kurumu.',
+    grades: '9. Sınıf (Anadolu Lisesi / Edebiyat)',
     is_demo: false,
   },
 ]
@@ -306,7 +294,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
   if (path === '/api/v1/instance/info' || path.startsWith('/api/v1/instance/info')) {
     return NextResponse.json({
       tenancy: 'single',
-      default_org_slug: 'neclagorer',
+      default_org_slug: 'oxonom',
       frontend_domain: 'learnhouze.vercel.app',
       top_domain: 'learnhouze.vercel.app',
       mode: 'saas',
@@ -314,10 +302,10 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
     }, { status: 200 })
   }
 
-  // Active class resolution from cookie or header (Defaults to 1-A)
+  // Active class resolution from cookie or header (Defaults to 9-A)
   const activeClassCode = request.cookies.get('oxonom_demo_student_active_class')?.value ||
                           request.headers.get('x-active-class') ||
-                          '1-A'
+                          '9-A'
   const activeClassItem = ALL_CLASSROOMS.find((c) => c.code === activeClassCode || c.name.startsWith(activeClassCode)) || ALL_CLASSROOMS[0]
 
   // TC Kimlik No Verification & Lookup Endpoint
@@ -414,8 +402,8 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
     const found: any = SYNCED_ORGANIZATIONS.find((o: any) => o.id === orgId) || SYNCED_ORGANIZATIONS[0]
     return NextResponse.json({
       ...found,
-      user_count: found?.user_count ?? (found?.slug === 'neclagorer' ? 48 : 24),
-      course_count: found?.course_count ?? (found?.slug === 'neclagorer' ? 14 : 8),
+      user_count: found?.user_count ?? (found?.slug === 'oxonom' ? 3 : 3),
+      course_count: found?.course_count ?? (found?.slug === 'oxonom' ? 14 : 8),
       plan: found?.plan || 'pro',
       active: true,
       custom_domains: [],
@@ -657,15 +645,6 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
 
     // 4. By Org: /api/v1/usergroups/org/:id
     if (path.includes('/org/')) {
-      const parts = path.split('/')
-      const orgParam = parts[parts.indexOf('org') + 1] || ''
-      const orgNum = Number(orgParam)
-      if (orgNum === 10 || orgParam === 'neclagorer') {
-        return NextResponse.json(ALL_CLASSROOMS.filter((c) => c.org_id === 10), { status: 200 })
-      }
-      if (orgNum === 20 || orgParam === 'fevzikalkanci') {
-        return NextResponse.json(ALL_CLASSROOMS.filter((c) => c.org_id === 20), { status: 200 })
-      }
       return NextResponse.json(ALL_CLASSROOMS, { status: 200 })
     }
 
@@ -682,9 +661,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
 
   // Teachers List in Dashboard: /api/v1/teachers or /api/v1/users/org/:id/teachers
   if (path.includes('/teachers')) {
-    const isMiddle = path.includes('fevzikalkanci') || path.includes('/20/')
-    const targetOrgId = isMiddle ? 20 : 10
-    return NextResponse.json(getOrgTeachers(targetOrgId), { status: 200 })
+    return NextResponse.json(getOrgTeachers(30), { status: 200 })
   }
 
   // Students List in Dashboard: /api/v1/students or /api/v1/users/org/:id/students

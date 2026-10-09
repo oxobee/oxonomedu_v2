@@ -287,64 +287,6 @@ export const INITIAL_SCHEDULE_ENTRIES: ScheduleEntry[] = [
   { id: 'sc-ox-33', orgId: 30, day: 'fri', period: 5, classCode: '9-A', subject: 'Proje & Edebi Metinler', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'rose', isSmartBoardActive: true },
   { id: 'sc-ox-34', orgId: 30, day: 'fri', period: 6, classCode: '9-A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Ebru TEKNECİ', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
   { id: 'sc-ox-35', orgId: 30, day: 'fri', period: 7, classCode: '9-A', subject: 'Haftalık Değerlendirme & Etüt', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-
-  // ── NECLA GÖRER İLKOKULU: 1-A ŞUBESİ ──
-  // Pazartesi
-  { id: 'sc-1', orgId: 10, day: 'mon', period: 1, classCode: '1-A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-2', orgId: 10, day: 'mon', period: 2, classCode: '1-A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-3', orgId: 10, day: 'mon', period: 3, classCode: '1-A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-4', orgId: 10, day: 'mon', period: 4, classCode: '1-A', subject: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'teal', isSmartBoardActive: true },
-  { id: 'sc-5', orgId: 10, day: 'mon', period: 5, classCode: '1-A', subject: 'Görsel Sanatlar', teacherName: 'Özlem ZOR', roomName: 'Görsel Sanatlar Atölyesi', color: 'amber', isSmartBoardActive: false },
-  { id: 'sc-6', orgId: 10, day: 'mon', period: 6, classCode: '1-A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Özlem ZOR', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
-
-  // Salı
-  { id: 'sc-7', orgId: 10, day: 'tue', period: 1, classCode: '1-A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-8', orgId: 10, day: 'tue', period: 2, classCode: '1-A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-9', orgId: 10, day: 'tue', period: 3, classCode: '1-A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-10', orgId: 10, day: 'tue', period: 4, classCode: '1-A', subject: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'teal', isSmartBoardActive: true },
-  { id: 'sc-11', orgId: 10, day: 'tue', period: 5, classCode: '1-A', subject: 'Müzik', teacherName: 'Özlem ZOR', roomName: 'Müzik Dersliği', color: 'pink', isSmartBoardActive: false },
-  { id: 'sc-12', orgId: 10, day: 'tue', period: 6, classCode: '1-A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Özlem ZOR', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
-
-  // Çarşamba
-  { id: 'sc-13', orgId: 10, day: 'wed', period: 1, classCode: '1-A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-14', orgId: 10, day: 'wed', period: 2, classCode: '1-A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-15', orgId: 10, day: 'wed', period: 3, classCode: '1-A', subject: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'teal', isSmartBoardActive: true },
-  { id: 'sc-16', orgId: 10, day: 'wed', period: 4, classCode: '1-A', subject: 'İngilizce', teacherName: 'Beyzanur SALMANLI', roomName: 'Derslik 101 (1. Kat)', color: 'purple', isSmartBoardActive: true },
-  { id: 'sc-17', orgId: 10, day: 'wed', period: 5, classCode: '1-A', subject: 'İngilizce', teacherName: 'Beyzanur SALMANLI', roomName: 'Derslik 101 (1. Kat)', color: 'purple', isSmartBoardActive: true },
-  { id: 'sc-18', orgId: 10, day: 'wed', period: 6, classCode: '1-A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Özlem ZOR', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
-
-  // Perşembe
-  { id: 'sc-19', orgId: 10, day: 'thu', period: 1, classCode: '1-A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-20', orgId: 10, day: 'thu', period: 2, classCode: '1-A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-21', orgId: 10, day: 'thu', period: 3, classCode: '1-A', subject: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'teal', isSmartBoardActive: true },
-  { id: 'sc-22', orgId: 10, day: 'thu', period: 4, classCode: '1-A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Özlem ZOR', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
-  { id: 'sc-23', orgId: 10, day: 'thu', period: 5, classCode: '1-A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Özlem ZOR', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
-  { id: 'sc-24', orgId: 10, day: 'thu', period: 6, classCode: '1-A', subject: 'Serbest Etkinlik', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'cyan', isSmartBoardActive: true },
-
-  // Cuma
-  { id: 'sc-25', orgId: 10, day: 'fri', period: 1, classCode: '1-A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-26', orgId: 10, day: 'fri', period: 2, classCode: '1-A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-27', orgId: 10, day: 'fri', period: 3, classCode: '1-A', subject: 'Din Kültürü & Ahlak', teacherName: 'Özge KABA', roomName: 'Derslik 101 (1. Kat)', color: 'emerald', isSmartBoardActive: true },
-  { id: 'sc-28', orgId: 10, day: 'fri', period: 4, classCode: '1-A', subject: 'Din Kültürü & Ahlak', teacherName: 'Özge KABA', roomName: 'Derslik 101 (1. Kat)', color: 'emerald', isSmartBoardActive: true },
-  { id: 'sc-29', orgId: 10, day: 'fri', period: 5, classCode: '1-A', subject: 'Müzik & Ritim', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'pink', isSmartBoardActive: true },
-  { id: 'sc-30', orgId: 10, day: 'fri', period: 6, classCode: '1-A', subject: 'Rehberlik & Kapanış', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'teal', isSmartBoardActive: true },
-
-  // ── 2-A ŞUBESİ (Zeliha EMAN) ──
-  { id: 'sc-31', orgId: 10, day: 'mon', period: 1, classCode: '2-A', subject: 'Matematik', teacherName: 'Zeliha EMAN', roomName: 'Derslik 104 (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-32', orgId: 10, day: 'mon', period: 2, classCode: '2-A', subject: 'Matematik', teacherName: 'Zeliha EMAN', roomName: 'Derslik 104 (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-33', orgId: 10, day: 'mon', period: 3, classCode: '2-A', subject: 'Türkçe', teacherName: 'Zeliha EMAN', roomName: 'Derslik 104 (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-34', orgId: 10, day: 'mon', period: 4, classCode: '2-A', subject: 'Hayat Bilgisi', teacherName: 'Zeliha EMAN', roomName: 'Derslik 104 (1. Kat)', color: 'teal', isSmartBoardActive: true },
-  { id: 'sc-35', orgId: 10, day: 'mon', period: 5, classCode: '2-A', subject: 'Beden Eğitimi', teacherName: 'Zeliha EMAN', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
-  { id: 'sc-36', orgId: 10, day: 'mon', period: 6, classCode: '2-A', subject: 'Görsel Sanatlar', teacherName: 'Zeliha EMAN', roomName: 'Derslik 104 (1. Kat)', color: 'amber', isSmartBoardActive: true },
-
-  // ── 7-A ŞUBESİ (Beritan ŞENATEŞ - Fevzi Kalkancı Ortaokulu) ──
-  { id: 'sc-50', orgId: 20, day: 'mon', period: 1, classCode: '7-A', subject: 'Türkçe', teacherName: 'Beritan ŞENATEŞ', roomName: 'Derslik 301 (3. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-51', orgId: 20, day: 'mon', period: 2, classCode: '7-A', subject: 'Türkçe', teacherName: 'Beritan ŞENATEŞ', roomName: 'Derslik 301 (3. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-52', orgId: 20, day: 'mon', period: 3, classCode: '7-A', subject: 'Matematik', teacherName: 'Orkun AYDIN', roomName: 'Derslik 301 (3. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-53', orgId: 20, day: 'mon', period: 4, classCode: '7-A', subject: 'Fen Bilimleri', teacherName: 'Bülent TURAN', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
-  { id: 'sc-54', orgId: 20, day: 'mon', period: 5, classCode: '7-A', subject: 'Fen Bilimleri', teacherName: 'Bülent TURAN', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
-  { id: 'sc-55', orgId: 20, day: 'mon', period: 6, classCode: '7-A', subject: 'Sosyal Bilgiler', teacherName: 'Ayşe GÜL', roomName: 'Derslik 301 (3. Kat)', color: 'amber', isSmartBoardActive: true },
-  { id: 'sc-56', orgId: 20, day: 'mon', period: 7, classCode: '7-A', subject: 'Bilişim & Kodlama', teacherName: 'Emre ÇELİK', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
 ]
 
 export default function MAdminScheduleClient({
@@ -357,12 +299,7 @@ export default function MAdminScheduleClient({
   const user = session?.data?.user
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
-    if (user?.school_org_id) return user.school_org_id
-    if (orgSlug === 'neclagorer') return 10
-    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 20
-    return 30
-  })
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(30)
 
   // View Mode: Sınıf Bazlı, Öğretmen Bazlı, Derslik Bazlı
   const [viewMode, setViewMode] = useState<ViewMode>('class')
@@ -371,24 +308,9 @@ export default function MAdminScheduleClient({
   const [activeDay, setActiveDay] = useState<DayKey>('mon')
 
   // Selected Targets
-  const [selectedClass, setSelectedClass] = useState<string>(() => {
-    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg' ? 20 : 30)
-    if (org === 10) return '1-A'
-    if (org === 20) return '7-A'
-    return '9-A'
-  })
-  const [selectedTeacher, setSelectedTeacher] = useState<string>(() => {
-    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg' ? 20 : 30)
-    if (org === 10) return 'Özlem ZOR'
-    if (org === 20) return 'Beritan ŞENATEŞ'
-    return 'Ebru TEKNECİ'
-  })
-  const [selectedRoom, setSelectedRoom] = useState<string>(() => {
-    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg' ? 20 : 30)
-    if (org === 10) return 'Derslik 101 (1. Kat)'
-    if (org === 20) return 'Derslik 301 (3. Kat)'
-    return 'Derslik 9-A (1. Kat)'
-  })
+  const [selectedClass, setSelectedClass] = useState<string>('9-A')
+  const [selectedTeacher, setSelectedTeacher] = useState<string>('Ebru TEKNECİ')
+  const [selectedRoom, setSelectedRoom] = useState<string>('Derslik 9-A (1. Kat)')
 
   // Modals state
   const [quickSelectedSubject, setQuickSelectedSubject] = useState<string | null>(null)
@@ -472,19 +394,9 @@ export default function MAdminScheduleClient({
       } catch (_) {}
     }
     setScheduleList(INITIAL_SCHEDULE_ENTRIES)
-    if (selectedOrgId === 30) {
-      setSelectedClass('9-A')
-      setSelectedTeacher('Ebru TEKNECİ')
-      setSelectedRoom('Derslik 9-A (1. Kat)')
-    } else if (selectedOrgId === 10) {
-      setSelectedClass('1-A')
-      setSelectedTeacher('Özlem ZOR')
-      setSelectedRoom('Derslik 101 (1. Kat)')
-    } else {
-      setSelectedClass('7-A')
-      setSelectedTeacher('Beritan ŞENATEŞ')
-      setSelectedRoom('Derslik 301 (3. Kat)')
-    }
+    setSelectedClass('9-A')
+    setSelectedTeacher('Ebru TEKNECİ')
+    setSelectedRoom('Derslik 9-A (1. Kat)')
   }, [selectedOrgId])
 
   // Save changes to localStorage helper
@@ -507,13 +419,7 @@ export default function MAdminScheduleClient({
 
   // Classrooms list for selector
   const availableClasses = useMemo(() => {
-    if (selectedOrgId === 30) {
-      return ['9-A']
-    }
-    if (selectedOrgId === 10) {
-      return ['1-A', '1-B', '1-C', '2-A', '2-B', '3-A', '3-B', '4-A', '4-B']
-    }
-    return ['5-A', '6-A', '7-A', '8-A (LGS)']
+    return ['9-A']
   }, [selectedOrgId])
 
   // Active periods list based on school stage
@@ -857,41 +763,14 @@ export default function MAdminScheduleClient({
               </button>
             </div>
 
-            {/* Quick School Tabs */}
-            <div className="grid grid-cols-3 gap-1.5 mt-2.5 p-1 rounded-2xl bg-white/5 border border-white/10">
-              <button
-                type="button"
-                onClick={() => setSelectedOrgId(30)}
-                className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  selectedOrgId === 30
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                Oxonom
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedOrgId(10)}
-                className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  selectedOrgId === 10
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                Necla Görer
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedOrgId(20)}
-                className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  selectedOrgId === 20
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                Fevzi Kutlu
-              </button>
+            {/* Institution Badge */}
+            <div className="flex items-center justify-between p-2.5 px-3.5 mt-2.5 rounded-2xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-black text-white">Oxonom Okulları</span>
+                <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10">MEB Onaylı</span>
+              </div>
+              <span className="text-[11px] font-semibold text-gray-400">9-A Şubesi (35 Saat / Hafta)</span>
             </div>
 
             {/* Key Metrics Grid */}

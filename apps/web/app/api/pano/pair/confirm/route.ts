@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!teacherData.orgSlug) {
-      teacherData.orgSlug = 'neclagorer'
+      teacherData.orgSlug = 'oxonom'
     }
 
     if (!teacherData.classrooms || !Array.isArray(teacherData.classrooms) || teacherData.classrooms.length === 0) {

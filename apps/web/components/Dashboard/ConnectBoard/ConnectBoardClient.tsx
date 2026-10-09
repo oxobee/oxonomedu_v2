@@ -507,13 +507,13 @@ export default function ConnectBoardClient({
     const teacherData = {
       id: user?.id || 2,
       username: user?.username || 'ogretmen',
-      first_name: user?.first_name || 'Özlem',
-      last_name: user?.last_name || 'ZOR',
+      first_name: user?.first_name || 'Ebru',
+      last_name: user?.last_name || 'TEKNECİ',
       email: user?.email || 'ogretmen@oxonom.com',
       role: 'teacher',
       token,
       refreshToken,
-      orgSlug: org?.slug || 'neclagorer',
+      orgSlug: org?.slug || 'oxonom',
       lock_pin: savedSettings?.pin || '1234',
       settings: savedSettings,
     }

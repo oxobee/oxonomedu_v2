@@ -70,12 +70,7 @@ export default function MAdminStudentsClient({
   const user = session?.data?.user
 
   // ── MULTI-TENANT ISOLATED SCHOOL ORG STATE ──
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
-    if (user?.school_org_id) return user.school_org_id
-    if (orgSlug === 'neclagorer') return 10
-    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci') return 20
-    return 30 // Oxonom Okulları is default
-  })
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(30)
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
   const [selectedClassCode, setSelectedClassCode] = useState<string>('ALL')
@@ -96,7 +91,7 @@ export default function MAdminStudentsClient({
   const [newFirstName, setNewFirstName] = useState('')
   const [newLastName, setNewLastName] = useState('')
   const [newClassCode, setNewClassCode] = useState('9-A')
-  const [newStudentNo, setNewStudentNo] = useState('2026-105')
+  const [newStudentNo, setNewStudentNo] = useState('102')
   const [newParentName, setNewParentName] = useState('')
   const [newParentPhone, setNewParentPhone] = useState('')
 
@@ -117,19 +112,18 @@ export default function MAdminStudentsClient({
   const [editHealthNote, setEditHealthNote] = useState('')
   const [editAdminNote, setEditAdminNote] = useState('')
 
-  // ── STUDENTS LIST WITH STRICT MULTI-TENANT ISOLATION ──
+  // ── STUDENTS LIST WITH STRICT MULTI-TENANT ISOLATION (OXONOM OKULLARI) ──
   const [studentsList, setStudentsList] = useState<any[]>(() => {
-    const initialOrgId = (user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30))
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem(`oxonom_admin_students_list_${initialOrgId}`)
+        const saved = localStorage.getItem('oxonom_admin_students_list_30')
         if (saved) {
           const parsed = JSON.parse(saved)
           if (Array.isArray(parsed) && parsed.length > 0) return parsed
         }
       } catch (_) {}
     }
-    return getOrgStudents(initialOrgId)
+    return getOrgStudents(30)
   })
 
   // Synchronize when school org changes or load from isolated localStorage partition
@@ -382,47 +376,23 @@ export default function MAdminStudentsClient({
           </span>
         </div>
 
-        {/* ── 1.5. OKUL SEÇİCİ & VERİTABANI İZOLASYONU BANNERI ── */}
+        {/* ── 1.5. KURUM VERİTABANI VE İZOLASYON ALANI ── */}
         <section className="px-4 mt-3">
-          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-gray-100 dark:bg-[#121826] border border-gray-200 dark:border-gray-800">
-            <button
-              type="button"
-              onClick={() => setSelectedOrgId(30)}
-              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                selectedOrgId === 30
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs'
-                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-              }`}
-            >
-              <School size={13} className={selectedOrgId === 30 ? 'text-white' : 'text-emerald-500'} />
-              <span>Oxonom (9-A)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedOrgId(10)}
-              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                selectedOrgId === 10
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs'
-                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-              }`}
-            >
-              <School size={13} className={selectedOrgId === 10 ? 'text-white' : 'text-gray-400'} />
-              <span>Necla Görer (1–4)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedOrgId(20)}
-              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                selectedOrgId === 20
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xs'
-                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
-              }`}
-            >
-              <School size={13} className={selectedOrgId === 20 ? 'text-white' : 'text-gray-400'} />
-              <span>Fevzi Kutlu (5–8)</span>
-            </button>
+          <div className="flex items-center justify-between p-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent border border-emerald-500/20 dark:border-emerald-500/30">
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-xs">
+                <School size={16} />
+              </span>
+              <div>
+                <div className="text-xs font-black text-gray-900 dark:text-white flex items-center gap-1.5">
+                  <span>Oxonom Okulları</span>
+                  <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black">Aktif Kurum</span>
+                </div>
+                <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                  9-A Şubesi · Edebiyat Alanı · 1 Kayıtlı Öğrenci (Erçil UĞURLU)
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 

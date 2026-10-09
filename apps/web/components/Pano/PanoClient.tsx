@@ -1555,7 +1555,7 @@ export default function PanoClient() {
   const session = useLHSession() as any
   const org = useOrg() as any
   const [pairedSession, setPairedSession] = useState<TeacherPairData | null>(null)
-  const orgslug = params?.orgslug || pairedSession?.orgSlug || org?.org_slug || 'neclagorer'
+  const orgslug = params?.orgslug || pairedSession?.orgSlug || org?.org_slug || 'oxonom'
   const user = session?.data?.user
 
   // Check role: Pano is strictly for teachers!
@@ -1717,7 +1717,7 @@ export default function PanoClient() {
 
     // Set client-side cookies immediately
     if (typeof document !== 'undefined') {
-      const oSlug = teacherData.orgSlug || 'neclagorer'
+      const oSlug = teacherData.orgSlug || 'oxonom'
       document.cookie = `LH_session=1; path=/; max-age=2592000; SameSite=Lax`
       document.cookie = `LH_org=${oSlug}; path=/; max-age=2592000; SameSite=Lax`
     }
@@ -1810,7 +1810,7 @@ export default function PanoClient() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ teacherData: parsed }),
             }).then(() => {
-              const oSlug = parsed.orgSlug || 'neclagorer'
+              const oSlug = parsed.orgSlug || 'oxonom'
               document.cookie = `LH_session=1; path=/; max-age=2592000; SameSite=Lax`
               document.cookie = `LH_org=${oSlug}; path=/; max-age=2592000; SameSite=Lax`
               if (session?.update) session.update(true).catch(() => {})

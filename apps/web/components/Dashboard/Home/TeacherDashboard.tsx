@@ -39,11 +39,11 @@ export default function TeacherDashboard() {
   const token = session?.data?.tokens?.access_token
   const user = session?.data?.user
 
-  const orgId = org?.id || 10
-  const isPrimary = org?.slug === 'neclagorer' || orgId === 10
+  const orgId = org?.id || 30
+  const isPrimary = org?.slug === 'oxonom' || orgId === 30
   const teacherName = (user?.first_name && user?.last_name)
     ? `${user.first_name} ${user.last_name}`
-    : (isPrimary ? 'Özlem ZOR' : 'Esin AKKAN')
+    : 'Ebru TEKNECİ'
 
   // 1. Fetch Boards
   const { data: boardsData, isLoading: boardsLoading } = useQuery({

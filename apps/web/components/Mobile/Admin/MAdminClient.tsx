@@ -203,33 +203,18 @@ export default function MAdminClient({
   const adminEmail = adminProfile.email
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
-    if (orgSlug === 'neclagorer') return 10
-    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 20
-    return 30 // 30: Oxonom Okulları (Flagship), 10: Necla Görer, 20: Fevzi Kalkancı
-  })
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(30)
 
   // Personel & Öğretmen İzin Talepleri state
-  const [leaveRequests, setLeaveRequests] = useState([
-    {
-      id: 'leave-1',
-      name: 'Meral ÖZDEN',
-      branch: '3-F Sınıf Öğretmeni',
-      type: 'Mazeret İzni',
-      duration: 'Bugün (1 Gün)',
-      reason: 'Ailevi mazeret izni',
-      status: 'pending' as 'pending' | 'approved' | 'rejected',
-    },
-    {
-      id: 'leave-2',
-      name: 'Hivda SADAK',
-      branch: '4-A Sınıf Öğretmeni',
-      type: 'Sağlık Raporu',
-      duration: 'Bugün - Yarın (2 Gün)',
-      reason: 'Devlet Hastanesi KBB İstirahat',
-      status: 'approved' as 'pending' | 'approved' | 'rejected',
-    },
-  ])
+  const [leaveRequests, setLeaveRequests] = useState<Array<{
+    id: string
+    name: string
+    branch: string
+    type: string
+    duration: string
+    reason: string
+    status: 'pending' | 'approved' | 'rejected'
+  }>>([])
 
   const handleApproveLeave = (id: string, name: string) => {
     setLeaveRequests((prev) =>
@@ -753,90 +738,23 @@ export default function MAdminClient({
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-black/40 border border-white/[0.08] backdrop-blur-md">
-                {/* Tab 1: Oxonom Okulları (Flagship) */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedOrgId(30)}
-                  className={`p-2 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between ${
-                    selectedOrgId === 30
-                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-400/30'
-                      : 'text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] border border-transparent'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <School
-                      size={13}
-                      className={selectedOrgId === 30 ? 'text-white' : 'text-gray-500'}
-                    />
-                    <span className="text-[11px] font-extrabold truncate">
-                      Oxonom
-                    </span>
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-black/40 border border-emerald-500/20 backdrop-blur-md">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md">
+                    <School size={20} />
                   </div>
-                  <div
-                    className={`text-[9px] mt-1 font-medium truncate ${
-                      selectedOrgId === 30 ? 'text-emerald-100' : 'text-gray-500'
-                    }`}
-                  >
-                    9-A (1 Öğrt, 1 Öğr)
+                  <div>
+                    <div className="text-sm font-black text-white flex items-center gap-2">
+                      <span>Oxonom Okulları</span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black border border-emerald-500/30">
+                        Aktif Kurum
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-400 font-medium">
+                      1 Şube (9-A) · 1 Öğretmen (Ebru TEKNECİ) · 1 Öğrenci (Erçil UĞURLU)
+                    </div>
                   </div>
-                </button>
-
-                {/* Tab 2: Necla Görer İlkokulu */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedOrgId(10)}
-                  className={`p-2 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between ${
-                    selectedOrgId === 10
-                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-400/30'
-                      : 'text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] border border-transparent'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <School
-                      size={13}
-                      className={selectedOrgId === 10 ? 'text-white' : 'text-gray-500'}
-                    />
-                    <span className="text-[11px] font-extrabold truncate">
-                      Necla Görer
-                    </span>
-                  </div>
-                  <div
-                    className={`text-[9px] mt-1 font-medium truncate ${
-                      selectedOrgId === 10 ? 'text-emerald-100' : 'text-gray-500'
-                    }`}
-                  >
-                    1–4. Sınıflar
-                  </div>
-                </button>
-
-                {/* Tab 3: Şair Fevzi Kutlu Kalkancı Ortaokulu */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedOrgId(20)}
-                  className={`p-2 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between ${
-                    selectedOrgId === 20
-                      ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-950/50 border border-indigo-400/30'
-                      : 'text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] border border-transparent'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <School
-                      size={13}
-                      className={selectedOrgId === 20 ? 'text-white' : 'text-gray-500'}
-                    />
-                    <span className="text-[11px] font-extrabold truncate">
-                      Fevzi Kutlu
-                    </span>
-                  </div>
-                  <div
-                    className={`text-[9px] mt-1 font-medium truncate ${
-                      selectedOrgId === 20 ? 'text-indigo-100' : 'text-gray-500'
-                    }`}
-                  >
-                    5–8. Sınıflar
-                  </div>
-                </button>
+                </div>
               </div>
             </div>
           </div>

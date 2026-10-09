@@ -186,7 +186,7 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
 
     // Set client-side cookies immediately
     if (typeof document !== 'undefined') {
-      const orgSlug = teacherData.orgSlug || 'neclagorer'
+      const orgSlug = teacherData.orgSlug || 'oxonom'
       document.cookie = `LH_session=1; path=/; max-age=2592000; SameSite=Lax`
       document.cookie = `LH_org=${orgSlug}; path=/; max-age=2592000; SameSite=Lax`
     }

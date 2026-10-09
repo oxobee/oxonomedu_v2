@@ -618,10 +618,10 @@ function OrgRow({
     ? (isTeacher && isMobile ? `/orgs/${org.slug}/dashv2` : `/orgs/${org.slug}/dash`)
     : `/orgs/${org.slug}`
 
-  const isPrimary = org.slug === 'neclagorer' || org.id === 10
-  const gradeLabel = isPrimary ? '1 - 4. Sınıflar (İlkokul)' : '5 - 8. Sınıflar (Ortaokul)'
-  const branchCount = isPrimary ? '28 Şube' : '30 Şube'
-  const teacherCount = isPrimary ? '28 Sınıf Öğretmeni' : '30 Branş Öğretmeni'
+  const isOxonom = org.slug === 'oxonom' || org.id === 30
+  const gradeLabel = isOxonom ? '9. Sınıf (Anadolu Lisesi / Edebiyat)' : (org.grades || 'MEB Müfredatı')
+  const branchCount = isOxonom ? '1 Şube (9-A)' : '1 Şube'
+  const teacherCount = isOxonom ? '1 Rehber Öğretmen (Ebru TEKNECİ)' : 'Öğretmen Kadrosu'
 
   return (
     <div className="relative flex flex-col p-5 sm:p-6 bg-white rounded-3xl border-2 border-gray-200/90 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all group">
