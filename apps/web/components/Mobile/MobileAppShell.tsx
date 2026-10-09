@@ -6,7 +6,9 @@ import MStudentClient from '@components/Mobile/MStudentClient'
 import MBoardsClient from '@components/Mobile/MBoardsClient'
 import MHomeworkClient from '@components/Mobile/MHomeworkClient'
 import MProfileClient from '@components/Mobile/MProfileClient'
+import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileFloatingDock, { DockTabType } from '@components/Mobile/MobileFloatingDock'
+import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 
 export interface MobileAppShellProps {
   initialTab?: DockTabType
@@ -40,6 +42,7 @@ function getTabFromPath(pathname: string): DockTabType {
 }
 
 export default function MobileAppShell({ initialTab = 'home', orgSlug }: MobileAppShellProps) {
+  const { theme, toggleTheme } = useMobileTheme()
   const [activeTab, setActiveTab] = useState<DockTabType>(initialTab)
   const [mountedTabs, setMountedTabs] = useState<Set<DockTabType>>(() => new Set([initialTab]))
 
@@ -166,45 +169,61 @@ export default function MobileAppShell({ initialTab = 'home', orgSlug }: MobileA
   return (
     <div
       onClick={handleContainerClick}
-      className="relative min-h-[100dvh] w-full bg-[#0A0D15] selection:bg-[#34D399]/30"
+      className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 font-jakarta overscroll-none transition-colors duration-200`}
     >
-      {/* ── 1. ANA SAYFA (DASH V2) ── */}
-      {mountedTabs.has('home') && (
-        <div style={{ display: activeTab === 'home' ? 'block' : 'none' }}>
-          <DashV2Client hideDock />
-        </div>
-      )}
+      {/* ── 390px UNIFIED MOBILE APP SHELL FRAME ── */}
+      <div className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none">
+        
+        {/* ── 1. SINGLE UNIFIED FIXED HEADER (Pinned top, shared across ALL screens) ── */}
+        <MobileHeader theme={theme} onToggleTheme={toggleTheme} />
 
-      {/* ── 2. ÖĞRENCİLER (M-STUDENT) ── */}
-      {mountedTabs.has('student') && (
-        <div style={{ display: activeTab === 'student' ? 'block' : 'none' }}>
-          <MStudentClient hideDock />
-        </div>
-      )}
+        {/* ── 2. PAGE CONTENT CONTAINERS (Instant 0ms Switching with Left Stagger) ── */}
+        <main className="flex-1 w-full flex flex-col">
+          {/* ── 1. ANA SAYFA (DASH V2) ── */}
+          {mountedTabs.has('home') && (
+            <div style={{ display: activeTab === 'home' ? 'block' : 'none' }}>
+              <DashV2Client hideDock hideHeader theme={theme} onToggleTheme={toggleTheme} />
+            </div>
+          )}
 
-      {/* ── 3. AKILLI TAHTA (M-BOARDS) ── */}
-      {mountedTabs.has('boards') && (
-        <div style={{ display: activeTab === 'boards' ? 'block' : 'none' }}>
-          <MBoardsClient hideDock />
-        </div>
-      )}
+          {/* ── 2. ÖĞRENCİLER (M-STUDENT) ── */}
+          {mountedTabs.has('student') && (
+            <div style={{ display: activeTab === 'student' ? 'block' : 'none' }}>
+              <MStudentClient hideDock hideHeader theme={theme} onToggleTheme={toggleTheme} />
+            </div>
+          )}
 
-      {/* ── 4. ÖDEVLER (M-HOMEWORK) ── */}
-      {mountedTabs.has('assignments') && (
-        <div style={{ display: activeTab === 'assignments' ? 'block' : 'none' }}>
-          <MHomeworkClient hideDock />
-        </div>
-      )}
+          {/* ── 3. AKILLI TAHTA (M-BOARDS) ── */}
+          {mountedTabs.has('boards') && (
+            <div style={{ display: activeTab === 'boards' ? 'block' : 'none' }}>
+              <MBoardsClient hideDock hideHeader theme={theme} onToggleTheme={toggleTheme} />
+            </div>
+          )}
 
-      {/* ── 5. PROFİL (M-PROFILE) ── */}
-      {mountedTabs.has('profile') && (
-        <div style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
-          <MProfileClient hideDock onBackToHome={() => switchTab('home')} />
-        </div>
-      )}
+          {/* ── 4. ÖDEVLER (M-HOMEWORK) ── */}
+          {mountedTabs.has('assignments') && (
+            <div style={{ display: activeTab === 'assignments' ? 'block' : 'none' }}>
+              <MHomeworkClient hideDock hideHeader theme={theme} onToggleTheme={toggleTheme} />
+            </div>
+          )}
 
-      {/* ── SINGLE PERSISTENT FLOATING DOCK (Zero unmount, smooth spring morphing) ── */}
-      <MobileFloatingDock activeTab={activeTab} onTabChange={switchTab} orgSlug={orgSlug} />
+          {/* ── 5. PROFİL (M-PROFILE) ── */}
+          {mountedTabs.has('profile') && (
+            <div style={{ display: activeTab === 'profile' ? 'block' : 'none' }}>
+              <MProfileClient
+                hideDock
+                hideHeader
+                theme={theme}
+                onToggleTheme={toggleTheme}
+                onBackToHome={() => switchTab('home')}
+              />
+            </div>
+          )}
+        </main>
+
+        {/* ── 3. SINGLE PERSISTENT FLOATING DOCK ── */}
+        <MobileFloatingDock activeTab={activeTab} onTabChange={switchTab} orgSlug={orgSlug} />
+      </div>
     </div>
   )
 }

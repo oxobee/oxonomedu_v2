@@ -17,10 +17,11 @@ export const metadata: Metadata = {
   description: 'Mobil öncelikli akıllı tahtalar ve panolar yönetim ekranı.',
 }
 
-export default function OrgMBoardsPage({ params }: { params?: { orgslug?: string } }) {
+export default async function OrgMBoardsPage({ params }: { params?: Promise<{ orgslug?: string }> }) {
+  const resolvedParams = params ? await params : undefined
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#0A0D15]" />}>
-      <MobileAppShell initialTab="boards" orgSlug={params?.orgslug} />
+      <MobileAppShell initialTab="boards" orgSlug={resolvedParams?.orgslug} />
     </Suspense>
   )
 }

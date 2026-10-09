@@ -1,6 +1,6 @@
 import { Metadata, Viewport } from 'next'
 import React, { Suspense } from 'react'
-import MobileAppShell from '@components/Mobile/MobileAppShell'
+import MAdminBoardsClient from '@components/Mobile/Admin/MAdminBoardsClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,15 +13,19 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Teslim ve Değerlendirme — Oxonom EDU (m-homework)',
-  description: 'Mobil öncelikli ödev teslimleri, değerlendirme ve puanlama ekranı.',
+  title: 'Akıllı Tahta Yönetimi (İdare) — Oxonom EDU (m-admin-boards)',
+  description: 'Mobil okul idare akıllı tahta takip merkezi, canlı oturumlar ve uzaktan yönetim.',
 }
 
-export default async function OrgMHomeworkPage({ params }: { params?: Promise<{ orgslug?: string }> }) {
+export default async function OrgMAdminBoardsPage({
+  params,
+}: {
+  params?: Promise<{ orgslug?: string }>
+}) {
   const resolvedParams = params ? await params : undefined
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#0A0D15]" />}>
-      <MobileAppShell initialTab="assignments" orgSlug={resolvedParams?.orgslug} />
+      <MAdminBoardsClient orgSlug={resolvedParams?.orgslug} />
     </Suspense>
   )
 }

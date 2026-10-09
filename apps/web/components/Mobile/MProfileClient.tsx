@@ -35,21 +35,29 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
+import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { signOut, useAuth } from '@components/Contexts/AuthContext'
+import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 
-interface MProfileClientProps {
+export interface MProfileClientProps {
   hideDock?: boolean
+  hideHeader?: boolean
+  theme?: 'light' | 'dark'
+  onToggleTheme?: () => void
   initialSubTab?: 'general' | 'profile' | 'security'
   onBackToHome?: () => void
 }
 
 export default function MProfileClient({
   hideDock = false,
+  hideHeader = false,
+  theme: propTheme,
+  onToggleTheme: propToggleTheme,
   initialSubTab = 'general',
   onBackToHome,
-}: MProfileClientProps) {
+}: MProfileClientProps = {}) {
   const { signOut: authSignOut } = useAuth()
   const session = useLHSession() as any
   const user = session?.data?.user
@@ -57,27 +65,10 @@ export default function MProfileClient({
   // Active sub-tab in Profile: 'general' (Genel), 'profile' (Profil), 'security' (Güvenlik)
   const [activeSubTab, setActiveSubTab] = useState<'general' | 'profile' | 'security'>(initialSubTab)
 
-  // Theme state
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('oxonom_dash_theme') as 'light' | 'dark' | null
-      const isDark =
-        savedTheme === 'dark' ||
-        (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-      setTheme(isDark ? 'dark' : 'light')
-    }
-  }, [])
-
-  const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light'
-    setTheme(next)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('oxonom_dash_theme', next)
-      document.documentElement.classList.toggle('dark', next === 'dark')
-    }
-  }
+  // Synchronized theme state
+  const { theme: internalTheme, toggleTheme: internalToggleTheme } = useMobileTheme()
+  const theme = propTheme || internalTheme
+  const toggleTheme = propToggleTheme || internalToggleTheme
 
   // Connect board modal state
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
@@ -196,75 +187,18 @@ export default function MProfileClient({
     }
   }
 
-  return (
-    <div
-      className={`${theme} min-h-[100dvh] w-full bg-[#F3F5F8] dark:bg-[#0A0D15] font-jakarta text-[#0F172A] dark:text-white flex justify-center selection:bg-[#34D399]/30 transition-colors duration-200`}
-    >
-      <div className="w-full max-w-[430px] min-h-screen flex flex-col relative pb-28">
-        {/* ── 1. UNIFIED MOBILE HEADER (Static / Fixed: Adaptive Light with Black Logo / Dark with White Logo) ── */}
-        <header
-          className="w-full bg-white dark:bg-[#0A0D15] pt-[max(1rem,env(safe-area-inset-top))] pb-3.5 px-5 flex items-center justify-between text-gray-900 dark:text-white rounded-b-[10px] sticky top-0 z-30 relative before:absolute before:-top-96 before:inset-x-0 before:h-96 before:bg-white dark:before:bg-[#0A0D15] before:pointer-events-none border-b border-gray-200/80 dark:border-transparent shadow-xs dark:shadow-none transition-colors"
-          style={
-            theme === 'dark'
-              ? {
-                  backgroundImage:
-                    'linear-gradient(45deg,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.05) 1px,transparent 1px)',
-                  backgroundSize: '26px 26px',
-                }
-              : {
-                  backgroundImage:
-                    'linear-gradient(45deg,rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(-45deg,rgba(0,0,0,.025) 1px,transparent 1px)',
-                  backgroundSize: '26px 26px',
-                }
-          }
-        >
-          <div className="flex items-center gap-2">
-            <Link href="/dashv2" className="flex items-center active:scale-95 transition-transform py-0.5">
-              <img
-                src={theme === 'dark' ? '/oxonom-edu-logo-transparent.png' : '/oxonom_edu_logo_black.png'}
-                alt="OXONOM edu."
-                className="h-10 w-auto object-contain"
-              />
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Theme Toggle */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-transparent flex items-center justify-center transition-all cursor-pointer"
-              title={theme === 'dark' ? 'Açık Temaya Geç' : 'Koyu Temaya Geç'}
-            >
-              {theme === 'dark' ? (
-                <Sun size={15} className="text-amber-300" />
-              ) : (
-                <Moon size={15} className="text-gray-700" />
-              )}
-            </button>
-
-            {/* QR Connect Button */}
-            <button
-              type="button"
-              onClick={() => setIsConnectModalOpen(true)}
-              aria-label="QR kod ile bağlan"
-              className="w-[46px] h-[46px] rounded-[14px] border border-gray-200/80 dark:border-white/20 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/15 text-gray-800 dark:text-white flex items-center justify-center cursor-pointer transition-all shadow-xs"
-            >
-              <QrCode size={21} strokeWidth={1.8} />
-            </button>
-          </div>
-        </header>
-
-        {/* ── STAGGERED PAGE CONTENT WRAPPER (Fluid Left Entrance) ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="flex flex-col flex-1 w-full dash-stagger-items"
-        >
+  const pageContent = (
+    <div className="flex flex-col flex-1 w-full">
+      {/* ── STAGGERED PAGE CONTENT WRAPPER (Fluid Left Entrance) ── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-col flex-1 w-full dash-stagger-items"
+      >
 
         {/* ── 2. SUBBAR & BREADCRUMB ── */}
-        <div className="px-5 pt-4 flex items-center gap-2.5">
+        <div className="px-4 pt-3 flex items-center gap-2.5">
           {/* Back Button */}
           <Link
             href="/dashv2"
@@ -309,7 +243,7 @@ export default function MProfileClient({
         </div>
 
         {/* ── 3. HERO PROFILE CARD WITH 3 SUB-TABS (Matching Reference Mockups) ── */}
-        <section className="mx-5 mt-3.5 bg-[#0A0D15] rounded-3xl p-4 sm:p-4.5 text-white flex flex-col gap-3.5 shadow-xl border border-gray-800/80 relative overflow-hidden">
+        <section className="mx-4 mt-3.5 bg-[#0A0D15] rounded-3xl p-4 sm:p-4.5 text-white flex flex-col gap-3.5 shadow-xl border border-gray-800/80 relative overflow-hidden">
           {/* Subtle grid pattern & glow */}
           <div
             className="absolute inset-0 pointer-events-none opacity-40"
@@ -382,7 +316,7 @@ export default function MProfileClient({
         </section>
 
         {/* ── 4. TAB CONTENTS ── */}
-        <main className="flex-1 px-5 pt-3.5 space-y-4">
+        <main className="flex-1 px-4 pt-3.5 space-y-4">
           {/* ========================================================= */}
           {/* ── TAB 1: GENEL (Matching Settings.dc.html Reference) ── */}
           {/* ========================================================= */}
@@ -951,15 +885,27 @@ export default function MProfileClient({
         </main>
       </motion.div>
 
-      {/* ── 5. SINGLE DOCK (WHEN RENDERED STANDALONE) ── */}
-      {!hideDock && <MobileFloatingDock activeTab="profile" />}
-
         {/* ── 6. CONNECT BOARD MODAL ── */}
         <ConnectBoardModal
           isOpen={isConnectModalOpen}
           onClose={() => setIsConnectModalOpen(false)}
           theme={theme}
         />
+    </div>
+  )
+
+  if (hideHeader) {
+    return pageContent
+  }
+
+  return (
+    <div
+      className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] font-jakarta text-[#0F172A] dark:text-white flex justify-center selection:bg-[#34D399]/30 transition-colors duration-200`}
+    >
+      <div className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none">
+        <MobileHeader theme={theme} onToggleTheme={toggleTheme} />
+        {pageContent}
+        {!hideDock && <MobileFloatingDock activeTab="profile" />}
       </div>
     </div>
   )

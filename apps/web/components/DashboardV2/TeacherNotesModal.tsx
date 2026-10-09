@@ -22,29 +22,49 @@ interface NoteItem {
   category?: string
 }
 
-const DEFAULT_NOTES: NoteItem[] = [
-  {
-    id: 'n-1',
-    text: '1-A Türkçe okuma parçası fotokopisi dağıtılacak.',
-    done: false,
-    createdAt: 'Bugün 09:15',
-    category: 'Ders Materyali',
-  },
-  {
-    id: 'n-2',
-    text: 'Erçil Evren: Ritmik sayma ödevinde ek pekiştirme yapılacak.',
-    done: true,
-    createdAt: 'Dün 14:30',
-    category: 'Öğrenci Takip',
-  },
-  {
-    id: 'n-3',
-    text: 'Akıllı tahta üzerinden yeni nesil soru çözümü etkinliği başlatılacak.',
-    done: false,
-    createdAt: 'Bugün 10:00',
-    category: 'Akıllı Tahta',
-  },
-]
+const getClassDefaultNotes = (code: string): NoteItem[] => {
+  if (code.includes('1-B') || code === '1-B') {
+    return [
+      {
+        id: 'n-1b-1',
+        text: '1-B Matematik: Ritmik sayma ödevinde ek pekiştirme yapılacak.',
+        done: false,
+        createdAt: 'Bugün 09:30',
+        category: 'Ders Materyali',
+      },
+      {
+        id: 'n-1b-2',
+        text: '1-B Hayat Bilgisi çalışma yaprağı akıllı tahtaya yansıtılacak.',
+        done: true,
+        createdAt: 'Dün 14:10',
+        category: 'Akıllı Tahta',
+      },
+    ]
+  }
+  return [
+    {
+      id: 'n-1a-1',
+      text: '1-A Türkçe okuma parçası fotokopisi dağıtılacak.',
+      done: false,
+      createdAt: 'Bugün 09:15',
+      category: 'Ders Materyali',
+    },
+    {
+      id: 'n-1a-2',
+      text: 'Erçil Evren: Ritmik sayma ödevinde ek pekiştirme yapılacak.',
+      done: true,
+      createdAt: 'Dün 14:30',
+      category: 'Öğrenci Takip',
+    },
+    {
+      id: 'n-1a-3',
+      text: 'Akıllı tahta üzerinden yeni nesil soru çözümü etkinliği başlatılacak.',
+      done: false,
+      createdAt: 'Bugün 10:00',
+      category: 'Akıllı Tahta',
+    },
+  ]
+}
 
 interface TeacherNotesModalProps {
   isOpen: boolean
@@ -64,6 +84,8 @@ export default function TeacherNotesModal({
   const [newCategory, setNewCategory] = useState('Ders İçi')
   const [expandedNoteIds, setExpandedNoteIds] = useState<Record<string, boolean>>({})
 
+  const storageKey = `oxonom_teacher_notes_${classNameCode || '1-A'}`
+
   const toggleExpand = (id: string) => {
     setExpandedNoteIds((prev) => ({ ...prev, [id]: !prev[id] }))
   }
@@ -71,24 +93,25 @@ export default function TeacherNotesModal({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const raw = localStorage.getItem('oxonom_teacher_notes')
+        const raw = localStorage.getItem(storageKey)
         if (raw) {
           setNotes(JSON.parse(raw))
         } else {
-          setNotes(DEFAULT_NOTES)
-          localStorage.setItem('oxonom_teacher_notes', JSON.stringify(DEFAULT_NOTES))
+          const initial = getClassDefaultNotes(classNameCode)
+          setNotes(initial)
+          localStorage.setItem(storageKey, JSON.stringify(initial))
         }
       } catch (_) {
-        setNotes(DEFAULT_NOTES)
+        setNotes(getClassDefaultNotes(classNameCode))
       }
     }
-  }, [isOpen])
+  }, [isOpen, classNameCode, storageKey])
 
   const saveNotes = (updated: NoteItem[]) => {
     setNotes(updated)
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('oxonom_teacher_notes', JSON.stringify(updated))
+        localStorage.setItem(storageKey, JSON.stringify(updated))
       } catch (_) {}
     }
   }

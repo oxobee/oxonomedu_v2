@@ -33,8 +33,10 @@ import {
   Moon,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
 import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
+import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import { ALL_INITIAL_STUDENTS, type MStudentItem } from '@components/Mobile/MStudentClient'
 import {
   DEFAULT_SCHOOL_ASSIGNMENTS,
@@ -392,29 +394,23 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
   },
 ]
 
-export default function MHomeworkClient({ hideDock = false }: { hideDock?: boolean } = {}) {
-  // Theme state for unified header and UI styling
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+export interface MHomeworkClientProps {
+  hideDock?: boolean
+  hideHeader?: boolean
+  theme?: 'light' | 'dark'
+  onToggleTheme?: () => void
+}
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('oxonom_dash_theme') as 'light' | 'dark' | null
-      const isDark =
-        savedTheme === 'dark' ||
-        (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-      setTheme(isDark ? 'dark' : 'light')
-      document.documentElement.classList.toggle('dark', isDark)
-    }
-  }, [])
-
-  const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light'
-    setTheme(next)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('oxonom_dash_theme', next)
-      document.documentElement.classList.toggle('dark', next === 'dark')
-    }
-  }
+export default function MHomeworkClient({
+  hideDock = false,
+  hideHeader = false,
+  theme: propTheme,
+  onToggleTheme: propToggleTheme,
+}: MHomeworkClientProps = {}) {
+  // Synchronized theme state for unified header and UI styling
+  const { theme: internalTheme, toggleTheme: internalToggleTheme } = useMobileTheme()
+  const theme = propTheme || internalTheme
+  const toggleTheme = propToggleTheme || internalToggleTheme
 
   // Prevent pinch-to-zoom & gesture changes
   useEffect(() => {
@@ -709,66 +705,15 @@ export default function MHomeworkClient({ hideDock = false }: { hideDock?: boole
 
   const isCurrentSubmitted = !!currentSubmissions[selectedStudent?.id]
 
-  return (
-    <div className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 selection:text-emerald-950 transition-colors duration-300 font-jakarta overscroll-none`}>
-      {/* ── 390px MOBILE APP FIRST FRAME CONTAINER ── */}
-      <div className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F3F5F8] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none">
-        
-        {/* ── 1. TOP HEADER (Static / Fixed: Adaptive Light with Black Logo / Dark with White Logo) ── */}
-        <header
-          className="w-full bg-white dark:bg-[#0A0D15] pt-[max(1rem,env(safe-area-inset-top))] pb-4.5 px-5 flex items-center justify-between text-gray-900 dark:text-white rounded-b-[10px] sticky top-0 z-30 relative before:absolute before:-top-96 before:inset-x-0 before:h-96 before:bg-white dark:before:bg-[#0A0D15] before:pointer-events-none border-b border-gray-200/80 dark:border-transparent shadow-xs dark:shadow-none transition-colors"
-          style={
-            theme === 'dark'
-              ? {
-                  backgroundImage:
-                    'linear-gradient(45deg,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.05) 1px,transparent 1px)',
-                  backgroundSize: '26px 26px',
-                }
-              : {
-                  backgroundImage:
-                    'linear-gradient(45deg,rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(-45deg,rgba(0,0,0,.025) 1px,transparent 1px)',
-                  backgroundSize: '26px 26px',
-                }
-          }
-        >
-          {/* Logo */}
-          <Link href="/dashv2" className="flex items-center active:scale-95 transition-transform">
-            <img
-              src={theme === 'dark' ? '/oxonom-edu-logo-transparent.png' : '/oxonom_edu_logo_black.png'}
-              alt="Oxonom EDU"
-              className="h-10 w-auto object-contain"
-            />
-          </Link>
-
-          {/* Right Header Actions: Theme Toggle & QR Connect */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-transparent flex items-center justify-center transition-all cursor-pointer"
-              title={theme === 'dark' ? 'Açık Temaya Geç' : 'Koyu Temaya Geç'}
-            >
-              {theme === 'dark' ? <Sun size={15} className="text-amber-300" /> : <Moon size={15} />}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsQrModalOpen(true)}
-              aria-label="QR kod ile bağlan"
-              className="w-[46px] h-[46px] rounded-[14px] border border-gray-200/80 dark:border-white/20 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/15 text-gray-800 dark:text-white flex items-center justify-center cursor-pointer transition-all shadow-xs"
-            >
-              <QrCode size={21} strokeWidth={1.8} />
-            </button>
-          </div>
-        </header>
-
-        {/* ── STAGGERED PAGE CONTENT WRAPPER (Fluid Left Entrance) ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="flex flex-col flex-1 w-full dash-stagger-items"
-        >
+  const pageContent = (
+    <div className="flex flex-col flex-1 w-full">
+      {/* ── STAGGERED PAGE CONTENT WRAPPER (Fluid Left Entrance) ── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-col flex-1 w-full dash-stagger-items"
+      >
 
         {/* ── 2. HERO / ASSIGNMENT INFO CARD ── */}
         <motion.section
@@ -1366,9 +1311,6 @@ export default function MHomeworkClient({ hideDock = false }: { hideDock?: boole
         </main>
       </motion.div>
 
-      {/* ── 7. FLOATING BOTTOM DOCK MENÜ ── */}
-      {!hideDock && <MobileFloatingDock activeTab="assignments" />}
-
         {/* ── 8. MODAL: ÖDEV SEÇİMİ VE TARİHSEL FİLTRELEME (İSTENEN YENİ MODAL) ── */}
         <AnimatePresence>
           {isHomeworkModalOpen && (
@@ -1728,9 +1670,21 @@ export default function MHomeworkClient({ hideDock = false }: { hideDock?: boole
         <ConnectBoardModal
           isOpen={isQrModalOpen}
           onClose={() => setIsQrModalOpen(false)}
-          theme="light"
+          theme={theme}
         />
+    </div>
+  )
 
+  if (hideHeader) {
+    return pageContent
+  }
+
+  return (
+    <div className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 selection:text-emerald-950 transition-colors duration-300 font-jakarta overscroll-none`}>
+      <div className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none">
+        <MobileHeader theme={theme} onToggleTheme={toggleTheme} />
+        {pageContent}
+        {!hideDock && <MobileFloatingDock activeTab="assignments" />}
       </div>
     </div>
   )

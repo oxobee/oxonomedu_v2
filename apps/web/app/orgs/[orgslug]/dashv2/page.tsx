@@ -17,10 +17,11 @@ export const metadata: Metadata = {
   description: 'Mobil öncelikli, sade ve modern öğretmen dashboard çalışma alanı.',
 }
 
-export default function OrgDashV2Page({ params }: { params?: { orgslug?: string } }) {
+export default async function OrgDashV2Page({ params }: { params?: Promise<{ orgslug?: string }> }) {
+  const resolvedParams = params ? await params : undefined
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#0A0D15]" />}>
-      <MobileAppShell initialTab="home" orgSlug={params?.orgslug} />
+      <MobileAppShell initialTab="home" orgSlug={resolvedParams?.orgslug} />
     </Suspense>
   )
 }

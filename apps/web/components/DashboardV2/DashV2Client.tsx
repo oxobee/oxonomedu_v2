@@ -41,6 +41,7 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
 import { signOut, useAuth } from '@components/Contexts/AuthContext'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -57,12 +58,25 @@ import {
 import ClassSelectorSheet from './ClassSelectorSheet'
 import ConnectBoardModal from './ConnectBoardModal'
 import TeacherNotesModal from './TeacherNotesModal'
+import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import {
   getAttendanceForClass,
   AttendanceRecord,
 } from '@services/demo/attendanceService'
 
-export default function DashV2Client({ hideDock = false }: { hideDock?: boolean } = {}) {
+export interface DashV2ClientProps {
+  hideDock?: boolean
+  hideHeader?: boolean
+  theme?: 'light' | 'dark'
+  onToggleTheme?: () => void
+}
+
+export default function DashV2Client({
+  hideDock = false,
+  hideHeader = false,
+  theme: propTheme,
+  onToggleTheme: propToggleTheme,
+}: DashV2ClientProps = {}) {
   const router = useRouter()
   const { signOut: authSignOut } = useAuth()
   const org = useOrg() as any
@@ -70,34 +84,10 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
   const user = session?.data?.user
   const token = session?.data?.tokens?.access_token
 
-  // Theme State: 'light' | 'dark'
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('oxonom_dash_theme') as 'light' | 'dark' | null
-      const initial = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      setTheme(initial)
-      if (initial === 'dark') {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-    }
-  }, [])
-
-  const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light'
-    setTheme(next)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('oxonom_dash_theme', next)
-      if (next === 'dark') {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-    }
-  }
+  // Synchronized Mobile Theme State: 'light' | 'dark'
+  const { theme: internalTheme, toggleTheme: internalToggleTheme } = useMobileTheme()
+  const theme = propTheme || internalTheme
+  const toggleTheme = propToggleTheme || internalToggleTheme
 
   // Prevent pinch-to-zoom and gesture-based zooming on mobile/trackpads
   useEffect(() => {
@@ -199,17 +189,86 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
     return 'Özlem Öğretmen'
   }, [user, selectedClass])
 
-  // Fetch Classroom Boards
-  const { data: boardsData } = useQuery({
-    queryKey: ['classroom-boards-v2', selectedClass?.id],
-    queryFn: () => getClassroomBoards(selectedClass.id, token),
-    staleTime: 30_000,
-  })
-  const boards: any[] = Array.isArray(boardsData) ? boardsData : []
-  const activeBoard = boards[0] || {
-    name: '1-A Türkçe: Okuma & Anlama ve Cümle Bilgisi',
-    board_uuid: 'board_6be7ebed-4c00-4243-9a9b-ffef9933803b',
-  }
+  // Boards for selected class (Synced from local storage / demo)
+  const [localBoards, setLocalBoards] = useState<any[]>([])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('oxonom_m_boards')
+        if (raw) {
+          setLocalBoards(JSON.parse(raw))
+        }
+      } catch (_) {}
+    }
+  }, [selectedClass?.code])
+
+  const classBoards = useMemo(() => {
+    const code = selectedClass?.code || '1-A'
+    const fromStorage = localBoards.filter((b) => b.className?.includes(code) || b.title?.includes(code))
+    if (fromStorage.length > 0) return fromStorage
+
+    // If none yet in storage for this class, generate contextual realistic boards for this class:
+    return [
+      {
+        id: `board-${code}-1`,
+        title: `${code} Türkçe: Okuma & Anlama ve Cümle Bilgisi`,
+        subject: 'TÜRKÇE',
+        date: '9 Ekim 2026',
+        time: 'Bugün, 11:15',
+        description: 'İnteraktif çizim ve ders sunumu için hazır',
+        className: `${code} Şubesi`,
+        url: 'http://localhost:3000/board/board_6be7ebed-4c00-4243-9a9b-ffef9933803b',
+        isOpen: true,
+      },
+      {
+        id: `board-${code}-2`,
+        title: `${code} Matematik: Ritmik Sayma & Dört İşlem Atölyesi`,
+        subject: 'MATEMATİK',
+        date: '9 Ekim 2026',
+        time: 'Bugün, 09:30',
+        description: 'Basamak değerleri, problem çözme stratejileri ve zihinden işlemler.',
+        className: `${code} Şubesi`,
+        url: 'http://localhost:3000/board/101_matematik',
+        isOpen: true,
+      },
+      {
+        id: `board-${code}-3`,
+        title: `${code} Hayat Bilgisi: Dünyamız ve Canlılar`,
+        subject: 'HAYAT BİLGİSİ',
+        date: '8 Ekim 2026',
+        time: 'Dün, 14:00',
+        description: 'Mevsimler, doğa olayları, sağlıklı yaşam ve çevre bilinci.',
+        className: `${code} Şubesi`,
+        url: 'http://localhost:3000/board/101_hayatbilgisi',
+        isOpen: true,
+      },
+      {
+        id: `board-${code}-4`,
+        title: `${code} Görsel Sanatlar: Çizim ve Tasarım`,
+        subject: 'GÖRSEL SANATLAR',
+        date: '8 Ekim 2026',
+        time: 'Dün, 11:30',
+        description: 'Renk teorisi ve dijital çizim etkinlikleri.',
+        className: `${code} Şubesi`,
+        url: 'http://localhost:3000/board/101_gorsel',
+        isOpen: true,
+      },
+      {
+        id: `board-${code}-5`,
+        title: `${code} Sınıf Panosu: Haftalık Yıldızlar & Etkinlikler`,
+        subject: 'SINIF PANOSU',
+        date: '7 Ekim 2026',
+        time: 'Çarşamba, 15:45',
+        description: 'Haftanın örnek öğrencileri ve haftalık ödev tablosu.',
+        className: `${code} Şubesi`,
+        url: 'http://localhost:3000/board/101_pano',
+        isOpen: true,
+      },
+    ]
+  }, [localBoards, selectedClass?.code])
+
+  const latestClassBoard = classBoards[0]
 
   // Fetch Classroom Assignments
   const { data: assignmentsData } = useQuery({
@@ -392,59 +451,8 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
     show: { opacity: 1, x: 0, transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } },
   }
 
-  return (
-    <div className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 selection:text-emerald-950 transition-colors duration-300 font-jakarta overscroll-none`}>
-      {/* ── 390px MOBILE APP FIRST FRAME CONTAINER ── */}
-      <div
-        className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-20 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
-      >
-        {/* ── TOP HEADER (Adaptive: Light with Black Logo / Dark with White Logo) ── */}
-        <header
-          className="w-full bg-white dark:bg-[#0A0D15] pt-[max(1rem,env(safe-area-inset-top))] pb-4.5 px-5 flex items-center justify-between text-gray-900 dark:text-white rounded-b-[10px] sticky top-0 z-30 relative before:absolute before:-top-96 before:inset-x-0 before:h-96 before:bg-white dark:before:bg-[#0A0D15] before:pointer-events-none border-b border-gray-200/80 dark:border-transparent shadow-xs dark:shadow-none transition-colors"
-          style={
-            theme === 'dark'
-              ? {
-                  backgroundImage:
-                    'linear-gradient(45deg,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.05) 1px,transparent 1px)',
-                  backgroundSize: '26px 26px',
-                }
-              : {
-                  backgroundImage:
-                    'linear-gradient(45deg,rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(-45deg,rgba(0,0,0,.025) 1px,transparent 1px)',
-                  backgroundSize: '26px 26px',
-                }
-          }
-        >
-          {/* Logo (Black logo on light theme, white transparent logo on dark theme) */}
-          <Link href="/dashv2" className="flex items-center active:scale-95 transition-transform py-0.5">
-            <img
-              src={theme === 'dark' ? '/oxonom-edu-logo-transparent.png' : '/oxonom_edu_logo_black.png'}
-              alt="OXONOM edu."
-              className="h-10 w-auto object-contain"
-            />
-          </Link>
-
-          {/* Right Action Icons: Theme Toggle & QR Connect */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-transparent flex items-center justify-center transition-all cursor-pointer"
-              title={theme === 'dark' ? 'Açık Temaya Geç' : 'Koyu Temaya Geç'}
-            >
-              {theme === 'dark' ? <Sun size={15} className="text-amber-300" /> : <Moon size={15} />}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsConnectModalOpen(true)}
-              aria-label="QR kod ile bağlan"
-              className="w-[46px] h-[46px] rounded-[14px] border border-gray-200/80 dark:border-white/20 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/15 text-gray-800 dark:text-white flex items-center justify-center cursor-pointer transition-all shadow-xs"
-            >
-              <QrCode size={21} strokeWidth={1.8} />
-            </button>
-          </div>
-        </header>
+  const pageContent = (
+    <div className="flex flex-col flex-1 w-full">
 
         {/* ── MAIN CONTENT CONTAINER (Spacious, Staggered entrance from Left) ── */}
         <motion.div
@@ -545,7 +553,7 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
               >
                 <div className="flex items-center justify-between">
                   <span className="text-3xl font-black text-gray-900 dark:text-white tracking-tight group-hover:text-teal-600 transition-colors">
-                    {boards.length || 5}
+                    {classBoards.length || 5}
                   </span>
                   <div className="w-9 h-9 rounded-xl bg-[#E6F9F5] dark:bg-teal-950/60 text-[#0D9488] dark:text-teal-300 flex items-center justify-center">
                     <Tv size={17} />
@@ -702,27 +710,40 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
               </div>
 
               <span className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs px-2.5 py-1 rounded-full">
-                {boards.length || 5} tahta
+                {classBoards.length} tahta
               </span>
             </div>
 
-            {/* Featured Subcard */}
+            {/* Featured Subcard (Shows the latest created board for the selected class with Date & Time) */}
             <div className="bg-[#F8FAFC] dark:bg-[#0A0D15] p-4 rounded-2xl border border-gray-200/60 dark:border-gray-800/80 space-y-3">
               <div>
                 <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug">
-                  <span className="w-2 h-2 rounded-full bg-[#10B981] shrink-0" />
-                  <span className="truncate">{activeBoard?.name || `${selectedClass.code} Türkçe: Okuma & Anlama ve Cümle Bilgisi`}</span>
+                  <span className="w-2 h-2 rounded-full bg-[#10B981] shrink-0 animate-pulse" />
+                  <span className="truncate">{latestClassBoard.title}</span>
                 </div>
+
+                {/* Date & Time clearly displayed as requested */}
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <span className="inline-flex items-center gap-1 font-bold text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/60">
+                    <Clock size={11} />
+                    <span>{latestClassBoard.time}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                    <Calendar size={11} />
+                    <span>{latestClassBoard.date}</span>
+                  </span>
+                </div>
+
                 <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                  İnteraktif çizim ve ders sunumu için hazır
+                  {latestClassBoard.description || 'İnteraktif çizim ve ders sunumu için hazır'}
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={() => {
-                  const boardUuid = activeBoard?.board_uuid || 'board_6be7ebed-4c00-4243-9a9b-ffef9933803b'
-                  window.open(`/board/${boardUuid}`, '_blank')
+                  const url = latestClassBoard.url || `/board/${latestClassBoard.id}`
+                  window.open(url, '_blank')
                 }}
                 className="w-full py-3 px-4 bg-[#111827] dark:bg-[#1E293B] hover:bg-black text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98 transition-all"
               >
@@ -1069,10 +1090,6 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
           </footer>
         </motion.div>
 
-        {/* ── FLOATING BOTTOM DOCK MENÜ WITH MORPH EFFECT ── */}
-        {!hideDock && <MobileFloatingDock activeTab="home" />}
-      </div>
-
       {/* ── DIALOGS & DRAWERS (Theme-aware) ── */}
       <ClassSelectorSheet
         isOpen={isClassSheetOpen}
@@ -1095,6 +1112,23 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
         classNameCode={selectedClass.code}
         theme={theme}
       />
+    </div>
+  )
+
+  if (hideHeader) {
+    return pageContent
+  }
+
+  return (
+    <div className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 selection:text-emerald-950 transition-colors duration-300 font-jakarta overscroll-none`}>
+      {/* ── 390px MOBILE APP FIRST FRAME CONTAINER ── */}
+      <div
+        className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-20 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
+      >
+        <MobileHeader theme={theme} onToggleTheme={toggleTheme} />
+        {pageContent}
+        {!hideDock && <MobileFloatingDock activeTab="home" />}
+      </div>
     </div>
   )
 }

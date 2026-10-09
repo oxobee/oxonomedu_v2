@@ -52,17 +52,35 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   // Pre-fill if already known or redirect if already authenticated
   useEffect(() => {
     if (session?.status === 'authenticated') {
-      const next = searchParams.get('next') || searchParams.get('redirect') || '/dashv2'
+      const user = session?.data?.user
+      const isAdmin =
+        user?.role?.name === 'Admin' ||
+        user?.is_superadmin ||
+        user?.email?.includes('idare') ||
+        user?.email?.includes('mudur') ||
+        user?.email?.includes('admin')
+      const defaultNext = isAdmin ? (orgslug ? `/orgs/${orgslug}/m-admin?openAccount=true` : '/m-admin?openAccount=true') : '/dashv2'
+      const next = searchParams.get('next') || searchParams.get('redirect') || defaultNext
       router.replace(next)
     }
-  }, [session, router, searchParams])
+  }, [session, router, searchParams, orgslug])
 
-  // Quick fill helper for testing/convenience
+  // Quick fill helper for teacher
   const handleFillDemoTeacher = () => {
     setIdentifier('ogretmen@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Öğretmen demo bilgileri dolduruldu!', {
-      icon: '⚡',
+    toast.success('Öğretmen (Özlem ZOR) demo bilgileri dolduruldu!', {
+      icon: '👩‍🏫',
+      duration: 2500,
+    })
+  }
+
+  // Quick fill helper for principal / admin
+  const handleFillDemoAdmin = () => {
+    setIdentifier('mudur@oxonom.com')
+    setPassword('Ugur2803*')
+    toast.success('Okul Müdürü (Dr. Uğur UĞURLU) demo bilgileri dolduruldu!', {
+      icon: '👔',
       duration: 2500,
     })
   }
@@ -84,8 +102,39 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
     setIsSubmitting(true)
 
     try {
-      const next = searchParams.get('next') || searchParams.get('redirect') || '/dashv2'
       const activeOrgSlug = orgslug || org?.slug || 'neclagorer'
+      const lowerIdent = rawIdent.toLowerCase()
+      const isAdmin =
+        lowerIdent.includes('idare') ||
+        lowerIdent.includes('mudur') ||
+        lowerIdent.includes('admin') ||
+        lowerIdent === '50'
+      const defaultNext = isAdmin ? (activeOrgSlug ? `/orgs/${activeOrgSlug}/m-admin?openAccount=true` : '/m-admin?openAccount=true') : '/dashv2'
+      const next = searchParams.get('next') || searchParams.get('redirect') || defaultNext
+
+      // Pre-persist active admin session locally for immediate UI reactivity
+      if (isAdmin && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(
+            'oxonom_active_admin_session',
+            JSON.stringify({
+              id: 50,
+              email: lowerIdent.includes('mudur') ? 'mudur@oxonom.com' : 'idare@oxonom.com',
+              username: 'mudur',
+              first_name: 'Dr. Uğur',
+              last_name: 'UĞURLU',
+              name: 'Dr. Uğur UĞURLU',
+              role: 'admin',
+              title: 'Okul Müdürü · Kurum Yetkilisi',
+              schoolName: activeOrgSlug === 'fevzikalkanci' ? 'Şair Fevzi Kutlu Kalkancı Ortaokulu' : 'Necla Görer İlkokulu',
+              tcNo: '10000000146',
+              phone: '+90 532 999 2200',
+              loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+              twoFactorActive: true,
+            })
+          )
+        } catch (_) {}
+      }
 
       const res = await signIn('credentials', {
         redirect: false,
@@ -106,9 +155,14 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
         return
       }
 
-      toast.success('Giriş başarılı! Yönlendiriliyorsunuz...', {
-        icon: '👋',
-      })
+      toast.success(
+        isAdmin
+          ? 'Okul Müdürü oturumu açıldı! İdare paneline yönlendiriliyorsunuz...'
+          : 'Giriş başarılı! Yönlendiriliyorsunuz...',
+        {
+          icon: isAdmin ? '👔' : '👋',
+        }
+      )
 
       // Short delay for smooth feedback then navigate
       setTimeout(() => {
@@ -156,16 +210,28 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
             </div>
           </div>
 
-          {/* Quick Demo Pill */}
-          <button
-            type="button"
-            onClick={handleFillDemoTeacher}
-            className="text-[11px] font-bold text-[#34D399] bg-[#34D399]/10 hover:bg-[#34D399]/20 border border-[#34D399]/30 px-2.5 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95"
-            title="Demo öğretmen bilgilerini tek tıkla doldur"
-          >
-            <Sparkles size={12} className="text-[#34D399]" />
-            <span>Demo Doldur</span>
-          </button>
+          {/* Quick Demo Pills for Director & Teacher */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleFillDemoAdmin}
+              className="text-[10.5px] font-bold text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 px-2.5 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shadow-xs"
+              title="Okul Müdürü (Dr. Uğur UĞURLU) ile giriş yap"
+            >
+              <ShieldCheck size={12} className="text-amber-400" />
+              <span>Müdür Girişi</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleFillDemoTeacher}
+              className="text-[10.5px] font-bold text-[#34D399] bg-[#34D399]/10 hover:bg-[#34D399]/20 border border-[#34D399]/30 px-2.5 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer"
+              title="Demo öğretmen bilgilerini tek tıkla doldur"
+            >
+              <Sparkles size={12} className="text-[#34D399]" />
+              <span>Öğretmen</span>
+            </button>
+          </div>
         </header>
 
         {/* ── 2. HERO SECTION ── */}
@@ -173,40 +239,56 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
           {/* Eyebrow Pill */}
           <div className="flex items-center gap-2.5 text-[11px] font-bold tracking-[0.14em] text-[#34D399]">
             <span className="w-[26px] h-[3px] rounded-full bg-[#34D399]"></span>
-            ÖĞRETMEN GİRİŞİ
+            {identifier.includes('mudur') || identifier.includes('idare') ? 'YÖNETİCİ & MÜDÜR GİRİŞİ' : 'ÖĞRETMEN GİRİŞİ'}
           </div>
 
           {/* Headline */}
           <h1 className="text-[34px] sm:text-[36px] font-extrabold leading-[1.1] tracking-[-0.03em] text-white m-0">
-            Sınıfınızı
-            <br />
-            <span className="bg-gradient-to-r from-[#34D399] to-[#5EEAD4] bg-clip-text text-transparent">
-              akıllı tahtadan
-            </span>
-            <br />
-            yönetin.
+            {identifier.includes('mudur') || identifier.includes('idare') ? (
+              <>
+                Okulunuzu
+                <br />
+                <span className="bg-gradient-to-r from-amber-300 to-[#34D399] bg-clip-text text-transparent">
+                  tek merkezden
+                </span>
+                <br />
+                yönetin.
+              </>
+            ) : (
+              <>
+                Sınıfınızı
+                <br />
+                <span className="bg-gradient-to-r from-[#34D399] to-[#5EEAD4] bg-clip-text text-transparent">
+                  akıllı tahtadan
+                </span>
+                <br />
+                yönetin.
+              </>
+            )}
           </h1>
 
           {/* Subtitle */}
           <p className="text-[14px] leading-relaxed text-[#B4BDCC] max-w-[300px] m-0">
-            Yoklama, ödev ve interaktif ders sunumları tek bir uygulamada.
+            {identifier.includes('mudur') || identifier.includes('idare')
+              ? 'Tüm şubeler, öğretmen kadrosu, ders saatleri ve canlı okul akışı.'
+              : 'Yoklama, ödev ve interaktif ders sunumları tek bir uygulamada.'}
           </p>
 
           {/* Feature Badges */}
           <div className="flex flex-wrap gap-2 mt-1">
             <span className="inline-flex items-center gap-1.5 h-[34px] px-3.5 rounded-[17px] bg-white/[0.08] border border-white/[0.18] text-[12px] font-bold text-[#E2E8F0] backdrop-blur-xs">
               <Check size={14} strokeWidth={2.4} className="text-[#34D399]" />
-              Yoklama
+              {identifier.includes('mudur') || identifier.includes('idare') ? 'İdari Takip' : 'Yoklama'}
             </span>
 
             <span className="inline-flex items-center gap-1.5 h-[34px] px-3.5 rounded-[17px] bg-white/[0.08] border border-white/[0.18] text-[12px] font-bold text-[#E2E8F0] backdrop-blur-xs">
               <Monitor size={14} strokeWidth={2.2} className="text-[#34D399]" />
-              Akıllı Tahta
+              Akıllı Tahtalar
             </span>
 
             <span className="inline-flex items-center gap-1.5 h-[34px] px-3.5 rounded-[17px] bg-white/[0.08] border border-white/[0.18] text-[12px] font-bold text-[#E2E8F0] backdrop-blur-xs">
               <BookOpen size={14} strokeWidth={2.2} className="text-[#34D399]" />
-              Ödevler
+              {identifier.includes('mudur') || identifier.includes('idare') ? 'Ders Çizelgesi' : 'Ödevler'}
             </span>
           </div>
         </section>
@@ -229,10 +311,12 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-[24px] font-extrabold tracking-[-0.02em] text-[#0F172A] m-0">
-                Giriş Yap
+                {identifier.includes('mudur') || identifier.includes('idare') ? 'Müdür Girişi' : 'Giriş Yap'}
               </h2>
               <p className="text-[13px] text-[#5B6577] mt-1 mb-0 font-medium">
-                Hesabınıza erişmek için bilgilerinizi girin.
+                {identifier.includes('mudur') || identifier.includes('idare')
+                  ? 'Okul Müdürü (Dr. Uğur UĞURLU) yönetim hesabı'
+                  : 'Hesabınıza erişmek için bilgilerinizi girin.'}
               </p>
             </div>
 
@@ -242,6 +326,34 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
             >
               <ShieldCheck size={24} strokeWidth={2.2} />
             </span>
+          </div>
+
+          {/* Quick Role Selection Tabs */}
+          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-gray-100 border border-gray-200">
+            <button
+              type="button"
+              onClick={handleFillDemoAdmin}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                identifier.includes('mudur') || identifier.includes('idare')
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 bg-white/50'
+              }`}
+            >
+              <ShieldCheck size={14} className={identifier.includes('mudur') || identifier.includes('idare') ? 'text-white' : 'text-emerald-600'} />
+              <span>👔 Okul Müdürü</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleFillDemoTeacher}
+              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                identifier === 'ogretmen@oxonom.com'
+                  ? 'bg-[#0A0D15] text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 bg-white/50'
+              }`}
+            >
+              <Sparkles size={14} className={identifier === 'ogretmen@oxonom.com' ? 'text-[#34D399]' : 'text-gray-500'} />
+              <span>👩‍🏫 Öğretmen</span>
+            </button>
           </div>
 
           {/* Login Form Fields */}

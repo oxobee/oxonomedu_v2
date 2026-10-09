@@ -449,6 +449,39 @@ const LoginClient = (props: LoginClientProps) => {
         turnstileRef.current?.reset();
       } else {
         track(AnalyticsEvent.LoginSucceeded, { method: 'credentials' })
+        const lowerEmail = (values.email || '').toLowerCase()
+        const isAdmin = lowerEmail.includes('idare') || lowerEmail.includes('mudur') || lowerEmail.includes('admin')
+        if (isAdmin && typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(
+              'oxonom_active_admin_session',
+              JSON.stringify({
+                id: 50,
+                email: lowerEmail.includes('mudur') ? 'mudur@oxonom.com' : 'idare@oxonom.com',
+                username: 'mudur',
+                first_name: 'Dr. Uğur',
+                last_name: 'UĞURLU',
+                name: 'Dr. Uğur UĞURLU',
+                role: 'admin',
+                title: 'Okul Müdürü · Kurum Yetkilisi',
+                schoolName: props.org?.slug === 'fevzikalkanci' ? 'Şair Fevzi Kutlu Kalkancı Ortaokulu' : 'Necla Görer İlkokulu',
+                tcNo: '10000000146',
+                phone: '+90 532 999 2200',
+                loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+                twoFactorActive: true,
+              })
+            )
+          } catch (_) {}
+        }
+
+        const params = new URLSearchParams(window.location.search)
+        const hasCustomNext = params.get('next') || params.get('redirect')
+        if (isAdmin && !hasCustomNext) {
+          const targetSlug = props.org?.slug || 'neclagorer'
+          window.location.href = `/orgs/${targetSlug}/m-admin?openAccount=true`
+          return
+        }
+
         // First signIn already authenticated and set cookies — just redirect
         window.location.href = callbackUrl;
       }
@@ -475,10 +508,37 @@ const LoginClient = (props: LoginClientProps) => {
     formik.setFieldValue('password', password)
 
     const targetSlug = props.org?.slug || 'neclagorer'
-    const targetPath = role === 'student' ? '/home' : `/orgs/${targetSlug}/dash`
+    const targetPath = role === 'student'
+      ? '/home'
+      : role === 'admin'
+        ? `/orgs/${targetSlug}/m-admin?openAccount=true`
+        : `/orgs/${targetSlug}/dash`
 
     if (typeof document !== 'undefined') {
       document.cookie = `LH_org=${targetSlug}; path=/; max-age=2592000`
+    }
+
+    if (typeof window !== 'undefined' && role === 'admin') {
+      try {
+        localStorage.setItem(
+          'oxonom_active_admin_session',
+          JSON.stringify({
+            id: 50,
+            email: 'idare@oxonom.com',
+            username: 'idare',
+            first_name: 'Dr. Uğur',
+            last_name: 'UĞURLU',
+            name: 'Dr. Uğur UĞURLU',
+            role: 'admin',
+            title: 'Okul Müdürü · Kurum Yetkilisi',
+            schoolName: targetSlug === 'fevzikalkanci' ? 'Şair Fevzi Kutlu Kalkancı Ortaokulu' : 'Necla Görer İlkokulu',
+            tcNo: '10000000146',
+            phone: '+90 532 999 2200',
+            loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+            twoFactorActive: true,
+          })
+        )
+      } catch (_) {}
     }
 
     // Pre-populate realistic favorite whiteboards for demo student

@@ -35,8 +35,10 @@ import {
   Sparkles,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
+import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
+import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
+import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import {
   getAttendanceForClass,
   saveAttendanceForClass,
@@ -586,29 +588,24 @@ const CLASS_OPTIONS = [
   { label: '1-G Şubesi (30)', value: '1-G Şubesi' },
 ]
 
-export default function MStudentClient({ hideDock = false }: { hideDock?: boolean } = {}) {
-  // Theme state
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+export interface MStudentClientProps {
+  hideDock?: boolean
+  hideHeader?: boolean
+  theme?: 'light' | 'dark'
+  onToggleTheme?: () => void
+}
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('oxonom_dash_theme') as 'light' | 'dark' | null
-      const isDark =
-        savedTheme === 'dark' ||
-        (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-      setTheme(isDark ? 'dark' : 'light')
-      document.documentElement.classList.toggle('dark', isDark)
-    }
-  }, [])
-
-  const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light'
-    setTheme(next)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('oxonom_dash_theme', next)
-      document.documentElement.classList.toggle('dark', next === 'dark')
-    }
-  }
+export default function MStudentClient({
+  hideDock = false,
+  hideHeader = false,
+  theme: propTheme,
+  onToggleTheme: propToggleTheme,
+}: MStudentClientProps = {}) {
+  const router = useRouter()
+  // Synchronized Theme state
+  const { theme: internalTheme, toggleTheme: internalToggleTheme } = useMobileTheme()
+  const theme = propTheme || internalTheme
+  const toggleTheme = propToggleTheme || internalToggleTheme
 
   // Prevent pinch-to-zoom & gestures on mobile
   useEffect(() => {
@@ -762,7 +759,13 @@ export default function MStudentClient({ hideDock = false }: { hideDock?: boolea
     )
     saveAttendanceForClass(activeClassCode, attendanceRecords, classStudents.length)
     setIsAttendanceModalOpen(false)
-    toast.success('Yoklama başarıyla kaydedildi ve sisteme işlendi!')
+    toast.success('Yoklama başarıyla kaydedildi! Ana sayfaya yönlendiriliyorsunuz...', {
+      icon: '✅',
+      duration: 2500,
+    })
+    setTimeout(() => {
+      router.push('/dashv2')
+    }, 450)
   }
 
   const handleMarkAllPresent = () => {
@@ -832,71 +835,15 @@ export default function MStudentClient({ hideDock = false }: { hideDock?: boolea
     },
   }
 
-  return (
-    <div
-      className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 selection:text-emerald-950 transition-colors duration-300 font-jakarta overscroll-none`}
-    >
-      {/* ── 390px MOBILE APP FIRST FRAME CONTAINER ── */}
-      <div
-        className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F3F5F8] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
+  const pageContent = (
+    <div className="flex flex-col flex-1 w-full">
+      {/* ── STAGGERED PAGE CONTENT WRAPPER (Fluid Left Entrance) ── */}
+      <motion.div
+        variants={pageVariants}
+        initial="hidden"
+        animate="show"
+        className="flex flex-col flex-1 w-full"
       >
-        {/* ── 1. TOP HEADER (Static / Fixed: Adaptive Light with Black Logo / Dark with White Logo) ── */}
-        <header
-          className="w-full bg-white dark:bg-[#0A0D15] pt-[max(1rem,env(safe-area-inset-top))] pb-4.5 px-5 flex items-center justify-between text-gray-900 dark:text-white rounded-b-[10px] sticky top-0 z-30 relative before:absolute before:-top-96 before:inset-x-0 before:h-96 before:bg-white dark:before:bg-[#0A0D15] before:pointer-events-none border-b border-gray-200/80 dark:border-transparent shadow-xs dark:shadow-none transition-colors"
-          style={
-            theme === 'dark'
-              ? {
-                  backgroundImage:
-                    'linear-gradient(45deg,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.05) 1px,transparent 1px)',
-                  backgroundSize: '26px 26px',
-                }
-              : {
-                  backgroundImage:
-                    'linear-gradient(45deg,rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(-45deg,rgba(0,0,0,.025) 1px,transparent 1px)',
-                  backgroundSize: '26px 26px',
-                }
-          }
-        >
-          {/* Logo */}
-          <Link href="/dashv2" className="flex items-center active:scale-95 transition-transform">
-            <img
-              src={theme === 'dark' ? '/oxonom-edu-logo-transparent.png' : '/oxonom_edu_logo_black.png'}
-              alt="Oxonom EDU"
-              className="h-10 w-auto object-contain"
-            />
-          </Link>
-
-          {/* Right Header Actions */}
-          <div className="flex items-center gap-2">
-            {/* Theme Toggle */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-transparent flex items-center justify-center transition-all cursor-pointer"
-              title={theme === 'dark' ? 'Açık Temaya Geç' : 'Koyu Temaya Geç'}
-            >
-              {theme === 'dark' ? <Sun size={15} className="text-amber-300" /> : <Moon size={15} />}
-            </button>
-
-            {/* QR Kod ile Bağlan */}
-            <button
-              type="button"
-              onClick={() => setIsConnectModalOpen(true)}
-              aria-label="QR kod ile bağlan"
-              className="w-[46px] h-[46px] rounded-[14px] border border-gray-200/80 dark:border-white/20 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/15 text-gray-800 dark:text-white flex items-center justify-center cursor-pointer transition-all shadow-xs"
-            >
-              <QrCode size={21} strokeWidth={1.8} />
-            </button>
-          </div>
-        </header>
-
-        {/* ── STAGGERED PAGE CONTENT WRAPPER (Fluid Left Entrance) ── */}
-        <motion.div
-          variants={pageVariants}
-          initial="hidden"
-          animate="show"
-          className="flex flex-col flex-1 w-full"
-        >
 
         {/* ── 2. TOP HERO SECTION: ÖĞRENCİ İŞLERİ & SINIF DAĞILIMI ── */}
         <motion.section
@@ -1253,10 +1200,6 @@ export default function MStudentClient({ hideDock = false }: { hideDock?: boolea
           </motion.div>
         </main>
       </motion.div>
-
-      {/* ── FLOATING BOTTOM DOCK MENÜ WITH MORPH EFFECT (ActiveTab: 'student') ── */}
-      {!hideDock && <MobileFloatingDock activeTab="student" />}
-    </div>
 
       {/* ── MODAL 1: ÖĞRENCİ TÜM BİLGİLERİ (BÜTÜN DETAYLAR - DÜZENLEME BUTONSUZ) ── */}
       <AnimatePresence>
@@ -1676,13 +1619,7 @@ export default function MStudentClient({ hideDock = false }: { hideDock?: boolea
                   </motion.div>
                 )}
 
-                {/* ── SECURITY / AUTHORITY NOTICE (NO EDIT BUTTON - MÜDÜR YETKİSİ) ── */}
-                <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 rounded-xl flex items-center gap-2 text-[11px] text-amber-800 dark:text-amber-300">
-                  <Lock size={14} className="shrink-0 text-amber-600 dark:text-amber-400" />
-                  <span>
-                    Öğrenci künye ve kayıt bilgileri yalnızca <strong>Okul Müdürü</strong> yetkisiyle güncellenebilir.
-                  </span>
-                </div>
+
               </div>
             </motion.div>
           </div>
@@ -1867,6 +1804,24 @@ export default function MStudentClient({ hideDock = false }: { hideDock?: boolea
         onClose={() => setIsConnectModalOpen(false)}
         theme={theme}
       />
+    </div>
+  )
+
+  if (hideHeader) {
+    return pageContent
+  }
+
+  return (
+    <div
+      className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 selection:text-emerald-950 transition-colors duration-300 font-jakarta overscroll-none`}
+    >
+      <div
+        className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
+      >
+        <MobileHeader theme={theme} onToggleTheme={toggleTheme} />
+        {pageContent}
+        {!hideDock && <MobileFloatingDock activeTab="student" />}
+      </div>
     </div>
   )
 }
