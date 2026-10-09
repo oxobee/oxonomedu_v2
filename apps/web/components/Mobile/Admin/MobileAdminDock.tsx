@@ -56,7 +56,8 @@ export default function MobileAdminDock({
 
   return (
     <nav
-      className="fixed bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[365px] bg-white/95 dark:bg-[#0E131F]/95 backdrop-blur-md border border-gray-200/90 dark:border-gray-800/90 rounded-[30px] p-1.5 flex items-center justify-between shadow-2xl z-40 select-none"
+      className="fixed safe-dock-bottom left-1/2 -translate-x-1/2 w-[94%] max-w-[365px] bg-white/95 dark:bg-[#0E131F]/95 backdrop-blur-md border border-gray-200/90 dark:border-gray-800/90 rounded-[30px] p-1.5 flex items-center justify-between shadow-2xl z-40 select-none"
+      style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
       aria-label="İdare Paneli Menüsü"
     >
       {/* ── 1. ANA SAYFA (01. Ana Sayfa) ── */}

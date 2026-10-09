@@ -305,7 +305,20 @@ export default function MBoardsClient({
             boxShadow: '0 12px 26px rgba(10,13,21,.2)',
           }}
         >
-          <div className="flex items-center gap-3">
+          {/* Animated Background Subtle Circles (Soft & non-distracting) */}
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-25">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
+              className="w-full h-full relative"
+            >
+              <div className="absolute inset-0 rounded-full border border-[#34D399]/30" />
+              <div className="absolute inset-6 rounded-full border border-white/10 border-dashed" />
+              <div className="absolute inset-12 rounded-full border border-[#34D399]/40" />
+            </motion.div>
+          </div>
+
+          <div className="flex items-center gap-3 relative z-10">
             <motion.span
               whileHover={{ rotate: 8, scale: 1.08 }}
               transition={{ type: 'spring', stiffness: 400 }}
@@ -1048,7 +1061,8 @@ export default function MBoardsClient({
       className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 selection:text-emerald-950 transition-colors duration-300 font-jakarta overscroll-none`}
     >
       <div
-        className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
+        className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6.5rem)' }}
       >
         <MobileHeader theme={theme} onToggleTheme={toggleTheme} />
         {pageContent}

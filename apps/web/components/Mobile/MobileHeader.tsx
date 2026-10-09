@@ -35,11 +35,12 @@ export default function MobileHeader({
           theme === 'dark'
             ? 'bg-[#0A0D15]/95 text-white border-b border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.4)]'
             : 'bg-white/95 text-gray-900 border-b border-gray-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]'
-        } backdrop-blur-md pt-[max(0.65rem,env(safe-area-inset-top))] pb-2.5 px-4 sm:px-5 flex items-center justify-between relative before:absolute before:-top-96 before:inset-x-0 before:h-96 ${
+        } backdrop-blur-md safe-header-pt pb-2.5 px-4 sm:px-5 flex items-center justify-between relative before:absolute before:-top-96 before:inset-x-0 before:h-96 ${
           theme === 'dark' ? 'before:bg-[#0A0D15]' : 'before:bg-white'
         } before:pointer-events-none ${className}`}
-        style={
-          theme === 'dark'
+        style={{
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.65rem)',
+          ...(theme === 'dark'
             ? {
                 backgroundImage:
                   'linear-gradient(45deg,rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.04) 1px,transparent 1px)',
@@ -49,8 +50,8 @@ export default function MobileHeader({
                 backgroundImage:
                   'linear-gradient(45deg,rgba(0,0,0,.02) 1px,transparent 1px),linear-gradient(-45deg,rgba(0,0,0,.02) 1px,transparent 1px)',
                 backgroundSize: '24px 24px',
-              }
-        }
+              }),
+        }}
       >
         {/* Brand Logo (Enlarged with crisp object-contain, fits perfectly within compact header height) */}
         <Link

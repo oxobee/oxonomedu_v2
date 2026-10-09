@@ -134,14 +134,17 @@ export default function PwaRegister() {
 
       {/* Modern App Install Banner */}
       {showPrompt && !installedSuccess && (
-        <div className="fixed bottom-4 left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-[9990] bg-[#101422]/95 border border-indigo-500/30 backdrop-blur-xl rounded-2xl p-4 shadow-2xl shadow-indigo-950/40 text-slate-100 animate-fade-in">
+        <div
+          className="fixed left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-[9990] bg-[#101422]/95 border border-indigo-500/30 backdrop-blur-xl rounded-2xl p-4 shadow-2xl shadow-indigo-950/40 text-slate-100 animate-fade-in"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}
+        >
           <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0 border border-indigo-400/30 overflow-hidden">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0 border border-indigo-400/30 overflow-hidden p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/oxonom-edu-logo.png"
+                src="/pwa-icon.svg"
                 alt="Oxonom EDU"
-                className="w-10 h-10 object-contain"
+                className="w-full h-full object-contain drop-shadow-sm"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = 'none'
                 }}

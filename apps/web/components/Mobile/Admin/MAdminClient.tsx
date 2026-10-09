@@ -203,7 +203,11 @@ export default function MAdminClient({
   const adminEmail = adminProfile.email
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(10) // 10: Necla Görer, 20: Fevzi Kalkancı
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
+    if (orgSlug === 'neclagorer') return 10
+    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 20
+    return 30 // 30: Oxonom Okulları (Flagship), 10: Necla Görer, 20: Fevzi Kalkancı
+  })
 
   // Personel & Öğretmen İzin Talepleri state
   const [leaveRequests, setLeaveRequests] = useState([
@@ -246,8 +250,8 @@ export default function MAdminClient({
   const [isConflictReportModalOpen, setIsConflictReportModalOpen] = useState(false)
 
   // Context-aware target class & subject
-  const targetMissingClass = selectedOrgId === 10 ? '3-B' : '7-B'
-  const targetMissingSubject = selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar'
+  const targetMissingClass = selectedOrgId === 30 ? '5-A' : selectedOrgId === 10 ? '3-B' : '7-B'
+  const targetMissingSubject = selectedOrgId === 30 ? 'Bilişim & Kodlama' : selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar'
 
   // Available teachers for active school
   const availableTeachers = useMemo(() => {
@@ -271,11 +275,11 @@ export default function MAdminClient({
     assignedAt?: string
   }>(() => {
     return {
-      isResolved: false,
-      assignedTeacher: selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
+      isResolved: selectedOrgId === 30 ? true : false,
+      assignedTeacher: selectedOrgId === 30 ? 'Ahmet YILMAZ' : selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
       assignedDay: 'wed',
       assignedPeriod: 5,
-      assignedRoom: selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
+      assignedRoom: selectedOrgId === 30 ? 'Derslik 5-A (1. Kat)' : selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
       targetClass: targetMissingClass,
       targetSubject: targetMissingSubject,
     }
@@ -305,24 +309,24 @@ export default function MAdminClient({
             setMissingAssignment(parsed)
           } else {
             setMissingAssignment({
-              isResolved: false,
-              assignedTeacher: selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
+              isResolved: selectedOrgId === 30 ? true : false,
+              assignedTeacher: selectedOrgId === 30 ? 'Ahmet YILMAZ' : selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
               assignedDay: 'wed',
               assignedPeriod: 5,
-              assignedRoom: selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
-              targetClass: selectedOrgId === 10 ? '3-B' : '7-B',
-              targetSubject: selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar',
+              assignedRoom: selectedOrgId === 30 ? 'Derslik 5-A (1. Kat)' : selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
+              targetClass: selectedOrgId === 30 ? '5-A' : selectedOrgId === 10 ? '3-B' : '7-B',
+              targetSubject: selectedOrgId === 30 ? 'Bilişim & Kodlama' : selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar',
             })
           }
         } else {
           setMissingAssignment({
-            isResolved: false,
-            assignedTeacher: selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
+            isResolved: selectedOrgId === 30 ? true : false,
+            assignedTeacher: selectedOrgId === 30 ? 'Ahmet YILMAZ' : selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
             assignedDay: 'wed',
             assignedPeriod: 5,
-            assignedRoom: selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
-            targetClass: selectedOrgId === 10 ? '3-B' : '7-B',
-            targetSubject: selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar',
+            assignedRoom: selectedOrgId === 30 ? 'Derslik 5-A (1. Kat)' : selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
+            targetClass: selectedOrgId === 30 ? '5-A' : selectedOrgId === 10 ? '3-B' : '7-B',
+            targetSubject: selectedOrgId === 30 ? 'Bilişim & Kodlama' : selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar',
           })
         }
 
@@ -749,12 +753,40 @@ export default function MAdminClient({
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/40 border border-white/[0.08] backdrop-blur-md">
-                {/* Tab 1: Necla Görer İlkokulu */}
+              <div className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-black/40 border border-white/[0.08] backdrop-blur-md">
+                {/* Tab 1: Oxonom Okulları (Flagship) */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedOrgId(30)}
+                  className={`p-2 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between ${
+                    selectedOrgId === 30
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-400/30'
+                      : 'text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <School
+                      size={13}
+                      className={selectedOrgId === 30 ? 'text-white' : 'text-gray-500'}
+                    />
+                    <span className="text-[11px] font-extrabold truncate">
+                      Oxonom
+                    </span>
+                  </div>
+                  <div
+                    className={`text-[9px] mt-1 font-medium truncate ${
+                      selectedOrgId === 30 ? 'text-emerald-100' : 'text-gray-500'
+                    }`}
+                  >
+                    5-A (1 Öğrt, 1 Öğr)
+                  </div>
+                </button>
+
+                {/* Tab 2: Necla Görer İlkokulu */}
                 <button
                   type="button"
                   onClick={() => setSelectedOrgId(10)}
-                  className={`p-2.5 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between ${
+                  className={`p-2 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between ${
                     selectedOrgId === 10
                       ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-400/30'
                       : 'text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] border border-transparent'
@@ -762,27 +794,27 @@ export default function MAdminClient({
                 >
                   <div className="flex items-center gap-1.5">
                     <School
-                      size={14}
+                      size={13}
                       className={selectedOrgId === 10 ? 'text-white' : 'text-gray-500'}
                     />
-                    <span className="text-[11.5px] font-extrabold truncate">
+                    <span className="text-[11px] font-extrabold truncate">
                       Necla Görer
                     </span>
                   </div>
                   <div
-                    className={`text-[9.5px] mt-1 font-medium truncate ${
+                    className={`text-[9px] mt-1 font-medium truncate ${
                       selectedOrgId === 10 ? 'text-emerald-100' : 'text-gray-500'
                     }`}
                   >
-                    1, 2, 3 ve 4. Sınıflar
+                    1–4. Sınıflar
                   </div>
                 </button>
 
-                {/* Tab 2: Şair Fevzi Kutlu Kalkancı Ortaokulu */}
+                {/* Tab 3: Şair Fevzi Kutlu Kalkancı Ortaokulu */}
                 <button
                   type="button"
                   onClick={() => setSelectedOrgId(20)}
-                  className={`p-2.5 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between ${
+                  className={`p-2 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between ${
                     selectedOrgId === 20
                       ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-950/50 border border-indigo-400/30'
                       : 'text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] border border-transparent'
@@ -790,19 +822,19 @@ export default function MAdminClient({
                 >
                   <div className="flex items-center gap-1.5">
                     <School
-                      size={14}
+                      size={13}
                       className={selectedOrgId === 20 ? 'text-white' : 'text-gray-500'}
                     />
-                    <span className="text-[11.5px] font-extrabold truncate">
+                    <span className="text-[11px] font-extrabold truncate">
                       Fevzi Kutlu
                     </span>
                   </div>
                   <div
-                    className={`text-[9.5px] mt-1 font-medium truncate ${
+                    className={`text-[9px] mt-1 font-medium truncate ${
                       selectedOrgId === 20 ? 'text-indigo-100' : 'text-gray-500'
                     }`}
                   >
-                    5, 6, 7 ve 8. Sınıflar
+                    5–8. Sınıflar
                   </div>
                 </button>
               </div>
@@ -832,11 +864,11 @@ export default function MAdminClient({
                   <GraduationCap size={17} />
                 </div>
                 <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-                  <TrendingUp size={11} /> %4
+                  <TrendingUp size={11} /> {selectedOrgId === 30 ? 'Aktif' : '%4'}
                 </span>
               </div>
               <div className="text-xl font-black text-gray-900 dark:text-white">
-                {selectedOrgId === 10 ? '348' : '412'}
+                {selectedOrgId === 30 ? '1' : selectedOrgId === 10 ? '348' : '412'}
               </div>
               <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                 Toplam Öğrenci
@@ -857,7 +889,7 @@ export default function MAdminClient({
                 </span>
               </div>
               <div className="text-xl font-black text-gray-900 dark:text-white">
-                {selectedOrgId === 10 ? '24' : '31'}
+                {selectedOrgId === 30 ? '1' : selectedOrgId === 10 ? '24' : '31'}
               </div>
               <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                 Toplam Öğretmen
@@ -874,11 +906,11 @@ export default function MAdminClient({
                   <Building2 size={17} />
                 </div>
                 <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400">
-                  {selectedOrgId === 10 ? '1–4. Sınıf' : '5–8. Sınıf'}
+                  {selectedOrgId === 30 ? '5. Sınıf' : selectedOrgId === 10 ? '1–4. Sınıf' : '5–8. Sınıf'}
                 </span>
               </div>
               <div className="text-xl font-black text-gray-900 dark:text-white">
-                {selectedOrgId === 10 ? '12 Şube' : '16 Şube'}
+                {selectedOrgId === 30 ? '1 Şube (5-A)' : selectedOrgId === 10 ? '12 Şube' : '16 Şube'}
               </div>
               <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                 Sınıf & Şube
@@ -894,10 +926,12 @@ export default function MAdminClient({
                 <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                   <HeartHandshake size={17} />
                 </div>
-                <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">%89 Aktif</span>
+                <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                  {selectedOrgId === 30 ? '%100 Aktif' : '%89 Aktif'}
+                </span>
               </div>
               <div className="text-xl font-black text-gray-900 dark:text-white">
-                {selectedOrgId === 10 ? '312' : '385'}
+                {selectedOrgId === 30 ? '1' : selectedOrgId === 10 ? '312' : '385'}
               </div>
               <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                 Aktif Veli Sayısı
@@ -925,7 +959,7 @@ export default function MAdminClient({
               </div>
 
               <span className="text-xs font-black text-[#10B981] bg-[#10B981]/10 px-2 py-1 rounded-xl">
-                %{selectedOrgId === 10 ? '91.7' : '93.5'} Görevde
+                %{selectedOrgId === 30 ? '100' : selectedOrgId === 10 ? '91.7' : '93.5'} Görevde
               </span>
             </div>
 
@@ -933,11 +967,11 @@ export default function MAdminClient({
             <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden flex">
               <div
                 className="bg-[#10B981] h-full"
-                style={{ width: selectedOrgId === 10 ? '91.7%' : '93.5%' }}
+                style={{ width: selectedOrgId === 30 ? '100%' : selectedOrgId === 10 ? '91.7%' : '93.5%' }}
               />
               <div
                 className="bg-amber-400 h-full"
-                style={{ width: selectedOrgId === 10 ? '8.3%' : '6.5%' }}
+                style={{ width: selectedOrgId === 30 ? '0%' : selectedOrgId === 10 ? '8.3%' : '6.5%' }}
               />
             </div>
 
@@ -945,12 +979,14 @@ export default function MAdminClient({
             <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 text-center">
               <div>
                 <div className="text-sm font-black text-emerald-600 dark:text-emerald-400">
-                  {selectedOrgId === 10 ? '22' : '29'}
+                  {selectedOrgId === 30 ? '1' : selectedOrgId === 10 ? '22' : '29'}
                 </div>
                 <div className="text-[10px] text-gray-500 font-bold">Okulda / Görevde</div>
               </div>
               <div>
-                <div className="text-sm font-black text-amber-500">2</div>
+                <div className="text-sm font-black text-amber-500">
+                  {selectedOrgId === 30 ? '0' : '2'}
+                </div>
                 <div className="text-[10px] text-gray-500 font-bold">İzinli / Raporlu</div>
               </div>
               <div>
@@ -964,71 +1000,83 @@ export default function MAdminClient({
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-black text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
                   <CalendarClock size={13} className="text-amber-500" />
-                  <span>Personel İzin & Rapor Talepleri ({leaveRequests.length})</span>
+                  <span>Personel İzin & Rapor Talepleri ({selectedOrgId === 30 ? 0 : leaveRequests.length})</span>
                 </span>
                 <span className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-full border border-amber-200/40">
-                  {leaveRequests.filter((l) => l.status === 'pending').length} Onay Bekliyor
+                  {selectedOrgId === 30 ? 0 : leaveRequests.filter((l) => l.status === 'pending').length} Onay Bekliyor
                 </span>
               </div>
 
-              <div className="space-y-2">
-                {leaveRequests.map((req) => (
-                  <div
-                    key={req.id}
-                    className="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800/80 flex items-center justify-between gap-2"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-black text-gray-900 dark:text-white truncate">
-                          {req.name}
-                        </span>
-                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                          {req.branch}
-                        </span>
-                      </div>
-                      <div className="text-[10.5px] text-gray-500 dark:text-gray-400 mt-0.5">
-                        <span className="font-semibold text-amber-700 dark:text-amber-300">
-                          {req.type}
-                        </span>
-                        <span> · {req.duration} ({req.reason})</span>
-                      </div>
-                    </div>
-
-                    <div className="shrink-0 flex items-center gap-1">
-                      {req.status === 'pending' ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => handleApproveLeave(req.id, req.name)}
-                            className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
-                          >
-                            <Check size={11} strokeWidth={2.5} />
-                            <span>Onayla</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRejectLeave(req.id, req.name)}
-                            className="px-2 py-1 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 hover:bg-rose-200 font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
-                          >
-                            <X size={11} strokeWidth={2.5} />
-                            <span>Reddet</span>
-                          </button>
-                        </>
-                      ) : req.status === 'approved' ? (
-                        <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-lg border border-emerald-200/50 flex items-center gap-1">
-                          <CheckCircle2 size={11} />
-                          <span>Onaylandı</span>
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-lg border border-rose-200/50 flex items-center gap-1">
-                          <AlertCircle size={11} />
-                          <span>Reddedildi</span>
-                        </span>
-                      )}
-                    </div>
+              {selectedOrgId === 30 ? (
+                <div className="p-3 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/40 text-center">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                    <CheckCircle2 size={14} className="text-emerald-500" />
+                    <span>Ahmet YILMAZ görev başındadır</span>
                   </div>
-                ))}
-              </div>
+                  <p className="text-[10.5px] text-gray-500 dark:text-gray-400 mt-0.5">
+                    Oxonom Okulları bünyesinde bekleyen izin veya devamsızlık kaydı yoktur.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {leaveRequests.map((req) => (
+                    <div
+                      key={req.id}
+                      className="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800/80 flex items-center justify-between gap-2"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-black text-gray-900 dark:text-white truncate">
+                            {req.name}
+                          </span>
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                            {req.branch}
+                          </span>
+                        </div>
+                        <div className="text-[10.5px] text-gray-500 dark:text-gray-400 mt-0.5">
+                          <span className="font-semibold text-amber-700 dark:text-amber-300">
+                            {req.type}
+                          </span>
+                          <span> · {req.duration} ({req.reason})</span>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 flex items-center gap-1">
+                        {req.status === 'pending' ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleApproveLeave(req.id, req.name)}
+                              className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                            >
+                              <Check size={11} strokeWidth={2.5} />
+                              <span>Onayla</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRejectLeave(req.id, req.name)}
+                              className="px-2 py-1 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 hover:bg-rose-200 font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                            >
+                              <X size={11} strokeWidth={2.5} />
+                              <span>Reddet</span>
+                            </button>
+                          </>
+                        ) : req.status === 'approved' ? (
+                          <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-lg border border-emerald-200/50 flex items-center gap-1">
+                            <CheckCircle2 size={11} />
+                            <span>Onaylandı</span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-lg border border-rose-200/50 flex items-center gap-1">
+                            <AlertCircle size={11} />
+                            <span>Reddedildi</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Link
@@ -1205,50 +1253,69 @@ export default function MAdminClient({
 
             {/* Live Class Stream */}
             <div className="space-y-2">
-              <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-[#10B981] bg-[#10B981]/15 px-1.5 py-0.5 rounded-md text-[10px]">
-                    1-A
-                  </span>
-                  <div>
-                    <div className="font-bold text-gray-900 dark:text-white">Hayat Bilgisi</div>
-                    <div className="text-[10px] text-gray-500">Özlem ZOR · Derslik 101</div>
+              {selectedOrgId === 30 ? (
+                <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-[#10B981] bg-[#10B981]/15 px-1.5 py-0.5 rounded-md text-[10px]">
+                      5-A
+                    </span>
+                    <div>
+                      <div className="font-bold text-gray-900 dark:text-white">Bilişim & Kodlama</div>
+                      <div className="text-[10px] text-gray-500">Ahmet YILMAZ · Derslik 5-A</div>
+                    </div>
                   </div>
+                  <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                    Akıllı Tahta Aktif
+                  </span>
                 </div>
-                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  Tahta Bağlı
-                </span>
-              </div>
+              ) : (
+                <>
+                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-[#10B981] bg-[#10B981]/15 px-1.5 py-0.5 rounded-md text-[10px]">
+                        1-A
+                      </span>
+                      <div>
+                        <div className="font-bold text-gray-900 dark:text-white">Hayat Bilgisi</div>
+                        <div className="text-[10px] text-gray-500">Özlem ZOR · Derslik 101</div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      Tahta Bağlı
+                    </span>
+                  </div>
 
-              <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-indigo-600 bg-indigo-100 dark:bg-indigo-950/80 px-1.5 py-0.5 rounded-md text-[10px]">
-                    2-B
-                  </span>
-                  <div>
-                    <div className="font-bold text-gray-900 dark:text-white">Matematik</div>
-                    <div className="text-[10px] text-gray-500">Murat KAYA · Derslik 104</div>
+                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-indigo-600 bg-indigo-100 dark:bg-indigo-950/80 px-1.5 py-0.5 rounded-md text-[10px]">
+                        2-B
+                      </span>
+                      <div>
+                        <div className="font-bold text-gray-900 dark:text-white">Matematik</div>
+                        <div className="text-[10px] text-gray-500">Murat KAYA · Derslik 104</div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      Tahta Bağlı
+                    </span>
                   </div>
-                </div>
-                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  Tahta Bağlı
-                </span>
-              </div>
 
-              <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-purple-600 bg-purple-100 dark:bg-purple-950/80 px-1.5 py-0.5 rounded-md text-[10px]">
-                    4-A
-                  </span>
-                  <div>
-                    <div className="font-bold text-gray-900 dark:text-white">Fen Bilimleri</div>
-                    <div className="text-[10px] text-gray-500">Selin AK · Fen Lab.</div>
+                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-purple-600 bg-purple-100 dark:bg-purple-950/80 px-1.5 py-0.5 rounded-md text-[10px]">
+                        4-A
+                      </span>
+                      <div>
+                        <div className="font-bold text-gray-900 dark:text-white">Fen Bilimleri</div>
+                        <div className="text-[10px] text-gray-500">Selin AK · Fen Lab.</div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-semibold text-gray-400">
+                      Laboratuvar
+                    </span>
                   </div>
-                </div>
-                <span className="text-[10px] font-semibold text-gray-400">
-                  Laboratuvar
-                </span>
-              </div>
+                </>
+              )}
             </div>
 
             <Link
@@ -2265,7 +2332,10 @@ export default function MAdminClient({
       className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 font-jakarta overscroll-none transition-colors duration-200`}
     >
       {/* ── 390px UNIFIED MOBILE APP SHELL FRAME ── */}
-      <div className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none">
+      <div
+        className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6.5rem)' }}
+      >
         {/* ── FIXED MASTER HEADER ── */}
         <MobileHeader theme={theme} onToggleTheme={toggleTheme} />
 

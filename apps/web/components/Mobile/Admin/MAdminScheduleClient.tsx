@@ -132,6 +132,7 @@ export const SCHOOL_ROOMS = [
   'Derslik 202 (2. Kat)',
   'Derslik 203 (2. Kat)',
   'Derslik 301 (3. Kat)',
+  'Derslik 5-A (1. Kat)',
   'Fen Laboratuvarı',
   'Bilişim & Kodlama Atölyesi',
   'Müzik Dersliği',
@@ -240,6 +241,15 @@ function getSubjectBadgeColors(color: string) {
 
 // ── INITIAL PRE-FILLED SCHEDULE ENTRIES ──
 export const INITIAL_SCHEDULE_ENTRIES: ScheduleEntry[] = [
+  // ── OXONOM OKULLARI: 5-A ŞUBESİ (Ahmet YILMAZ) ──
+  { id: 'sc-ox-1', orgId: 30, day: 'mon', period: 1, classCode: '5-A', subject: 'Türkçe', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-2', orgId: 30, day: 'mon', period: 2, classCode: '5-A', subject: 'Türkçe', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-3', orgId: 30, day: 'mon', period: 3, classCode: '5-A', subject: 'Matematik', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-4', orgId: 30, day: 'mon', period: 4, classCode: '5-A', subject: 'Fen Bilimleri', teacherName: 'Ahmet YILMAZ', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
+  { id: 'sc-ox-5', orgId: 30, day: 'mon', period: 5, classCode: '5-A', subject: 'Sosyal Bilgiler', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'amber', isSmartBoardActive: true },
+  { id: 'sc-ox-6', orgId: 30, day: 'mon', period: 6, classCode: '5-A', subject: 'İngilizce', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'purple', isSmartBoardActive: true },
+  { id: 'sc-ox-7', orgId: 30, day: 'mon', period: 7, classCode: '5-A', subject: 'Bilişim & Yazılım', teacherName: 'Ahmet YILMAZ', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
+
   // ── NECLA GÖRER İLKOKULU: 1-A ŞUBESİ ──
   // Pazartesi
   { id: 'sc-1', orgId: 10, day: 'mon', period: 1, classCode: '1-A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: 'Derslik 101 (1. Kat)', color: 'blue', isSmartBoardActive: true },
@@ -306,7 +316,11 @@ export default function MAdminScheduleClient({
 }: MAdminScheduleClientProps) {
   const { theme, toggleTheme } = useMobileTheme()
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(10) // 10: Necla Görer, 20: Fevzi Kalkancı
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
+    if (orgSlug === 'neclagorer') return 10
+    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 20
+    return 30
+  })
 
   // View Mode: Sınıf Bazlı, Öğretmen Bazlı, Derslik Bazlı
   const [viewMode, setViewMode] = useState<ViewMode>('class')
@@ -315,9 +329,21 @@ export default function MAdminScheduleClient({
   const [activeDay, setActiveDay] = useState<DayKey>('mon')
 
   // Selected Targets
-  const [selectedClass, setSelectedClass] = useState<string>('1-A')
-  const [selectedTeacher, setSelectedTeacher] = useState<string>('Özlem ZOR')
-  const [selectedRoom, setSelectedRoom] = useState<string>('Derslik 101 (1. Kat)')
+  const [selectedClass, setSelectedClass] = useState<string>(() => {
+    if (orgSlug === 'neclagorer') return '1-A'
+    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return '7-A'
+    return '5-A'
+  })
+  const [selectedTeacher, setSelectedTeacher] = useState<string>(() => {
+    if (orgSlug === 'neclagorer') return 'Özlem ZOR'
+    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 'Beritan ŞENATEŞ'
+    return 'Ahmet YILMAZ'
+  })
+  const [selectedRoom, setSelectedRoom] = useState<string>(() => {
+    if (orgSlug === 'neclagorer') return 'Derslik 101 (1. Kat)'
+    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 'Derslik 301 (3. Kat)'
+    return 'Derslik 5-A (1. Kat)'
+  })
 
   // Modals state
   const [quickSelectedSubject, setQuickSelectedSubject] = useState<string | null>(null)
@@ -401,7 +427,11 @@ export default function MAdminScheduleClient({
       } catch (_) {}
     }
     setScheduleList(INITIAL_SCHEDULE_ENTRIES)
-    if (selectedOrgId === 10) {
+    if (selectedOrgId === 30) {
+      setSelectedClass('5-A')
+      setSelectedTeacher('Ahmet YILMAZ')
+      setSelectedRoom('Derslik 5-A (1. Kat)')
+    } else if (selectedOrgId === 10) {
       setSelectedClass('1-A')
       setSelectedTeacher('Özlem ZOR')
       setSelectedRoom('Derslik 101 (1. Kat)')
@@ -432,6 +462,9 @@ export default function MAdminScheduleClient({
 
   // Classrooms list for selector
   const availableClasses = useMemo(() => {
+    if (selectedOrgId === 30) {
+      return ['5-A']
+    }
     if (selectedOrgId === 10) {
       return ['1-A', '1-B', '1-C', '2-A', '2-B', '3-A', '3-B', '4-A', '4-B']
     }
@@ -720,9 +753,10 @@ export default function MAdminScheduleClient({
 
   return (
     <div
-      className={`min-h-screen pb-24 font-jakarta select-none transition-colors duration-200 ${
+      className={`min-h-screen font-jakarta select-none transition-colors duration-200 ${
         theme === 'dark' ? 'bg-[#0A0D15] text-white' : 'bg-[#F8FAFC] text-gray-900'
       }`}
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6.5rem)' }}
     >
       {/* ── 1. HEADER ── */}
       {!hideHeader && (
@@ -779,7 +813,18 @@ export default function MAdminScheduleClient({
             </div>
 
             {/* Quick School Tabs */}
-            <div className="grid grid-cols-2 gap-1.5 mt-2.5 p-1 rounded-2xl bg-white/5 border border-white/10">
+            <div className="grid grid-cols-3 gap-1.5 mt-2.5 p-1 rounded-2xl bg-white/5 border border-white/10">
+              <button
+                type="button"
+                onClick={() => setSelectedOrgId(30)}
+                className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  selectedOrgId === 30
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Oxonom
+              </button>
               <button
                 type="button"
                 onClick={() => setSelectedOrgId(10)}
@@ -789,7 +834,7 @@ export default function MAdminScheduleClient({
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                Necla Görer İlkokulu
+                Necla Görer
               </button>
               <button
                 type="button"
@@ -800,7 +845,7 @@ export default function MAdminScheduleClient({
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                Fevzi Kalkancı Ortaokulu
+                Fevzi Kutlu
               </button>
             </div>
 

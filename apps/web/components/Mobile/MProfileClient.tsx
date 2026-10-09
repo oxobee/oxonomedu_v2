@@ -73,15 +73,15 @@ export default function MProfileClient({
   // Connect board modal state
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
 
-  // General Form States
-  const [email, setEmail] = useState('neclagorer@oxonom.com')
+  // General Form States — Real Teacher Details (Ahmet YILMAZ)
+  const [email, setEmail] = useState('ogretmen@oxonom.com')
   const [username, setUsername] = useState('ogretmen')
-  const [firstName, setFirstName] = useState('Özlem')
-  const [lastName, setLastName] = useState('ZOR')
-  const [bio, setBio] = useState('1-A Sınıfı Öğretmeni · Oxonom İlkokul Dijital Eğitim Sorumlusu')
+  const [firstName, setFirstName] = useState('Ahmet')
+  const [lastName, setLastName] = useState('YILMAZ')
+  const [bio, setBio] = useState('5-A Sınıf Rehber Öğretmeni & Fen Bilimleri Koordinatörü · Oxonom Okulları')
   const [extraDetails, setExtraDetails] = useState<string[]>([
     'Zümre Başkanı',
-    'Temel Eğitim Uzmanı',
+    '5-A Rehber Öğretmeni',
     'Akıllı Tahta Koordinatörü',
   ])
 
@@ -238,12 +238,25 @@ export default function MProfileClient({
           {/* Class Pill */}
           <span className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#E3F3EF] dark:bg-emerald-950/60 text-[#0F766E] dark:text-emerald-300 text-xs font-black shrink-0 border border-emerald-200/40 dark:border-emerald-800/40">
             <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-            1-A
+            5-A
           </span>
         </div>
 
         {/* ── 3. HERO PROFILE CARD WITH 3 SUB-TABS (Matching Reference Mockups) ── */}
         <section className="mx-4 mt-3.5 bg-[#0A0D15] rounded-3xl p-4 sm:p-4.5 text-white flex flex-col gap-3.5 shadow-xl border border-gray-800/80 relative overflow-hidden">
+          {/* Animated Background Subtle Circles (Soft & eye-friendly) */}
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-25">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 42, repeat: Infinity, ease: 'linear' }}
+              className="w-full h-full relative"
+            >
+              <div className="absolute inset-0 rounded-full border border-teal-400/30" />
+              <div className="absolute inset-6 rounded-full border border-white/10 border-dashed" />
+              <div className="absolute inset-12 rounded-full border border-teal-400/40" />
+            </motion.div>
+          </div>
+
           {/* Subtle grid pattern & glow */}
           <div
             className="absolute inset-0 pointer-events-none opacity-40"
@@ -576,10 +589,10 @@ export default function MProfileClient({
                   </div>
                   <div>
                     <div className="text-sm font-extrabold text-gray-900 dark:text-white">
-                      Necla Görer İlkokulu
+                      Oxonom Okulları
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                      MEB Temel Eğitim Genel Müdürlüğü
+                      MEB Maarif Modeli · Bütünleşik Kampüs
                     </div>
                   </div>
                 </div>
@@ -590,7 +603,7 @@ export default function MProfileClient({
                       GÖREV
                     </span>
                     <span className="font-extrabold text-gray-900 dark:text-white mt-0.5 block">
-                      Sınıf Öğretmeni
+                      Fen Bilimleri & Rehberlik
                     </span>
                   </div>
                   <div className="p-3 rounded-2xl bg-[#F6F8FC] dark:bg-[#0E131F] border border-gray-100 dark:border-gray-800">
@@ -598,7 +611,7 @@ export default function MProfileClient({
                       ŞUBE
                     </span>
                     <span className="font-extrabold text-gray-900 dark:text-white mt-0.5 block">
-                      1-A Şubesi (30 Öğrenci)
+                      5-A Şubesi (1 Öğrenci)
                     </span>
                   </div>
                   <div className="p-3 rounded-2xl bg-[#F6F8FC] dark:bg-[#0E131F] border border-gray-100 dark:border-gray-800">
@@ -614,7 +627,7 @@ export default function MProfileClient({
                       SİCİL NO
                     </span>
                     <span className="font-mono font-extrabold text-gray-900 dark:text-white mt-0.5 block">
-                      MEB-342019
+                      MEB-280301
                     </span>
                   </div>
                 </div>
@@ -629,11 +642,11 @@ export default function MProfileClient({
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/40">
                     <Mail size={15} className="text-gray-400" />
-                    <span className="text-gray-600 dark:text-gray-300">ozlem.zor@meb.k12.tr</span>
+                    <span className="text-gray-600 dark:text-gray-300">ogretmen@oxonom.com</span>
                   </div>
                   <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/40">
                     <Phone size={15} className="text-gray-400" />
-                    <span className="text-gray-600 dark:text-gray-300">+90 (532) 555 01 23</span>
+                    <span className="text-gray-600 dark:text-gray-300">+90 (533) 280 03 01</span>
                   </div>
                   <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/40">
                     <Clock size={15} className="text-gray-400" />
@@ -902,7 +915,10 @@ export default function MProfileClient({
     <div
       className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] font-jakarta text-[#0F172A] dark:text-white flex justify-center selection:bg-[#34D399]/30 transition-colors duration-200`}
     >
-      <div className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none">
+      <div
+        className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6.5rem)' }}
+      >
         <MobileHeader theme={theme} onToggleTheme={toggleTheme} />
         {pageContent}
         {!hideDock && <MobileFloatingDock activeTab="profile" />}

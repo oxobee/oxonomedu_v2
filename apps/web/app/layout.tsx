@@ -3,6 +3,7 @@ import React from 'react'
 import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
 import PwaRegister from '@components/Mobile/PwaRegister'
+import AppleSplashScreen from '@components/Mobile/AppleSplashScreen'
 import { Wix_Madefor_Text, Tajawal, Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google'
 
 export const viewport: Viewport = {
@@ -28,9 +29,9 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/oxonom-edu-logo.png',
+    icon: '/pwa-icon.svg',
     shortcut: '/favicon.ico',
-    apple: '/oxonom-edu-logo.png',
+    apple: '/apple-touch-icon.png',
   },
 }
 
@@ -104,10 +105,14 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Oxonom EDU" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#0A0D15" />
-        <link rel="apple-touch-icon" href="/oxonom-edu-logo.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/svg+xml" href="/pwa-icon.svg" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/pwa-icon-512.png" />
       </head>
       <body suppressHydrationWarning>
         <Providers>
+          <AppleSplashScreen />
           <main className="animate-fade-in">
             {children}
           </main>

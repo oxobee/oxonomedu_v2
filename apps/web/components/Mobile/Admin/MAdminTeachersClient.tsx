@@ -63,7 +63,11 @@ export default function MAdminTeachersClient({
 }: MAdminTeachersClientProps) {
   const { theme, toggleTheme } = useMobileTheme()
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(10) // 10: Necla Görer, 20: Fevzi Kalkancı
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
+    if (orgSlug === 'neclagorer') return 10
+    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 20
+    return 30
+  })
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedBranchFilter, setSelectedBranchFilter] = useState<string>('ALL')
 
@@ -469,31 +473,44 @@ export default function MAdminTeachersClient({
 
         {/* ── 2. SCHOOL SELECTOR (İlkokul vs Ortaokul) ── */}
         <section className="px-4 mt-3">
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-gray-100 dark:bg-[#121826] border border-gray-200 dark:border-gray-800">
+          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-gray-100 dark:bg-[#121826] border border-gray-200 dark:border-gray-800">
+            <button
+              type="button"
+              onClick={() => setSelectedOrgId(30)}
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                selectedOrgId === 30
+                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
+                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+              }`}
+            >
+              <School size={13} className={selectedOrgId === 30 ? 'text-[#10B981]' : 'text-gray-400'} />
+              <span className="truncate">Oxonom</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setSelectedOrgId(10)}
-              className={`py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                 selectedOrgId === 10
                   ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
                   : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               <School size={13} className={selectedOrgId === 10 ? 'text-[#10B981]' : 'text-gray-400'} />
-              <span>Necla Görer (1–4)</span>
+              <span className="truncate">Necla Görer</span>
             </button>
 
             <button
               type="button"
               onClick={() => setSelectedOrgId(20)}
-              className={`py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                 selectedOrgId === 20
                   ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
                   : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               <School size={13} className={selectedOrgId === 20 ? 'text-indigo-500' : 'text-gray-400'} />
-              <span>Fevzi Kutlu (5–8)</span>
+              <span className="truncate">Fevzi Kutlu</span>
             </button>
           </div>
         </section>
@@ -1915,7 +1932,10 @@ export default function MAdminTeachersClient({
     <div
       className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 font-jakarta overscroll-none transition-colors duration-200`}
     >
-      <div className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none">
+      <div
+        className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6.5rem)' }}
+      >
         <MobileHeader theme={theme} onToggleTheme={toggleTheme} />
         <main className="flex-1 w-full flex flex-col">{pageContent}</main>
         {!hideDock && (

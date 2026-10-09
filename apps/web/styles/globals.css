@@ -2709,5 +2709,21 @@ button, nav, [role="button"], [data-nav-item], header {
   overscroll-behavior: contain;
 }
 
+/* PWA Safe Areas for iPhone Notch, Dynamic Island & Home Indicator */
+.safe-header-pt {
+  padding-top: max(16px, env(safe-area-inset-top, 16px));
+  padding-top: calc(env(safe-area-inset-top, 0px) + 0.65rem);
+}
+
+.safe-dock-bottom {
+  bottom: max(12px, env(safe-area-inset-bottom, 12px));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+}
+
+.safe-page-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 6.5rem) !important;
+}
+
+
 
 

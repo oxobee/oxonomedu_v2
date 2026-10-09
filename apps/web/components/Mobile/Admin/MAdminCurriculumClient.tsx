@@ -917,9 +917,10 @@ export default function MAdminCurriculumClient({
 
   return (
     <div
-      className={`min-h-screen pb-24 font-jakarta select-none transition-colors duration-200 ${
+      className={`min-h-screen font-jakarta select-none transition-colors duration-200 ${
         theme === 'dark' ? 'bg-[#0A0D15] text-white' : 'bg-[#F8FAFC] text-gray-900'
       }`}
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6.5rem)' }}
     >
       {/* ── 1. HEADER ── */}
       {!hideHeader && (

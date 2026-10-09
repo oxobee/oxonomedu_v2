@@ -13,21 +13,27 @@
   "categories": ["education", "productivity"],
   "icons": [
     {
-      "src": "/oxonom-edu-logo.png",
+      "src": "/pwa-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/oxonom-edu-logo.png",
+      "src": "/pwa-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/learnhouse_bigicon.png",
+      "src": "/pwa-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any"
     }
   ],
@@ -37,28 +43,28 @@
       "short_name": "İdare",
       "description": "Okul Yönetim Portalı",
       "url": "/m-admin",
-      "icons": [{ "src": "/oxonom-edu-logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Ders Programı",
       "short_name": "Program",
       "description": "Haftalık Ders Dağılım Çizelgesi",
       "url": "/m-admin-schedule",
-      "icons": [{ "src": "/oxonom-edu-logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Öğrenci Yönetimi",
       "short_name": "Öğrenciler",
       "description": "Öğrenci Künye ve Kayıtları",
       "url": "/m-admin-students",
-      "icons": [{ "src": "/oxonom-edu-logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Akademik Raporlar",
       "short_name": "Raporlar",
       "description": "Başarı ve Devamsızlık Analizi",
       "url": "/m-admin-reports",
-      "icons": [{ "src": "/oxonom-edu-logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

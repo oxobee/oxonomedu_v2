@@ -69,8 +69,8 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   const handleFillDemoTeacher = () => {
     setIdentifier('ogretmen@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Öğretmen (Özlem ZOR) demo bilgileri dolduruldu!', {
-      icon: '👩‍🏫',
+    toast.success('Öğretmen (Ahmet YILMAZ) bilgileri dolduruldu!', {
+      icon: '👨‍🏫',
       duration: 2500,
     })
   }
@@ -79,8 +79,18 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   const handleFillDemoAdmin = () => {
     setIdentifier('mudur@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Okul Müdürü (Dr. Uğur UĞURLU) demo bilgileri dolduruldu!', {
+    toast.success('Okul Müdürü (Dr. Uğur UĞURLU) bilgileri dolduruldu!', {
       icon: '👔',
+      duration: 2500,
+    })
+  }
+
+  // Quick fill helper for student
+  const handleFillDemoStudent = () => {
+    setIdentifier('ogrenci@oxonom.com')
+    setPassword('Ugur2803*')
+    toast.success('Öğrenci (Ali KAYA — 5-A) bilgileri dolduruldu!', {
+      icon: '🎒',
       duration: 2500,
     })
   }
@@ -102,14 +112,33 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
     setIsSubmitting(true)
 
     try {
-      const activeOrgSlug = orgslug || org?.slug || 'neclagorer'
+      const activeOrgSlug = orgslug || org?.slug || 'oxonom'
       const lowerIdent = rawIdent.toLowerCase()
       const isAdmin =
         lowerIdent.includes('idare') ||
         lowerIdent.includes('mudur') ||
         lowerIdent.includes('admin') ||
         lowerIdent === '50'
-      const defaultNext = isAdmin ? (activeOrgSlug ? `/orgs/${activeOrgSlug}/m-admin?openAccount=true` : '/m-admin?openAccount=true') : '/dashv2'
+      const isStudent =
+        lowerIdent.includes('ogrenci') ||
+        lowerIdent.includes('student') ||
+        lowerIdent === '51' ||
+        lowerIdent === '101'
+      const isTeacher =
+        lowerIdent.includes('ogretmen') ||
+        lowerIdent.includes('teacher') ||
+        lowerIdent === '2' ||
+        lowerIdent === '3001'
+
+      let defaultNext = '/dashv2'
+      if (isAdmin) {
+        defaultNext = activeOrgSlug ? `/orgs/${activeOrgSlug}/m-admin?openAccount=true` : '/m-admin?openAccount=true'
+      } else if (isStudent) {
+        defaultNext = activeOrgSlug ? `/orgs/${activeOrgSlug}/m-student` : '/m-student'
+      } else if (isTeacher) {
+        defaultNext = '/dashv2'
+      }
+
       const next = searchParams.get('next') || searchParams.get('redirect') || defaultNext
 
       // Pre-persist active admin session locally for immediate UI reactivity
@@ -119,18 +148,39 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
             'oxonom_active_admin_session',
             JSON.stringify({
               id: 50,
-              email: lowerIdent.includes('mudur') ? 'mudur@oxonom.com' : 'idare@oxonom.com',
+              email: 'mudur@oxonom.com',
               username: 'mudur',
               first_name: 'Dr. Uğur',
               last_name: 'UĞURLU',
               name: 'Dr. Uğur UĞURLU',
               role: 'admin',
               title: 'Okul Müdürü · Kurum Yetkilisi',
-              schoolName: activeOrgSlug === 'fevzikalkanci' ? 'Şair Fevzi Kutlu Kalkancı Ortaokulu' : 'Necla Görer İlkokulu',
-              tcNo: '10000000146',
-              phone: '+90 532 999 2200',
+              schoolName: 'Oxonom Okulları',
+              tcNo: '10000002803',
+              phone: '+90 532 280 0300',
               loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
               twoFactorActive: true,
+            })
+          )
+        } catch (_) {}
+      }
+
+      // Pre-persist teacher session
+      if (isTeacher && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(
+            'oxonom_teacher_profile',
+            JSON.stringify({
+              email: 'ogretmen@oxonom.com',
+              username: 'ogretmen',
+              firstName: 'Ahmet',
+              lastName: 'YILMAZ',
+              bio: '5-A Sınıf Rehber Öğretmeni & Fen Bilimleri Koordinatörü · Oxonom Okulları',
+              extraDetails: [
+                'Zümre Başkanı',
+                '5-A Rehber Öğretmeni',
+                'Akıllı Tahta Koordinatörü',
+              ],
             })
           )
         } catch (_) {}
@@ -195,41 +245,55 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
         }}
       >
         {/* ── 1. HEADER (BRAND LOGO) ── */}
-        <header className="px-5 pt-6 pb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[#34D399] flex items-center justify-center text-[#0A0D15] font-black text-base shadow-sm">
-              O
+        <header
+          className="px-4 pb-2 flex items-center justify-between gap-2"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}
+        >
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#34D399] flex items-center justify-center text-[#0A0D15] font-black text-base shadow-sm p-1.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/pwa-icon.svg" alt="Oxonom" className="w-full h-full object-contain invert brightness-0" />
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-[17px] tracking-tight leading-none text-white">
+              <span className="font-extrabold text-[16px] tracking-tight leading-none text-white">
                 OXONOM <span className="text-[#34D399]">EDU</span>
               </span>
-              <span className="text-[10px] text-gray-400 font-medium tracking-wide">
-                Öğretmen Çalışma Alanı
+              <span className="text-[9.5px] text-gray-400 font-medium tracking-wide">
+                Akıllı Okul Portalı
               </span>
             </div>
           </div>
 
-          {/* Quick Demo Pills for Director & Teacher */}
-          <div className="flex items-center gap-1.5">
+          {/* Quick Demo Pills for Director, Teacher & Student */}
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
             <button
               type="button"
               onClick={handleFillDemoAdmin}
-              className="text-[10.5px] font-bold text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 px-2.5 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shadow-xs"
+              className="text-[10px] font-bold text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0 shadow-xs"
               title="Okul Müdürü (Dr. Uğur UĞURLU) ile giriş yap"
             >
-              <ShieldCheck size={12} className="text-amber-400" />
-              <span>Müdür Girişi</span>
+              <ShieldCheck size={11} className="text-amber-400" />
+              <span>Müdür</span>
             </button>
 
             <button
               type="button"
               onClick={handleFillDemoTeacher}
-              className="text-[10.5px] font-bold text-[#34D399] bg-[#34D399]/10 hover:bg-[#34D399]/20 border border-[#34D399]/30 px-2.5 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer"
-              title="Demo öğretmen bilgilerini tek tıkla doldur"
+              className="text-[10px] font-bold text-[#34D399] bg-[#34D399]/10 hover:bg-[#34D399]/20 border border-[#34D399]/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0"
+              title="Öğretmen (Ahmet YILMAZ) ile giriş yap"
             >
-              <Sparkles size={12} className="text-[#34D399]" />
+              <Sparkles size={11} className="text-[#34D399]" />
               <span>Öğretmen</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleFillDemoStudent}
+              className="text-[10px] font-bold text-sky-300 bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0"
+              title="Öğrenci (Ali KAYA — 5-A) ile giriş yap"
+            >
+              <BookOpen size={11} className="text-sky-400" />
+              <span>Öğrenci</span>
             </button>
           </div>
         </header>

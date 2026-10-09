@@ -21,6 +21,23 @@ export interface SchoolOrg {
 
 export const SCHOOL_ORGS: SchoolOrg[] = [
   {
+    id: 30,
+    org_uuid: 'org_oxonom_okullari',
+    name: 'Oxonom Okulları',
+    slug: 'oxonom',
+    description: '1 Okul, 1 Sınıf, 1 Öğretmen, 1 Öğrenci — Bütünleşik Dijital Okul',
+    about: 'Oxonom Okulları; okul müdürü, sınıf rehber öğretmeni ve öğrencinin tamamen birbirine tanımlandığı, MEB müfredatına tam uyumlu akıllı eğitim kurumu.',
+    grades: '5. Sınıf (Ortaokul)',
+    grade_levels: ['5. Sınıf'],
+    level_type: 'MIDDLE',
+    address: 'Oxonom Dijital Eğitim Kampüsü No:1 Beşiktaş / İstanbul',
+    phone: '+90 212 500 2803',
+    email: 'bilgi@oxonom.com',
+    logo_text: 'OXO',
+    logo_image: '/pwa-icon.svg',
+    accent_color: 'emerald',
+  },
+  {
     id: 10,
     org_uuid: 'org_necla_gorer_ilkokulu',
     name: 'Necla Görer İlkokulu',
@@ -60,8 +77,9 @@ export const SCHOOL_ORGS: SchoolOrg[] = [
 export const DEFAULT_SCHOOL_ALIAS_MAP: Record<string, SchoolOrg> = {
   'demo': SCHOOL_ORGS[0],
   'default': SCHOOL_ORGS[0],
-  'neclagorer': SCHOOL_ORGS[0],
-  'fevzikalkanci': SCHOOL_ORGS[1],
+  'oxonom': SCHOOL_ORGS[0],
+  'neclagorer': SCHOOL_ORGS[1],
+  'fevzikalkanci': SCHOOL_ORGS[2],
 }
 
 export interface TeacherDef {
@@ -75,6 +93,13 @@ export interface TeacherDef {
 }
 
 export const TEACHER_RAW_LIST: { grade: string; orgId: number; teachers: { className: string; name: string }[] }[] = [
+  {
+    grade: '5. Sınıf',
+    orgId: 30,
+    teachers: [
+      { className: '5-A', name: 'Ahmet YILMAZ' },
+    ],
+  },
   {
     grade: '1. Sınıf',
     orgId: 10,
@@ -222,8 +247,8 @@ TEACHER_RAW_LIST.forEach((g) => {
       school_slug: school.slug,
       description: `Sınıf Öğretmeni: ${t.name} — ${school.name}`,
       teacher_name: t.name,
-      teacher_email: `${t.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@oxonom.com`,
-      student_count: 30,
+      teacher_email: g.orgId === 30 ? 'ogretmen@oxonom.com' : `${cleanTr(t.name).toLowerCase().replace(/[^a-z0-9]/g, '')}@oxonom.com`,
+      student_count: g.orgId === 30 ? 1 : 30,
       boards_count: 5,
     })
   })
@@ -314,6 +339,73 @@ const TURKISH_LAST_NAMES = [
 ]
 
 export function generateClassStudents(classItem: ClassroomItem) {
+  // If Oxonom Okulları (orgId === 30): Exactly 1 defined student! No mock 30 students.
+  if (classItem.org_id === 30 || classItem.school_slug === 'oxonom' || classItem.code === '5-A') {
+    return [
+      {
+        id: 3001,
+        user_uuid: 'user_ali_kaya',
+        studentNo: '101',
+        tcNo: '30000002803',
+        name: 'Ali KAYA',
+        first_name: 'Ali',
+        last_name: 'KAYA',
+        email: 'ogrenci@oxonom.com',
+        username: 'ogrenci',
+        gender: 'Erkek' as const,
+        birthDate: '15.06.2014 (12 Yaşında)',
+        bloodType: 'A Rh+',
+        motherName: 'Ayşe KAYA',
+        motherPhone: '+90 535 280 0303',
+        fatherName: 'Mehmet KAYA',
+        fatherPhone: '+90 535 280 0302',
+        parentName: 'Mehmet KAYA & Ayşe KAYA',
+        parentPhone: '+90 535 280 0302',
+        parentRelation: 'Baba & Anne',
+        parentOccupation: 'Mühendis',
+        secondParentName: 'Ayşe KAYA (Anne)',
+        secondParentPhone: '+90 535 280 0303',
+        parents: [
+          { name: 'Ayşe KAYA', relation: 'Anne', phone: '+90 535 280 0303', occupation: 'Mimar', email: 'ayse.kaya@oxonom.com' },
+          { name: 'Mehmet KAYA', relation: 'Baba', phone: '+90 535 280 0302', occupation: 'Mühendis', email: 'mehmet.kaya@oxonom.com' },
+        ],
+        address: 'Beşiktaş / İstanbul',
+        emergencyContact: 'Mehmet KAYA (Baba)',
+        emergencyPhone: '+90 535 280 0302',
+        status: 'active' as const,
+        enrollmentDate: '01.09.2024',
+        gpa: 96.5,
+        attendanceRate: 100,
+        excusedDays: 0,
+        unexcusedDays: 0,
+        assignmentsDone: 15,
+        assignmentsTotal: 15,
+        notes: '5-A sınıfı öğrencisi. Matematik ve Fen Bilimlerinde yüksek analitik başarı.',
+        specialHealthNote: 'Sağlık engeli veya alerjisi bulunmamaktadır.',
+        disciplineStatus: 'Temiz Sicil — Örnek Öğrenci',
+        guidanceNotes: [
+          {
+            id: 'gn-30-1',
+            date: '15.09.2026',
+            author: 'Ahmet YILMAZ (Sınıf Rehber Öğretmeni)',
+            category: 'Akademik' as const,
+            content: 'Öğrencinin ders içi dikkati ve ödev tamamlama disiplini kusursuzdur.',
+          },
+        ],
+        grades: [
+          { courseName: 'Fen Bilimleri', teacherName: 'Ahmet YILMAZ', exam1: 98, exam2: 95, performance: 100, average: 97.6 },
+          { courseName: 'Matematik', teacherName: 'Ahmet YILMAZ', exam1: 96, exam2: 98, performance: 100, average: 98.0 },
+          { courseName: 'Türkçe', teacherName: 'Ahmet YILMAZ', exam1: 95, exam2: 94, performance: 100, average: 96.3 },
+        ],
+        classroomId: classItem.id,
+        classroomName: classItem.name,
+        mentorTeacher: 'Ahmet YILMAZ',
+        schoolName: 'Oxonom Okulları',
+        is_demo: false,
+      },
+    ]
+  }
+
   const students = []
   // Student #1 is ALWAYS Erçil Evren UĞURLU
   students.push({
@@ -508,6 +600,42 @@ export function getActiveClassroom(classCode?: string): ClassroomItem {
 }
 
 export function getOrgTeachers(orgId: number) {
+  if (orgId === 30) {
+    return [
+      {
+        id: 3001,
+        name: 'Ahmet YILMAZ',
+        tcNo: '20000002803',
+        email: 'ogretmen@oxonom.com',
+        phone: '+90 533 280 0301',
+        branch: 'Fen Bilimleri & Sınıf Rehber Öğretmeni',
+        university: 'Boğaziçi Üniversitesi Eğitim Fakültesi',
+        graduationYear: '2018',
+        birthDate: '1991-03-28 (35 Yaşında)',
+        address: 'Beşiktaş / İstanbul',
+        emergencyContact: 'Eşi (Zeynep Yılmaz)',
+        emergencyPhone: '+90 533 280 0399',
+        workingHours: '08:30 - 15:30 (Pazartesi - Cuma)',
+        weeklyHours: 30,
+        employmentType: 'Kadrolu' as const,
+        isClassMentor: true,
+        mentorClass: '5-A',
+        assignedClasses: ['5-A'],
+        status: 'active' as const,
+        documents: [
+          {
+            id: 'doc-30-1',
+            name: 'Ahmet_Yilmaz_Lisans_Diplomasi.pdf',
+            type: 'Lisans Diploması' as const,
+            uploadDate: '01.09.2024',
+            fileSize: '2.4 MB',
+          },
+        ],
+        leaves: [],
+      },
+    ]
+  }
+
   const isMiddle = orgId === 20
   const targetOrgId = isMiddle ? 20 : 10
   return TEACHER_RAW_LIST
