@@ -727,13 +727,8 @@ export default function MAdminScheduleClient({
       {/* ── 1. HEADER ── */}
       {!hideHeader && (
         <MobileHeader
-          title="Ders Programı Yönetimi"
-          subtitle={activeOrg.name}
-          showBack
-          backHref={orgSlug ? `/orgs/${orgSlug}/m-admin` : '/m-admin'}
           theme={theme}
-          onThemeToggle={toggleTheme}
-          badgeCount={totalConflictsCount > 0 ? totalConflictsCount : 0}
+          onToggleTheme={toggleTheme}
         />
       )}
 

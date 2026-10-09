@@ -2669,4 +2669,45 @@
   }
 }
 
+/* =========================================================================
+   PWA & Native Mobile App Feel (iOS & Android)
+   ========================================================================= */
+html, body {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+.safe-pb {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+}
+
+.safe-pt {
+  padding-top: max(1rem, env(safe-area-inset-top, 1rem));
+}
+
+.pwa-standalone-bottom-pad {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
+}
+
+/* Prevent accidental text highlight on interactive mobile UI */
+button, nav, [role="button"], [data-nav-item], header {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Smooth native touch scrolling */
+.native-momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+
 

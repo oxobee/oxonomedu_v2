@@ -1,7 +1,8 @@
 import '../styles/globals.css'
 import React from 'react'
-import type { Viewport } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
+import PwaRegister from '@components/Mobile/PwaRegister'
 import { Wix_Madefor_Text, Tajawal, Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google'
 
 export const viewport: Viewport = {
@@ -10,6 +11,27 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
+  themeColor: '#0A0D15',
+}
+
+export const metadata: Metadata = {
+  title: 'Oxonom EDU — Dijital Okul Portalı',
+  description: 'MEB Uyumlu Akıllı Okul Yönetimi, Ders Programı, Akıllı Tahta ve Öğrenci Takip Sistemi',
+  manifest: '/manifest.json',
+  applicationName: 'Oxonom EDU',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Oxonom EDU',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: '/oxonom-edu-logo.png',
+    shortcut: '/favicon.ico',
+    apple: '/oxonom-edu-logo.png',
+  },
 }
 
 const wixMadeforText = Wix_Madefor_Text({
@@ -77,12 +99,19 @@ export default function RootLayout({
             Reads the optional ?bgcolor param (hex-validated) or defaults to dark. */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="/embed-bg.js" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Oxonom EDU" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#0A0D15" />
+        <link rel="apple-touch-icon" href="/oxonom-edu-logo.png" />
       </head>
       <body suppressHydrationWarning>
         <Providers>
           <main className="animate-fade-in">
             {children}
           </main>
+          <PwaRegister />
         </Providers>
       </body>
     </html>

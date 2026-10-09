@@ -924,12 +924,8 @@ export default function MAdminCurriculumClient({
       {/* ── 1. HEADER ── */}
       {!hideHeader && (
         <MobileHeader
-          title="MEB Müfredatı & Ders Dağıtımı"
-          subtitle={activeOrg.name}
-          showBack
-          backHref={orgSlug ? `/orgs/${orgSlug}/m-admin` : '/m-admin'}
           theme={theme}
-          onThemeToggle={toggleTheme}
+          onToggleTheme={toggleTheme}
         />
       )}
 
@@ -1135,7 +1131,10 @@ export default function MAdminCurriculumClient({
                         whileTap={{ scale: 0.96 }}
                         draggable={true}
                         onDragStart={(e) => {
-                          e.dataTransfer.setData('text/plain', course.name)
+                          const dt = (e as unknown as { dataTransfer?: DataTransfer }).dataTransfer
+                          if (dt) {
+                            dt.setData('text/plain', course.name)
+                          }
                           setDraggedCourseName(course.name)
                         }}
                         onDragEnd={() => setDraggedCourseName(null)}
