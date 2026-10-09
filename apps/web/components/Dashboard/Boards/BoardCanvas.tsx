@@ -1254,7 +1254,7 @@ function BoardEditorInner({
       </div>
 
       {/* Whiteboard Multi-page Tab System (Floating prominently above the bottom toolbar) */}
-      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-30 pointer-events-auto max-w-[95vw] animate-in fade-in slide-in-from-bottom-2 duration-200">
+      <div className="fixed bottom-[64px] sm:bottom-20 left-1/2 -translate-x-1/2 z-30 pointer-events-auto max-w-[95vw] animate-in fade-in slide-in-from-bottom-2 duration-200">
         <BoardTabBar
           tabs={tabs}
           activeTabId={activeTabId}
@@ -1342,8 +1342,8 @@ function BoardEditorInner({
         </div>
       )}
 
-      {/* Zoom & Odak Controls — Fixed bottom-right with clean, non-overlapping placement */}
-      <div className="fixed bottom-4 end-4 z-30 pointer-events-auto flex items-center board-enter-delayed">
+      {/* Zoom & Odak Controls — Fixed bottom-right with clean, non-overlapping placement (hidden on mobile, native pinch used) */}
+      <div className="hidden md:flex fixed bottom-4 end-4 z-30 pointer-events-auto items-center board-enter-delayed">
         <BoardZoomControls
           zoom={zoom}
           onZoomIn={handleZoomIn}

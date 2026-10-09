@@ -1,7 +1,9 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { getAuthOrgSlug } from '@services/org/orgResolution'
 import LoginClient from './login'
+import MLoginClient from '@components/Mobile/MLoginClient'
 import { Metadata } from 'next'
+import { headers } from 'next/headers'
 import OrgNotFound from '@components/Objects/StyledElements/Error/OrgNotFound'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -9,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   if (!orgslug) {
     // Apex (org-less) login.
-    return { title: 'Login — Oxonom Edu', robots: { index: false, follow: false } }
+    return { title: 'Giriş Yap — Oxonom Edu', robots: { index: false, follow: false } }
   }
 
   let org: any = null
@@ -23,13 +25,18 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    title: 'Login' + ` — ${org?.name || 'Oxonom Edu'}`,
+    title: 'Giriş Yap' + ` — ${org?.name || 'Oxonom Edu'}`,
     robots: { index: false, follow: false },
   }
 }
 
 const Login = async () => {
   const orgslug = await getAuthOrgSlug()
+
+  // Detect mobile request from User-Agent header
+  const reqHeaders = await headers()
+  const userAgent = reqHeaders.get('user-agent') || ''
+  const isMobileUA = /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(userAgent)
 
   // No org slug → bare apex (learn.io) → generic, org-less login.
   let org: any = null
@@ -46,6 +53,11 @@ const Login = async () => {
     if (!org) {
       return <OrgNotFound />
     }
+  }
+
+  // If request originates from mobile device, deliver the mobile teacher login experience directly
+  if (isMobileUA) {
+    return <MLoginClient org={org} orgslug={orgslug || ''} />
   }
 
   return (

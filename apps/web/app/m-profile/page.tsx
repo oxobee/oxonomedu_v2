@@ -13,14 +13,14 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Oxonom EDU — Öğretmen Çalışma Alanı (Dash v2)',
-  description: 'Mobil öncelikli, sade ve modern öğretmen dashboard çalışma alanı.',
+  title: 'Hesap Ayarları & Profilim — Oxonom EDU (m-profile)',
+  description: 'Mobil öncelikli öğretmen hesap ayarları, profil ve güvenlik yönetim ekranı.',
 }
 
-export default function OrgDashV2Page({ params }: { params?: { orgslug?: string } }) {
+export default function MProfilePage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#0A0D15]" />}>
-      <MobileAppShell initialTab="home" orgSlug={params?.orgslug} />
+      <MobileAppShell initialTab="profile" />
     </Suspense>
   )
 }

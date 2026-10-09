@@ -25,6 +25,7 @@ export default function BoardTopBar({
   const { t } = useTranslation()
   const searchParams = useSearchParams()
   const [isInIframe, setIsInIframe] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     try {
@@ -33,6 +34,18 @@ export default function BoardTopBar({
       }
     } catch (_) {
       setIsInIframe(true)
+    }
+
+    if (typeof window !== 'undefined') {
+      const check = () => {
+        setIsMobile(
+          window.innerWidth <= 1024 ||
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Tablet/i.test(navigator.userAgent)
+        )
+      }
+      check()
+      window.addEventListener('resize', check)
+      return () => window.removeEventListener('resize', check)
     }
   }, [])
 
@@ -45,6 +58,8 @@ export default function BoardTopBar({
   if (isPanoWindow) {
     return null
   }
+
+  const backHref = isMobile ? '/m-boards' : getUriWithOrg(orgslug, '/boards')
 
   return (
     <>
@@ -59,14 +74,14 @@ export default function BoardTopBar({
           }}
         >
           <ToolTip content={t('boards.back_to_boards')}>
-            <Link href={getUriWithOrg(orgslug, '/boards')}>
+            <Link href={backHref}>
               <div className="editor-tool-btn">
                 <ArrowLeft size={15} />
               </div>
             </Link>
           </ToolTip>
 
-          <Link href={getUriWithOrg(orgslug, '/boards')}>
+          <Link href={backHref}>
             <div className="bg-black rounded-md w-[25px] h-[25px] flex items-center justify-center hover:opacity-80 transition-opacity">
               <Image
                 src="/lrn.svg"
@@ -78,7 +93,7 @@ export default function BoardTopBar({
             </div>
           </Link>
 
-          <span className="text-sm font-bold text-neutral-800 truncate max-w-[220px] sm:max-w-[340px] md:max-w-[460px]">
+          <span className="text-sm font-bold text-neutral-800 truncate max-w-[120px] sm:max-w-[260px] md:max-w-[460px]">
             {boardName}
           </span>
 

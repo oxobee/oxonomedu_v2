@@ -610,8 +610,12 @@ function OrgRow({
     }
   }
 
+  const isMobile =
+    typeof window !== 'undefined' &&
+    (window.innerWidth < 768 || /mobile|iphone|ipod|android/i.test(navigator.userAgent))
+
   const destinationHref = (isAdmin || isTeacher)
-    ? `/orgs/${org.slug}/dash`
+    ? (isTeacher && isMobile ? `/orgs/${org.slug}/dashv2` : `/orgs/${org.slug}/dash`)
     : `/orgs/${org.slug}`
 
   const isPrimary = org.slug === 'neclagorer' || org.id === 10

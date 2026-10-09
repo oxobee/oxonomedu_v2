@@ -341,7 +341,7 @@ export default async function proxy(req: NextRequest) {
   //    layout additionally enforces SaaS gating. We set instance cookies so the
   //    hub's client components can read tenancy/mode/top-domain.
   // -------------------------------------------------------------------------
-  const HUB_ROOT_PATHS = ['/home', '/organizations', '/account', '/billing', '/subscriptions', '/new']
+  const HUB_ROOT_PATHS = ['/home', '/organizations', '/account', '/billing', '/subscriptions', '/new', '/m-login']
   const isHubRoot = HUB_ROOT_PATHS.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   )
@@ -366,6 +366,20 @@ export default async function proxy(req: NextRequest) {
   // -------------------------------------------------------------------------
   // 2b. Legacy or explicit /auth/* routes — redirect to canonical routes
   // -------------------------------------------------------------------------
+  const userAgent = req.headers.get('user-agent') || ''
+  const isMobileUA = /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(userAgent)
+  const cleanAuthPath = pathname.toLowerCase().replace(/\/+$/, '')
+
+  // Redirect mobile users to /m-login on login routes
+  if ((cleanAuthPath === '/login' || cleanAuthPath === '/auth/login' || cleanAuthPath === '/auth') && isMobileUA) {
+    return NextResponse.redirect(new URL(`/m-login${search}`, req.url), 307)
+  }
+
+  // Redirect mobile users from /dash to /dashv2
+  if (cleanAuthPath === '/dash' && isMobileUA) {
+    return NextResponse.redirect(new URL(`/dashv2${search}`, req.url), 307)
+  }
+
   const AUTH_PREFIX_MAP: Record<string, string> = {
     '/auth': '/login',
     '/auth/': '/login',
@@ -375,7 +389,6 @@ export default async function proxy(req: NextRequest) {
     '/auth/forgot': '/forgot',
     '/auth/verify-email': '/verify-email',
   }
-  const cleanAuthPath = pathname.toLowerCase().replace(/\/+$/, '')
   if (AUTH_PREFIX_MAP[cleanAuthPath] || AUTH_PREFIX_MAP[pathname.toLowerCase()]) {
     const target = AUTH_PREFIX_MAP[cleanAuthPath] || AUTH_PREFIX_MAP[pathname.toLowerCase()]
     return NextResponse.redirect(new URL(`${target}${search}`, req.url), 308)

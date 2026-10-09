@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -31,6 +32,7 @@ import {
   ArrowCounterClockwise,
   ArrowClockwise,
   Plus,
+  SignOut,
 } from '@phosphor-icons/react'
 import { DividerVerticalIcon } from '@radix-ui/react-icons'
 import * as Popover from '@radix-ui/react-popover'
@@ -121,6 +123,25 @@ export default function BoardToolbar({
     return 1
   })
 
+  const router = useRouter()
+
+  const handleExit = () => {
+    if (typeof window !== 'undefined') {
+      const isMobileOrTablet =
+        window.innerWidth <= 1024 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Tablet/i.test(
+          navigator.userAgent
+        ) ||
+        window.matchMedia('(max-width: 1024px)').matches ||
+        ('ontouchstart' in window && window.innerWidth <= 1024)
+      if (isMobileOrTablet) {
+        router.push('/m-boards')
+      } else {
+        router.push('/dash/boards')
+      }
+    }
+  }
+
   const handleScaleChange = (scale: number) => {
     setToolbarScale(scale)
     if (typeof window !== 'undefined') {
@@ -156,19 +177,18 @@ export default function BoardToolbar({
           </div>
         </Link>
 
-        {/* Plus (+) Button for New Board Tab / Page as requested */}
-        {onAddTab && (
-          <ToolTip content="Yeni Sayfa Ekle (+)">
-            <div
-              onClick={onAddTab}
-              className="editor-tool-btn text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-pointer"
-              role="button"
-              tabIndex={0}
-            >
-              <Plus size={16} weight="bold" />
-            </div>
-          </ToolTip>
-        )}
+        {/* Çıkış Yap (Exit) Button next to mouse / cursor */}
+        <ToolTip content="Tahtadan Çıkış Yap">
+          <div
+            onClick={handleExit}
+            className="editor-tool-btn text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
+            role="button"
+            tabIndex={0}
+            title="Çıkış Yap"
+          >
+            <SignOut size={16} weight="bold" />
+          </div>
+        </ToolTip>
 
         <DividerVerticalIcon style={{ color: 'grey', opacity: '0.4' }} />
 
@@ -515,25 +535,25 @@ export default function BoardToolbar({
       </div>
 
       {/* ─── MOBILE TOOL DOCK ────────────────────────────────────────────── */}
-      <div className="flex md:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 items-center gap-1.5 bg-white/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-xl border border-neutral-200/80 max-w-[95vw]">
-        {onAddTab && (
-          <button
-            type="button"
-            onClick={onAddTab}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors shrink-0"
-            title="Yeni Sayfa Ekle"
-          >
-            <Plus size={16} weight="bold" />
-          </button>
-        )}
+      <div className="flex md:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 items-center gap-1 bg-white/95 backdrop-blur-md px-2 py-1.5 rounded-2xl shadow-xl border border-neutral-200/80 max-w-[96vw]">
+        {/* Çıkış Yap Butonu */}
+        <button
+          type="button"
+          onClick={handleExit}
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors shrink-0"
+          title="Çıkış Yap"
+        >
+          <SignOut size={16} weight="bold" />
+        </button>
 
         <button
           type="button"
           onClick={() => onToolModeChange('select')}
           className={cn(
-            'w-9 h-9 rounded-xl flex items-center justify-center transition-colors shrink-0',
+            'w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0',
             toolMode === 'select' ? 'bg-slate-900 text-white' : 'text-neutral-600 hover:bg-neutral-100'
           )}
+          title="Seçim"
         >
           <Cursor size={16} weight="bold" />
         </button>
@@ -542,9 +562,10 @@ export default function BoardToolbar({
           type="button"
           onClick={() => onToolModeChange('draw')}
           className={cn(
-            'w-9 h-9 rounded-xl flex items-center justify-center transition-colors shrink-0',
+            'w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0',
             toolMode === 'draw' ? 'bg-blue-600 text-white' : 'text-neutral-600 hover:bg-neutral-100'
           )}
+          title="Çizim"
         >
           <PencilSimple size={16} weight="bold" />
         </button>
@@ -553,9 +574,10 @@ export default function BoardToolbar({
           type="button"
           onClick={() => onToolModeChange('text')}
           className={cn(
-            'w-9 h-9 rounded-xl flex items-center justify-center transition-colors shrink-0',
+            'w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0',
             toolMode === 'text' ? 'bg-indigo-600 text-white' : 'text-neutral-600 hover:bg-neutral-100'
           )}
+          title="Metin"
         >
           <TextT size={16} weight="bold" />
         </button>
@@ -564,19 +586,21 @@ export default function BoardToolbar({
           type="button"
           onClick={() => onToolModeChange('eraser')}
           className={cn(
-            'w-9 h-9 rounded-xl flex items-center justify-center transition-colors shrink-0',
+            'w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0',
             toolMode === 'eraser' ? 'bg-rose-600 text-white' : 'text-neutral-600 hover:bg-neutral-100'
           )}
+          title="Silgi"
         >
           <Eraser size={16} weight="bold" />
         </button>
 
-        <div className="w-px h-5 bg-neutral-200 shrink-0" />
+        <div className="w-px h-4 bg-neutral-200 shrink-0 mx-0.5" />
 
         <button
           type="button"
           onClick={() => editor?.chain?.().undo?.().run?.()}
-          className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-600 shrink-0"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-600 hover:bg-neutral-100 shrink-0"
+          title="Geri Al"
         >
           <ArrowCounterClockwise size={15} weight="bold" />
         </button>
@@ -585,7 +609,8 @@ export default function BoardToolbar({
           <button
             type="button"
             onClick={onClearAll}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-rose-500 shrink-0"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-rose-500 hover:bg-rose-50 shrink-0"
+            title="Temizle"
           >
             <Trash size={15} weight="bold" />
           </button>
@@ -594,10 +619,11 @@ export default function BoardToolbar({
         <button
           type="button"
           onClick={() => setMobileDrawerOpen(true)}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-600 font-bold text-xs shrink-0"
+          className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-blue-50 text-blue-600 font-bold text-xs shrink-0"
+          title="Tüm Araçlar"
         >
-          <DotsThreeCircle size={16} weight="fill" />
-          <span>Tüm Araçlar</span>
+          <DotsThreeCircle size={15} weight="fill" />
+          <span>Araçlar</span>
         </button>
       </div>
 

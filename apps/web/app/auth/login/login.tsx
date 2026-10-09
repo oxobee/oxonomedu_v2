@@ -18,6 +18,7 @@ import AuthLayout from '@components/Auth/AuthLayout'
 import TurnstileWidget, { useTurnstileRequired, verifyTurnstileToken, type TurnstileWidgetHandle } from '@components/Auth/TurnstileWidget'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import { getAllowedAuthMethods } from '@services/auth/authMethods'
+import MLoginClient from '@components/Mobile/MLoginClient'
 
 interface LoginClientProps {
   org: any
@@ -28,6 +29,25 @@ const LoginClient = (props: LoginClientProps) => {
   const { signIn, completeMfaLogin, requestMagicLink } = useAuth()
   const { track } = useLHAnalytics('public')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Mobile viewport detection
+  const [isMobileScreen, setIsMobileScreen] = useState(false)
+  useEffect(() => {
+    const check = () => {
+      const isSmall = typeof window !== 'undefined' && window.innerWidth < 768
+      const isMobileUA =
+        typeof navigator !== 'undefined' &&
+        /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(navigator.userAgent)
+      setIsMobileScreen(isSmall || isMobileUA)
+    }
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  if (isMobileScreen) {
+    return <MLoginClient org={props.org} orgslug={props.org?.slug} />
+  }
   const [ssoEnabled, setSsoEnabled] = useState(false)
   const [ssoLoading, setSsoLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
@@ -126,7 +146,8 @@ const LoginClient = (props: LoginClientProps) => {
     // `redirect_to` is what the magic-link consume endpoint forwards when it
     // bounces a 2FA-enabled user here instead of signing them straight in.
     const raw = params.get('next') ?? params.get('redirect') ?? params.get('redirect_to')
-    const dest = raw && /^\/(?!\/)/.test(raw) ? raw : '/home'
+    const defaultDest = props.org?.slug ? `/orgs/${props.org.slug}/dash` : '/dash'
+    const dest = raw && /^\/(?!\/)/.test(raw) ? raw : defaultDest
     return `${window.location.origin}/redirect_from_auth?next=${encodeURIComponent(dest)}`
   }
 

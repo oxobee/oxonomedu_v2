@@ -18,28 +18,11 @@ interface BoardTopRightProps {
   accessToken?: string
 }
 
-type PomodoroPhase = 'work' | 'shortBreak' | 'longBreak'
-
 interface TimerState {
   endTime: number | null
   duration: number
   paused: boolean
   pausedRemaining: number
-  isPomodoro: boolean
-  pomodoroPhase: PomodoroPhase
-  pomodoroSessions: number
-}
-
-const POMODORO_DURATIONS: Record<PomodoroPhase, number> = {
-  work: 25 * 60,
-  shortBreak: 5 * 60,
-  longBreak: 15 * 60,
-}
-
-const POMODORO_COLORS: Record<PomodoroPhase, { bg: string; on: string; off: string; btnBg: string; text: string }> = {
-  work: { bg: '#2a0808', on: '#ef4444', off: '#3d1818', btnBg: 'rgba(239,68,68,0.15)', text: 'text-red-400' },
-  shortBreak: { bg: '#082a0e', on: '#22c55e', off: '#183d1e', btnBg: 'rgba(34,197,94,0.15)', text: 'text-green-400' },
-  longBreak: { bg: '#08102a', on: '#3b82f6', off: '#18253d', btnBg: 'rgba(59,130,246,0.15)', text: 'text-blue-400' },
 }
 
 const TIMER_PRESETS = [
@@ -167,13 +150,6 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
 export default function BoardTopRight({ provider, ydoc, board, accessToken }: BoardTopRightProps) {
   const { t } = useTranslation()
-  const getPomodoroLabel = (phase: PomodoroPhase) => {
-    switch (phase) {
-      case 'work': return t('boards.timer.pomodoro_focus')
-      case 'shortBreak': return t('boards.timer.pomodoro_short_break')
-      case 'longBreak': return t('boards.timer.pomodoro_long_break')
-    }
-  }
   const [showShare, setShowShare] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showTimerPicker, setShowTimerPicker] = useState(false)
@@ -183,9 +159,6 @@ export default function BoardTopRight({ provider, ydoc, board, accessToken }: Bo
     duration: 0,
     paused: false,
     pausedRemaining: 0,
-    isPomodoro: false,
-    pomodoroPhase: 'work',
-    pomodoroSessions: 0,
   })
   const tickRef = useRef<ReturnType<typeof setInterval>>(null)
   const [timesUpPhase, setTimesUpPhase] = useState<'hidden' | 'dramatic' | 'bar'>('hidden')
@@ -361,10 +334,7 @@ export default function BoardTopRight({ provider, ydoc, board, accessToken }: Bo
       const duration = timerMap.get('duration') as number ?? 0
       const paused = timerMap.get('paused') as boolean ?? false
       const pausedRemaining = timerMap.get('pausedRemaining') as number ?? 0
-      const isPomodoro = timerMap.get('isPomodoro') as boolean ?? false
-      const pomodoroPhase = (timerMap.get('pomodoroPhase') as PomodoroPhase) ?? 'work'
-      const pomodoroSessions = timerMap.get('pomodoroSessions') as number ?? 0
-      setTimerState({ endTime, duration, paused, pausedRemaining, isPomodoro, pomodoroPhase, pomodoroSessions })
+      setTimerState({ endTime, duration, paused, pausedRemaining })
     }
     timerMap.observe(sync)
     sync()
@@ -378,7 +348,6 @@ export default function BoardTopRight({ provider, ydoc, board, accessToken }: Bo
     }
     return () => { if (tickRef.current) clearInterval(tickRef.current) }
   }, [timerState.endTime, timerState.paused])
-
 
   const startTimer = useCallback((seconds: number) => {
     const timerMap = ydoc.getMap<any>('board-timer')
@@ -424,45 +393,6 @@ export default function BoardTopRight({ provider, ydoc, board, accessToken }: Bo
     timerMap.set('duration', 0)
     timerMap.set('paused', false)
     timerMap.set('pausedRemaining', 0)
-    timerMap.set('isPomodoro', false)
-    timerMap.set('pomodoroPhase', 'work')
-    timerMap.set('pomodoroSessions', 0)
-  }, [ydoc])
-
-  const startPomodoro = useCallback(() => {
-    const timerMap = ydoc.getMap<any>('board-timer')
-    const seconds = POMODORO_DURATIONS.work
-    timerMap.set('endTime', Date.now() + seconds * 1000)
-    timerMap.set('duration', seconds)
-    timerMap.set('paused', false)
-    timerMap.set('pausedRemaining', 0)
-    timerMap.set('isPomodoro', true)
-    timerMap.set('pomodoroPhase', 'work')
-    timerMap.set('pomodoroSessions', 0)
-    setShowTimerPicker(false)
-  }, [ydoc])
-
-  const advancePomodoro = useCallback(() => {
-    const timerMap = ydoc.getMap<any>('board-timer')
-    const currentPhase = timerMap.get('pomodoroPhase') as PomodoroPhase ?? 'work'
-    const sessions = timerMap.get('pomodoroSessions') as number ?? 0
-    let nextPhase: PomodoroPhase
-    let nextSessions = sessions
-    if (currentPhase === 'work') {
-      nextSessions = sessions + 1
-      nextPhase = nextSessions % 4 === 0 ? 'longBreak' : 'shortBreak'
-    } else {
-      nextPhase = 'work'
-    }
-    const seconds = POMODORO_DURATIONS[nextPhase]
-    timerMap.set('endTime', Date.now() + seconds * 1000)
-    timerMap.set('duration', seconds)
-    timerMap.set('paused', false)
-    timerMap.set('pausedRemaining', 0)
-    timerMap.set('pomodoroPhase', nextPhase)
-    timerMap.set('pomodoroSessions', nextSessions)
-    prevExpiredRef.current = false
-    setTimesUpPhase('hidden')
   }, [ydoc])
 
   const formatTime = (date: Date) => {
@@ -494,33 +424,21 @@ export default function BoardTopRight({ provider, ydoc, board, accessToken }: Bo
   const timerDisplay = `${timer.mm}:${timer.ss}`
   const currentTime = formatTime(new Date(now))
 
-  // Pomodoro color scheme
-  const pomColors = timerState.isPomodoro ? POMODORO_COLORS[timerState.pomodoroPhase] : null
-
   // Track "Time's up" banner — phases: 'hidden' → 'dramatic' (50% screen) → 'bar' (small top bar, stays)
-  // For pomodoro: auto-advance to the next phase after the dramatic display
   useEffect(() => {
     if (isTimerExpired && !prevExpiredRef.current) {
       prevExpiredRef.current = true
       setTimesUpPhase('dramatic')
-      if (timerState.isPomodoro) {
-        // Auto-advance pomodoro after 3 seconds
-        const autoAdvance = setTimeout(() => {
-          advancePomodoro()
-        }, 3000)
-        return () => clearTimeout(autoAdvance)
-      } else {
-        const shrinkTimer = setTimeout(() => {
-          setTimesUpPhase('bar')
-        }, 3000)
-        return () => clearTimeout(shrinkTimer)
-      }
+      const shrinkTimer = setTimeout(() => {
+        setTimesUpPhase('bar')
+      }, 3000)
+      return () => clearTimeout(shrinkTimer)
     }
     if (!isTimerExpired && !isTimerActive) {
       prevExpiredRef.current = false
       setTimesUpPhase('hidden')
     }
-  }, [isTimerExpired, isTimerActive, timerState.isPomodoro, advancePomodoro])
+  }, [isTimerExpired, isTimerActive])
 
   const dismissTimesUp = useCallback(() => {
     setTimesUpPhase('hidden')
@@ -537,7 +455,10 @@ export default function BoardTopRight({ provider, ydoc, board, accessToken }: Bo
           style={frostedStyle}
         >
           <PresenceAvatars provider={provider} />
-          <LcdPanel time={currentTime} size={13} />
+          {/* Hide digital clock on mobile screens to save space and avoid collisions */}
+          <div className="hidden sm:block">
+            <LcdPanel time={currentTime} size={13} />
+          </div>
 
           {/* Timer button */}
           <div className="relative">
@@ -570,15 +491,6 @@ export default function BoardTopRight({ provider, ydoc, board, accessToken }: Bo
                       {preset.label.replace('m', ` ${t('boards.timer.minute_short')}`)}
                     </button>
                   ))}
-                </div>
-                <div className="border-t border-neutral-100 mt-2 pt-2">
-                  <button
-                    onClick={startPomodoro}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:bg-red-50 text-red-500"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-red-400" />
-                    {t('boards.timer.pomodoro_label')}
-                  </button>
                 </div>
               </div>
             )}
@@ -796,138 +708,86 @@ export default function BoardTopRight({ provider, ydoc, board, accessToken }: Bo
           <div
             className="flex items-center gap-3 rounded-b-2xl px-5 py-2.5 nice-shadow"
             style={{
-              background: pomColors?.bg ?? '#2a0808',
+              background: '#2a0808',
               borderTop: 'none',
               boxShadow: `0 4px 20px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(255,255,255,0.05)`,
             }}
           >
-            {/* Pomodoro phase label */}
-            {pomColors && (
-              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: pomColors.on }}>
-                {getPomodoroLabel(timerState.pomodoroPhase)}
-              </span>
-            )}
-
             <LcdPanel
               time={timerDisplay}
               size={18}
-              bg={pomColors?.bg ?? '#2a0808'}
-              onColor={pomColors?.on ?? '#ef4444'}
-              offColor={pomColors?.off ?? '#3d1818'}
+              bg="#2a0808"
+              onColor="#ef4444"
+              offColor="#3d1818"
             />
-
-            {/* Pomodoro session dots */}
-            {timerState.isPomodoro && (
-              <div className="flex items-center gap-1">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{
-                      backgroundColor: i < (timerState.pomodoroSessions % 4) ? pomColors!.on : pomColors!.off,
-                    }}
-                  />
-                ))}
-              </div>
-            )}
 
             {timerState.paused ? (
               <button
                 onClick={resumeTimer}
-                className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
-                style={{ background: pomColors?.btnBg ?? 'rgba(239,68,68,0.15)' }}
+                className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors bg-red-500/15"
                 title={t('boards.timer.resume')}
               >
-                <Play size={13} className={pomColors?.text ?? 'text-red-400'} />
+                <Play size={13} className="text-red-400" />
               </button>
             ) : (
               <button
                 onClick={pauseTimer}
-                className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
-                style={{ background: pomColors?.btnBg ?? 'rgba(239,68,68,0.15)' }}
+                className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors bg-red-500/15"
                 title={t('boards.timer.pause')}
               >
-                <Pause size={13} className={pomColors?.text ?? 'text-red-400'} />
+                <Pause size={13} className="text-red-400" />
               </button>
             )}
 
             <button
               onClick={restartTimer}
-              className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
-              style={{ background: pomColors?.btnBg ?? 'rgba(239,68,68,0.15)' }}
+              className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors bg-red-500/15"
               title={t('boards.timer.restart')}
             >
-              <RotateCcw size={13} className={pomColors?.text ?? 'text-red-400'} />
+              <RotateCcw size={13} className="text-red-400" />
             </button>
-
-            {/* Skip to next phase (pomodoro only) */}
-            {timerState.isPomodoro && (
-              <button
-                onClick={advancePomodoro}
-                className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
-                style={{ background: pomColors?.btnBg ?? 'rgba(239,68,68,0.15)' }}
-                title="Skip to next phase"
-              >
-                <SkipForward size={13} className={pomColors?.text ?? 'text-red-400'} />
-              </button>
-            )}
 
             <button
               onClick={clearTimer}
-              className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
-              style={{ background: pomColors?.btnBg ?? 'rgba(239,68,68,0.15)' }}
+              className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors bg-red-500/15"
               title={t('boards.timer.close')}
             >
-              <X size={13} className={pomColors?.text ?? 'text-red-400'} />
+              <X size={13} className="text-red-400" />
             </button>
           </div>
         </div>
       )}
 
       {/* Time's up — dramatic phase: takes 50% of screen */}
-      {timesUpPhase === 'dramatic' && (() => {
-        const pc = pomColors
-        const dramaticBg = pc ? pc.bg : '#1a0505'
-        const dramaticOn = pc ? pc.on : '#ff4444'
-        const dramaticOff = pc ? pc.off : '#3d1515'
-        const dramaticLabel = pc ? (timerState.pomodoroPhase === 'work'
-          ? (timerState.pomodoroSessions % 4 === 3 ? t('boards.timer.pomodoro_long_break') : t('boards.timer.pomodoro_short_break'))
-          : t('boards.timer.back_to_focus')) : null
-        return (
-          <div
-            className="absolute inset-x-0 top-0 z-40 pointer-events-auto flex items-center justify-center"
-            style={{
-              height: '50vh',
-              background: `linear-gradient(180deg, ${dramaticBg} 0%, ${dramaticBg} 70%, transparent 100%)`,
-              animation: 'timesup-expand 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            }}
-          >
-            <div className="flex flex-col items-center gap-4">
-              <LcdPanel
-                time="00:00"
-                size={48}
-                bg="transparent"
-                onColor={dramaticOn}
-                offColor={dramaticOff}
-              />
-              <span
-                className="text-2xl font-black tracking-widest uppercase"
-                style={{ color: dramaticOn, animation: 'timesup-pulse 0.6s ease-in-out infinite' }}
-              >
-                {t('boards.timer.times_up')}
-              </span>
-              {dramaticLabel && (
-                <span className="text-sm font-medium tracking-wide" style={{ color: `${dramaticOn}99` }}>
-                  {dramaticLabel}
-                </span>
-              )}
-            </div>
+      {timesUpPhase === 'dramatic' && (
+        <div
+          className="absolute inset-x-0 top-0 z-40 pointer-events-auto flex items-center justify-center"
+          style={{
+            height: '50vh',
+            background: 'linear-gradient(180deg, #1a0505 0%, #1a0505 70%, transparent 100%)',
+            animation: 'timesup-expand 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          }}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <LcdPanel
+              time="00:00"
+              size={48}
+              bg="transparent"
+              onColor="#ff4444"
+              offColor="#3d1515"
+            />
+            <span
+              className="text-2xl font-black tracking-widest uppercase"
+              style={{ color: '#ff4444', animation: 'timesup-pulse 0.6s ease-in-out infinite' }}
+            >
+              {t('boards.timer.times_up')}
+            </span>
           </div>
-        )
-      })()}
+        </div>
+      )}
 
-      {/* Time's up — bar phase: small banner at top, stays permanently (non-pomodoro only) */}
-      {timesUpPhase === 'bar' && !timerState.isPomodoro && (
+      {/* Time's up — bar phase: small banner at top, stays permanently */}
+      {timesUpPhase === 'bar' && (
         <div
           className="absolute top-0 left-1/2 z-30 pointer-events-auto"
           style={{

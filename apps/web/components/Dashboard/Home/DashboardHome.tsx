@@ -55,6 +55,19 @@ export default function DashboardHome() {
   const plan = usePlan()
   const planStyle = PLAN_COLORS[plan] || PLAN_COLORS.free
 
+  // If a teacher accesses the desktop dashboard from a mobile device, redirect to /dashv2
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isMobile =
+        window.innerWidth < 768 ||
+        /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(navigator.userAgent)
+      if (isMobile && !canManageOrg) {
+        const target = org?.slug ? `/orgs/${org.slug}/dashv2` : '/dashv2'
+        window.location.replace(target)
+      }
+    }
+  }, [canManageOrg, org?.slug])
+
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
       <div className="px-4 sm:px-10 pt-8 pb-10">

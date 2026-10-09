@@ -1,12 +1,33 @@
 import '../styles/globals.css'
 import React from 'react'
+import type { Viewport } from 'next'
 import Providers from '@components/Providers'
-import { Wix_Madefor_Text, Tajawal } from 'next/font/google'
+import { Wix_Madefor_Text, Tajawal, Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+}
 
 const wixMadeforText = Wix_Madefor_Text({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-default',
+})
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-jakarta',
+})
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-serif-display',
 })
 
 // Wix Madefor Text has no Arabic subset, so Arabic would otherwise fall back to
@@ -39,7 +60,7 @@ export default function RootLayout({
   // no-JS baseline for crawlers; the script overwrites it for everyone else.
   return (
     <html
-      className={`${wixMadeforText.variable} ${tajawal.variable}`}
+      className={`${wixMadeforText.variable} ${tajawal.variable} ${plusJakartaSans.variable} ${playfairDisplay.variable}`}
       lang="tr"
       suppressHydrationWarning
     >
