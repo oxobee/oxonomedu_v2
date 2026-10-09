@@ -118,16 +118,17 @@ export default function MProfileClient({
   // Save General Profile Changes
   const handleSaveGeneral = () => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(
-        'oxonom_teacher_profile',
-        JSON.stringify({
-          email,
-          username,
-          firstName,
-          lastName,
-          bio,
-          extraDetails,
-        })
+      const profileData = {
+        email,
+        username,
+        firstName,
+        lastName,
+        bio,
+        extraDetails,
+      }
+      localStorage.setItem('oxonom_teacher_profile', JSON.stringify(profileData))
+      window.dispatchEvent(
+        new CustomEvent('oxonom_teacher_profile_updated', { detail: profileData })
       )
     }
     toast.success('Hesap bilgileri başarıyla kaydedildi!')

@@ -40,6 +40,9 @@ import {
   Wallet,
   MapPin,
   HeartPulse,
+  Lock,
+  Key,
+  Shield,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import MobileHeader from '@components/Mobile/MobileHeader'
@@ -135,8 +138,172 @@ export default function MAdminTeachersClient({
 
   // Initial teacher dataset
   const [teachersList, setTeachersList] = useState<any[]>(() => {
-    return getOrgTeachers(10)
+    return getOrgTeachers(30)
   })
+
+  // New Teacher Modal Form States
+  const [newTeacherTab, setNewTeacherTab] = useState<'temel' | 'gorev' | 'ozluk' | 'finans'>('temel')
+  const [newName, setNewName] = useState('')
+  const [newTcNo, setNewTcNo] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('Ugur2803*')
+  const [newPhone, setNewPhone] = useState('')
+  const [newBranch, setNewBranch] = useState('Matematik Öğretmeni')
+  const [newMentorClass, setNewMentorClass] = useState('9-A')
+  const [newEmploymentType, setNewEmploymentType] = useState<'Kadrolu' | 'Sözleşmeli'>('Kadrolu')
+  const [newWeeklyHours, setNewWeeklyHours] = useState<number>(30)
+  const [newTitle, setNewTitle] = useState('Öğretmen')
+  const [newDutyInfo, setNewDutyInfo] = useState('Salı · 1. Kat Koridor')
+  const [newClub, setNewClub] = useState('Robotik & Kodlama Kulübü')
+  const [newUniversity, setNewUniversity] = useState('')
+  const [newGraduationYear, setNewGraduationYear] = useState('')
+  const [newSicilNo, setNewSicilNo] = useState('')
+  const [newAddress, setNewAddress] = useState('')
+  const [newEmergencyContact, setNewEmergencyContact] = useState('')
+  const [newEmergencyPhone, setNewEmergencyPhone] = useState('')
+  const [newBankName, setNewBankName] = useState('Vakıfbank')
+  const [newIban, setNewIban] = useState('')
+  const [newBaseSalary, setNewBaseSalary] = useState<number>(55000)
+  const [newExtraSalary, setNewExtraSalary] = useState<number>(18000)
+  const [newAnnualLeave, setNewAnnualLeave] = useState<number>(20)
+  const [newCreatedCredentials, setNewCreatedCredentials] = useState<{ email: string; pass: string; name: string } | null>(null)
+
+  const handleNameChange = (val: string) => {
+    setNewName(val)
+    if (!newEmail || newEmail.endsWith('@oxonom.com')) {
+      const slug = val
+        .toLowerCase()
+        .replace(/ğ/g, 'g')
+        .replace(/ü/g, 'u')
+        .replace(/ş/g, 's')
+        .replace(/ı/g, 'i')
+        .replace(/ö/g, 'o')
+        .replace(/ç/g, 'c')
+        .replace(/[^a-z0-9]/g, '.')
+        .replace(/\.+/g, '.')
+        .replace(/^\.|\.$/g, '')
+      if (slug) {
+        setNewEmail(`${slug}@oxonom.com`)
+      }
+    }
+  }
+
+  const resetNewTeacherForm = () => {
+    setNewTeacherTab('temel')
+    setNewName('')
+    setNewTcNo('')
+    setNewEmail('')
+    setNewPassword('Ugur2803*')
+    setNewPhone('')
+    setNewBranch('Matematik Öğretmeni')
+    setNewMentorClass('9-A')
+    setNewEmploymentType('Kadrolu')
+    setNewWeeklyHours(30)
+    setNewTitle('Öğretmen')
+    setNewDutyInfo('Salı · 1. Kat Koridor')
+    setNewClub('Robotik & Kodlama Kulübü')
+    setNewUniversity('')
+    setNewGraduationYear('')
+    setNewSicilNo('')
+    setNewAddress('')
+    setNewEmergencyContact('')
+    setNewEmergencyPhone('')
+    setNewBankName('Vakıfbank')
+    setNewIban('')
+    setNewBaseSalary(55000)
+    setNewExtraSalary(18000)
+    setNewAnnualLeave(20)
+    setNewCreatedCredentials(null)
+  }
+
+  const handleCreateTeacher = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newName.trim()) {
+      toast.error('Lütfen öğretmen ad ve soyadını giriniz.')
+      setNewTeacherTab('temel')
+      return
+    }
+    if (!newTcNo.trim() || newTcNo.length < 11) {
+      toast.error('Lütfen 11 haneli geçerli bir TC Kimlik Numarası giriniz.')
+      setNewTeacherTab('temel')
+      return
+    }
+    if (!newEmail.trim()) {
+      toast.error('Lütfen kurumsal e-posta adresini giriniz.')
+      setNewTeacherTab('temel')
+      return
+    }
+
+    const assignedEmail = newEmail.toLowerCase().trim()
+    const assignedPassword = newPassword || 'Ugur2803*'
+    const newTeacherId = Date.now()
+
+    const newTeacherObj = {
+      id: newTeacherId,
+      name: newName.trim(),
+      tcNo: newTcNo.trim(),
+      email: assignedEmail,
+      password: assignedPassword,
+      phone: newPhone.trim() || '+90 532 000 0000',
+      branch: newBranch.trim() || 'Öğretmen',
+      mentorClass: newMentorClass || '9-A',
+      assignedClasses: [newMentorClass || '9-A'],
+      employmentType: newEmploymentType,
+      weeklyHours: newWeeklyHours || 30,
+      title: newTitle || 'Öğretmen',
+      dutyInfo: newDutyInfo || 'Belirlenmedi',
+      club: newClub || 'Belirlenmedi',
+      university: newUniversity || 'Belirtilmedi (Öğretmen Tarafından Doldurulacak)',
+      graduationYear: newGraduationYear || '',
+      sicilNo: newSicilNo || `MEB-${Math.floor(10000000 + Math.random() * 90000000)}`,
+      address: newAddress || 'Belirtilmedi (Öğretmen Tarafından Doldurulacak)',
+      emergencyContact: newEmergencyContact || 'Belirtilmedi',
+      emergencyPhone: newEmergencyPhone || '',
+      bankName: newBankName || 'Vakıfbank',
+      iban: newIban || '',
+      baseSalary: newBaseSalary,
+      extraSalary: newExtraSalary,
+      annualLeave: newAnnualLeave,
+      casualLeave: 8,
+      status: 'active',
+      isFirstLogin: true,
+      profileCompleted: false,
+      documents: [],
+      leaves: [],
+    }
+
+    const updatedList = [newTeacherObj, ...teachersList]
+    setTeachersList(updatedList)
+
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(`oxonom_admin_teachers_${selectedOrgId}`, JSON.stringify(updatedList))
+        const regRaw = localStorage.getItem('oxonom_registered_teachers')
+        const registeredList = regRaw ? JSON.parse(regRaw) : []
+        const filtered = registeredList.filter((t: any) => t.email !== assignedEmail)
+        filtered.push({
+          id: newTeacherId,
+          name: newTeacherObj.name,
+          email: assignedEmail,
+          username: assignedEmail.split('@')[0],
+          password: assignedPassword,
+          tcNo: newTeacherObj.tcNo,
+          branch: newTeacherObj.branch,
+          phone: newTeacherObj.phone,
+          isFirstLogin: true,
+          profileCompleted: false,
+        })
+        localStorage.setItem('oxonom_registered_teachers', JSON.stringify(filtered))
+      } catch (_) {}
+    }
+
+    setNewCreatedCredentials({
+      name: newTeacherObj.name,
+      email: assignedEmail,
+      pass: assignedPassword,
+    })
+    toast.success(`${newTeacherObj.name} başarıyla sisteme eklendi!`, { duration: 4000 })
+  }
 
   // Sync when school changes or load overrides
   useEffect(() => {
@@ -479,32 +646,45 @@ export default function MAdminTeachersClient({
                   <span>Oxonom Okulları</span>
                   <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black">Aktif Kurum</span>
                 </div>
-                <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                  9-A Sınıf Rehberi · Türk Dili ve Edebiyatı · 1 Kadrolu Öğretmen (Ebru TEKNECİ)
+                <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">
+                  1 Sınıf
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── 3. SEARCH BAR ── */}
+        {/* ── 3. SEARCH & ADD BAR ── */}
         <section className="px-4 mt-3">
-          <div className="relative">
-            <Search
-              size={15}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Öğretmen adı, branş veya e-posta ara..."
-              className={`w-full h-11 pl-9 pr-3.5 rounded-2xl text-xs font-medium outline-hidden transition-all ${
-                theme === 'dark'
-                  ? 'bg-[#121826] text-white placeholder-gray-500 border border-gray-800 focus:border-[#34D399]/60'
-                  : 'bg-white text-gray-900 placeholder-gray-400 border border-gray-200/90 focus:border-[#10B981] shadow-xs'
-              }`}
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search
+                size={15}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Öğretmen adı, branş veya e-posta ara..."
+                className={`w-full h-11 pl-9 pr-3.5 rounded-2xl text-xs font-medium outline-hidden transition-all ${
+                  theme === 'dark'
+                    ? 'bg-[#121826] text-white placeholder-gray-500 border border-gray-800 focus:border-[#34D399]/60'
+                    : 'bg-white text-gray-900 placeholder-gray-400 border border-gray-200/90 focus:border-[#10B981] shadow-xs'
+                }`}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                resetNewTeacherForm()
+                setIsNewTeacherModalOpen(true)
+              }}
+              className="h-11 px-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all shrink-0 cursor-pointer"
+            >
+              <Plus size={16} strokeWidth={2.5} />
+              <span>Yeni Ekle</span>
+            </button>
           </div>
         </section>
 
@@ -1881,6 +2061,573 @@ export default function MAdminTeachersClient({
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── MODAL: YENİ ÖĞRETMEN & PERSONEL EKLEME (KATEGORİZE FORM) ── */}
+      <AnimatePresence>
+        {isNewTeacherModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ duration: 0.25 }}
+              className="w-full sm:max-w-lg bg-white dark:bg-[#121826] rounded-t-[32px] sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden relative"
+            >
+              {/* Header */}
+              <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shrink-0">
+                    <User size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white flex items-center gap-2">
+                      <span>Yeni Öğretmen / Personel Ekle</span>
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
+                        Müdür Yetkisi
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Temel bilgileri tanımlayın; ilk girişte profilini tamamlayacaktır
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewTeacherModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Categorized Tabs Switcher */}
+              <div className="px-4 pt-3 shrink-0">
+                <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-gray-100 dark:bg-gray-800/80 text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setNewTeacherTab('temel')}
+                    className={`py-2 rounded-xl transition-all cursor-pointer ${
+                      newTeacherTab === 'temel'
+                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    1. Temel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewTeacherTab('gorev')}
+                    className={`py-2 rounded-xl transition-all cursor-pointer ${
+                      newTeacherTab === 'gorev'
+                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    2. Görev
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewTeacherTab('ozluk')}
+                    className={`py-2 rounded-xl transition-all cursor-pointer ${
+                      newTeacherTab === 'ozluk'
+                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    3. Özlük
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewTeacherTab('finans')}
+                    className={`py-2 rounded-xl transition-all cursor-pointer ${
+                      newTeacherTab === 'finans'
+                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    4. Finans
+                  </button>
+                </div>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleCreateTeacher} className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* ── KATEGORİ 1: TEMEL & GİRİŞ BİLGİLERİ ── */}
+                {newTeacherTab === 'temel' && (
+                  <div className="space-y-3.5">
+                    <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 flex items-start gap-2.5 text-xs">
+                      <Sparkles size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <div className="text-emerald-900 dark:text-emerald-200 leading-snug">
+                        <span className="font-extrabold">Müdür Görevi:</span> Ad, TC Kimlik, kurumsal e-posta ve başlangıç şifresini belirleyin. Öğretmen ilk girişte kalıcı şifresini belirleyecek ve evraklarını yükleyecektir.
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Adı Soyadı <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newName}
+                        onChange={(e) => handleNameChange(e.target.value)}
+                        placeholder="Örn: Zeynep KILIÇ"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          TC Kimlik No <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          maxLength={11}
+                          value={newTcNo}
+                          onChange={(e) => setNewTcNo(e.target.value.replace(/\D/g, ''))}
+                          placeholder="11 haneli TC No"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          İletişim Telefonu
+                        </label>
+                        <input
+                          type="text"
+                          value={newPhone}
+                          onChange={(e) => setNewPhone(e.target.value)}
+                          placeholder="+90 532 ..."
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Kurumsal E-posta Adresi <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        placeholder="ad.soyad@oxonom.com"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-semibold text-emerald-600 dark:text-emerald-400 outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                          Başlangıç / Geçici Şifresi <span className="text-rose-500">*</span>
+                        </label>
+                        <span className="text-[10px] text-gray-400">Varsayılan: Ugur2803*</span>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Ugur2803*"
+                          className="w-full h-11 pl-3.5 pr-10 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                        <Lock size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                      </div>
+                      <p className="text-[10.5px] text-gray-500 dark:text-gray-400 mt-1">
+                        Öğretmen bu şifreyle giriş yaptıktan sonra yeni şifresini kendisi belirleyecektir.
+                      </p>
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setNewTeacherTab('gorev')}
+                        className="w-full h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-200 transition-colors cursor-pointer"
+                      >
+                        <span>Sonraki Adım: Görev & Kadro Bilgileri</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── KATEGORİ 2: GÖREV & KADRO BİLGİLERİ ── */}
+                {newTeacherTab === 'gorev' && (
+                  <div className="space-y-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Branş / Uzmanlık Alanı <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={newBranch}
+                        onChange={(e) => setNewBranch(e.target.value)}
+                        placeholder="Örn: Matematik Öğretmeni"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Atanacağı Şube / Rehberlik
+                        </label>
+                        <select
+                          value={newMentorClass}
+                          onChange={(e) => setNewMentorClass(e.target.value)}
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        >
+                          <option value="9-A">9-A Şubesi</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          İstihdam Türü
+                        </label>
+                        <select
+                          value={newEmploymentType}
+                          onChange={(e) => setNewEmploymentType(e.target.value as any)}
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        >
+                          <option value="Kadrolu">Kadrolu</option>
+                          <option value="Sözleşmeli">Sözleşmeli</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Haftalık Ders Saati
+                        </label>
+                        <input
+                          type="number"
+                          value={newWeeklyHours}
+                          onChange={(e) => setNewWeeklyHours(Number(e.target.value))}
+                          min={1}
+                          max={45}
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Ünvan / Kıdem
+                        </label>
+                        <input
+                          type="text"
+                          value={newTitle}
+                          onChange={(e) => setNewTitle(e.target.value)}
+                          placeholder="Örn: Uzman Öğretmen"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Haftalık Nöbet Görevi
+                      </label>
+                      <input
+                        type="text"
+                        value={newDutyInfo}
+                        onChange={(e) => setNewDutyInfo(e.target.value)}
+                        placeholder="Örn: Salı · 1. Kat Koridor & Bahçe Kapısı"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Danışman Kulüp
+                      </label>
+                      <input
+                        type="text"
+                        value={newClub}
+                        onChange={(e) => setNewClub(e.target.value)}
+                        placeholder="Örn: Robotik & Kodlama Kulübü"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setNewTeacherTab('ozluk')}
+                        className="w-full h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-200 transition-colors cursor-pointer"
+                      >
+                        <span>Sonraki Adım: Özlük & Mezuniyet</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── KATEGORİ 3: ÖZLÜK & MEZUNİYET BİLGİLERİ ── */}
+                {newTeacherTab === 'ozluk' && (
+                  <div className="space-y-3.5">
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Bu alanlar opsiyoneldir. Müdür boş bırakırsa, öğretmen ilk girişinde profil tamamlama adımında dolduracaktır.
+                    </p>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Mezun Olduğu Üniversite & Fakülte
+                      </label>
+                      <input
+                        type="text"
+                        value={newUniversity}
+                        onChange={(e) => setNewUniversity(e.target.value)}
+                        placeholder="Örn: Boğaziçi Üniversitesi Eğitim Fakültesi"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Mezuniyet Yılı
+                        </label>
+                        <input
+                          type="text"
+                          value={newGraduationYear}
+                          onChange={(e) => setNewGraduationYear(e.target.value)}
+                          placeholder="2018"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          MEB Sicil No
+                        </label>
+                        <input
+                          type="text"
+                          value={newSicilNo}
+                          onChange={(e) => setNewSicilNo(e.target.value)}
+                          placeholder="MEB-34..."
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        İkametgah Adresi
+                      </label>
+                      <input
+                        type="text"
+                        value={newAddress}
+                        onChange={(e) => setNewAddress(e.target.value)}
+                        placeholder="Kadıköy / İstanbul"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Acil Durum Yakını
+                        </label>
+                        <input
+                          type="text"
+                          value={newEmergencyContact}
+                          onChange={(e) => setNewEmergencyContact(e.target.value)}
+                          placeholder="Eşi / Babası"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Acil Durum Tel
+                        </label>
+                        <input
+                          type="text"
+                          value={newEmergencyPhone}
+                          onChange={(e) => setNewEmergencyPhone(e.target.value)}
+                          placeholder="+90 532 ..."
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setNewTeacherTab('finans')}
+                        className="w-full h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-200 transition-colors cursor-pointer"
+                      >
+                        <span>Sonraki Adım: Finans & Maaş</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── KATEGORİ 4: FİNANS & MAAŞ BİLGİLERİ ── */}
+                {newTeacherTab === 'finans' && (
+                  <div className="space-y-3.5">
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Maaş Bankası
+                        </label>
+                        <input
+                          type="text"
+                          value={newBankName}
+                          onChange={(e) => setNewBankName(e.target.value)}
+                          placeholder="Vakıfbank"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Yıllık İzin Hakkı (Gün)
+                        </label>
+                        <input
+                          type="number"
+                          value={newAnnualLeave}
+                          onChange={(e) => setNewAnnualLeave(Number(e.target.value))}
+                          min={0}
+                          max={60}
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        IBAN Numarası
+                      </label>
+                      <input
+                        type="text"
+                        value={newIban}
+                        onChange={(e) => setNewIban(e.target.value)}
+                        placeholder="TR..."
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-blue-600 dark:text-blue-400 outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Taban Maaş (₺)
+                        </label>
+                        <input
+                          type="number"
+                          value={newBaseSalary}
+                          onChange={(e) => setNewBaseSalary(Number(e.target.value))}
+                          step={500}
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-emerald-600 dark:text-emerald-400 outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Ek Ders Ücreti (₺)
+                        </label>
+                        <input
+                          type="number"
+                          value={newExtraSalary}
+                          onChange={(e) => setNewExtraSalary(Number(e.target.value))}
+                          step={250}
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-teal-600 dark:text-teal-400 outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-900/50 flex justify-between items-center text-xs">
+                      <span className="font-bold text-emerald-800 dark:text-emerald-300">
+                        Toplam Net Hak Ediş:
+                      </span>
+                      <span className="font-black text-sm text-emerald-600 dark:text-emerald-400">
+                        ₺{((newBaseSalary || 0) + (newExtraSalary || 0)).toLocaleString('tr-TR')}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Submit Action */}
+                <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsNewTeacherModalOpen(false)}
+                    className="flex-1 h-12 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#121826] text-gray-700 dark:text-gray-300 text-xs font-bold hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    İptal
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-[2] h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer"
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>Öğretmeni Sisteme Kaydet</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* ── SUCCESS CREDENTIALS POPUP (Müdürün Öğretmene İleteceği Bilgiler) ── */}
+              {newCreatedCredentials && (
+                <div className="absolute inset-0 z-30 bg-white/95 dark:bg-[#121826]/95 backdrop-blur-md p-6 flex flex-col justify-center items-center text-center space-y-4">
+                  <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center shadow-lg border border-emerald-500/30">
+                    <CheckCircle2 size={36} />
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-black text-gray-900 dark:text-white">
+                      Öğretmen Hesabı Başarıyla Oluşturuldu!
+                    </h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xs">
+                      <span className="font-bold text-gray-800 dark:text-gray-200">{newCreatedCredentials.name}</span> sisteme tanımlandı. Aşağıdaki giriş bilgilerini öğretmenle paylaşabilirsiniz.
+                    </p>
+                  </div>
+
+                  <div className="w-full max-w-sm p-4 rounded-2xl bg-gray-50 dark:bg-[#0A0D15] border border-gray-200 dark:border-gray-800 text-left space-y-2.5 text-xs font-mono">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 block">Giriş E-Postası:</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400 select-all">{newCreatedCredentials.email}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 block">Geçici Şifre:</span>
+                      <span className="font-bold text-gray-900 dark:text-white select-all">{newCreatedCredentials.pass}</span>
+                    </div>
+                    <div className="pt-1 text-[10.5px] text-amber-600 dark:text-amber-400 font-sans font-medium flex items-center gap-1.5">
+                      <AlertCircle size={13} className="shrink-0" />
+                      <span>Öğretmen ilk girişinde şifresini değiştirecek ve belgelerini yükleyecektir.</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 w-full max-w-sm pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const text = `Oxonom Okulları Öğretmen Giriş Bilgileri:\nE-Posta: ${newCreatedCredentials.email}\nGeçici Şifre: ${newCreatedCredentials.pass}\nGiriş: https://agenapos.vercel.app/m-login`
+                        navigator.clipboard.writeText(text)
+                        toast.success('Giriş bilgileri panoya kopyalandı!')
+                      }}
+                      className="flex-1 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Copy size={14} />
+                      <span>Bilgileri Kopyala</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsNewTeacherModalOpen(false)
+                        setNewCreatedCredentials(null)
+                      }}
+                      className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-md"
+                    >
+                      <span>Tamam & Kapat</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
         )}

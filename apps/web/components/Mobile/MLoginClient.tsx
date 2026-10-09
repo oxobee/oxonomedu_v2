@@ -124,11 +124,28 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
         lowerIdent.includes('student') ||
         lowerIdent === '51' ||
         lowerIdent === '101'
+      let registeredTeacher: any = null
+      if (typeof window !== 'undefined') {
+        try {
+          const regRaw = localStorage.getItem('oxonom_registered_teachers')
+          if (regRaw) {
+            const list = JSON.parse(regRaw)
+            registeredTeacher = list.find((t: any) =>
+              t.email?.toLowerCase() === lowerIdent ||
+              t.username?.toLowerCase() === lowerIdent ||
+              t.tcNo === rawIdent
+            )
+          }
+        } catch (_) {}
+      }
+
       const isTeacher =
         lowerIdent.includes('ogretmen') ||
         lowerIdent.includes('teacher') ||
         lowerIdent === '2' ||
-        lowerIdent === '3001'
+        lowerIdent === '3001' ||
+        Boolean(registeredTeacher) ||
+        (!isAdmin && !isStudent && lowerIdent.endsWith('@oxonom.com'))
 
       let defaultNext = '/dashv2'
       if (isAdmin) {
@@ -168,21 +185,58 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
       // Pre-persist teacher session
       if (isTeacher && typeof window !== 'undefined') {
         try {
-          localStorage.setItem(
-            'oxonom_teacher_profile',
-            JSON.stringify({
-              email: 'ogretmen@oxonom.com',
-              username: 'ogretmen',
-              firstName: 'Ebru',
-              lastName: 'TEKNECİ',
-              bio: 'Türk Dili ve Edebiyatı Öğretmeni · 9-A Sınıf Rehber Öğretmeni · Oxonom Okulları',
+          if (registeredTeacher) {
+            // Newly created teacher by Principal
+            const nameParts = (registeredTeacher.name || '').trim().split(' ')
+            const fName = nameParts[0] || 'Öğretmen'
+            const lName = nameParts.slice(1).join(' ') || ''
+            const teacherProfileData = {
+              id: registeredTeacher.id,
+              email: registeredTeacher.email || rawIdent,
+              username: registeredTeacher.username || rawIdent.split('@')[0],
+              firstName: fName,
+              lastName: lName,
+              tcNo: registeredTeacher.tcNo || '',
+              phone: registeredTeacher.phone || '',
+              branch: registeredTeacher.branch || 'Öğretmen',
+              bio: `${registeredTeacher.branch || 'Öğretmen'} · Oxonom Okulları`,
               extraDetails: [
-                'Edebiyat Zümre Başkanı',
-                '9-A Rehber Öğretmeni',
-                'Akıllı Tahta & Kütüphane Koordinatörü',
+                registeredTeacher.branch || 'Öğretmen',
+                'Oxonom Okulları Kadrosu',
               ],
-            })
-          )
+              isFirstLogin: registeredTeacher.isFirstLogin ?? true,
+              profileCompleted: registeredTeacher.profileCompleted ?? false,
+            }
+            localStorage.setItem('oxonom_teacher_profile', JSON.stringify(teacherProfileData))
+            if (registeredTeacher.profileCompleted === false) {
+              localStorage.setItem('oxonom_teacher_profile_completed', 'false')
+            } else {
+              localStorage.setItem('oxonom_teacher_profile_completed', 'true')
+            }
+          } else {
+            // Default teacher or existing profile
+            const existingProfile = localStorage.getItem('oxonom_teacher_profile')
+            if (!existingProfile) {
+              localStorage.setItem(
+                'oxonom_teacher_profile',
+                JSON.stringify({
+                  email: lowerIdent.includes('@') ? lowerIdent : 'ogretmen@oxonom.com',
+                  username: lowerIdent.includes('@') ? lowerIdent.split('@')[0] : lowerIdent,
+                  firstName: 'Ebru',
+                  lastName: 'TEKNECİ',
+                  bio: 'Türk Dili ve Edebiyatı Öğretmeni · 9-A Sınıf Rehber Öğretmeni · Oxonom Okulları',
+                  extraDetails: [
+                    'Edebiyat Zümre Başkanı',
+                    '9-A Rehber Öğretmeni',
+                    'Akıllı Tahta & Kütüphane Koordinatörü',
+                  ],
+                  isFirstLogin: false,
+                  profileCompleted: true,
+                })
+              )
+              localStorage.setItem('oxonom_teacher_profile_completed', 'true')
+            }
+          }
         } catch (_) {}
       }
 

@@ -285,20 +285,47 @@ export function findDemoUser(identifier: string): DemoUser | null {
     return DEMO_USERS['ogrenci@oxonom.com']
   }
 
-  // Check token
-  if (identifier.includes('.')) {
-    try {
-      const parts = identifier.split('.')
-      if (parts.length >= 2) {
-        const padded = parts[1].replace(/-/g, '+').replace(/_/g, '/')
-        const json = Buffer.from(padded, 'base64').toString('utf-8')
-        const data = JSON.parse(json)
-        if (data.email && DEMO_USERS[data.email.toLowerCase()]) {
-          return DEMO_USERS[data.email.toLowerCase()]
-        }
-      }
-    } catch {
-      // not a jwt
+  // Check dynamically created teachers under @oxonom.com (or teacher username)
+  if (
+    (normalized.endsWith('@oxonom.com') && !normalized.includes('mudur') && !normalized.includes('ogrenci')) ||
+    normalized.startsWith('ogretmen') ||
+    normalized.includes('ogretmen')
+  ) {
+    const namePart = normalized.replace('@oxonom.com', '').replace(/[._-]/g, ' ')
+    const capitalized = namePart
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
+    const parts = capitalized.split(' ')
+    return {
+      id: 3000 + (Math.abs(normalized.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) % 900),
+      user_uuid: `user_teacher_${normalized.replace(/[^a-z0-9]/g, '_')}`,
+      username: normalized.includes('@') ? normalized.split('@')[0] : normalized,
+      email: normalized.includes('@') ? normalized : `${normalized}@oxonom.com`,
+      password: 'Ugur2803*',
+      first_name: parts[0] || 'Öğretmen',
+      last_name: parts.slice(1).join(' ') || '',
+      email_verified: true,
+      is_superadmin: false,
+      is_demo: false,
+      avatar_image: '',
+      role: {
+        id: 3,
+        role_uuid: 'role_teacher',
+        name: 'Teacher',
+        rights: {
+          courses: { action_create: true, action_read: true, action_read_own: true, action_update: true, action_update_own: true, action_delete: false, action_delete_own: true },
+          users: { action_create: false, action_read: true, action_update: false, action_delete: false },
+          usergroups: { action_create: true, action_read: true, action_update: true, action_delete: false },
+          folders: { action_create: true, action_read: true, action_update: true, action_delete: true },
+          media: { action_create: true, action_read: true, action_update: true, action_delete: true },
+          organizations: { action_create: false, action_read: true, action_update: false, action_delete: false },
+          coursechapters: { action_create: true, action_read: true, action_update: true, action_delete: true },
+          activities: { action_create: true, action_read: true, action_update: true, action_delete: true },
+          roles: { action_create: false, action_read: true, action_update: false, action_delete: false },
+          dashboard: { action_access: true },
+        },
+      },
     }
   }
 

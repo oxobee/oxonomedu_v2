@@ -37,6 +37,10 @@ import {
   Lock,
   Smartphone,
   RotateCw,
+  Upload,
+  ShieldCheck,
+  FileCheck,
+  X,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -177,17 +181,234 @@ export default function DashV2Client({
     }
   }, [selectedClass?.code])
 
-  // Teacher Name (Matches screenshot: "Özlem Öğretmen")
+  // Teacher Profile state (Synced from local storage & custom events)
+  const [teacherProfile, setTeacherProfile] = useState<{
+    firstName?: string
+    lastName?: string
+    email?: string
+    bio?: string
+    tcNo?: string
+    phone?: string
+    branch?: string
+    isFirstLogin?: boolean
+    profileCompleted?: boolean
+  } | null>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const readTeacherProfile = () => {
+        try {
+          const raw = localStorage.getItem('oxonom_teacher_profile')
+          if (raw) {
+            setTeacherProfile(JSON.parse(raw))
+          }
+        } catch (_) {}
+      }
+      readTeacherProfile()
+
+      const handleTeacherUpdate = (e?: any) => {
+        if (e?.detail) {
+          setTeacherProfile((prev) => ({ ...prev, ...e.detail }))
+        } else {
+          readTeacherProfile()
+        }
+      }
+
+      window.addEventListener('oxonom_teacher_profile_updated', handleTeacherUpdate)
+      window.addEventListener('storage', handleTeacherUpdate)
+      return () => {
+        window.removeEventListener('oxonom_teacher_profile_updated', handleTeacherUpdate)
+        window.removeEventListener('storage', handleTeacherUpdate)
+      }
+    }
+  }, [])
+
+  // Teacher Name (Always prioritizes edited profile so it never reverts)
   const teacherName = useMemo(() => {
-    if (selectedClass?.teacher_name) {
-      const first = selectedClass.teacher_name.split(' ')[0]
-      return `${first} Öğretmen`
+    if (teacherProfile?.firstName) {
+      return `${teacherProfile.firstName} Öğretmen`
     }
     if (user?.first_name) {
       return `${user.first_name} Öğretmen`
     }
-    return 'Özlem Öğretmen'
-  }, [user, selectedClass])
+    if (selectedClass?.teacher_name) {
+      const first = selectedClass.teacher_name.split(' ')[0]
+      return `${first} Öğretmen`
+    }
+    return 'Ebru Öğretmen'
+  }, [teacherProfile, user, selectedClass])
+
+  // Full teacher name for account link & avatar
+  const teacherFullName = useMemo(() => {
+    if (teacherProfile?.firstName) {
+      return `${teacherProfile.firstName} ${teacherProfile.lastName || ''}`.trim()
+    }
+    if (user?.full_name) {
+      return user.full_name
+    }
+    return selectedClass?.teacher_name || 'Ebru TEKNECİ'
+  }, [teacherProfile, user, selectedClass])
+
+  const teacherInitials = useMemo(() => {
+    return teacherFullName
+      .split(' ')
+      .map((p: string) => p[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase()
+  }, [teacherFullName])
+
+  // First-Login Profile Completion Modal state
+  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false)
+  const [onboardingStep, setOnboardingStep] = useState<1 | 2 | 3 | 4>(1)
+  const [onboardingFirstName, setOnboardingFirstName] = useState('')
+  const [onboardingLastName, setOnboardingLastName] = useState('')
+  const [onboardingTcNo, setOnboardingTcNo] = useState('')
+  const [onboardingPhone, setOnboardingPhone] = useState('')
+  const [onboardingBirthDate, setOnboardingBirthDate] = useState('14.05.1990')
+  const [onboardingBloodType, setOnboardingBloodType] = useState('A Rh+')
+  const [onboardingAddress, setOnboardingAddress] = useState('')
+  const [onboardingEmergencyContact, setOnboardingEmergencyContact] = useState('')
+  const [onboardingEmergencyPhone, setOnboardingEmergencyPhone] = useState('')
+  const [onboardingUniversity, setOnboardingUniversity] = useState('Boğaziçi Üniversitesi Eğitim Fakültesi')
+  const [onboardingGraduationYear, setOnboardingGraduationYear] = useState('2016')
+  const [onboardingBranch, setOnboardingBranch] = useState('Türk Dili ve Edebiyatı')
+  const [onboardingSicilNo, setOnboardingSicilNo] = useState('')
+  const [onboardingBankName, setOnboardingBankName] = useState('Vakıfbank')
+  const [onboardingIban, setOnboardingIban] = useState('')
+  const [onboardingNewPass, setOnboardingNewPass] = useState('')
+  const [onboardingNewPassConfirm, setOnboardingNewPassConfirm] = useState('')
+  const [onboardingKvkkAccepted, setOnboardingKvkkAccepted] = useState(false)
+
+  // Uploaded docs state
+  const [uploadedDocs, setUploadedDocs] = useState<{
+    diploma: boolean
+    sicil: boolean
+    saglik: boolean
+    ikametgah: boolean
+  }>({
+    diploma: false,
+    sicil: false,
+    saglik: false,
+    ikametgah: false,
+  })
+
+  // Check if profile completion is needed on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const isCompleted = localStorage.getItem('oxonom_teacher_profile_completed')
+        const rawProfile = localStorage.getItem('oxonom_teacher_profile')
+        let profileObj: any = null
+        if (rawProfile) profileObj = JSON.parse(rawProfile)
+
+        if (isCompleted === 'false' || profileObj?.isFirstLogin === true || profileObj?.profileCompleted === false) {
+          setIsOnboardingModalOpen(true)
+          if (profileObj?.firstName) setOnboardingFirstName(profileObj.firstName)
+          if (profileObj?.lastName) setOnboardingLastName(profileObj.lastName)
+          if (profileObj?.tcNo) setOnboardingTcNo(profileObj.tcNo)
+          if (profileObj?.phone) setOnboardingPhone(profileObj.phone)
+          if (profileObj?.branch) setOnboardingBranch(profileObj.branch)
+        }
+      } catch (_) {}
+    }
+  }, [])
+
+  const handleSimulateUpload = (docKey: 'diploma' | 'sicil' | 'saglik' | 'ikametgah') => {
+    toast.loading('Belge sisteme yükleniyor ve doğrulanıyor...', { id: `upload-${docKey}` })
+    setTimeout(() => {
+      setUploadedDocs((prev) => ({ ...prev, [docKey]: true }))
+      toast.success('Belge başarıyla yüklendi ve e-Devlet doğrulaması alındı!', { id: `upload-${docKey}` })
+    }, 800)
+  }
+
+  const handleCompleteOnboarding = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!onboardingFirstName.trim()) {
+      toast.error('Lütfen adınızı giriniz.')
+      setOnboardingStep(1)
+      return
+    }
+    if (!onboardingTcNo.trim() || onboardingTcNo.length < 11) {
+      toast.error('Lütfen 11 haneli TC Kimlik numaranızı doğrulayınız.')
+      setOnboardingStep(1)
+      return
+    }
+    if (!uploadedDocs.diploma || !uploadedDocs.sicil) {
+      toast.error('Lütfen en az Diploma ve Adli Sicil belgelerinizi yükleyiniz.')
+      setOnboardingStep(3)
+      return
+    }
+    if (onboardingNewPass && onboardingNewPass !== onboardingNewPassConfirm) {
+      toast.error('Yeni şifreler birbiriyle uyuşmuyor.')
+      setOnboardingStep(4)
+      return
+    }
+    if (!onboardingKvkkAccepted) {
+      toast.error('Lütfen KVKK ve Kurumsal Aydınlatma Metnini onaylayınız.')
+      setOnboardingStep(4)
+      return
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        const rawProfile = localStorage.getItem('oxonom_teacher_profile')
+        const prev = rawProfile ? JSON.parse(rawProfile) : {}
+        const updated = {
+          ...prev,
+          firstName: onboardingFirstName.trim(),
+          lastName: onboardingLastName.trim(),
+          tcNo: onboardingTcNo.trim(),
+          phone: onboardingPhone.trim(),
+          address: onboardingAddress.trim(),
+          university: onboardingUniversity.trim(),
+          graduationYear: onboardingGraduationYear.trim(),
+          branch: onboardingBranch.trim(),
+          sicilNo: onboardingSicilNo.trim(),
+          bankName: onboardingBankName.trim(),
+          iban: onboardingIban.trim(),
+          bio: `${onboardingBranch || 'Öğretmen'} · Oxonom Okulları`,
+          isFirstLogin: false,
+          profileCompleted: true,
+        }
+        localStorage.setItem('oxonom_teacher_profile', JSON.stringify(updated))
+        localStorage.setItem('oxonom_teacher_profile_completed', 'true')
+
+        // Update in admin teachers list
+        const adminTeachersRaw = localStorage.getItem('oxonom_admin_teachers_30')
+        if (adminTeachersRaw) {
+          const teachers = JSON.parse(adminTeachersRaw)
+          const updatedTeachers = teachers.map((t: any) => {
+            if (t.email?.toLowerCase() === updated.email?.toLowerCase() || t.id === updated.id) {
+              return {
+                ...t,
+                name: `${updated.firstName} ${updated.lastName}`.trim(),
+                tcNo: updated.tcNo,
+                phone: updated.phone,
+                branch: updated.branch,
+                isFirstLogin: false,
+                profileCompleted: true,
+                documents: [
+                  { id: 'doc-dip', name: 'Lisans_Mezuniyet_Diplomasi.pdf', type: 'Lisans Diploması', uploadDate: 'Bugün', fileSize: '2.4 MB' },
+                  { id: 'doc-sic', name: 'e-Devlet_Adli_Sicil_Kaydi.pdf', type: 'Adli Sicil Kaydı', uploadDate: 'Bugün', fileSize: '1.1 MB' },
+                  ...(uploadedDocs.saglik ? [{ id: 'doc-sag', name: 'Saglik_Kurulu_Raporu.pdf', type: 'Sağlık Raporu', uploadDate: 'Bugün', fileSize: '1.8 MB' }] : []),
+                  ...(uploadedDocs.ikametgah ? [{ id: 'doc-ika', name: 'Yerlesim_Yeri_Belgesi.pdf', type: 'İkametgah Belgesi', uploadDate: 'Bugün', fileSize: '0.9 MB' }] : []),
+                ],
+              }
+            }
+            return t
+          })
+          localStorage.setItem('oxonom_admin_teachers_30', JSON.stringify(updatedTeachers))
+        }
+
+        window.dispatchEvent(new CustomEvent('oxonom_teacher_profile_updated', { detail: updated }))
+        setTeacherProfile(updated)
+      } catch (_) {}
+    }
+
+    setIsOnboardingModalOpen(false)
+    toast.success('Tebrikler! Profiliniz ve resmi evraklarınız başarıyla tamamlandı.', { duration: 5000, icon: '🎉' })
+  }
 
   // Boards for selected class (Synced from local storage / demo)
   const [localBoards, setLocalBoards] = useState<any[]>([])
@@ -466,21 +687,89 @@ export default function DashV2Client({
             variants={itemVariants}
             className="w-full bg-[#0A0D15] rounded-[30px] p-5 sm:p-6 space-y-4 sm:space-y-5 text-white shadow-xl border border-white/5 relative overflow-hidden"
           >
+            {/* Animated Background Subtle Concentric Circles (Matching Profile visual language) */}
+            <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-20">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 42, repeat: Infinity, ease: 'linear' }}
+                className="w-full h-full relative"
+              >
+                <div className="absolute inset-0 rounded-full border border-teal-400/40" />
+                <div className="absolute inset-6 rounded-full border border-white/10 border-dashed" />
+                <div className="absolute inset-12 rounded-full border border-teal-400/30" />
+              </motion.div>
+            </div>
+
             {/* Subtle gradient sheen behind hero */}
             <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-emerald-500/10 to-transparent rounded-full blur-2xl pointer-events-none" />
 
-            {/* Tag & Greetings */}
-            <div className="space-y-1.5 relative z-10">
-              <span className="text-[11px] font-extrabold tracking-widest text-[#34D399] uppercase block">
-                ÖĞRETMEN ÇALIŞMA ALANI
-              </span>
-              <div className="text-xs sm:text-sm text-gray-400 font-medium leading-none pt-0.5">
-                Hoş Geldiniz,
+            {/* Top Row: Tag & Greetings on Left + Prominent Clickable Account Link on Right */}
+            <div className="flex items-start justify-between gap-3 relative z-10">
+              <div className="space-y-1.5 min-w-0 flex-1">
+                <span className="text-[11px] font-extrabold tracking-widest text-[#34D399] uppercase block">
+                  ÖĞRETMEN ÇALIŞMA ALANI
+                </span>
+                <div className="text-xs sm:text-sm text-gray-400 font-medium leading-none pt-0.5">
+                  Hoş Geldiniz,
+                </div>
+                <h1 className="text-[24px] sm:text-[28px] font-bold text-white tracking-tight leading-tight font-serif-display truncate">
+                  {teacherName}
+                </h1>
+                <p className="text-[11px] text-gray-400 font-medium truncate">
+                  {teacherProfile?.branch || 'Türk Dili ve Edebiyatı'} · Oxonom Okulları
+                </p>
               </div>
-              <h1 className="text-[26px] sm:text-[28px] font-bold text-white tracking-tight leading-tight font-serif-display">
-                {teacherName}
-              </h1>
+
+              {/* Prominent, Clearly Noticeable & Clickable Account / Profile Button */}
+              <Link
+                href="/m-profile"
+                className="group flex items-center gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-white/10 hover:bg-white/15 active:scale-95 border border-white/15 backdrop-blur-md transition-all shadow-md shrink-0 cursor-pointer"
+                title="Hesap ve Profil Ayarları"
+              >
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-[#0A0D15] flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-105 transition-transform">
+                    {teacherInitials}
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0A0D15]" />
+                </div>
+                <div className="text-left hidden xs:block sm:block pr-1">
+                  <div className="text-[10px] text-gray-300 font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span>Hesabım</span>
+                    <Settings size={11} className="text-[#34D399] group-hover:rotate-45 transition-transform" />
+                  </div>
+                  <div className="text-xs font-bold text-white group-hover:text-[#34D399] transition-colors flex items-center gap-0.5">
+                    <span>Profil</span>
+                    <ChevronRight size={13} className="text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </div>
+              </Link>
             </div>
+
+            {/* Incomplete Profile Alert Banner (If profile completion is pending) */}
+            {teacherProfile?.profileCompleted === false && (
+              <div className="relative z-10 p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-transparent border border-amber-500/30 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
+                    <AlertCircle size={16} />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="font-extrabold text-amber-200">
+                      Profil & Evrak Tamamlama Bekleniyor
+                    </div>
+                    <div className="text-[11px] text-amber-300/80 truncate">
+                      MEB resmi kaydınız için evraklarınızı yükleyin
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsOnboardingModalOpen(true)}
+                  className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-gray-950 font-black text-xs shrink-0 active:scale-95 transition-all shadow-sm cursor-pointer"
+                >
+                  Tamamla
+                </button>
+              </div>
+            )}
 
             {/* Sınıf Dropdown & Notlar Butonu */}
             <div className="flex items-center gap-3 pt-1 relative z-10">
@@ -1112,6 +1401,558 @@ export default function DashV2Client({
         classNameCode={selectedClass.code}
         theme={theme}
       />
+
+      {/* ── MODAL: İLK GİRİŞ PROFİL TAMAMLAMA & EVRAK YÜKLEME ── */}
+      <AnimatePresence>
+        {isOnboardingModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ duration: 0.25 }}
+              className="w-full sm:max-w-lg bg-white dark:bg-[#121826] rounded-t-[32px] sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden relative"
+            >
+              {/* Header */}
+              <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shrink-0">
+                    <ShieldCheck size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white flex items-center gap-2">
+                      <span>İlk Giriş: Profil & Evrak Tamamlama</span>
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
+                        Zorunlu MEB Kaydı
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Oxonom Okulları kadrosundaki resmi kaydınızı ve evraklarınızı onaylayın
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsOnboardingModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Stepper Tabs */}
+              <div className="px-4 pt-3 shrink-0">
+                <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-gray-100 dark:bg-gray-800/80 text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setOnboardingStep(1)}
+                    className={`py-2 rounded-xl transition-all cursor-pointer ${
+                      onboardingStep === 1
+                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    1. Kimlik
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOnboardingStep(2)}
+                    className={`py-2 rounded-xl transition-all cursor-pointer ${
+                      onboardingStep === 2
+                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    2. Akademik
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOnboardingStep(3)}
+                    className={`py-2 rounded-xl transition-all cursor-pointer ${
+                      onboardingStep === 3
+                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    3. Belgeler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOnboardingStep(4)}
+                    className={`py-2 rounded-xl transition-all cursor-pointer ${
+                      onboardingStep === 4
+                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    4. Şifre & Onay
+                  </button>
+                </div>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleCompleteOnboarding} className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* ── ADIM 1: KİMLİK & İLETİŞİM ── */}
+                {onboardingStep === 1 && (
+                  <div className="space-y-3.5">
+                    <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 text-xs text-emerald-900 dark:text-emerald-200">
+                      Sayın Öğretmenimiz, müdürlük tarafından oluşturulan temel bilgilerinizi teyit ediniz ve eksik iletişim bilgilerinizi tamamlayınız.
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Adınız <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={onboardingFirstName}
+                          onChange={(e) => setOnboardingFirstName(e.target.value)}
+                          placeholder="Adınız"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Soyadınız <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={onboardingLastName}
+                          onChange={(e) => setOnboardingLastName(e.target.value)}
+                          placeholder="Soyadınız"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          TC Kimlik No <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          maxLength={11}
+                          value={onboardingTcNo}
+                          onChange={(e) => setOnboardingTcNo(e.target.value.replace(/\D/g, ''))}
+                          placeholder="11 haneli TC No"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Cep Telefonu
+                        </label>
+                        <input
+                          type="text"
+                          value={onboardingPhone}
+                          onChange={(e) => setOnboardingPhone(e.target.value)}
+                          placeholder="+90 532 ..."
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Doğum Tarihi
+                        </label>
+                        <input
+                          type="text"
+                          value={onboardingBirthDate}
+                          onChange={(e) => setOnboardingBirthDate(e.target.value)}
+                          placeholder="GG.AA.YYYY"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Kan Grubu
+                        </label>
+                        <select
+                          value={onboardingBloodType}
+                          onChange={(e) => setOnboardingBloodType(e.target.value)}
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        >
+                          <option value="A Rh+">A Rh+</option>
+                          <option value="A Rh-">A Rh-</option>
+                          <option value="B Rh+">B Rh+</option>
+                          <option value="B Rh-">B Rh-</option>
+                          <option value="AB Rh+">AB Rh+</option>
+                          <option value="AB Rh-">AB Rh-</option>
+                          <option value="0 Rh+">0 Rh+</option>
+                          <option value="0 Rh-">0 Rh-</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        İkametgah Adresi
+                      </label>
+                      <input
+                        type="text"
+                        value={onboardingAddress}
+                        onChange={(e) => setOnboardingAddress(e.target.value)}
+                        placeholder="İlçe / İl (Örn: Beşiktaş / İstanbul)"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Acil Durum Yakını
+                        </label>
+                        <input
+                          type="text"
+                          value={onboardingEmergencyContact}
+                          onChange={(e) => setOnboardingEmergencyContact(e.target.value)}
+                          placeholder="Eşi / Babası"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Acil Durum Tel
+                        </label>
+                        <input
+                          type="text"
+                          value={onboardingEmergencyPhone}
+                          onChange={(e) => setOnboardingEmergencyPhone(e.target.value)}
+                          placeholder="+90 532 ..."
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setOnboardingStep(2)}
+                        className="w-full h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-200 transition-colors cursor-pointer"
+                      >
+                        <span>Sonraki: Akademik Bilgiler</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── ADIM 2: AKADEMİK & ÖZLÜK ── */}
+                {onboardingStep === 2 && (
+                  <div className="space-y-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Mezun Olunan Üniversite & Fakülte <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={onboardingUniversity}
+                        onChange={(e) => setOnboardingUniversity(e.target.value)}
+                        placeholder="Örn: Boğaziçi Üniversitesi Eğitim Fakültesi"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Mezuniyet Yılı
+                        </label>
+                        <input
+                          type="text"
+                          value={onboardingGraduationYear}
+                          onChange={(e) => setOnboardingGraduationYear(e.target.value)}
+                          placeholder="2016"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Branş / Alan
+                        </label>
+                        <input
+                          type="text"
+                          value={onboardingBranch}
+                          onChange={(e) => setOnboardingBranch(e.target.value)}
+                          placeholder="Türk Dili ve Edebiyatı"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-emerald-600 dark:text-emerald-400 outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        MEB Sicil / Sertifika No
+                      </label>
+                      <input
+                        type="text"
+                        value={onboardingSicilNo}
+                        onChange={(e) => setOnboardingSicilNo(e.target.value)}
+                        placeholder="MEB-34019284"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          Maaş Bankası
+                        </label>
+                        <input
+                          type="text"
+                          value={onboardingBankName}
+                          onChange={(e) => setOnboardingBankName(e.target.value)}
+                          placeholder="Vakıfbank"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                          IBAN Numarası
+                        </label>
+                        <input
+                          type="text"
+                          value={onboardingIban}
+                          onChange={(e) => setOnboardingIban(e.target.value)}
+                          placeholder="TR..."
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-blue-600 dark:text-blue-400 outline-hidden focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setOnboardingStep(3)}
+                        className="w-full h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-200 transition-colors cursor-pointer"
+                      >
+                        <span>Sonraki: Zorunlu Belgeleri Yükle</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── ADIM 3: RESMİ BELGELERİN YÜKLENMESİ ── */}
+                {onboardingStep === 3 && (
+                  <div className="space-y-3.5">
+                    <div className="p-3 rounded-2xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200/50 dark:border-teal-800/40 text-xs text-teal-900 dark:text-teal-200">
+                      Milli Eğitim Bakanlığı mevzuatı gereği kurumumuza ibraz edilmesi gereken resmi evrakları lütfen yükleyiniz. (PDF / JPG formatında)
+                    </div>
+
+                    {/* Belge 1: Lisans / Mezuniyet Diploması */}
+                    <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/70 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
+                          uploadedDocs.diploma
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
+                        }`}>
+                          {uploadedDocs.diploma ? <CheckCircle2 size={20} /> : <FileText size={20} />}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-black text-gray-900 dark:text-white truncate">
+                            1. Lisans / Mezuniyet Diploması
+                          </div>
+                          <div className="text-[10.5px] text-gray-500 dark:text-gray-400">
+                            {uploadedDocs.diploma ? 'Yüklendi (2.4 MB · MEB Onaylı)' : 'Zorunlu Belge (PDF/Görsel)'}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSimulateUpload('diploma')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all cursor-pointer ${
+                          uploadedDocs.diploma
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                        }`}
+                      >
+                        {uploadedDocs.diploma ? 'Değiştir' : 'Belge Yükle'}
+                      </button>
+                    </div>
+
+                    {/* Belge 2: e-Devlet Adli Sicil Kaydı */}
+                    <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/70 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
+                          uploadedDocs.sicil
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
+                        }`}>
+                          {uploadedDocs.sicil ? <CheckCircle2 size={20} /> : <ShieldCheck size={20} />}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-black text-gray-900 dark:text-white truncate">
+                            2. e-Devlet Adli Sicil Belgesi
+                          </div>
+                          <div className="text-[10.5px] text-gray-500 dark:text-gray-400">
+                            {uploadedDocs.sicil ? 'Yüklendi (1.1 MB · Barkodlu Doğrulandı)' : 'Zorunlu Belge (Barkodlu PDF)'}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSimulateUpload('sicil')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all cursor-pointer ${
+                          uploadedDocs.sicil
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                        }`}
+                      >
+                        {uploadedDocs.sicil ? 'Değiştir' : 'Belge Yükle'}
+                      </button>
+                    </div>
+
+                    {/* Belge 3: Sağlık Kurulu Raporu */}
+                    <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/70 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
+                          uploadedDocs.saglik
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
+                        }`}>
+                          {uploadedDocs.saglik ? <CheckCircle2 size={20} /> : <FileCheck size={20} />}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-black text-gray-900 dark:text-white truncate">
+                            3. Sağlık Kurulu Raporu
+                          </div>
+                          <div className="text-[10.5px] text-gray-500 dark:text-gray-400">
+                            {uploadedDocs.saglik ? 'Yüklendi (1.8 MB · Sağlık Raporu)' : 'Öğretmenlik Görevine Uygunluk'}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSimulateUpload('saglik')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all cursor-pointer ${
+                          uploadedDocs.saglik
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                        }`}
+                      >
+                        {uploadedDocs.saglik ? 'Değiştir' : 'Belge Yükle'}
+                      </button>
+                    </div>
+
+                    {/* Belge 4: İkametgah / Yerleşim Yeri Belgesi */}
+                    <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/70 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
+                          uploadedDocs.ikametgah
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
+                        }`}>
+                          {uploadedDocs.ikametgah ? <CheckCircle2 size={20} /> : <FileText size={20} />}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-black text-gray-900 dark:text-white truncate">
+                            4. İkametgah / Yerleşim Yeri Belgesi
+                          </div>
+                          <div className="text-[10.5px] text-gray-500 dark:text-gray-400">
+                            {uploadedDocs.ikametgah ? 'Yüklendi (0.9 MB · e-Devlet)' : 'e-Devlet Barkodlu İkametgah'}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSimulateUpload('ikametgah')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all cursor-pointer ${
+                          uploadedDocs.ikametgah
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                        }`}
+                      >
+                        {uploadedDocs.ikametgah ? 'Değiştir' : 'Belge Yükle'}
+                      </button>
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setOnboardingStep(4)}
+                        className="w-full h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-200 transition-colors cursor-pointer"
+                      >
+                        <span>Sonraki: Kalıcı Şifre & Onay</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── ADIM 4: GÜVENLİK, ŞİFRE & ONAY ── */}
+                {onboardingStep === 4 && (
+                  <div className="space-y-3.5">
+                    <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 text-xs text-emerald-900 dark:text-emerald-200">
+                      İlk girişinizde okul idaresi tarafından size tanımlanan geçici şifrenin yerine kalıcı ve güvenli şifrenizi belirleyiniz.
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Yeni Kalıcı Şifre (En az 6 karakter)
+                      </label>
+                      <input
+                        type="password"
+                        value={onboardingNewPass}
+                        onChange={(e) => setOnboardingNewPass(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Yeni Kalıcı Şifre (Tekrar)
+                      </label>
+                      <input
+                        type="password"
+                        value={onboardingNewPassConfirm}
+                        onChange={(e) => setOnboardingNewPassConfirm(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                      />
+                    </div>
+
+                    {/* KVKK & Taahhütname */}
+                    <div className="pt-2">
+                      <label className="flex items-start gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={onboardingKvkkAccepted}
+                          onChange={(e) => setOnboardingKvkkAccepted(e.target.checked)}
+                          className="mt-0.5 w-4 h-4 rounded-md text-emerald-600 accent-emerald-600 cursor-pointer"
+                        />
+                        <span className="text-xs text-gray-600 dark:text-gray-300 leading-snug">
+                          <span className="font-bold">KVKK ve Kurumsal Aydınlatma Metni</span>'ni okudum. Yüklediğim belgelerin ve beyan ettiğim bilgilerin doğruluğunu, Oxonom Okulları bünyesinde öğretmenlik yetkisiyle kullanacağımı taahhüt ederim.
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="pt-3 border-t border-gray-100 dark:border-gray-800">
+                      <button
+                        type="submit"
+                        className="w-full h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer"
+                      >
+                        <CheckCircle2 size={18} />
+                        <span>Profili ve Belgeleri Tamamla & Onayla</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 

@@ -1130,8 +1130,8 @@ export default function MAdminClassesClient({
                   <span>Oxonom Okulları</span>
                   <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black">Aktif Kurum</span>
                 </div>
-                <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                  9-A Şubesi · Edebiyat Alanı · 1 Şube Aktif
+                <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">
+                  1 Sınıf
                 </div>
               </div>
             </div>

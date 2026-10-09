@@ -750,8 +750,8 @@ export default function MAdminClient({
                         Aktif Kurum
                       </span>
                     </div>
-                    <div className="text-xs text-gray-400 font-medium">
-                      1 Şube (9-A) · 1 Öğretmen (Ebru TEKNECİ) · 1 Öğrenci (Erçil UĞURLU)
+                    <div className="text-xs text-gray-300 font-semibold">
+                      1 Sınıf
                     </div>
                   </div>
                 </div>

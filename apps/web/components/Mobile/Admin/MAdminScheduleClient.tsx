@@ -770,7 +770,7 @@ export default function MAdminScheduleClient({
                 <span className="text-xs font-black text-white">Oxonom Okulları</span>
                 <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10">MEB Onaylı</span>
               </div>
-              <span className="text-[11px] font-semibold text-gray-400">9-A Şubesi (35 Saat / Hafta)</span>
+              <span className="text-[11px] font-semibold text-gray-400">1 Sınıf</span>
             </div>
 
             {/* Key Metrics Grid */}
