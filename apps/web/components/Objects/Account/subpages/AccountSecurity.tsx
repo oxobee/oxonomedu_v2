@@ -1096,7 +1096,7 @@ function AccountSecurity() {
         })
 
         await new Promise(resolve => setTimeout(resolve, 4000))
-        signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })
+        signOut({ redirect: true, callbackUrl: '/login' })
       } else {
         toast.error(getErrorMessage(response.data?.detail, 'Failed to update password'), { id: loadingToast })
       }
@@ -1135,7 +1135,7 @@ function AccountSecurity() {
             </div>
             <Button
               variant="outline"
-              onClick={() => signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })}
+              onClick={() => signOut({ redirect: true, callbackUrl: '/login' })}
               className="gap-1.5 shrink-0"
             >
               <LogOut size={14} />

@@ -76,7 +76,7 @@ function DashMobileMenu() {
   }
 
   async function logOutUI() {
-    await signOut({ redirect: true, callbackUrl: getUriWithOrg(org.slug, '/login') })
+    await signOut({ redirect: true, callbackUrl: '/m-login' })
   }
 
   const close = () => { setMenuOpen(false) }

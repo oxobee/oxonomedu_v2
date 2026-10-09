@@ -202,10 +202,63 @@ function clearOAuthStateCookie(): void {
 function clearSessionMarker(): void {
   if (typeof document === 'undefined') return
 
-  const { secureAttr, domainAttr, sameSiteAttr } = getCookieAttributes()
-  const expired = 'expires=Thu, 01 Jan 1970 00:00:00 GMT'
-  document.cookie = `LH_session=; path=/${sameSiteAttr}${secureAttr}${domainAttr}; ${expired}`
-  document.cookie = `LH_session=; path=/${sameSiteAttr}${secureAttr}; ${expired}`
+  const expired = '; expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; path=/'
+  document.cookie = `LH_session=${expired}`
+  document.cookie = `LH_session=${expired}; SameSite=Lax`
+  document.cookie = `LH_session=${expired}; SameSite=Lax; Secure`
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const host = window.location.hostname
+    document.cookie = `LH_session=${expired}; domain=${host}`
+    document.cookie = `LH_session=${expired}; domain=.${host}`
+  }
+}
+
+function clearAllClientAuthCookies(): void {
+  if (typeof document === 'undefined') return
+
+  const names = [
+    'LH_session',
+    'LH_access',
+    'LH_refresh',
+    'LH_org',
+    'LH_oauth_orgslug',
+    'LH_oauth_org_id',
+    'LH_custom_domain',
+  ]
+  const expired = '; expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; path=/'
+
+  for (const name of names) {
+    document.cookie = `${name}=${expired}`
+    document.cookie = `${name}=${expired}; SameSite=Lax`
+    document.cookie = `${name}=${expired}; SameSite=Lax; Secure`
+
+    if (typeof window !== 'undefined' && window.location?.hostname) {
+      const host = window.location.hostname
+      document.cookie = `${name}=${expired}; domain=${host}`
+      document.cookie = `${name}=${expired}; domain=.${host}`
+      const parts = host.split('.')
+      if (parts.length > 2 && !host.endsWith('vercel.app')) {
+        const rootDomain = parts.slice(-2).join('.')
+        document.cookie = `${name}=${expired}; domain=.${rootDomain}`
+      }
+    }
+  }
+
+  // Clear all localStorage auth & paired keys
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem('oxonom_pano_paired_session')
+      localStorage.removeItem('oxonom_pano_active_session_id')
+      localStorage.removeItem('oxonom_pano_device_token')
+      localStorage.removeItem('oxonom_pano_device_type')
+      localStorage.removeItem('oxonom_selected_class')
+      localStorage.removeItem('oxonom_pano_selected_class_id')
+      sessionStorage.clear()
+    } catch (_) {}
+  }
+
+  clearOAuthStateCookie()
+  clearSessionMarker()
 }
 
 // Session Provider Component
@@ -250,7 +303,7 @@ export function SessionProvider({
     sessionCacheRef.current = null
 
     if (clearMarker) {
-      clearSessionMarker()
+      clearAllClientAuthCookies()
     }
   }, [])
 
@@ -1104,10 +1157,21 @@ export function SessionProvider({
 
   // Sign out function
   const handleSignOut = useCallback(async (options: SignOutOptions = {}) => {
-    const { callbackUrl = '/', redirect = true } = options
+    const isMobile = typeof window !== 'undefined' && (
+      window.innerWidth < 768 ||
+      /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(navigator.userAgent)
+    )
+    const defaultCallback = isMobile ? '/m-login' : '/login'
+    const { callbackUrl = defaultCallback, redirect = true } = options
 
     let logoutSuccess = false
     try {
+      fetch('/api/pano/pair/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target: 'both' }),
+      }).catch(() => null)
+
       // Use Next.js API route to ensure cookies are cleared correctly
       const response = await fetch('/api/auth/logout', {
         method: 'POST',
@@ -1132,21 +1196,14 @@ export function SessionProvider({
     refreshPromiseRef.current = null
     isRefreshingRef.current = false
 
-    // Clear any auth cookies on client side
-    const { secureAttr, domainAttr } = getCookieAttributes()
-    const expireAttr = '; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-    document.cookie = `LH_oauth_orgslug=; path=/${expireAttr}${secureAttr}${domainAttr}`
-    document.cookie = `LH_oauth_org_id=; path=/${expireAttr}${secureAttr}${domainAttr}`
-
-    // Clear OAuth state
-    clearOAuthStateCookie()
-    clearSessionMarker()
+    // Clear all auth cookies, session markers, and localStorage paired session keys
+    clearAllClientAuthCookies()
 
     // Notify other tabs about logout
     broadcastChannelRef.current?.postMessage({ type: 'LOGOUT' })
 
     if (redirect) {
-      window.location.href = safeRedirectUrl(callbackUrl)
+      window.location.href = safeRedirectUrl(callbackUrl || defaultCallback)
     }
 
     // If backend logout failed, log a warning (user is still logged out locally)
@@ -1350,7 +1407,20 @@ export async function signIn(
 
 // signOut function - matches NextAuth's API
 export async function signOut(options?: SignOutOptions): Promise<void> {
-  const { callbackUrl = '/', redirect = true } = options || {}
+  const isMobile = typeof window !== 'undefined' && (
+    window.innerWidth < 768 ||
+    /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(navigator.userAgent)
+  )
+  const defaultCallback = isMobile ? '/m-login' : '/login'
+  const { callbackUrl = defaultCallback, redirect = true } = options || {}
+
+  try {
+    fetch('/api/pano/pair/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target: 'both' }),
+    }).catch(() => null)
+  } catch (_) {}
 
   try {
     // Use Next.js API route to ensure cookies are cleared correctly
@@ -1362,15 +1432,8 @@ export async function signOut(options?: SignOutOptions): Promise<void> {
     console.error('Logout error:', error)
   }
 
-  // Clear cookies
-  const { secureAttr, domainAttr } = getCookieAttributes()
-  const expireAttr = '; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-  document.cookie = `LH_oauth_orgslug=; path=/${expireAttr}${secureAttr}${domainAttr}`
-  document.cookie = `LH_oauth_org_id=; path=/${expireAttr}${secureAttr}${domainAttr}`
-
-  // Clear OAuth state
-  clearOAuthStateCookie()
-  clearSessionMarker()
+  // Clear cookies and all localStorage session & paired keys
+  clearAllClientAuthCookies()
 
   // Try to notify other tabs (if BroadcastChannel is available)
   try {
@@ -1382,7 +1445,7 @@ export async function signOut(options?: SignOutOptions): Promise<void> {
   }
 
   if (redirect) {
-    window.location.href = safeRedirectUrl(callbackUrl)
+    window.location.href = safeRedirectUrl(callbackUrl || defaultCallback)
   }
 }
 

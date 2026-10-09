@@ -42,7 +42,7 @@ import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
-import { signOut } from '@components/Contexts/AuthContext'
+import { signOut, useAuth } from '@components/Contexts/AuthContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import {
   ALL_CLASSROOMS,
@@ -64,6 +64,7 @@ import {
 
 export default function DashV2Client({ hideDock = false }: { hideDock?: boolean } = {}) {
   const router = useRouter()
+  const { signOut: authSignOut } = useAuth()
   const org = useOrg() as any
   const session = useLHSession() as any
   const user = session?.data?.user
@@ -358,15 +359,21 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
 
   // Logout Handler
   const handleSignOut = async () => {
+    toast.loading('Oturum kapatılıyor...', { id: 'dashv2-logout' })
     try {
-      await fetch('/api/pano/pair/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target: 'both' }),
-      })
-    } catch (_) {}
-    toast.success('Oturum kapatıldı.')
-    await signOut({ redirect: true, callbackUrl: '/m-login' })
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('oxonom_pano_paired_session')
+        localStorage.removeItem('oxonom_pano_active_session_id')
+        localStorage.removeItem('oxonom_pano_device_token')
+        localStorage.removeItem('oxonom_pano_device_type')
+        localStorage.removeItem('oxonom_selected_class')
+        localStorage.removeItem('oxonom_pano_selected_class_id')
+        sessionStorage.clear()
+      }
+      await authSignOut({ redirect: true, callbackUrl: '/m-login' })
+    } catch {
+      await signOut({ redirect: true, callbackUrl: '/m-login' })
+    }
   }
 
   // Stagger animation variants

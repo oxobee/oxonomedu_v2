@@ -192,7 +192,7 @@ function DashLeftMenu() {
 
 
   async function logOutUI() {
-    await signOut({ redirect: true, callbackUrl: getUriWithOrg(org.slug, '/login') })
+    await signOut({ redirect: true, callbackUrl: '/login' })
   }
 
 

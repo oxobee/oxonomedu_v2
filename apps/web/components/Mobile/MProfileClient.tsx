@@ -37,7 +37,7 @@ import toast from 'react-hot-toast'
 import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { signOut } from '@components/Contexts/AuthContext'
+import { signOut, useAuth } from '@components/Contexts/AuthContext'
 
 interface MProfileClientProps {
   hideDock?: boolean
@@ -50,6 +50,7 @@ export default function MProfileClient({
   initialSubTab = 'general',
   onBackToHome,
 }: MProfileClientProps) {
+  const { signOut: authSignOut } = useAuth()
   const session = useLHSession() as any
   const user = session?.data?.user
 
@@ -178,9 +179,21 @@ export default function MProfileClient({
 
   // Handle Logout
   const handleSignOutClick = async () => {
-    if (!confirm('Oturumunuzu kapatmak istediğinize emin misiniz?')) return
-    toast.success('Oturum kapatılıyor...')
-    await signOut({ redirect: true, callbackUrl: '/m-login' })
+    toast.loading('Oturum kapatılıyor...', { id: 'logout-toast' })
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('oxonom_pano_paired_session')
+        localStorage.removeItem('oxonom_pano_active_session_id')
+        localStorage.removeItem('oxonom_pano_device_token')
+        localStorage.removeItem('oxonom_pano_device_type')
+        localStorage.removeItem('oxonom_selected_class')
+        localStorage.removeItem('oxonom_pano_selected_class_id')
+        sessionStorage.clear()
+      }
+      await authSignOut({ redirect: true, callbackUrl: '/m-login' })
+    } catch {
+      await signOut({ redirect: true, callbackUrl: '/m-login' })
+    }
   }
 
   return (

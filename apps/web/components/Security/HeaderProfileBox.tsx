@@ -311,7 +311,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                 <DropdownMenuItem
                   onClick={() => {
                     track(AnalyticsEvent.LogoutClicked, { source: 'header_profile' })
-                    signOut({ callbackUrl: '/' })
+                    signOut({ callbackUrl: '/login' })
                   }}
                   className="flex items-center space-x-2 text-red-600 focus:text-red-600 cursor-pointer"
                 >

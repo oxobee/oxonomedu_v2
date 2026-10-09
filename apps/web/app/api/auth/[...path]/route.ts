@@ -85,15 +85,28 @@ function appendClearAuthCookies(response: NextResponse, request: NextRequest) {
   const securePart = request.nextUrl.protocol === 'https:' ? '; Secure' : ''
   const host = request.headers.get('host') || ''
   const { topDomain } = getDomainFromRequest(request)
+  const isVercel = !topDomain || topDomain === 'vercel.app' || topDomain.endsWith('.vercel.app')
   const domainScoped =
-    !isLocalhost(host) && topDomain && topDomain !== 'localhost' ? `.${topDomain}` : undefined
+    !isLocalhost(host) && topDomain && topDomain !== 'localhost' && !isVercel ? `.${topDomain}` : undefined
 
   const clear = (name: string, httpOnly: boolean, domain?: string) => {
+    try {
+      response.cookies.set(name, '', {
+        path: '/',
+        maxAge: 0,
+        expires: new Date(0),
+        httpOnly,
+        secure: request.nextUrl.protocol === 'https:',
+        sameSite: 'lax',
+        ...(domain ? { domain } : {}),
+      })
+    } catch (_) {}
+
     const httpPart = httpOnly ? '; HttpOnly' : ''
     const domainPart = domain ? `; Domain=${domain}` : ''
     response.headers.append(
       'Set-Cookie',
-      `${name}=; Path=/${domainPart}; Max-Age=0${httpPart}; SameSite=Lax${securePart}`,
+      `${name}=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT${domainPart}${httpPart}; SameSite=Lax${securePart}`,
     )
   }
 
