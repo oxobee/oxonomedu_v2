@@ -34,6 +34,8 @@ import {
   SCHOOL_ORGS,
   getOrgTeachers,
 } from '@services/demo/schoolDirectory'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { INITIAL_SCHEDULE_ENTRIES } from './MAdminScheduleClient'
 
 export interface MAdminCurriculumClientProps {
   orgSlug?: string
@@ -455,6 +457,121 @@ const INITIAL_MIDDLE_COURSES: CurriculumCourse[] = [
   },
 ]
 
+const INITIAL_OXONOM_COURSES: CurriculumCourse[] = [
+  {
+    id: 'c-ox-1',
+    code: 'EDB-901',
+    name: 'Türk Dili ve Edebiyatı',
+    category: 'Temel Ders',
+    gradeLevels: ['9. Sınıf'],
+    orgId: 30,
+    weeklyHours: 5,
+    branchTeacher: 'Ebru TEKNECİ',
+    requiredRoom: 'Derslik 9-A',
+    isSmartBoardReady: true,
+    isElective: false,
+    color: 'blue',
+  },
+  {
+    id: 'c-ox-2',
+    code: 'MAT-901',
+    name: 'Matematik',
+    category: 'Temel Ders',
+    gradeLevels: ['9. Sınıf'],
+    orgId: 30,
+    weeklyHours: 6,
+    branchTeacher: 'Ebru TEKNECİ',
+    requiredRoom: 'Derslik 9-A',
+    isSmartBoardReady: true,
+    isElective: false,
+    color: 'indigo',
+  },
+  {
+    id: 'c-ox-3',
+    code: 'FEN-901',
+    name: 'Fizik / Fen Bilimleri',
+    category: 'Fen & Teknoloji',
+    gradeLevels: ['9. Sınıf'],
+    orgId: 30,
+    weeklyHours: 4,
+    branchTeacher: 'Ebru TEKNECİ',
+    requiredRoom: 'Fen Laboratuvarı',
+    isSmartBoardReady: true,
+    isElective: false,
+    color: 'emerald',
+  },
+  {
+    id: 'c-ox-4',
+    code: 'TAR-901',
+    name: 'Tarih',
+    category: 'Sosyal & Beşeri',
+    gradeLevels: ['9. Sınıf'],
+    orgId: 30,
+    weeklyHours: 2,
+    branchTeacher: 'Ebru TEKNECİ',
+    requiredRoom: 'Derslik 9-A',
+    isSmartBoardReady: true,
+    isElective: false,
+    color: 'amber',
+  },
+  {
+    id: 'c-ox-5',
+    code: 'COG-901',
+    name: 'Coğrafya',
+    category: 'Sosyal & Beşeri',
+    gradeLevels: ['9. Sınıf'],
+    orgId: 30,
+    weeklyHours: 2,
+    branchTeacher: 'Ebru TEKNECİ',
+    requiredRoom: 'Derslik 9-A',
+    isSmartBoardReady: true,
+    isElective: false,
+    color: 'teal',
+  },
+  {
+    id: 'c-ox-6',
+    code: 'ING-901',
+    name: 'İngilizce / Yabancı Dil',
+    category: 'Yabancı Dil',
+    gradeLevels: ['9. Sınıf'],
+    orgId: 30,
+    weeklyHours: 4,
+    branchTeacher: 'Ebru TEKNECİ',
+    requiredRoom: 'Derslik 9-A',
+    isSmartBoardReady: true,
+    isElective: false,
+    color: 'purple',
+  },
+  {
+    id: 'c-ox-7',
+    code: 'BIL-901',
+    name: 'Bilişim & Kodlama',
+    category: 'Fen & Teknoloji',
+    gradeLevels: ['9. Sınıf'],
+    orgId: 30,
+    weeklyHours: 2,
+    branchTeacher: 'Ebru TEKNECİ',
+    requiredRoom: 'Bilişim & Kodlama Atölyesi',
+    isSmartBoardReady: true,
+    isElective: false,
+    color: 'cyan',
+  },
+  {
+    id: 'c-ox-8',
+    code: 'REH-901',
+    name: 'Rehberlik & Kariyer',
+    category: 'Sosyal & Beşeri',
+    gradeLevels: ['9. Sınıf'],
+    orgId: 30,
+    weeklyHours: 1,
+    branchTeacher: 'Ebru TEKNECİ',
+    requiredRoom: 'Derslik 9-A',
+    isSmartBoardReady: true,
+    isElective: false,
+    color: 'pink',
+  },
+]
+
 // Default pre-filled 1-A weekly template
 const DEFAULT_1A_SCHEDULE: ScheduleEntry[] = [
   // Pazartesi (6 saat)
@@ -500,9 +617,22 @@ export default function MAdminCurriculumClient({
   hideDock = false,
 }: MAdminCurriculumClientProps) {
   const { theme, toggleTheme } = useMobileTheme()
+  const session = useLHSession() as any
+  const user = session?.data?.user
+
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(10) // 10: İlkokul, 20: Ortaokul
-  const [selectedClass, setSelectedClass] = useState<string>('1-A')
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
+    if (user?.school_org_id) return user.school_org_id
+    if (orgSlug === 'neclagorer') return 10
+    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci') return 20
+    return 30
+  })
+  const [selectedClass, setSelectedClass] = useState<string>(() => {
+    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30)
+    if (org === 10) return '1-A'
+    if (org === 20) return '7-A'
+    return '9-A'
+  })
   const [activeDay, setActiveDay] = useState<DayKey>('mon')
 
   // Main View Tab: 'distribute' (Sürükle-Bırak Haftalık Çizelge) | 'catalog' (Ders Tanımları & Saatler)
@@ -516,7 +646,8 @@ export default function MAdminCurriculumClient({
 
   // Dynamic Periods State (Allows adding extra lesson periods via + button)
   const [periods, setPeriods] = useState<PeriodSlot[]>(() => {
-    return PRIMARY_PERIODS
+    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30)
+    return org === 10 ? PRIMARY_PERIODS : MIDDLE_PERIODS
   })
 
   // Modals state
@@ -544,12 +675,36 @@ export default function MAdminCurriculumClient({
 
   // Courses Catalog State with localStorage
   const [coursesList, setCoursesList] = useState<CurriculumCourse[]>(() => {
-    return INITIAL_PRIMARY_COURSES
+    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30)
+    if (typeof window !== 'undefined') {
+      try {
+        const savedCourses = localStorage.getItem(`oxonom_admin_curriculum_${org}`)
+        if (savedCourses) {
+          const parsed = JSON.parse(savedCourses)
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed
+        }
+      } catch (_) {}
+    }
+    return org === 30 ? INITIAL_OXONOM_COURSES : org === 10 ? INITIAL_PRIMARY_COURSES : INITIAL_MIDDLE_COURSES
   })
 
   // Schedule Entries State with localStorage (shares same key with /m-admin-schedule!)
   const [scheduleList, setScheduleList] = useState<ScheduleEntry[]>(() => {
-    return DEFAULT_1A_SCHEDULE
+    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30)
+    if (typeof window !== 'undefined') {
+      try {
+        const savedSchedule = localStorage.getItem(`oxonom_admin_schedule_${org}`)
+        if (savedSchedule) {
+          const parsedSchedule = JSON.parse(savedSchedule)
+          if (Array.isArray(parsedSchedule) && parsedSchedule.length > 0) return parsedSchedule
+        }
+      } catch (_) {}
+    }
+    return org === 30
+      ? INITIAL_SCHEDULE_ENTRIES.filter((e) => e.orgId === 30)
+      : org === 10
+      ? DEFAULT_1A_SCHEDULE
+      : []
   })
 
   // Load from localStorage on school change
@@ -562,10 +717,22 @@ export default function MAdminCurriculumClient({
           if (Array.isArray(parsed) && parsed.length > 0) {
             setCoursesList(parsed)
           } else {
-            setCoursesList(selectedOrgId === 10 ? INITIAL_PRIMARY_COURSES : INITIAL_MIDDLE_COURSES)
+            setCoursesList(
+              selectedOrgId === 30
+                ? INITIAL_OXONOM_COURSES
+                : selectedOrgId === 10
+                ? INITIAL_PRIMARY_COURSES
+                : INITIAL_MIDDLE_COURSES
+            )
           }
         } else {
-          setCoursesList(selectedOrgId === 10 ? INITIAL_PRIMARY_COURSES : INITIAL_MIDDLE_COURSES)
+          setCoursesList(
+            selectedOrgId === 30
+              ? INITIAL_OXONOM_COURSES
+              : selectedOrgId === 10
+              ? INITIAL_PRIMARY_COURSES
+              : INITIAL_MIDDLE_COURSES
+          )
         }
 
         const savedSchedule = localStorage.getItem(`oxonom_admin_schedule_${selectedOrgId}`)
@@ -574,15 +741,30 @@ export default function MAdminCurriculumClient({
           if (Array.isArray(parsedSchedule) && parsedSchedule.length > 0) {
             setScheduleList(parsedSchedule)
           } else {
-            setScheduleList(selectedOrgId === 10 ? DEFAULT_1A_SCHEDULE : [])
+            setScheduleList(
+              selectedOrgId === 30
+                ? INITIAL_SCHEDULE_ENTRIES.filter((e) => e.orgId === 30)
+                : selectedOrgId === 10
+                ? DEFAULT_1A_SCHEDULE
+                : []
+            )
           }
         } else {
-          setScheduleList(selectedOrgId === 10 ? DEFAULT_1A_SCHEDULE : [])
+          setScheduleList(
+            selectedOrgId === 30
+              ? INITIAL_SCHEDULE_ENTRIES.filter((e) => e.orgId === 30)
+              : selectedOrgId === 10
+              ? DEFAULT_1A_SCHEDULE
+              : []
+          )
         }
       } catch (_) {}
     }
 
-    if (selectedOrgId === 10) {
+    if (selectedOrgId === 30) {
+      setSelectedClass('9-A')
+      setPeriods(MIDDLE_PERIODS)
+    } else if (selectedOrgId === 10) {
       setSelectedClass('1-A')
       setPeriods(PRIMARY_PERIODS)
     } else {
@@ -613,7 +795,9 @@ export default function MAdminCurriculumClient({
   }
 
   const activeOrg = SCHOOL_ORGS.find((o) => o.id === selectedOrgId) || SCHOOL_ORGS[0]
-  const availableClasses = selectedOrgId === 10
+  const availableClasses = selectedOrgId === 30
+    ? ['9-A']
+    : selectedOrgId === 10
     ? ['1-A', '1-B', '1-C', '2-A', '2-B', '3-A', '4-A']
     : ['5-A', '6-A', '7-A', '8-A']
 
@@ -968,7 +1152,18 @@ export default function MAdminCurriculumClient({
             </div>
 
             {/* School Tabs */}
-            <div className="grid grid-cols-2 gap-1.5 mt-2.5 p-1 rounded-2xl bg-white/5 border border-white/10">
+            <div className="grid grid-cols-3 gap-1.5 mt-2.5 p-1 rounded-2xl bg-white/5 border border-white/10">
+              <button
+                type="button"
+                onClick={() => setSelectedOrgId(30)}
+                className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  selectedOrgId === 30
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                Oxonom Okulları
+              </button>
               <button
                 type="button"
                 onClick={() => setSelectedOrgId(10)}
@@ -978,7 +1173,7 @@ export default function MAdminCurriculumClient({
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                Necla Görer İlkokulu
+                Necla Görer
               </button>
               <button
                 type="button"
@@ -989,7 +1184,7 @@ export default function MAdminCurriculumClient({
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                Fevzi Kalkancı Ortaokulu
+                Fevzi Kutlu
               </button>
             </div>
 

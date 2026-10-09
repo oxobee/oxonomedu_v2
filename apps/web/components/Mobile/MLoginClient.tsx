@@ -69,8 +69,8 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   const handleFillDemoTeacher = () => {
     setIdentifier('ogretmen@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Öğretmen (Ahmet YILMAZ) bilgileri dolduruldu!', {
-      icon: '👨‍🏫',
+    toast.success('Öğretmen (Ebru TEKNECİ — Edebiyat Öğretmeni) bilgileri dolduruldu!', {
+      icon: '👩‍🏫',
       duration: 2500,
     })
   }
@@ -79,7 +79,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   const handleFillDemoAdmin = () => {
     setIdentifier('mudur@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Okul Müdürü (Dr. Uğur UĞURLU) bilgileri dolduruldu!', {
+    toast.success('Okul Müdürü (Uğur UĞURLU) bilgileri dolduruldu!', {
       icon: '👔',
       duration: 2500,
     })
@@ -89,7 +89,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   const handleFillDemoStudent = () => {
     setIdentifier('ogrenci@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Öğrenci (Ali KAYA — 5-A) bilgileri dolduruldu!', {
+    toast.success('Öğrenci (Erçil UĞURLU — 9-A) bilgileri dolduruldu!', {
       icon: '🎒',
       duration: 2500,
     })
@@ -173,13 +173,13 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
             JSON.stringify({
               email: 'ogretmen@oxonom.com',
               username: 'ogretmen',
-              firstName: 'Ahmet',
-              lastName: 'YILMAZ',
-              bio: '5-A Sınıf Rehber Öğretmeni & Fen Bilimleri Koordinatörü · Oxonom Okulları',
+              firstName: 'Ebru',
+              lastName: 'TEKNECİ',
+              bio: 'Türk Dili ve Edebiyatı Öğretmeni · 9-A Sınıf Rehber Öğretmeni · Oxonom Okulları',
               extraDetails: [
-                'Zümre Başkanı',
-                '5-A Rehber Öğretmeni',
-                'Akıllı Tahta Koordinatörü',
+                'Edebiyat Zümre Başkanı',
+                '9-A Rehber Öğretmeni',
+                'Akıllı Tahta & Kütüphane Koordinatörü',
               ],
             })
           )
@@ -270,7 +270,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               type="button"
               onClick={handleFillDemoAdmin}
               className="text-[10px] font-bold text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0 shadow-xs"
-              title="Okul Müdürü (Dr. Uğur UĞURLU) ile giriş yap"
+              title="Okul Müdürü (Uğur UĞURLU) ile giriş yap"
             >
               <ShieldCheck size={11} className="text-amber-400" />
               <span>Müdür</span>
@@ -280,7 +280,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               type="button"
               onClick={handleFillDemoTeacher}
               className="text-[10px] font-bold text-[#34D399] bg-[#34D399]/10 hover:bg-[#34D399]/20 border border-[#34D399]/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0"
-              title="Öğretmen (Ahmet YILMAZ) ile giriş yap"
+              title="Öğretmen (Ebru TEKNECİ — Edebiyat Öğretmeni) ile giriş yap"
             >
               <Sparkles size={11} className="text-[#34D399]" />
               <span>Öğretmen</span>
@@ -290,7 +290,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               type="button"
               onClick={handleFillDemoStudent}
               className="text-[10px] font-bold text-sky-300 bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0"
-              title="Öğrenci (Ali KAYA — 5-A) ile giriş yap"
+              title="Öğrenci (Erçil UĞURLU — 9-A) ile giriş yap"
             >
               <BookOpen size={11} className="text-sky-400" />
               <span>Öğrenci</span>

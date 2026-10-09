@@ -73,16 +73,16 @@ export default function MProfileClient({
   // Connect board modal state
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
 
-  // General Form States — Real Teacher Details (Ahmet YILMAZ)
+  // General Form States — Real Teacher Details (Ebru TEKNECİ)
   const [email, setEmail] = useState('ogretmen@oxonom.com')
   const [username, setUsername] = useState('ogretmen')
-  const [firstName, setFirstName] = useState('Ahmet')
-  const [lastName, setLastName] = useState('YILMAZ')
-  const [bio, setBio] = useState('5-A Sınıf Rehber Öğretmeni & Fen Bilimleri Koordinatörü · Oxonom Okulları')
+  const [firstName, setFirstName] = useState('Ebru')
+  const [lastName, setLastName] = useState('TEKNECİ')
+  const [bio, setBio] = useState('Türk Dili ve Edebiyatı Öğretmeni · 9-A Sınıf Rehber Öğretmeni · Oxonom Okulları')
   const [extraDetails, setExtraDetails] = useState<string[]>([
-    'Zümre Başkanı',
-    '5-A Rehber Öğretmeni',
-    'Akıllı Tahta Koordinatörü',
+    'Edebiyat Zümre Başkanı',
+    '9-A Rehber Öğretmeni',
+    'Akıllı Tahta & Kütüphane Koordinatörü',
   ])
 
   // Security Form States
@@ -238,7 +238,7 @@ export default function MProfileClient({
           {/* Class Pill */}
           <span className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#E3F3EF] dark:bg-emerald-950/60 text-[#0F766E] dark:text-emerald-300 text-xs font-black shrink-0 border border-emerald-200/40 dark:border-emerald-800/40">
             <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-            5-A
+            9-A
           </span>
         </div>
 
@@ -603,7 +603,7 @@ export default function MProfileClient({
                       GÖREV
                     </span>
                     <span className="font-extrabold text-gray-900 dark:text-white mt-0.5 block">
-                      Fen Bilimleri & Rehberlik
+                      Türk Dili ve Edebiyatı & Rehberlik
                     </span>
                   </div>
                   <div className="p-3 rounded-2xl bg-[#F6F8FC] dark:bg-[#0E131F] border border-gray-100 dark:border-gray-800">
@@ -611,7 +611,7 @@ export default function MProfileClient({
                       ŞUBE
                     </span>
                     <span className="font-extrabold text-gray-900 dark:text-white mt-0.5 block">
-                      5-A Şubesi (1 Öğrenci)
+                      9-A Şubesi (1 Öğrenci — Erçil UĞURLU)
                     </span>
                   </div>
                   <div className="p-3 rounded-2xl bg-[#F6F8FC] dark:bg-[#0E131F] border border-gray-100 dark:border-gray-800">

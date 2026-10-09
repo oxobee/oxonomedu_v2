@@ -250,8 +250,8 @@ export default function MAdminClient({
   const [isConflictReportModalOpen, setIsConflictReportModalOpen] = useState(false)
 
   // Context-aware target class & subject
-  const targetMissingClass = selectedOrgId === 30 ? '5-A' : selectedOrgId === 10 ? '3-B' : '7-B'
-  const targetMissingSubject = selectedOrgId === 30 ? 'Bilişim & Kodlama' : selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar'
+  const targetMissingClass = selectedOrgId === 30 ? '9-A' : selectedOrgId === 10 ? '3-B' : '7-B'
+  const targetMissingSubject = selectedOrgId === 30 ? 'Türk Dili ve Edebiyatı' : selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar'
 
   // Available teachers for active school
   const availableTeachers = useMemo(() => {
@@ -276,10 +276,10 @@ export default function MAdminClient({
   }>(() => {
     return {
       isResolved: selectedOrgId === 30 ? true : false,
-      assignedTeacher: selectedOrgId === 30 ? 'Ahmet YILMAZ' : selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
+      assignedTeacher: selectedOrgId === 30 ? 'Ebru TEKNECİ' : selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
       assignedDay: 'wed',
       assignedPeriod: 5,
-      assignedRoom: selectedOrgId === 30 ? 'Derslik 5-A (1. Kat)' : selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
+      assignedRoom: selectedOrgId === 30 ? 'Derslik 9-A (1. Kat)' : selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
       targetClass: targetMissingClass,
       targetSubject: targetMissingSubject,
     }
@@ -310,23 +310,23 @@ export default function MAdminClient({
           } else {
             setMissingAssignment({
               isResolved: selectedOrgId === 30 ? true : false,
-              assignedTeacher: selectedOrgId === 30 ? 'Ahmet YILMAZ' : selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
+              assignedTeacher: selectedOrgId === 30 ? 'Ebru TEKNECİ' : selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
               assignedDay: 'wed',
               assignedPeriod: 5,
-              assignedRoom: selectedOrgId === 30 ? 'Derslik 5-A (1. Kat)' : selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
-              targetClass: selectedOrgId === 30 ? '5-A' : selectedOrgId === 10 ? '3-B' : '7-B',
-              targetSubject: selectedOrgId === 30 ? 'Bilişim & Kodlama' : selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar',
+              assignedRoom: selectedOrgId === 30 ? 'Derslik 9-A (1. Kat)' : selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
+              targetClass: selectedOrgId === 30 ? '9-A' : selectedOrgId === 10 ? '3-B' : '7-B',
+              targetSubject: selectedOrgId === 30 ? 'Türk Dili ve Edebiyatı' : selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar',
             })
           }
         } else {
           setMissingAssignment({
             isResolved: selectedOrgId === 30 ? true : false,
-            assignedTeacher: selectedOrgId === 30 ? 'Ahmet YILMAZ' : selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
+            assignedTeacher: selectedOrgId === 30 ? 'Ebru TEKNECİ' : selectedOrgId === 10 ? 'Fatma MARANGOZ' : 'Aybüke ÇELİK',
             assignedDay: 'wed',
             assignedPeriod: 5,
-            assignedRoom: selectedOrgId === 30 ? 'Derslik 5-A (1. Kat)' : selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
-            targetClass: selectedOrgId === 30 ? '5-A' : selectedOrgId === 10 ? '3-B' : '7-B',
-            targetSubject: selectedOrgId === 30 ? 'Bilişim & Kodlama' : selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar',
+            assignedRoom: selectedOrgId === 30 ? 'Derslik 9-A (1. Kat)' : selectedOrgId === 10 ? 'Müzik Dersliği' : 'Görsel Sanatlar Atölyesi',
+            targetClass: selectedOrgId === 30 ? '9-A' : selectedOrgId === 10 ? '3-B' : '7-B',
+            targetSubject: selectedOrgId === 30 ? 'Türk Dili ve Edebiyatı' : selectedOrgId === 10 ? 'Müzik' : 'Görsel Sanatlar',
           })
         }
 
@@ -778,7 +778,7 @@ export default function MAdminClient({
                       selectedOrgId === 30 ? 'text-emerald-100' : 'text-gray-500'
                     }`}
                   >
-                    5-A (1 Öğrt, 1 Öğr)
+                    9-A (1 Öğrt, 1 Öğr)
                   </div>
                 </button>
 
@@ -906,11 +906,11 @@ export default function MAdminClient({
                   <Building2 size={17} />
                 </div>
                 <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400">
-                  {selectedOrgId === 30 ? '5. Sınıf' : selectedOrgId === 10 ? '1–4. Sınıf' : '5–8. Sınıf'}
+                  {selectedOrgId === 30 ? '9. Sınıf' : selectedOrgId === 10 ? '1–4. Sınıf' : '5–8. Sınıf'}
                 </span>
               </div>
               <div className="text-xl font-black text-gray-900 dark:text-white">
-                {selectedOrgId === 30 ? '1 Şube (5-A)' : selectedOrgId === 10 ? '12 Şube' : '16 Şube'}
+                {selectedOrgId === 30 ? '1 Şube (9-A)' : selectedOrgId === 10 ? '12 Şube' : '16 Şube'}
               </div>
               <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                 Sınıf & Şube
@@ -1011,7 +1011,7 @@ export default function MAdminClient({
                 <div className="p-3 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-900/40 text-center">
                   <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300">
                     <CheckCircle2 size={14} className="text-emerald-500" />
-                    <span>Ahmet YILMAZ görev başındadır</span>
+                    <span>Ebru TEKNECİ görev başındadır</span>
                   </div>
                   <p className="text-[10.5px] text-gray-500 dark:text-gray-400 mt-0.5">
                     Oxonom Okulları bünyesinde bekleyen izin veya devamsızlık kaydı yoktur.
@@ -1257,11 +1257,11 @@ export default function MAdminClient({
                 <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="font-extrabold text-[#10B981] bg-[#10B981]/15 px-1.5 py-0.5 rounded-md text-[10px]">
-                      5-A
+                      9-A
                     </span>
                     <div>
-                      <div className="font-bold text-gray-900 dark:text-white">Bilişim & Kodlama</div>
-                      <div className="text-[10px] text-gray-500">Ahmet YILMAZ · Derslik 5-A</div>
+                      <div className="font-bold text-gray-900 dark:text-white">Türk Dili ve Edebiyatı</div>
+                      <div className="text-[10px] text-gray-500">Ebru TEKNECİ · Derslik 9-A</div>
                     </div>
                   </div>
                   <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">

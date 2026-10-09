@@ -27,8 +27,8 @@ export const SCHOOL_ORGS: SchoolOrg[] = [
     slug: 'oxonom',
     description: '1 Okul, 1 Sınıf, 1 Öğretmen, 1 Öğrenci — Bütünleşik Dijital Okul',
     about: 'Oxonom Okulları; okul müdürü, sınıf rehber öğretmeni ve öğrencinin tamamen birbirine tanımlandığı, MEB müfredatına tam uyumlu akıllı eğitim kurumu.',
-    grades: '5. Sınıf (Ortaokul)',
-    grade_levels: ['5. Sınıf'],
+    grades: '9. Sınıf (Anadolu Lisesi / Edebiyat)',
+    grade_levels: ['9. Sınıf'],
     level_type: 'MIDDLE',
     address: 'Oxonom Dijital Eğitim Kampüsü No:1 Beşiktaş / İstanbul',
     phone: '+90 212 500 2803',
@@ -94,10 +94,10 @@ export interface TeacherDef {
 
 export const TEACHER_RAW_LIST: { grade: string; orgId: number; teachers: { className: string; name: string }[] }[] = [
   {
-    grade: '5. Sınıf',
+    grade: '9. Sınıf',
     orgId: 30,
     teachers: [
-      { className: '5-A', name: 'Ahmet YILMAZ' },
+      { className: '9-A', name: 'Ebru TEKNECİ' },
     ],
   },
   {
@@ -339,67 +339,68 @@ const TURKISH_LAST_NAMES = [
 ]
 
 export function generateClassStudents(classItem: ClassroomItem) {
-  // If Oxonom Okulları (orgId === 30): Exactly 1 defined student! No mock 30 students.
-  if (classItem.org_id === 30 || classItem.school_slug === 'oxonom' || classItem.code === '5-A') {
+  // If Oxonom Okulları (orgId === 30): Exactly 1 defined student: Erçil UĞURLU!
+  if (classItem.org_id === 30 || classItem.school_slug === 'oxonom' || classItem.code === '9-A' || classItem.code === '5-A') {
     return [
       {
         id: 3001,
-        user_uuid: 'user_ali_kaya',
+        user_uuid: 'user_ercil_ugurlu',
         studentNo: '101',
-        tcNo: '30000002803',
-        name: 'Ali KAYA',
-        first_name: 'Ali',
-        last_name: 'KAYA',
+        tcNo: '10000000146',
+        name: 'Erçil UĞURLU',
+        first_name: 'Erçil',
+        last_name: 'UĞURLU',
         email: 'ogrenci@oxonom.com',
         username: 'ogrenci',
         gender: 'Erkek' as const,
-        birthDate: '15.06.2014 (12 Yaşında)',
+        birthDate: '15.06.2010 (16 Yaşında)',
         bloodType: 'A Rh+',
-        motherName: 'Ayşe KAYA',
-        motherPhone: '+90 535 280 0303',
-        fatherName: 'Mehmet KAYA',
-        fatherPhone: '+90 535 280 0302',
-        parentName: 'Mehmet KAYA & Ayşe KAYA',
-        parentPhone: '+90 535 280 0302',
-        parentRelation: 'Baba & Anne',
-        parentOccupation: 'Mühendis',
-        secondParentName: 'Ayşe KAYA (Anne)',
-        secondParentPhone: '+90 535 280 0303',
+        motherName: 'Ebru UĞURLU',
+        motherPhone: '+90 532 999 1100',
+        fatherName: 'Uğur UĞURLU (Okul Müdürü)',
+        fatherPhone: '+90 532 999 2200',
+        parentName: 'Uğur UĞURLU & Ebru UĞURLU',
+        parentPhone: '+90 532 999 2200',
+        parentRelation: 'Baba (Kurum Müdürü) & Anne',
+        parentOccupation: 'Eğitim Yöneticisi & Mimar',
+        secondParentName: 'Ebru UĞURLU (Anne)',
+        secondParentPhone: '+90 532 999 1100',
         parents: [
-          { name: 'Ayşe KAYA', relation: 'Anne', phone: '+90 535 280 0303', occupation: 'Mimar', email: 'ayse.kaya@oxonom.com' },
-          { name: 'Mehmet KAYA', relation: 'Baba', phone: '+90 535 280 0302', occupation: 'Mühendis', email: 'mehmet.kaya@oxonom.com' },
+          { name: 'Uğur UĞURLU', relation: 'Baba (Okul Müdürü)', phone: '+90 532 999 2200', occupation: 'Okul Müdürü · Kurum Yetkilisi', email: 'mudur@oxonom.com' },
+          { name: 'Ebru UĞURLU', relation: 'Anne', phone: '+90 532 999 1100', occupation: 'Mimar', email: 'ebru@oxonom.com' },
         ],
-        address: 'Beşiktaş / İstanbul',
-        emergencyContact: 'Mehmet KAYA (Baba)',
-        emergencyPhone: '+90 535 280 0302',
+        address: 'Bağdat Cad. No:114 Kadıköy / İstanbul',
+        emergencyContact: 'Uğur UĞURLU (Baba - Okul Müdürü)',
+        emergencyPhone: '+90 532 999 2200',
         status: 'active' as const,
         enrollmentDate: '01.09.2024',
-        gpa: 96.5,
+        gpa: 98.8,
         attendanceRate: 100,
         excusedDays: 0,
         unexcusedDays: 0,
         assignmentsDone: 15,
         assignmentsTotal: 15,
-        notes: '5-A sınıfı öğrencisi. Matematik ve Fen Bilimlerinde yüksek analitik başarı.',
+        notes: '9-A şubesi öğrencisi. Türk Dili ve Edebiyatı, Matematik ve Bilişim alanlarında üstün analitik ve edebi başarı.',
         specialHealthNote: 'Sağlık engeli veya alerjisi bulunmamaktadır.',
-        disciplineStatus: 'Temiz Sicil — Örnek Öğrenci',
+        disciplineStatus: 'Temiz Sicil — Onur Belgesi Sahibi Örnek Öğrenci',
         guidanceNotes: [
           {
             id: 'gn-30-1',
             date: '15.09.2026',
-            author: 'Ahmet YILMAZ (Sınıf Rehber Öğretmeni)',
+            author: 'Ebru TEKNECİ (Edebiyat Öğretmeni & Sınıf Rehberi)',
             category: 'Akademik' as const,
-            content: 'Öğrencinin ders içi dikkati ve ödev tamamlama disiplini kusursuzdur.',
+            content: 'Öğrencinin edebiyat okumaları, kompozisyon yeteneği ve ders içi analitik katkısı takdir edilmektedir.',
           },
         ],
         grades: [
-          { courseName: 'Fen Bilimleri', teacherName: 'Ahmet YILMAZ', exam1: 98, exam2: 95, performance: 100, average: 97.6 },
-          { courseName: 'Matematik', teacherName: 'Ahmet YILMAZ', exam1: 96, exam2: 98, performance: 100, average: 98.0 },
-          { courseName: 'Türkçe', teacherName: 'Ahmet YILMAZ', exam1: 95, exam2: 94, performance: 100, average: 96.3 },
+          { courseName: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', exam1: 98, exam2: 100, performance: 100, average: 99.3 },
+          { courseName: 'Matematik', teacherName: 'Ebru TEKNECİ', exam1: 96, exam2: 98, performance: 100, average: 98.0 },
+          { courseName: 'Bilişim & Kodlama', teacherName: 'Ebru TEKNECİ', exam1: 100, exam2: 98, performance: 100, average: 99.0 },
         ],
         classroomId: classItem.id,
         classroomName: classItem.name,
-        mentorTeacher: 'Ahmet YILMAZ',
+        className: '9-A',
+        mentorTeacher: 'Ebru TEKNECİ (Edebiyat Öğretmeni)',
         schoolName: 'Oxonom Okulları',
         is_demo: false,
       },
@@ -604,28 +605,28 @@ export function getOrgTeachers(orgId: number) {
     return [
       {
         id: 3001,
-        name: 'Ahmet YILMAZ',
+        name: 'Ebru TEKNECİ',
         tcNo: '20000002803',
         email: 'ogretmen@oxonom.com',
         phone: '+90 533 280 0301',
-        branch: 'Fen Bilimleri & Sınıf Rehber Öğretmeni',
-        university: 'Boğaziçi Üniversitesi Eğitim Fakültesi',
-        graduationYear: '2018',
-        birthDate: '1991-03-28 (35 Yaşında)',
+        branch: 'Türk Dili ve Edebiyatı (Edebiyat Öğretmeni)',
+        university: 'Boğaziçi Üniversitesi Türk Dili ve Edebiyatı',
+        graduationYear: '2016',
+        birthDate: '1990-05-14 (36 Yaşında)',
         address: 'Beşiktaş / İstanbul',
-        emergencyContact: 'Eşi (Zeynep Yılmaz)',
+        emergencyContact: 'Eşi',
         emergencyPhone: '+90 533 280 0399',
         workingHours: '08:30 - 15:30 (Pazartesi - Cuma)',
         weeklyHours: 30,
         employmentType: 'Kadrolu' as const,
         isClassMentor: true,
-        mentorClass: '5-A',
-        assignedClasses: ['5-A'],
+        mentorClass: '9-A',
+        assignedClasses: ['9-A'],
         status: 'active' as const,
         documents: [
           {
             id: 'doc-30-1',
-            name: 'Ahmet_Yilmaz_Lisans_Diplomasi.pdf',
+            name: 'Ebru_Tekneci_Lisans_Diplomasi.pdf',
             type: 'Lisans Diploması' as const,
             uploadDate: '01.09.2024',
             fileSize: '2.4 MB',
@@ -678,6 +679,15 @@ export function getOrgTeachers(orgId: number) {
       ],
       leaves: [],
     })))
+}
+
+export function getOrgStudents(orgId: number) {
+  const classrooms = ALL_CLASSROOMS.filter((cls) => cls.org_id === orgId)
+  return classrooms.flatMap((cls) => generateClassStudents(cls))
+}
+
+export function getOrgClassrooms(orgId: number): ClassroomItem[] {
+  return ALL_CLASSROOMS.filter((cls) => cls.org_id === orgId)
 }
 
 function cleanTr(str: string): string {

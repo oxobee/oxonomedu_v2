@@ -87,7 +87,7 @@ export const DEMO_USERS: Record<string, DemoUser> = {
     username: 'mudur',
     email: 'mudur@oxonom.com',
     password: 'Ugur2803*',
-    first_name: 'Dr. Uğur',
+    first_name: 'Uğur',
     last_name: 'UĞURLU',
     email_verified: true,
     is_superadmin: true,
@@ -117,8 +117,8 @@ export const DEMO_USERS: Record<string, DemoUser> = {
     username: 'ogretmen',
     email: 'ogretmen@oxonom.com',
     password: 'Ugur2803*',
-    first_name: 'Ahmet',
-    last_name: 'YILMAZ',
+    first_name: 'Ebru',
+    last_name: 'TEKNECİ',
     email_verified: true,
     is_superadmin: false,
     is_demo: false,
@@ -147,8 +147,8 @@ export const DEMO_USERS: Record<string, DemoUser> = {
     username: 'ogretmen',
     email: 'ogretmen@oxonom.com',
     password: 'Ugur2803*',
-    first_name: 'Ahmet',
-    last_name: 'YILMAZ',
+    first_name: 'Ebru',
+    last_name: 'TEKNECİ',
     email_verified: true,
     is_superadmin: false,
     is_demo: false,
@@ -173,12 +173,12 @@ export const DEMO_USERS: Record<string, DemoUser> = {
   },
   'ogrenci@oxonom.com': {
     id: 3001,
-    user_uuid: 'user_ali_kaya',
+    user_uuid: 'user_ercil_ugurlu',
     username: 'ogrenci',
     email: 'ogrenci@oxonom.com',
     password: 'Ugur2803*',
-    first_name: 'Ali',
-    last_name: 'KAYA',
+    first_name: 'Erçil',
+    last_name: 'UĞURLU',
     email_verified: true,
     is_superadmin: false,
     is_demo: false,
@@ -203,12 +203,12 @@ export const DEMO_USERS: Record<string, DemoUser> = {
   },
   'ogrenci': {
     id: 3001,
-    user_uuid: 'user_ali_kaya',
+    user_uuid: 'user_ercil_ugurlu',
     username: 'ogrenci',
     email: 'ogrenci@oxonom.com',
     password: 'Ugur2803*',
-    first_name: 'Ali',
-    last_name: 'KAYA',
+    first_name: 'Erçil',
+    last_name: 'UĞURLU',
     email_verified: true,
     is_superadmin: false,
     is_demo: false,
@@ -573,6 +573,17 @@ export function getDemoSession(demoUser: DemoUser) {
       },
     },
   }
+  // Strict School Isolation: Determine the exact school for this user
+  const isNeclaGorerUser = demoUser.email.includes('neclagorer') || demoUser.username.includes('necla')
+  const isFevziKutluUser = demoUser.email.includes('fevzikalkanci') || demoUser.username.includes('fevzi')
+  const isOxonomUser = !isNeclaGorerUser && !isFevziKutluUser // Oxonom Okulları is primary / flagship
+
+  const targetOrg = isNeclaGorerUser
+    ? neclaGorerOrg
+    : isFevziKutluUser
+    ? fevziKutluOrg
+    : oxonomOrg
+
   return {
     user: {
       id: demoUser.id,
@@ -586,6 +597,9 @@ export function getDemoSession(demoUser: DemoUser) {
       avatar_image: demoUser.avatar_image,
       is_demo: isDemo,
       plan: userPlan,
+      school_org_id: targetOrg.id,
+      school_slug: targetOrg.slug,
+      school_name: targetOrg.name,
     },
     roles: [
       {
@@ -595,34 +609,7 @@ export function getDemoSession(demoUser: DemoUser) {
           name: demoUser.role.name,
           rights: demoUser.role.rights,
         },
-        org: oxonomOrg,
-      },
-      {
-        role: {
-          id: demoUser.role.id,
-          role_uuid: demoUser.role.role_uuid,
-          name: demoUser.role.name,
-          rights: demoUser.role.rights,
-        },
-        org: neclaGorerOrg,
-      },
-      {
-        role: {
-          id: demoUser.role.id,
-          role_uuid: demoUser.role.role_uuid,
-          name: demoUser.role.name,
-          rights: demoUser.role.rights,
-        },
-        org: fevziKutluOrg,
-      },
-      {
-        role: {
-          id: demoUser.role.id,
-          role_uuid: demoUser.role.role_uuid,
-          name: demoUser.role.name,
-          rights: demoUser.role.rights,
-        },
-        org: defaultOrg,
+        org: targetOrg,
       },
     ],
   }

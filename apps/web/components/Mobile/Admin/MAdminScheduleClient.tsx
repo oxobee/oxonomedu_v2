@@ -49,6 +49,7 @@ import {
   getOrgTeachers,
   ALL_CLASSROOMS,
 } from '@services/demo/schoolDirectory'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
 
 export interface MAdminScheduleClientProps {
   orgSlug?: string
@@ -241,14 +242,51 @@ function getSubjectBadgeColors(color: string) {
 
 // ── INITIAL PRE-FILLED SCHEDULE ENTRIES ──
 export const INITIAL_SCHEDULE_ENTRIES: ScheduleEntry[] = [
-  // ── OXONOM OKULLARI: 5-A ŞUBESİ (Ahmet YILMAZ) ──
-  { id: 'sc-ox-1', orgId: 30, day: 'mon', period: 1, classCode: '5-A', subject: 'Türkçe', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-ox-2', orgId: 30, day: 'mon', period: 2, classCode: '5-A', subject: 'Türkçe', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-ox-3', orgId: 30, day: 'mon', period: 3, classCode: '5-A', subject: 'Matematik', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-ox-4', orgId: 30, day: 'mon', period: 4, classCode: '5-A', subject: 'Fen Bilimleri', teacherName: 'Ahmet YILMAZ', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
-  { id: 'sc-ox-5', orgId: 30, day: 'mon', period: 5, classCode: '5-A', subject: 'Sosyal Bilgiler', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'amber', isSmartBoardActive: true },
-  { id: 'sc-ox-6', orgId: 30, day: 'mon', period: 6, classCode: '5-A', subject: 'İngilizce', teacherName: 'Ahmet YILMAZ', roomName: 'Derslik 5-A (1. Kat)', color: 'purple', isSmartBoardActive: true },
-  { id: 'sc-ox-7', orgId: 30, day: 'mon', period: 7, classCode: '5-A', subject: 'Bilişim & Yazılım', teacherName: 'Ahmet YILMAZ', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
+  // ── OXONOM OKULLARI: 9-A ŞUBESİ (Ebru TEKNECİ) ──
+  // Pazartesi
+  { id: 'sc-ox-1', orgId: 30, day: 'mon', period: 1, classCode: '9-A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-2', orgId: 30, day: 'mon', period: 2, classCode: '9-A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-3', orgId: 30, day: 'mon', period: 3, classCode: '9-A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-4', orgId: 30, day: 'mon', period: 4, classCode: '9-A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-5', orgId: 30, day: 'mon', period: 5, classCode: '9-A', subject: 'Tarih', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'amber', isSmartBoardActive: true },
+  { id: 'sc-ox-6', orgId: 30, day: 'mon', period: 6, classCode: '9-A', subject: 'İngilizce', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'purple', isSmartBoardActive: true },
+  { id: 'sc-ox-7', orgId: 30, day: 'mon', period: 7, classCode: '9-A', subject: 'Bilişim & Kodlama', teacherName: 'Ebru TEKNECİ', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
+
+  // Salı
+  { id: 'sc-ox-8', orgId: 30, day: 'tue', period: 1, classCode: '9-A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-9', orgId: 30, day: 'tue', period: 2, classCode: '9-A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-10', orgId: 30, day: 'tue', period: 3, classCode: '9-A', subject: 'Fen Bilimleri', teacherName: 'Ebru TEKNECİ', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
+  { id: 'sc-ox-11', orgId: 30, day: 'tue', period: 4, classCode: '9-A', subject: 'Coğrafya', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'teal', isSmartBoardActive: true },
+  { id: 'sc-ox-12', orgId: 30, day: 'tue', period: 5, classCode: '9-A', subject: 'İngilizce', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'purple', isSmartBoardActive: true },
+  { id: 'sc-ox-13', orgId: 30, day: 'tue', period: 6, classCode: '9-A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Ebru TEKNECİ', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
+  { id: 'sc-ox-14', orgId: 30, day: 'tue', period: 7, classCode: '9-A', subject: 'Rehberlik & Kariyer', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'pink', isSmartBoardActive: true },
+
+  // Çarşamba
+  { id: 'sc-ox-15', orgId: 30, day: 'wed', period: 1, classCode: '9-A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-16', orgId: 30, day: 'wed', period: 2, classCode: '9-A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-17', orgId: 30, day: 'wed', period: 3, classCode: '9-A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-18', orgId: 30, day: 'wed', period: 4, classCode: '9-A', subject: 'Bilişim & Kodlama', teacherName: 'Ebru TEKNECİ', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
+  { id: 'sc-ox-19', orgId: 30, day: 'wed', period: 5, classCode: '9-A', subject: 'Tarih', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'amber', isSmartBoardActive: true },
+  { id: 'sc-ox-20', orgId: 30, day: 'wed', period: 6, classCode: '9-A', subject: 'İngilizce', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'purple', isSmartBoardActive: true },
+  { id: 'sc-ox-21', orgId: 30, day: 'wed', period: 7, classCode: '9-A', subject: 'Görsel Sanatlar', teacherName: 'Ebru TEKNECİ', roomName: 'Görsel Sanatlar Atölyesi', color: 'amber', isSmartBoardActive: false },
+
+  // Perşembe
+  { id: 'sc-ox-22', orgId: 30, day: 'thu', period: 1, classCode: '9-A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-23', orgId: 30, day: 'thu', period: 2, classCode: '9-A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-24', orgId: 30, day: 'thu', period: 3, classCode: '9-A', subject: 'Fen Bilimleri', teacherName: 'Ebru TEKNECİ', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
+  { id: 'sc-ox-25', orgId: 30, day: 'thu', period: 4, classCode: '9-A', subject: 'Coğrafya', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'teal', isSmartBoardActive: true },
+  { id: 'sc-ox-26', orgId: 30, day: 'thu', period: 5, classCode: '9-A', subject: 'İngilizce', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'purple', isSmartBoardActive: true },
+  { id: 'sc-ox-27', orgId: 30, day: 'thu', period: 6, classCode: '9-A', subject: 'Din Kültürü & Ahlak', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'emerald', isSmartBoardActive: true },
+  { id: 'sc-ox-28', orgId: 30, day: 'thu', period: 7, classCode: '9-A', subject: 'Müzik', teacherName: 'Ebru TEKNECİ', roomName: 'Müzik Dersliği', color: 'pink', isSmartBoardActive: false },
+
+  // Cuma
+  { id: 'sc-ox-29', orgId: 30, day: 'fri', period: 1, classCode: '9-A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-30', orgId: 30, day: 'fri', period: 2, classCode: '9-A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-31', orgId: 30, day: 'fri', period: 3, classCode: '9-A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-32', orgId: 30, day: 'fri', period: 4, classCode: '9-A', subject: 'Bilişim & Yazılım', teacherName: 'Ebru TEKNECİ', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
+  { id: 'sc-ox-33', orgId: 30, day: 'fri', period: 5, classCode: '9-A', subject: 'Proje & Edebi Metinler', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'rose', isSmartBoardActive: true },
+  { id: 'sc-ox-34', orgId: 30, day: 'fri', period: 6, classCode: '9-A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Ebru TEKNECİ', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
+  { id: 'sc-ox-35', orgId: 30, day: 'fri', period: 7, classCode: '9-A', subject: 'Haftalık Değerlendirme & Etüt', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 9-A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
 
   // ── NECLA GÖRER İLKOKULU: 1-A ŞUBESİ ──
   // Pazartesi
@@ -315,8 +353,12 @@ export default function MAdminScheduleClient({
   hideDock = false,
 }: MAdminScheduleClientProps) {
   const { theme, toggleTheme } = useMobileTheme()
+  const session = useLHSession() as any
+  const user = session?.data?.user
+
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
   const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
+    if (user?.school_org_id) return user.school_org_id
     if (orgSlug === 'neclagorer') return 10
     if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 20
     return 30
@@ -330,19 +372,22 @@ export default function MAdminScheduleClient({
 
   // Selected Targets
   const [selectedClass, setSelectedClass] = useState<string>(() => {
-    if (orgSlug === 'neclagorer') return '1-A'
-    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return '7-A'
-    return '5-A'
+    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg' ? 20 : 30)
+    if (org === 10) return '1-A'
+    if (org === 20) return '7-A'
+    return '9-A'
   })
   const [selectedTeacher, setSelectedTeacher] = useState<string>(() => {
-    if (orgSlug === 'neclagorer') return 'Özlem ZOR'
-    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 'Beritan ŞENATEŞ'
-    return 'Ahmet YILMAZ'
+    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg' ? 20 : 30)
+    if (org === 10) return 'Özlem ZOR'
+    if (org === 20) return 'Beritan ŞENATEŞ'
+    return 'Ebru TEKNECİ'
   })
   const [selectedRoom, setSelectedRoom] = useState<string>(() => {
-    if (orgSlug === 'neclagorer') return 'Derslik 101 (1. Kat)'
-    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg') return 'Derslik 301 (3. Kat)'
-    return 'Derslik 5-A (1. Kat)'
+    const org = user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'sfg' ? 20 : 30)
+    if (org === 10) return 'Derslik 101 (1. Kat)'
+    if (org === 20) return 'Derslik 301 (3. Kat)'
+    return 'Derslik 9-A (1. Kat)'
   })
 
   // Modals state
@@ -428,9 +473,9 @@ export default function MAdminScheduleClient({
     }
     setScheduleList(INITIAL_SCHEDULE_ENTRIES)
     if (selectedOrgId === 30) {
-      setSelectedClass('5-A')
-      setSelectedTeacher('Ahmet YILMAZ')
-      setSelectedRoom('Derslik 5-A (1. Kat)')
+      setSelectedClass('9-A')
+      setSelectedTeacher('Ebru TEKNECİ')
+      setSelectedRoom('Derslik 9-A (1. Kat)')
     } else if (selectedOrgId === 10) {
       setSelectedClass('1-A')
       setSelectedTeacher('Özlem ZOR')
@@ -463,7 +508,7 @@ export default function MAdminScheduleClient({
   // Classrooms list for selector
   const availableClasses = useMemo(() => {
     if (selectedOrgId === 30) {
-      return ['5-A']
+      return ['9-A']
     }
     if (selectedOrgId === 10) {
       return ['1-A', '1-B', '1-C', '2-A', '2-B', '3-A', '3-B', '4-A', '4-B']
@@ -888,7 +933,7 @@ export default function MAdminScheduleClient({
 
               <div className="p-2 rounded-xl bg-white/5">
                 <div className="text-sm font-black text-indigo-400">
-                  {selectedOrgId === 10 ? '12 Şube' : '8 Şube'}
+                  {selectedOrgId === 30 ? '1 Şube' : selectedOrgId === 10 ? '12 Şube' : '8 Şube'}
                 </div>
                 <div className="text-[10px] text-gray-400 font-semibold mt-0.5">
                   Aktif Çizelge

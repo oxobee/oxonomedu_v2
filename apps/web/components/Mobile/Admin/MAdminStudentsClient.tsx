@@ -48,7 +48,11 @@ import {
   DEMO_STUDENT,
   validateTcKimlik,
   lookupTcRecord,
+  SCHOOL_ORGS,
+  getOrgStudents,
+  getOrgClassrooms,
 } from '@services/demo/schoolDirectory'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
 
 export interface MAdminStudentsClientProps {
   orgSlug?: string
@@ -62,6 +66,17 @@ export default function MAdminStudentsClient({
   hideDock = false,
 }: MAdminStudentsClientProps) {
   const { theme, toggleTheme } = useMobileTheme()
+  const session = useLHSession() as any
+  const user = session?.data?.user
+
+  // ── MULTI-TENANT ISOLATED SCHOOL ORG STATE ──
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
+    if (user?.school_org_id) return user.school_org_id
+    if (orgSlug === 'neclagorer') return 10
+    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci') return 20
+    return 30 // Oxonom Okulları is default
+  })
+
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
   const [selectedClassCode, setSelectedClassCode] = useState<string>('ALL')
   const [searchQuery, setSearchQuery] = useState('')
@@ -74,13 +89,13 @@ export default function MAdminStudentsClient({
   const [isNewStudentModalOpen, setIsNewStudentModalOpen] = useState(false)
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
   const [studentToTransfer, setStudentToTransfer] = useState<any | null>(null)
-  const [targetTransferClass, setTargetTransferClass] = useState<string>('1-B')
+  const [targetTransferClass, setTargetTransferClass] = useState<string>('9-A')
 
   // ── FORM STATES FOR NEW STUDENT ──
   const [newTcNo, setNewTcNo] = useState('')
   const [newFirstName, setNewFirstName] = useState('')
   const [newLastName, setNewLastName] = useState('')
-  const [newClassCode, setNewClassCode] = useState('1-A')
+  const [newClassCode, setNewClassCode] = useState('9-A')
   const [newStudentNo, setNewStudentNo] = useState('2026-105')
   const [newParentName, setNewParentName] = useState('')
   const [newParentPhone, setNewParentPhone] = useState('')
@@ -90,7 +105,7 @@ export default function MAdminStudentsClient({
   const [editLastName, setEditLastName] = useState('')
   const [editTcNo, setEditTcNo] = useState('')
   const [editStudentNo, setEditStudentNo] = useState('')
-  const [editClassCode, setEditClassCode] = useState('1-A')
+  const [editClassCode, setEditClassCode] = useState('9-A')
   const [editBirthDate, setEditBirthDate] = useState('')
   const [editBloodType, setEditBloodType] = useState('A Rh+')
   const [editGender, setEditGender] = useState<'Erkek' | 'Kız'>('Erkek')
@@ -102,31 +117,47 @@ export default function MAdminStudentsClient({
   const [editHealthNote, setEditHealthNote] = useState('')
   const [editAdminNote, setEditAdminNote] = useState('')
 
-  // ── STUDENTS LIST WITH LOCALSTORAGE PERSISTENCE ──
+  // ── STUDENTS LIST WITH STRICT MULTI-TENANT ISOLATION ──
   const [studentsList, setStudentsList] = useState<any[]>(() => {
+    const initialOrgId = (user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30))
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem('oxonom_admin_students_list')
+        const saved = localStorage.getItem(`oxonom_admin_students_list_${initialOrgId}`)
         if (saved) {
           const parsed = JSON.parse(saved)
           if (Array.isArray(parsed) && parsed.length > 0) return parsed
         }
       } catch (_) {}
     }
-    const list: any[] = []
-    ALL_CLASSROOMS.slice(0, 8).forEach((cls) => {
-      const clsStudents = generateClassStudents(cls)
-      list.push(...clsStudents)
-    })
-    return list
+    return getOrgStudents(initialOrgId)
   })
 
-  // Sync to localStorage whenever studentsList changes
+  // Synchronize when school org changes or load from isolated localStorage partition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(`oxonom_admin_students_list_${selectedOrgId}`)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setStudentsList(parsed)
+            setSelectedClassCode('ALL')
+            return
+          }
+        }
+      } catch (_) {}
+    }
+    const orgStudents = getOrgStudents(selectedOrgId)
+    setStudentsList(orgStudents)
+    setSelectedClassCode('ALL')
+  }, [selectedOrgId])
+
+  // Sync to isolated localStorage partition whenever studentsList changes
   const updateStudentsList = (newList: any[]) => {
     setStudentsList(newList)
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('oxonom_admin_students_list', JSON.stringify(newList))
+        localStorage.setItem(`oxonom_admin_students_list_${selectedOrgId}`, JSON.stringify(newList))
       } catch (_) {}
     }
   }
@@ -277,7 +308,18 @@ export default function MAdminStudentsClient({
     return orgSlug ? `/orgs/${orgSlug}${path}` : path
   }
 
-  const classList = ['ALL', '1-A', '1-B', '2-A', '2-B', '3-A', '3-B', '4-A', '4-B', '5-A', '6-A', '7-A', '8-A']
+  const activeOrg = useMemo(() => {
+    return SCHOOL_ORGS.find((o) => o.id === selectedOrgId) || SCHOOL_ORGS[0]
+  }, [selectedOrgId])
+
+  const orgClassrooms = useMemo(() => {
+    return getOrgClassrooms(selectedOrgId)
+  }, [selectedOrgId])
+
+  const classList = useMemo(() => {
+    const codes = orgClassrooms.map((c) => c.code)
+    return ['ALL', ...codes]
+  }, [orgClassrooms])
 
   // Filtered students by class and search
   const filteredStudents = useMemo(() => {
@@ -340,11 +382,58 @@ export default function MAdminStudentsClient({
           </span>
         </div>
 
+        {/* ── 1.5. OKUL SEÇİCİ & VERİTABANI İZOLASYONU BANNERI ── */}
+        <section className="px-4 mt-3">
+          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-gray-100 dark:bg-[#121826] border border-gray-200 dark:border-gray-800">
+            <button
+              type="button"
+              onClick={() => setSelectedOrgId(30)}
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                selectedOrgId === 30
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs'
+                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+              }`}
+            >
+              <School size={13} className={selectedOrgId === 30 ? 'text-white' : 'text-emerald-500'} />
+              <span>Oxonom (9-A)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedOrgId(10)}
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                selectedOrgId === 10
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs'
+                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+              }`}
+            >
+              <School size={13} className={selectedOrgId === 10 ? 'text-white' : 'text-gray-400'} />
+              <span>Necla Görer (1–4)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedOrgId(20)}
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                selectedOrgId === 20
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xs'
+                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+              }`}
+            >
+              <School size={13} className={selectedOrgId === 20 ? 'text-white' : 'text-gray-400'} />
+              <span>Fevzi Kutlu (5–8)</span>
+            </button>
+          </div>
+        </section>
+
         {/* ── 2. QUICK ACTIONS BAR (+ Yeni Kayıt & ⇄ Nakil) ── */}
         <section className="px-4 mt-3 grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={() => setIsNewStudentModalOpen(true)}
+            onClick={() => {
+              setNewClassCode(orgClassrooms[0]?.code || '9-A')
+              setIsNewStudentModalOpen(true)
+            }}
             className="h-11 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
           >
             <Plus size={16} strokeWidth={2.5} />
@@ -356,6 +445,7 @@ export default function MAdminStudentsClient({
             onClick={() => {
               if (filteredStudents.length > 0) {
                 setStudentToTransfer(filteredStudents[0])
+                setTargetTransferClass(orgClassrooms[0]?.code || '9-A')
                 setIsTransferModalOpen(true)
               } else {
                 toast.error('Nakil yapılacak öğrenci bulunamadı.')
@@ -737,7 +827,7 @@ export default function MAdminStudentsClient({
                           onChange={(e) => setEditClassCode(e.target.value)}
                           className="w-full h-9 px-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
                         >
-                          {['1-A', '1-B', '2-A', '2-B', '3-A', '3-B', '4-A', '4-B', '5-A', '6-A', '7-A', '8-A'].map((c) => (
+                          {classList.filter(c => c !== 'ALL').map((c) => (
                             <option key={c} value={c}>{c} Şubesi</option>
                           ))}
                         </select>
@@ -923,7 +1013,7 @@ export default function MAdminStudentsClient({
                         <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 flex justify-between items-center">
                           <span className="text-gray-500 font-bold">Kayıtlı Kurum</span>
                           <span className="font-extrabold text-gray-900 dark:text-white">
-                            Necla Görer İlkokulu
+                            {selectedStudentForDetail.schoolName || activeOrg.name}
                           </span>
                         </div>
 
@@ -944,7 +1034,7 @@ export default function MAdminStudentsClient({
                         <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 flex justify-between items-center">
                           <span className="text-gray-500 font-bold">Sınıf Rehber Öğretmeni</span>
                           <span className="font-bold text-gray-900 dark:text-white">
-                            {selectedStudentForDetail.mentorTeacher || 'Özlem ZOR'}
+                            {selectedStudentForDetail.mentorTeacher || (selectedOrgId === 30 ? 'Ebru TEKNECİ (Edebiyat Öğretmeni)' : selectedOrgId === 20 ? 'Beritan ŞENATEŞ' : 'Özlem ZOR')}
                           </span>
                         </div>
 
@@ -1235,11 +1325,9 @@ export default function MAdminStudentsClient({
                       onChange={(e) => setNewClassCode(e.target.value)}
                       className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-bold"
                     >
-                      <option value="1-A">1-A Şubesi</option>
-                      <option value="1-B">1-B Şubesi</option>
-                      <option value="2-A">2-A Şubesi</option>
-                      <option value="3-A">3-A Şubesi</option>
-                      <option value="4-A">4-A Şubesi</option>
+                      {classList.filter(c => c !== 'ALL').map((c) => (
+                        <option key={c} value={c}>{c} Şubesi</option>
+                      ))}
                     </select>
                   </div>
                   <div>

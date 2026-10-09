@@ -53,6 +53,7 @@ import {
   generateClassStudents,
   DEMO_STUDENT,
 } from '@services/demo/schoolDirectory'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
 
 export interface MAdminClassesClientProps {
   orgSlug?: string
@@ -627,6 +628,42 @@ const DEFAULT_MIDDLE_CLASSES: AdminClassroom[] = [
   },
 ]
 
+// Default Oxonom classroom (9-A with Ebru TEKNECİ, 1 student Erçil UĞURLU)
+export const DEFAULT_OXONOM_CLASSES: AdminClassroom[] = [
+  {
+    id: 301,
+    code: '9-A',
+    name: '9-A Şubesi',
+    gradeLevel: '9. Sınıf',
+    gradeNumber: 9,
+    orgId: 30,
+    roomName: 'Derslik 9-A (1. Kat)',
+    teacherName: 'Ebru TEKNECİ',
+    teacherBranch: 'Türk Dili ve Edebiyatı (Edebiyat Öğretmeni)',
+    teacherPhone: '+90 532 999 2803',
+    teacherEmail: 'ogretmen@oxonom.com',
+    studentCount: 1,
+    capacity: 24,
+    boysCount: 1,
+    girlsCount: 0,
+    presentToday: 1,
+    leaveToday: 0,
+    absentToday: 0,
+    attendanceRate: 100,
+    academicAverage: 98.8,
+    courseAverages: [
+      { course: 'Türk Dili ve Edebiyatı', average: 99.3, highest: 100, lowest: 98 },
+      { course: 'Matematik', average: 98.0, highest: 98, lowest: 96 },
+      { course: 'Bilişim & Kodlama', average: 99.0, highest: 100, lowest: 98 },
+    ],
+    boardStatus: 'online',
+    boardName: '9-A Akıllı Etkileşimli Tahta',
+    scheduleSummary: 'Haftalık 35 Saat (MEB Anadolu Lisesi)',
+    classPresident: 'Erçil UĞURLU',
+    parentRepresentative: 'Uğur UĞURLU (Müdür & Veli)',
+  },
+]
+
 type ClassDetailTabKey =
   | 'genel'
   | 'yoklama'
@@ -641,8 +678,16 @@ export default function MAdminClassesClient({
   hideDock = false,
 }: MAdminClassesClientProps) {
   const { theme, toggleTheme } = useMobileTheme()
+  const session = useLHSession() as any
+  const user = session?.data?.user
+
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [selectedOrgId, setSelectedOrgId] = useState<number>(10) // 10: Necla Görer, 20: Fevzi Kalkancı
+  const [selectedOrgId, setSelectedOrgId] = useState<number>(() => {
+    if (user?.school_org_id) return user.school_org_id
+    if (orgSlug === 'neclagorer') return 10
+    if (orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci') return 20
+    return 30 // 30: Oxonom Okulları (Flagship), 10: Necla Görer, 20: Fevzi Kalkancı
+  })
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGradeFilter, setSelectedGradeFilter] = useState<string>('ALL')
 
@@ -698,13 +743,31 @@ export default function MAdminClassesClient({
 
   // Classrooms dataset with localStorage sync
   const [classesList, setClassesList] = useState<AdminClassroom[]>(() => {
-    return DEFAULT_PRIMARY_CLASSES
+    const initialOrgId = (user?.school_org_id || (orgSlug === 'neclagorer' ? 10 : orgSlug === 'fevzi-kutlu' || orgSlug === 'fevzikalkanci' ? 20 : 30))
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(`oxonom_admin_classes_${initialOrgId}`)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed
+        }
+      } catch (_) {}
+    }
+    return initialOrgId === 30
+      ? DEFAULT_OXONOM_CLASSES
+      : initialOrgId === 10
+      ? DEFAULT_PRIMARY_CLASSES
+      : DEFAULT_MIDDLE_CLASSES
   })
 
   // Synchronize when school org changes or load from localStorage
   useEffect(() => {
     const defaultClasses =
-      selectedOrgId === 10 ? DEFAULT_PRIMARY_CLASSES : DEFAULT_MIDDLE_CLASSES
+      selectedOrgId === 30
+        ? DEFAULT_OXONOM_CLASSES
+        : selectedOrgId === 10
+        ? DEFAULT_PRIMARY_CLASSES
+        : DEFAULT_MIDDLE_CLASSES
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem(
@@ -714,6 +777,7 @@ export default function MAdminClassesClient({
           const parsed = JSON.parse(saved)
           if (Array.isArray(parsed) && parsed.length > 0) {
             setClassesList(parsed)
+            setSelectedGradeFilter('ALL')
             return
           }
         }
@@ -865,11 +929,11 @@ export default function MAdminClassesClient({
 
   // Open New Class Modal
   const handleOpenNewClass = () => {
-    const defaultGrade = selectedOrgId === 10 ? '1. Sınıf' : '5. Sınıf'
+    const defaultGrade = selectedOrgId === 30 ? '9. Sınıf' : selectedOrgId === 10 ? '1. Sınıf' : '5. Sınıf'
     setFormGradeLevel(defaultGrade)
-    setFormCode(selectedOrgId === 10 ? '1-D' : '5-B')
-    setFormRoomName('1. Kat · Derslik 107')
-    setFormTeacherName(availableTeachers[0]?.name || 'Özlem ZOR')
+    setFormCode(selectedOrgId === 30 ? '9-B' : selectedOrgId === 10 ? '1-D' : '5-B')
+    setFormRoomName(selectedOrgId === 30 ? '1. Kat · Derslik 102' : '1. Kat · Derslik 107')
+    setFormTeacherName(availableTeachers[0]?.name || (selectedOrgId === 30 ? 'Ebru TEKNECİ' : 'Özlem ZOR'))
     setFormCapacity(32)
     setIsNewClassModalOpen(true)
   }
@@ -886,32 +950,42 @@ export default function MAdminClassesClient({
       code: formCode,
       name: `${formCode} Şubesi`,
       gradeLevel: formGradeLevel,
-      gradeNumber: parseInt(formGradeLevel) || (selectedOrgId === 10 ? 1 : 5),
+      gradeNumber: parseInt(formGradeLevel) || (selectedOrgId === 30 ? 9 : selectedOrgId === 10 ? 1 : 5),
       orgId: selectedOrgId,
       roomName: formRoomName,
       teacherName: formTeacherName,
-      teacherBranch: matchedTeacher?.branch || 'Sınıf Öğretmeni',
+      teacherBranch: matchedTeacher?.branch || (selectedOrgId === 30 ? 'Türk Dili ve Edebiyatı' : 'Sınıf Öğretmeni'),
       teacherPhone: matchedTeacher?.phone || '+90 532 999 1000',
       teacherEmail: matchedTeacher?.email || 'ogretmen@oxonom.com',
-      studentCount: 28,
+      studentCount: selectedOrgId === 30 ? 1 : 28,
       capacity: formCapacity,
-      boysCount: 14,
-      girlsCount: 14,
-      presentToday: 28,
+      boysCount: selectedOrgId === 30 ? 1 : 14,
+      girlsCount: selectedOrgId === 30 ? 0 : 14,
+      presentToday: selectedOrgId === 30 ? 1 : 28,
       leaveToday: 0,
       absentToday: 0,
       attendanceRate: 100,
-      academicAverage: 88.0,
+      academicAverage: selectedOrgId === 30 ? 98.8 : 88.0,
       courseAverages: [
-        { course: 'Türkçe', average: 89.0, highest: 100, lowest: 72 },
+        { course: selectedOrgId === 30 ? 'Türk Dili ve Edebiyatı' : 'Türkçe', average: 89.0, highest: 100, lowest: 72 },
         { course: 'Matematik', average: 86.0, highest: 100, lowest: 68 },
-        { course: 'Hayat Bilgisi', average: 91.0, highest: 100, lowest: 75 },
+        {
+          course:
+            selectedOrgId === 30
+              ? 'Bilişim & Kodlama'
+              : selectedOrgId === 10
+              ? 'Hayat Bilgisi'
+              : 'Fen Bilimleri',
+          average: 91.0,
+          highest: 100,
+          lowest: 75,
+        },
       ],
       boardStatus: 'online',
       boardName: `${formCode} Akıllı Tahta`,
-      scheduleSummary: 'Haftalık 30 Saat',
-      classPresident: 'Sınıf Temsilcisi',
-      parentRepresentative: 'Veli Temsilcisi',
+      scheduleSummary: selectedOrgId === 30 ? 'Haftalık 35 Saat' : selectedOrgId === 10 ? 'Haftalık 30 Saat' : 'Haftalık 35 Saat',
+      classPresident: selectedOrgId === 30 ? 'Erçil UĞURLU' : 'Sınıf Temsilcisi',
+      parentRepresentative: selectedOrgId === 30 ? 'Uğur UĞURLU' : 'Veli Temsilcisi',
     }
 
     const updated = [newClassItem, ...classesList]
@@ -965,10 +1039,17 @@ export default function MAdminClassesClient({
       grade_level: selectedClassForDetail.gradeLevel,
       org_id: selectedClassForDetail.orgId,
       school_name:
-        selectedClassForDetail.orgId === 10
+        selectedClassForDetail.orgId === 30
+          ? 'Oxonom Okulları'
+          : selectedClassForDetail.orgId === 10
           ? 'Necla Görer İlkokulu'
-          : 'Fevzi Kutlu Ortaokulu',
-      school_slug: selectedClassForDetail.orgId === 10 ? 'neclagorer' : 'fevzikalkanci',
+          : 'Şair Fevzi Kutlu Kalkancı Ortaokulu',
+      school_slug:
+        selectedClassForDetail.orgId === 30
+          ? 'oxonom'
+          : selectedClassForDetail.orgId === 10
+          ? 'neclagorer'
+          : 'fevzikalkanci',
       description: `Sınıf Öğretmeni: ${selectedClassForDetail.teacherName}`,
       teacher_name: selectedClassForDetail.teacherName,
       teacher_email: selectedClassForDetail.teacherEmail,
@@ -1061,21 +1142,37 @@ export default function MAdminClassesClient({
           </span>
         </div>
 
-        {/* ── 2. OKUL SEÇİMİ (İlkokul 1-4 vs Ortaokul 5-8) ── */}
+        {/* ── 2. OKUL SEÇİMİ (Oxonom 9 vs İlkokul 1-4 vs Ortaokul 5-8) ── */}
         <section className="px-4 mt-3">
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-gray-100 dark:bg-[#121826] border border-gray-200 dark:border-gray-800">
+          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-gray-100 dark:bg-[#121826] border border-gray-200 dark:border-gray-800">
             <button
               type="button"
-              onClick={() => setSelectedOrgId(10)}
-              className={`py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                selectedOrgId === 10
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
+              onClick={() => setSelectedOrgId(30)}
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                selectedOrgId === 30
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs'
                   : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               <School
                 size={13}
-                className={selectedOrgId === 10 ? 'text-[#10B981]' : 'text-gray-400'}
+                className={selectedOrgId === 30 ? 'text-white' : 'text-emerald-500'}
+              />
+              <span>Oxonom (9-A)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedOrgId(10)}
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                selectedOrgId === 10
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs'
+                  : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+              }`}
+            >
+              <School
+                size={13}
+                className={selectedOrgId === 10 ? 'text-white' : 'text-gray-400'}
               />
               <span>Necla Görer (1–4)</span>
             </button>
@@ -1083,15 +1180,15 @@ export default function MAdminClassesClient({
             <button
               type="button"
               onClick={() => setSelectedOrgId(20)}
-              className={`py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              className={`py-2 px-1 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                 selectedOrgId === 20
-                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs'
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xs'
                   : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               <School
                 size={13}
-                className={selectedOrgId === 20 ? 'text-indigo-500' : 'text-gray-400'}
+                className={selectedOrgId === 20 ? 'text-white' : 'text-gray-400'}
               />
               <span>Fevzi Kutlu (5–8)</span>
             </button>
@@ -1174,7 +1271,9 @@ export default function MAdminClassesClient({
               Tüm Kademeler ({classesList.length})
             </button>
 
-            {(selectedOrgId === 10
+            {(selectedOrgId === 30
+              ? ['9. Sınıf']
+              : selectedOrgId === 10
               ? ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf']
               : ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf']
             ).map((grade) => {
@@ -2029,7 +2128,9 @@ export default function MAdminClassesClient({
                       onChange={(e) => setFormGradeLevel(e.target.value)}
                       className="w-full h-11 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-bold"
                     >
-                      {selectedOrgId === 10 ? (
+                      {selectedOrgId === 30 ? (
+                        <option value="9. Sınıf">9. Sınıf (Anadolu Lisesi)</option>
+                      ) : selectedOrgId === 10 ? (
                         <>
                           <option value="1. Sınıf">1. Sınıf</option>
                           <option value="2. Sınıf">2. Sınıf</option>
@@ -2212,7 +2313,9 @@ export default function MAdminClassesClient({
                           onChange={(e) => setFormGradeLevel(e.target.value)}
                           className="w-full h-11 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-bold"
                         >
-                          {selectedOrgId === 10 ? (
+                          {selectedOrgId === 30 ? (
+                            <option value="9. Sınıf">9. Sınıf (Anadolu Lisesi)</option>
+                          ) : selectedOrgId === 10 ? (
                             <>
                               <option value="1. Sınıf">1. Sınıf</option>
                               <option value="2. Sınıf">2. Sınıf</option>
