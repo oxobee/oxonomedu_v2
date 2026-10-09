@@ -714,19 +714,27 @@ export default function MHomeworkClient({ hideDock = false }: { hideDock?: boole
       {/* ── 390px MOBILE APP FIRST FRAME CONTAINER ── */}
       <div className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F3F5F8] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-24 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none">
         
-        {/* ── 1. TOP HEADER (Dark #0A0D15 Unified Layout) ── */}
+        {/* ── 1. TOP HEADER (Static / Fixed: Adaptive Light with Black Logo / Dark with White Logo) ── */}
         <header
-          className="w-full bg-[#0A0D15] pt-[max(1rem,env(safe-area-inset-top))] pb-4.5 px-5 flex items-center justify-between text-white rounded-b-[10px] sticky top-0 z-30 relative before:absolute before:-top-96 before:inset-x-0 before:h-96 before:bg-[#0A0D15] before:pointer-events-none"
-          style={{
-            backgroundImage:
-              'linear-gradient(45deg,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.05) 1px,transparent 1px)',
-            backgroundSize: '26px 26px',
-          }}
+          className="w-full bg-white dark:bg-[#0A0D15] pt-[max(1rem,env(safe-area-inset-top))] pb-4.5 px-5 flex items-center justify-between text-gray-900 dark:text-white rounded-b-[10px] sticky top-0 z-30 relative before:absolute before:-top-96 before:inset-x-0 before:h-96 before:bg-white dark:before:bg-[#0A0D15] before:pointer-events-none border-b border-gray-200/80 dark:border-transparent shadow-xs dark:shadow-none transition-colors"
+          style={
+            theme === 'dark'
+              ? {
+                  backgroundImage:
+                    'linear-gradient(45deg,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.05) 1px,transparent 1px)',
+                  backgroundSize: '26px 26px',
+                }
+              : {
+                  backgroundImage:
+                    'linear-gradient(45deg,rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(-45deg,rgba(0,0,0,.025) 1px,transparent 1px)',
+                  backgroundSize: '26px 26px',
+                }
+          }
         >
           {/* Logo */}
           <Link href="/dashv2" className="flex items-center active:scale-95 transition-transform">
             <img
-              src="/oxonom-edu-logo-transparent.png"
+              src={theme === 'dark' ? '/oxonom-edu-logo-transparent.png' : '/oxonom_edu_logo_black.png'}
               alt="Oxonom EDU"
               className="h-10 w-auto object-contain"
             />
@@ -737,7 +745,7 @@ export default function MHomeworkClient({ hideDock = false }: { hideDock?: boole
             <button
               type="button"
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 flex items-center justify-center transition-all cursor-pointer"
+              className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-transparent flex items-center justify-center transition-all cursor-pointer"
               title={theme === 'dark' ? 'Açık Temaya Geç' : 'Koyu Temaya Geç'}
             >
               {theme === 'dark' ? <Sun size={15} className="text-amber-300" /> : <Moon size={15} />}
@@ -747,12 +755,20 @@ export default function MHomeworkClient({ hideDock = false }: { hideDock?: boole
               type="button"
               onClick={() => setIsQrModalOpen(true)}
               aria-label="QR kod ile bağlan"
-              className="w-[46px] h-[46px] rounded-[14px] border border-white/20 bg-white/10 hover:bg-white/15 text-white flex items-center justify-center cursor-pointer transition-all shadow-xs"
+              className="w-[46px] h-[46px] rounded-[14px] border border-gray-200/80 dark:border-white/20 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/15 text-gray-800 dark:text-white flex items-center justify-center cursor-pointer transition-all shadow-xs"
             >
               <QrCode size={21} strokeWidth={1.8} />
             </button>
           </div>
         </header>
+
+        {/* ── STAGGERED PAGE CONTENT WRAPPER (Fluid Left Entrance) ── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="flex flex-col flex-1 w-full dash-stagger-items"
+        >
 
         {/* ── 2. HERO / ASSIGNMENT INFO CARD ── */}
         <motion.section
@@ -1348,9 +1364,10 @@ export default function MHomeworkClient({ hideDock = false }: { hideDock?: boole
           </section>
 
         </main>
+      </motion.div>
 
-        {/* ── 7. FLOATING BOTTOM DOCK MENÜ ── */}
-        {!hideDock && <MobileFloatingDock activeTab="assignments" />}
+      {/* ── 7. FLOATING BOTTOM DOCK MENÜ ── */}
+      {!hideDock && <MobileFloatingDock activeTab="assignments" />}
 
         {/* ── 8. MODAL: ÖDEV SEÇİMİ VE TARİHSEL FİLTRELEME (İSTENEN YENİ MODAL) ── */}
         <AnimatePresence>

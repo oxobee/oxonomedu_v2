@@ -247,7 +247,7 @@ export default function SchoolAssignmentsPage() {
 
   return (
     <div className="flex w-full">
-      <div className="px-4 sm:px-10 py-6 tracking-tighter flex flex-col space-y-6 w-full max-w-7xl mx-auto">
+      <div className="px-4 sm:px-10 py-6 tracking-tighter flex flex-col space-y-6 w-full max-w-7xl mx-auto dash-stagger-items">
         {/* TOP BAR: Breadcrumbs, Title, View Switcher & Action */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5">

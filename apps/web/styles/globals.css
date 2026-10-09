@@ -33,6 +33,72 @@
   animation: pin-shake 0.4s ease-in-out;
 }
 
+/* =========================================================================
+   Fluid Stagger Menu Transitions (Menu on Left -> Slide in Left to Right)
+   ========================================================================= */
+@keyframes dashSlideInLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(-22px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes dashFadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.dash-stagger-container {
+  width: 100%;
+}
+
+/* Stagger direct children of page content */
+.dash-stagger-container > * {
+  animation: dashSlideInLeft 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.dash-stagger-container > *:nth-child(1) { animation-delay: 0.02s; }
+.dash-stagger-container > *:nth-child(2) { animation-delay: 0.06s; }
+.dash-stagger-container > *:nth-child(3) { animation-delay: 0.10s; }
+.dash-stagger-container > *:nth-child(4) { animation-delay: 0.14s; }
+.dash-stagger-container > *:nth-child(5) { animation-delay: 0.18s; }
+.dash-stagger-container > *:nth-child(6) { animation-delay: 0.22s; }
+.dash-stagger-container > *:nth-child(7) { animation-delay: 0.26s; }
+.dash-stagger-container > *:nth-child(8) { animation-delay: 0.30s; }
+.dash-stagger-container > *:nth-child(9) { animation-delay: 0.34s; }
+.dash-stagger-container > *:nth-child(10) { animation-delay: 0.38s; }
+.dash-stagger-container > *:nth-child(11) { animation-delay: 0.42s; }
+.dash-stagger-container > *:nth-child(12) { animation-delay: 0.46s; }
+
+/* Sub-containers (e.g. grids, flex containers with multiple cards) */
+.dash-stagger-items > * {
+  animation: dashSlideInLeft 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+.dash-stagger-items > *:nth-child(1) { animation-delay: 0.03s; }
+.dash-stagger-items > *:nth-child(2) { animation-delay: 0.07s; }
+.dash-stagger-items > *:nth-child(3) { animation-delay: 0.11s; }
+.dash-stagger-items > *:nth-child(4) { animation-delay: 0.15s; }
+.dash-stagger-items > *:nth-child(5) { animation-delay: 0.19s; }
+.dash-stagger-items > *:nth-child(6) { animation-delay: 0.23s; }
+.dash-stagger-items > *:nth-child(7) { animation-delay: 0.27s; }
+.dash-stagger-items > *:nth-child(8) { animation-delay: 0.31s; }
+.dash-stagger-items > *:nth-child(9) { animation-delay: 0.35s; }
+.dash-stagger-items > *:nth-child(10) { animation-delay: 0.39s; }
+.dash-stagger-items > *:nth-child(11) { animation-delay: 0.43s; }
+.dash-stagger-items > *:nth-child(12) { animation-delay: 0.47s; }
+
 
 /* Board load animations */
 @keyframes board-fade-in {

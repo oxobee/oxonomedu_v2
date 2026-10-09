@@ -71,7 +71,7 @@ export default function DashboardHome() {
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
       <div className="px-4 sm:px-10 pt-8 pb-10">
-        <div className="space-y-6 max-w-[1600px] mx-auto w-full">
+        <div className="space-y-6 max-w-[1600px] mx-auto w-full dash-stagger-items">
           {/* Welcome Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>

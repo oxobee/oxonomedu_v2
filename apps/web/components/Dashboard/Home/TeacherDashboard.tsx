@@ -75,7 +75,7 @@ export default function TeacherDashboard() {
   const totalGraded = assignments.reduce((acc, a) => acc + (a.graded_submissions || 0), 0)
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 dash-stagger-items">
       {/* ── 1. Hero Teacher Banner ── */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-800 to-indigo-900 p-6 sm:p-8 text-white shadow-md">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">

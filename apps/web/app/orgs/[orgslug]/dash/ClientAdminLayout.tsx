@@ -9,6 +9,7 @@ import { SessionGate } from '@components/Contexts/LHSessionContext'
 import { CommandPaletteProvider } from '@components/Dashboard/CommandPalette/CommandPaletteContext'
 import CommandPalette from '@components/Dashboard/CommandPalette/CommandPalette'
 import { UpgradeModalProvider } from '@components/Dashboard/Shared/PlanRestricted/UpgradeModalContext'
+import DashPageTransition from '@components/Dashboard/Shared/DashPageTransition'
 import React from 'react'
 import { useMediaQuery } from 'usehooks-ts';
 import { useSearchParams } from 'next/navigation'
@@ -55,7 +56,9 @@ function ClientAdminLayout({
                             {!chromeless && !isMobile && <DashLeftMenu />}
                             <div className="flex flex-col w-full min-w-0 relative isolate pb-24 lg:pb-0">
                                 {!chromeless && <DemoBanner />}
-                                {children}
+                                <DashPageTransition menuPosition="left">
+                                    {children}
+                                </DashPageTransition>
                                 {!chromeless && <OnboardingTracker />}
                             </div>
                             {!chromeless && <WelcomeModal />}

@@ -388,32 +388,37 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
   }
 
   const itemVariants: any = {
-    hidden: { opacity: 0, y: 14 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+    hidden: { opacity: 0, x: -20 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } },
   }
 
   return (
     <div className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 selection:text-emerald-950 transition-colors duration-300 font-jakarta overscroll-none`}>
       {/* ── 390px MOBILE APP FIRST FRAME CONTAINER ── */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
+      <div
         className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-20 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"
       >
-        {/* ── TOP HEADER (Dark #0A0D15 Unified Layout) ── */}
+        {/* ── TOP HEADER (Adaptive: Light with Black Logo / Dark with White Logo) ── */}
         <header
-          className="w-full bg-[#0A0D15] pt-[max(1rem,env(safe-area-inset-top))] pb-4.5 px-5 flex items-center justify-between text-white rounded-b-[10px] sticky top-0 z-30 relative before:absolute before:-top-96 before:inset-x-0 before:h-96 before:bg-[#0A0D15] before:pointer-events-none"
-          style={{
-            backgroundImage:
-              'linear-gradient(45deg,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.05) 1px,transparent 1px)',
-            backgroundSize: '26px 26px',
-          }}
+          className="w-full bg-white dark:bg-[#0A0D15] pt-[max(1rem,env(safe-area-inset-top))] pb-4.5 px-5 flex items-center justify-between text-gray-900 dark:text-white rounded-b-[10px] sticky top-0 z-30 relative before:absolute before:-top-96 before:inset-x-0 before:h-96 before:bg-white dark:before:bg-[#0A0D15] before:pointer-events-none border-b border-gray-200/80 dark:border-transparent shadow-xs dark:shadow-none transition-colors"
+          style={
+            theme === 'dark'
+              ? {
+                  backgroundImage:
+                    'linear-gradient(45deg,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.05) 1px,transparent 1px)',
+                  backgroundSize: '26px 26px',
+                }
+              : {
+                  backgroundImage:
+                    'linear-gradient(45deg,rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(-45deg,rgba(0,0,0,.025) 1px,transparent 1px)',
+                  backgroundSize: '26px 26px',
+                }
+          }
         >
-          {/* Logo */}
+          {/* Logo (Black logo on light theme, white transparent logo on dark theme) */}
           <Link href="/dashv2" className="flex items-center active:scale-95 transition-transform py-0.5">
             <img
-              src="/oxonom-edu-logo-transparent.png"
+              src={theme === 'dark' ? '/oxonom-edu-logo-transparent.png' : '/oxonom_edu_logo_black.png'}
               alt="OXONOM edu."
               className="h-10 w-auto object-contain"
             />
@@ -424,7 +429,7 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
             <button
               type="button"
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 flex items-center justify-center transition-all cursor-pointer"
+              className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-transparent flex items-center justify-center transition-all cursor-pointer"
               title={theme === 'dark' ? 'Açık Temaya Geç' : 'Koyu Temaya Geç'}
             >
               {theme === 'dark' ? <Sun size={15} className="text-amber-300" /> : <Moon size={15} />}
@@ -434,15 +439,20 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
               type="button"
               onClick={() => setIsConnectModalOpen(true)}
               aria-label="QR kod ile bağlan"
-              className="w-[46px] h-[46px] rounded-[14px] border border-white/20 bg-white/10 hover:bg-white/15 text-white flex items-center justify-center cursor-pointer transition-all shadow-xs"
+              className="w-[46px] h-[46px] rounded-[14px] border border-gray-200/80 dark:border-white/20 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/15 text-gray-800 dark:text-white flex items-center justify-center cursor-pointer transition-all shadow-xs"
             >
               <QrCode size={21} strokeWidth={1.8} />
             </button>
           </div>
         </header>
 
-        {/* ── MAIN CONTENT CONTAINER (Spacious, No Cramped Areas) ── */}
-        <div className="flex flex-col gap-4 p-4 w-full">
+        {/* ── MAIN CONTENT CONTAINER (Spacious, Staggered entrance from Left) ── */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="flex flex-col gap-4 p-4 w-full"
+        >
           {/* ── HERO ALANI (Dark #0A0D15 Rounded Card matching screenshot) ── */}
           <motion.section
             variants={itemVariants}
@@ -1057,11 +1067,11 @@ export default function DashV2Client({ hideDock = false }: { hideDock?: boolean 
               <span>Oturumu Kapat</span>
             </button>
           </footer>
-        </div>
+        </motion.div>
 
         {/* ── FLOATING BOTTOM DOCK MENÜ WITH MORPH EFFECT ── */}
         {!hideDock && <MobileFloatingDock activeTab="home" />}
-      </motion.div>
+      </div>
 
       {/* ── DIALOGS & DRAWERS (Theme-aware) ── */}
       <ClassSelectorSheet
