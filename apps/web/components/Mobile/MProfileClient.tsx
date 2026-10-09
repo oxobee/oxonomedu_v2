@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -32,6 +32,8 @@ import {
   MapPin,
   BookOpen,
   Award,
+  Camera,
+  Trash2,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
@@ -73,6 +75,10 @@ export default function MProfileClient({
   // Connect board modal state
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
 
+  // Avatar State & File Input Ref
+  const [avatarImage, setAvatarImage] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   // General Form States — Real Teacher Details (Ebru TEKNECİ)
   const [email, setEmail] = useState('ogretmen@oxonom.com')
   const [username, setUsername] = useState('ogretmen')
@@ -110,10 +116,74 @@ export default function MProfileClient({
           if (parsed.lastName) setLastName(parsed.lastName)
           if (parsed.bio) setBio(parsed.bio)
           if (Array.isArray(parsed.extraDetails)) setExtraDetails(parsed.extraDetails)
+          if (parsed.avatarImage || parsed.avatarUrl) {
+            setAvatarImage(parsed.avatarImage || parsed.avatarUrl)
+          }
+        }
+        const savedAvatar = localStorage.getItem('oxonom_teacher_avatar')
+        if (savedAvatar) {
+          setAvatarImage(savedAvatar)
         }
       } catch (_) {}
     }
   }, [user])
+
+  // Save Avatar Helper
+  const saveAvatarToStorage = (avatarData: string | null) => {
+    if (typeof window === 'undefined') return
+    try {
+      if (avatarData) {
+        localStorage.setItem('oxonom_teacher_avatar', avatarData)
+      } else {
+        localStorage.removeItem('oxonom_teacher_avatar')
+      }
+      const savedProfile = localStorage.getItem('oxonom_teacher_profile')
+      const parsed = savedProfile ? JSON.parse(savedProfile) : {}
+      parsed.avatarImage = avatarData
+      parsed.avatarUrl = avatarData
+      localStorage.setItem('oxonom_teacher_profile', JSON.stringify(parsed))
+      window.dispatchEvent(new CustomEvent('oxonom_teacher_profile_updated', { detail: parsed }))
+    } catch (_) {}
+  }
+
+  // Handle local avatar file picker
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Lütfen geçerli bir görsel dosyası seçin (PNG, JPG, WebP).')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Görsel boyutu en fazla 5 MB olabilir.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      const base64 = reader.result as string
+      setAvatarImage(base64)
+      saveAvatarToStorage(base64)
+      toast.success('Profil resmi başarıyla güncellendi!')
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Generate modern educator avatar with AI
+  const handleGenerateAiAvatar = () => {
+    const seed = `${username || firstName || 'teacher'}_${Date.now()}`
+    const aiAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=e2f3ef,eef0ff,fef3c7`
+    setAvatarImage(aiAvatar)
+    saveAvatarToStorage(aiAvatar)
+    toast.success('Yapay zeka profil resmi oluşturuldu ve uygulandı!')
+  }
+
+  // Remove avatar
+  const handleRemoveAvatar = () => {
+    setAvatarImage(null)
+    saveAvatarToStorage(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    toast.success('Profil resmi kaldırıldı.')
+  }
 
   // Save General Profile Changes
   const handleSaveGeneral = () => {
@@ -125,6 +195,8 @@ export default function MProfileClient({
         lastName,
         bio,
         extraDetails,
+        avatarImage,
+        avatarUrl: avatarImage,
       }
       localStorage.setItem('oxonom_teacher_profile', JSON.stringify(profileData))
       window.dispatchEvent(
@@ -270,8 +342,25 @@ export default function MProfileClient({
 
           {/* Teacher Identity Row */}
           <div className="relative z-10 flex items-center gap-3.5">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 border-2 border-white/25 text-slate-300 flex items-center justify-center shrink-0 shadow-md">
-              <User size={28} strokeWidth={1.8} />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="relative cursor-pointer group shrink-0"
+              title="Profil resmini değiştirmek için dokunun"
+            >
+              {avatarImage ? (
+                <img
+                  src={avatarImage}
+                  alt={`${firstName} ${lastName}`}
+                  className="w-14 h-14 rounded-full object-cover border-2 border-emerald-400 shadow-md group-hover:opacity-90 transition-opacity"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 border-2 border-white/25 text-slate-300 flex items-center justify-center shrink-0 shadow-md group-hover:border-emerald-400 transition-colors">
+                  <User size={28} strokeWidth={1.8} />
+                </div>
+              )}
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-gray-900 flex items-center justify-center shadow-xs border-2 border-[#0A0D15] group-hover:scale-110 transition-transform">
+                <Camera size={10} strokeWidth={2.5} />
+              </span>
             </div>
             <div className="min-w-0">
               <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-white leading-tight truncate">
@@ -356,8 +445,29 @@ export default function MProfileClient({
 
               {/* Card 1: Profil Resmi */}
               <section className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800 rounded-3xl p-4 shadow-sm flex items-center gap-4">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 text-slate-300 flex items-center justify-center shrink-0 shadow-md">
-                  <User size={46} strokeWidth={1.5} />
+                <div className="relative shrink-0">
+                  {avatarImage ? (
+                    <img
+                      src={avatarImage}
+                      alt="Profil Resmi"
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover shadow-md border-2 border-emerald-500/30"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 text-slate-300 flex items-center justify-center shadow-md">
+                      <User size={46} strokeWidth={1.5} />
+                    </div>
+                  )}
+
+                  {avatarImage && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveAvatar}
+                      title="Profil Resmini Kaldır"
+                      className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                    >
+                      <Trash2 size={12} strokeWidth={2.4} />
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex-1 min-w-0 flex flex-col gap-2">
@@ -365,27 +475,37 @@ export default function MProfileClient({
                     Profil Resmi
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => toast.success('Avatar yükleme penceresi açıldı.')}
-                    className="h-9 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2234] text-gray-900 dark:text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors shadow-2xs"
-                  >
-                    <Upload size={14} className="text-gray-500 dark:text-gray-400" />
-                    <span>Avatarı Değiştir</span>
-                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarFileChange}
+                    className="hidden"
+                  />
 
-                  <button
-                    type="button"
-                    onClick={() => toast.success('Yapay zeka avatarınız oluşturuluyor...')}
-                    className="h-9 px-3 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/60 dark:bg-indigo-950/40 text-[#4338CA] dark:text-indigo-300 text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors"
-                  >
-                    <Sparkles size={14} />
-                    <span>Generate with AI</span>
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-9 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2234] hover:bg-gray-50 dark:hover:bg-gray-700/60 text-gray-900 dark:text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                    >
+                      <Upload size={14} className="text-emerald-500" />
+                      <span>{avatarImage ? 'Resmi Değiştir' : 'Resim Yükle'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleGenerateAiAvatar}
+                      className="h-9 px-3 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/60 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-[#4338CA] dark:text-indigo-300 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                    >
+                      <Sparkles size={14} />
+                      <span>Generate with AI</span>
+                    </button>
+                  </div>
 
                   <div className="flex items-center gap-1 text-[10px] text-gray-400">
                     <Info size={12} />
-                    <span>Önerilen boyut 100x100</span>
+                    <span>Önerilen kare format (JPG, PNG, WebP · maks 5MB)</span>
                   </div>
                 </div>
               </section>

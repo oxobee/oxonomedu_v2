@@ -52,76 +52,7 @@ export interface BoardItem {
   accentColor: string
 }
 
-const INITIAL_BOARDS: BoardItem[] = [
-  {
-    id: 'b-1',
-    title: '1-A Türkçe: Okuma & Anlama ve Cümle Bilgisi',
-    subject: 'TÜRKÇE',
-    subjectLabel: 'TÜRKÇE',
-    description: 'Öğretmen: Özlem ZOR. 5N1K etkinlikleri, harf-hece çalışmaları ve hızlı okuma tahtası.',
-    teacherName: 'Özlem ZOR',
-    date: '9 Ekim 2026',
-    time: 'Bugün, 09:30',
-    studentCount: 30,
-    className: '1-A Şubesi',
-    isOpen: true,
-    url: 'http://localhost:3000/board/board_6be7ebed-4c00-4243-9a9b-ffef9933803b',
-    isPublic: true,
-    hasPin: false,
-    accentColor: 'rose',
-  },
-  {
-    id: 'b-2',
-    title: '1-A Matematik: Ritmik Sayma & Dört İşlem Atölyesi',
-    subject: 'MATEMATİK',
-    subjectLabel: 'MATEMATİK',
-    description: 'Öğretmen: Özlem ZOR. Basamak değerleri, problem çözme stratejileri ve zihinden işlemler.',
-    teacherName: 'Özlem ZOR',
-    date: '9 Ekim 2026',
-    time: 'Bugün, 11:15',
-    studentCount: 30,
-    className: '1-A Şubesi',
-    isOpen: true,
-    url: 'http://localhost:3000/board/101_matematik',
-    isPublic: true,
-    hasPin: false,
-    accentColor: 'blue',
-  },
-  {
-    id: 'b-3',
-    title: '1-A Hayat Bilgisi: Dünyamız ve Canlılar',
-    subject: 'HAYAT BİLGİSİ',
-    subjectLabel: 'HAYAT BİLGİSİ',
-    description: 'Öğretmen: Özlem ZOR. Mevsimler, doğa olayları, sağlıklı yaşam ve çevre bilinci.',
-    teacherName: 'Özlem ZOR',
-    date: '9 Ekim 2026',
-    time: 'Dün, 14:00',
-    studentCount: 30,
-    className: '1-A Şubesi',
-    isOpen: true,
-    url: 'http://localhost:3000/board/101_hayatbilgisi',
-    isPublic: true,
-    hasPin: false,
-    accentColor: 'emerald',
-  },
-  {
-    id: 'b-4',
-    title: '1-A Görsel Sanatlar & Bilişim: Çizim ve Tasarım',
-    subject: 'GÖRSEL SANATLAR',
-    subjectLabel: 'GÖRSEL SANATLAR',
-    description: 'Öğretmen: Özlem ZOR. Dijital resim, renk teorisi, serbest etkinlikler ve kodlama atölyesi.',
-    teacherName: 'Özlem ZOR',
-    date: '9 Ekim 2026',
-    time: 'Dün, 14:00',
-    studentCount: 30,
-    className: '1-A Şubesi',
-    isOpen: true,
-    url: 'http://localhost:3000/board/101_gorsel',
-    isPublic: true,
-    hasPin: false,
-    accentColor: 'amber',
-  },
-]
+const INITIAL_BOARDS: BoardItem[] = []
 
 export interface MBoardsClientProps {
   hideDock?: boolean
@@ -161,10 +92,19 @@ export default function MBoardsClient({
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('oxonom_m_boards')
-        if (saved) return JSON.parse(saved)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed)) {
+            // Filter out old synthetic demo boards
+            const clean = parsed.filter(
+              (b: any) => !b.teacherName?.includes('Özlem') && !b.id?.startsWith('b-')
+            )
+            return clean
+          }
+        }
       } catch (_) {}
     }
-    return INITIAL_BOARDS
+    return []
   })
 
   const saveBoards = (newBoards: BoardItem[]) => {
@@ -501,9 +441,33 @@ export default function MBoardsClient({
           {/* ── 5. PANOLAR LİSTESİ WITH STAGGERED ENTRANCE ── */}
           <motion.div variants={macroItemVariants} className="flex flex-col gap-4">
             {filteredBoards.length === 0 ? (
-              <div className="py-12 text-center text-gray-400 text-xs bg-white dark:bg-[#121826] rounded-[22px] border border-gray-100 dark:border-gray-800 p-6">
-                Aramanıza uygun akıllı tahta bulunamadı.
-              </div>
+              boards.length === 0 ? (
+                <div className="py-12 px-6 text-center bg-white dark:bg-[#121826] rounded-[24px] border border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center gap-3 shadow-xs">
+                  <div className="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                    <Tv size={26} />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                      Henüz Akıllı Ders Tahtası Bulunmuyor
+                    </h3>
+                    <p className="text-xs text-gray-400 max-w-xs">
+                      Sınıfınız için interaktif çizim ve sunum tahtası oluşturarak dersi başlatabilirsiniz.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsNewBoardModalOpen(true)}
+                    className="mt-1 px-4 py-2.5 rounded-xl bg-[#34D399] hover:bg-[#2ee59d] text-[#0A0D15] font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Plus size={15} strokeWidth={2.5} />
+                    <span>+ İlk Tahtayı Oluştur</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="py-12 text-center text-gray-400 text-xs bg-white dark:bg-[#121826] rounded-[22px] border border-gray-100 dark:border-gray-800 p-6">
+                  Aramanıza uygun akıllı tahta bulunamadı.
+                </div>
+              )
             ) : (
               filteredBoards.map((b, idx) => {
                 // Radial gradient color according to subject
@@ -927,17 +891,30 @@ export default function MBoardsClient({
                   const subject = form.boardSubject.value
                   if (!title.trim()) return
 
+                  let currentTeacher = 'Ebru TEKNECİ'
+                  if (typeof window !== 'undefined') {
+                    try {
+                      const saved = localStorage.getItem('oxonom_teacher_profile')
+                      if (saved) {
+                        const parsed = JSON.parse(saved)
+                        if (parsed.firstName && parsed.lastName) {
+                          currentTeacher = `${parsed.firstName} ${parsed.lastName}`.trim()
+                        }
+                      }
+                    } catch (_) {}
+                  }
+
                   const newB: BoardItem = {
                     id: `b-${Date.now()}`,
                     title: title.trim(),
                     subject: subject as any,
                     subjectLabel: subject,
-                    description: 'Öğretmen: Özlem ZOR. İnteraktif tuval ve akıllı ders panosu.',
-                    teacherName: 'Özlem ZOR',
-                    date: '9 Ekim 2026',
-                    time: 'Bugün, Yeni',
+                    description: `Öğretmen: ${currentTeacher}. İnteraktif tuval ve akıllı ders panosu.`,
+                    teacherName: currentTeacher,
+                    date: 'Bugün',
+                    time: 'Yeni',
                     studentCount: 30,
-                    className: '1-A Şubesi',
+                    className: '9-A Şubesi',
                     isOpen: true,
                     url: `http://localhost:3000/board/custom_${Date.now()}`,
                     isPublic: true,
@@ -957,7 +934,7 @@ export default function MBoardsClient({
                     name="boardTitle"
                     type="text"
                     required
-                    placeholder="Örn: 1-A Fen Bilimleri: Deneyler ve Gözlem"
+                    placeholder="Örn: 9-A Edebiyat: Şiir Tahlilleri ve Söz Sanatları"
                     className="w-full px-3.5 py-2.5 bg-[#182033] border border-white/10 rounded-xl text-white outline-hidden"
                   />
                 </div>

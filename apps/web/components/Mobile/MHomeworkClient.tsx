@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText,
   CheckCircle2,
+  CheckSquare,
   AlertCircle,
   Clock,
   Search,
@@ -84,315 +85,12 @@ const DEFAULT_TEMPLATES = [
 const QUICK_SCORES = [100, 95, 90, 85, 75, 60, 50]
 
 const BRANCH_OPTIONS = [
-  { id: 'all', title: 'Tüm Sınıflar ve Şubeler', desc: 'Filtreleme yapmadan tüm okul ödevlerini gösterir', isAll: true },
-  { id: '1-A', title: '1-A Şubesi', desc: 'Öğretmen: Özlem ZOR (30 Öğrenci)', isAll: false },
-  { id: '1-B', title: '1-B Şubesi', desc: 'Öğretmen: Beyzanur SALMANLI (30 Öğrenci)', isAll: false },
-  { id: '1-C', title: '1-C Şubesi', desc: 'Öğretmen: Özge KABA (30 Öğrenci)', isAll: false },
-  { id: '1-D', title: '1-D Şubesi', desc: 'Öğretmen: Hande YILDIZ (30 Öğrenci)', isAll: false },
-  { id: '1-E', title: '1-E Şubesi', desc: 'Öğretmen: Serkan ÇELİK (30 Öğrenci)', isAll: false },
-  { id: '1-F', title: '1-F Şubesi', desc: 'Öğretmen: Merve AKSOY (30 Öğrenci)', isAll: false },
-  { id: '1-G', title: '1-G Şubesi', desc: 'Öğretmen: Tolga DEMİR (30 Öğrenci)', isAll: false },
+  { id: 'all', title: 'Tüm Şubeler', desc: 'Oxonom Okulları', isAll: true },
+  { id: '9-A', title: '9-A Şubesi', desc: 'Sınıf Rehber Öğretmeni: Ebru TEKNECİ', isAll: false },
 ]
 
 // Real school assignments across classes with authentic board UUIDs
-const INITIAL_HOMEWORKS: HomeworkItem[] = [
-  // ── 1-A ŞUBESİ ──
-  {
-    id: 'hw-1a-1',
-    assignment_uuid: 'asg_ritmik_sayma_01',
-    title: '1-A Matematik: Ritmik Sayma & Sayı Doğrusu Etkinliği',
-    shortTitle: 'Ritmik Sayma & Sayı Doğrusu',
-    subject: 'Matematik',
-    category: 'MATH',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_6be7ebed-4c00-4243-9a9b-ffef9933803b',
-    className: '1-A Şubesi',
-    assignedDate: '08.10.2026',
-    dueDate: '15.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-08').getTime(),
-    dueTimestamp: new Date('2026-10-15T23:59:00').getTime(),
-    description: '1’er ve 2’şer ileriye doğru ritmik sayma kurallarını akıllı tahtada sayı doğrusunda zıplayarak tamamlayınız.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'blue',
-    teacher_name: 'Özlem ZOR',
-  },
-  {
-    id: 'hw-1a-2',
-    assignment_uuid: 'asg_hizli_okuma_02',
-    title: '1-A Türkçe: 1 Dk Hızlı Okuma & Kelime Sayacı Çalışması',
-    shortTitle: '1 Dk Hızlı Okuma & Kelime Sayacı',
-    subject: 'Türkçe',
-    category: 'READING',
-    tool_type: 'READING',
-    className: '1-A Şubesi',
-    assignedDate: '07.10.2026',
-    dueDate: '14.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-07').getTime(),
-    dueTimestamp: new Date('2026-10-14T23:59:00').getTime(),
-    description: 'Verilen metni 1 dakika boyunca sesli okuyarak kelime sayacını başlatınız ve puanınızı kaydediniz.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'rose',
-    teacher_name: 'Özlem ZOR',
-  },
-  {
-    id: 'hw-1a-3',
-    assignment_uuid: 'asg_harf_cizgi_03',
-    title: '1-A Türkçe: Harf Çizgi & Yazılış Yönü Atölyesi (Dik Temel Harfler)',
-    shortTitle: 'Harf Çizgi & Yazılış Yönü Atölyesi',
-    subject: 'Türkçe',
-    category: 'READING',
-    tool_type: 'WORKSHEET',
-    className: '1-A Şubesi',
-    assignedDate: '06.10.2026',
-    dueDate: '13.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-06').getTime(),
-    dueTimestamp: new Date('2026-10-13T23:59:00').getTime(),
-    description: 'MEB standart dik temel harfleri ok yönlerini takip ederek tamamlayınız.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'rose',
-    teacher_name: 'Özlem ZOR',
-  },
-  {
-    id: 'hw-1a-4',
-    title: '1-A Hayat Bilgisi: Sağlıklı Yaşam ve Dengeli Beslenme Tablosu',
-    shortTitle: 'Sağlıklı Yaşam & Dengeli Beslenme',
-    subject: 'Hayat Bilgisi',
-    category: 'LIFE_STUDIES',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_101_hayat',
-    className: '1-A Şubesi',
-    assignedDate: '28.09.2026',
-    dueDate: '05.10.2026 23:59',
-    assignedTimestamp: new Date('2026-09-28').getTime(),
-    dueTimestamp: new Date('2026-10-05T23:59:00').getTime(),
-    description: 'Haftalık sağlıklı beslenme, uyku ve hijyen günlüğünü akıllı tahta tablosuna işleyiniz.',
-    period: 'past',
-    periodLabel: 'Geçen Hafta',
-    accentColor: 'emerald',
-    teacher_name: 'Özlem ZOR',
-  },
-  {
-    id: 'hw-1a-5',
-    title: '1-A Görsel Sanatlar & Bilişim: Çizim ve Tasarım Atölyesi',
-    shortTitle: 'Çizim ve Tasarım Atölyesi',
-    subject: 'Görsel Sanatlar',
-    category: 'ART',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_101_sanat',
-    className: '1-A Şubesi',
-    assignedDate: '20.09.2026',
-    dueDate: '27.09.2026 23:59',
-    assignedTimestamp: new Date('2026-09-20').getTime(),
-    dueTimestamp: new Date('2026-09-27T23:59:00').getTime(),
-    description: 'Dijital resim, renk teorisi ve serbest çizim tuvali üzerinde geometrik desenler oluşturunuz.',
-    period: 'past',
-    periodLabel: 'Eylül Ayı',
-    accentColor: 'purple',
-    teacher_name: 'Özlem ZOR',
-  },
-  {
-    id: 'hw-1a-6',
-    title: '1-A Matematik: Basit Toplama ve Çıkarma Problemleri',
-    shortTitle: 'Toplama & Çıkarma Problemleri',
-    subject: 'Matematik',
-    category: 'MATH',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_6be7ebed-4c00-4243-9a9b-ffef9933803b',
-    className: '1-A Şubesi',
-    assignedDate: '12.10.2026',
-    dueDate: '19.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-12').getTime(),
-    dueTimestamp: new Date('2026-10-19T23:59:00').getTime(),
-    description: 'Görsel nesneler ve sayı çubukları ile 20’ye kadar toplama-çıkarma problem adımlarını akıllı tahtada çözünüz.',
-    period: 'upcoming',
-    periodLabel: 'Gelecek Hafta',
-    accentColor: 'blue',
-    teacher_name: 'Özlem ZOR',
-  },
-
-  // ── 1-B ŞUBESİ ──
-  {
-    id: 'hw-1b-1',
-    title: '1-B Matematik: Doğal Sayılar ve Onluk-Birlik Blokları',
-    shortTitle: 'Doğal Sayılar & Onluk-Birlik',
-    subject: 'Matematik',
-    category: 'MATH',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_102_mat',
-    className: '1-B Şubesi',
-    assignedDate: '08.10.2026',
-    dueDate: '15.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-08').getTime(),
-    dueTimestamp: new Date('2026-10-15T23:59:00').getTime(),
-    description: 'Onluk taban bloklarını kullanarak iki basamaklı sayıları modelleyiniz ve basamak değerlerini gösteriniz.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'blue',
-    teacher_name: 'Beyzanur SALMANLI',
-  },
-  {
-    id: 'hw-1b-2',
-    title: '1-B Türkçe: Okuduğunu Anlama ve Görsel Okuma',
-    shortTitle: 'Okuduğunu Anlama & Görsel Okuma',
-    subject: 'Türkçe',
-    category: 'READING',
-    tool_type: 'READING',
-    className: '1-B Şubesi',
-    assignedDate: '07.10.2026',
-    dueDate: '14.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-07').getTime(),
-    dueTimestamp: new Date('2026-10-14T23:59:00').getTime(),
-    description: 'Kısa hikayeyi okuyup 5N1K sorularını yanıtlayınız.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'rose',
-    teacher_name: 'Beyzanur SALMANLI',
-  },
-  {
-    id: 'hw-1b-3',
-    title: '1-B Hayat Bilgisi: Okul Kuralları & Güvenli Yaşam',
-    shortTitle: 'Okul Kuralları & Güvenli Yaşam',
-    subject: 'Hayat Bilgisi',
-    category: 'LIFE_STUDIES',
-    tool_type: 'WORKSHEET',
-    className: '1-B Şubesi',
-    assignedDate: '29.09.2026',
-    dueDate: '06.10.2026 23:59',
-    assignedTimestamp: new Date('2026-09-29').getTime(),
-    dueTimestamp: new Date('2026-10-06T23:59:00').getTime(),
-    description: 'Sınıf kuralları ve acil durumlarda yapılacaklar listesini eşleştiriniz.',
-    period: 'past',
-    periodLabel: 'Geçen Hafta',
-    accentColor: 'emerald',
-    teacher_name: 'Beyzanur SALMANLI',
-  },
-
-  // ── 1-C ŞUBESİ ──
-  {
-    id: 'hw-1c-1',
-    title: '1-C Matematik: Geometrik Cisimler ve Şekiller',
-    shortTitle: 'Geometrik Cisimler & Şekiller',
-    subject: 'Matematik',
-    category: 'MATH',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_103_mat',
-    className: '1-C Şubesi',
-    assignedDate: '08.10.2026',
-    dueDate: '15.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-08').getTime(),
-    dueTimestamp: new Date('2026-10-15T23:59:00').getTime(),
-    description: 'Küp, prizma ve silindir modellerini akıllı tahta üzerinde döndürerek köşe ve yüzlerini belirleyiniz.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'blue',
-    teacher_name: 'Özge KABA',
-  },
-  {
-    id: 'hw-1c-2',
-    title: '1-C Türkçe: Hece Bilgisi ve Anlamlı Sözcük Türetme',
-    shortTitle: 'Hece Bilgisi & Anlamlı Sözcükler',
-    subject: 'Türkçe',
-    category: 'READING',
-    tool_type: 'WORKSHEET',
-    className: '1-C Şubesi',
-    assignedDate: '12.10.2026',
-    dueDate: '19.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-12').getTime(),
-    dueTimestamp: new Date('2026-10-19T23:59:00').getTime(),
-    description: 'Verilen karışık hecelerden anlamlı sözcükler kurarak cümle içinde kullanınız.',
-    period: 'upcoming',
-    periodLabel: 'Gelecek Hafta',
-    accentColor: 'rose',
-    teacher_name: 'Özge KABA',
-  },
-
-  // ── 1-D ŞUBESİ ──
-  {
-    id: 'hw-1d-1',
-    title: '1-D Matematik: Paralarımız ve Alışveriş Problemleri',
-    shortTitle: 'Paralarımız & Alışveriş',
-    subject: 'Matematik',
-    category: 'MATH',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_104_mat',
-    className: '1-D Şubesi',
-    assignedDate: '07.10.2026',
-    dueDate: '14.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-07').getTime(),
-    dueTimestamp: new Date('2026-10-14T23:59:00').getTime(),
-    description: 'Madeni paralarımızla basit market alışverişi hesaplamalarını akıllı tahtada yapınız.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'blue',
-    teacher_name: 'Hande YILDIZ',
-  },
-
-  // ── 1-E ŞUBESİ ──
-  {
-    id: 'hw-1e-1',
-    title: '1-E Hayat Bilgisi: Ailemiz ve Evimizdeki Sorumluluklar',
-    shortTitle: 'Ailemiz & Sorumluluklar',
-    subject: 'Hayat Bilgisi',
-    category: 'LIFE_STUDIES',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_105_hayat',
-    className: '1-E Şubesi',
-    assignedDate: '06.10.2026',
-    dueDate: '13.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-06').getTime(),
-    dueTimestamp: new Date('2026-10-13T23:59:00').getTime(),
-    description: 'Evde yardımlaşma tablosunu hazırlayıp akıllı tahtada paylaşınız.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'emerald',
-    teacher_name: 'Serkan ÇELİK',
-  },
-
-  // ── 1-F ŞUBESİ ──
-  {
-    id: 'hw-1f-1',
-    title: '1-F Matematik: Zamanı Ölçme ve Saat Okuma',
-    shortTitle: 'Zamanı Ölçme & Saat Okuma',
-    subject: 'Matematik',
-    category: 'MATH',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_106_mat',
-    className: '1-F Şubesi',
-    assignedDate: '08.10.2026',
-    dueDate: '15.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-08').getTime(),
-    dueTimestamp: new Date('2026-10-15T23:59:00').getTime(),
-    description: 'Tam ve yarım saatleri analog saat üzerinde akrep ve yelkovanı ayarlayarak gösteriniz.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'blue',
-    teacher_name: 'Merve AKSOY',
-  },
-
-  // ── 1-G ŞUBESİ ──
-  {
-    id: 'hw-1g-1',
-    title: '1-G Türkçe: Masal Analizi ve 5N1K Çözümlemesi',
-    shortTitle: 'Masal Analizi & 5N1K',
-    subject: 'Türkçe',
-    category: 'READING',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_107_turkce',
-    className: '1-G Şubesi',
-    assignedDate: '07.10.2026',
-    dueDate: '14.10.2026 23:59',
-    assignedTimestamp: new Date('2026-10-07').getTime(),
-    dueTimestamp: new Date('2026-10-14T23:59:00').getTime(),
-    description: 'Okunan masalın kahramanlarını ve olay örgüsünü akıllı tahta kavram haritasında birleştiriniz.',
-    period: 'this_week',
-    periodLabel: 'Bu Hafta',
-    accentColor: 'rose',
-    teacher_name: 'Tolga DEMİR',
-  },
-]
+const INITIAL_HOMEWORKS: HomeworkItem[] = []
 
 export interface MHomeworkClientProps {
   hideDock?: boolean
@@ -429,69 +127,71 @@ export default function MHomeworkClient({
   }, [])
 
   // Branch & Modals
-  const [selectedBranch, setSelectedBranch] = useState('1-A Şubesi')
+  const [selectedBranch, setSelectedBranch] = useState('9-A Şubesi')
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false)
   const [branchSearch, setBranchSearch] = useState('')
   const [isQrModalOpen, setIsQrModalOpen] = useState(false)
 
   // Homework Selector Modal state
   const [isHomeworkModalOpen, setIsHomeworkModalOpen] = useState(false)
-  const [selectedHomeworkId, setSelectedHomeworkId] = useState<string>('hw-1a-1')
+  const [selectedHomeworkId, setSelectedHomeworkId] = useState<string>('')
   const [homeworkDateFilter, setHomeworkDateFilter] = useState<'all' | 'this_week' | 'past' | 'upcoming'>('all')
   const [homeworkSearch, setHomeworkSearch] = useState('')
   const [homeworkSortBy, setHomeworkSortBy] = useState<'newest' | 'due' | 'subject'>('newest')
 
-  // Real merged school assignments (Default + Stored Custom + Curricular)
+  // Real merged school assignments (Custom created only for new accounts)
   const allSchoolHomeworks = useMemo(() => {
     const customList = getStoredCustomAssignments()
-    const convertedCustom: HomeworkItem[] = customList.map((asg) => {
-      const className = asg.classes?.[0]?.name || `${asg.grade_level || '1'}-A Şubesi`
-      const assignedMs = asg.creation_date ? new Date(asg.creation_date).getTime() : Date.now()
-      const dueMs = asg.due_date ? new Date(asg.due_date).getTime() : Date.now() + 7 * 86400000
-      const now = Date.now()
-      let period: 'this_week' | 'past' | 'upcoming' = 'this_week'
-      let periodLabel = 'Bu Hafta'
-      if (dueMs < now) {
-        period = 'past'
-        periodLabel = 'Geçmiş'
-      } else if (dueMs > now + 7 * 86400000) {
-        period = 'upcoming'
-        periodLabel = 'Gelecek'
-      }
+    const convertedCustom: HomeworkItem[] = customList
+      .filter((asg) => !asg.title?.includes('Ritmik Sayma') && !asg.title?.includes('1 Dk Hızlı Okuma'))
+      .map((asg) => {
+        const className = asg.classes?.[0]?.name || '9-A Şubesi'
+        const assignedMs = asg.creation_date ? new Date(asg.creation_date).getTime() : Date.now()
+        const dueMs = asg.due_date ? new Date(asg.due_date).getTime() : Date.now() + 7 * 86400000
+        const now = Date.now()
+        let period: 'this_week' | 'past' | 'upcoming' = 'this_week'
+        let periodLabel = 'Bu Hafta'
+        if (dueMs < now) {
+          period = 'past'
+          periodLabel = 'Geçmiş'
+        } else if (dueMs > now + 7 * 86400000) {
+          period = 'upcoming'
+          periodLabel = 'Gelecek'
+        }
 
-      return {
-        id: String(asg.id || asg.assignment_uuid),
-        assignment_uuid: asg.assignment_uuid,
-        title: asg.title,
-        shortTitle: asg.title.split(':')?.[1]?.trim() || asg.title,
-        subject: (asg.subject as any) || 'Matematik',
-        category: (asg.tool_type as any) || 'WHITEBOARD',
-        tool_type: asg.tool_type,
-        board_uuid: asg.board_uuid,
-        className,
-        assignedDate: new Date(assignedMs).toLocaleDateString('tr-TR'),
-        dueDate: asg.due_date ? new Date(asg.due_date).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) : '15.10.2026 23:59',
-        assignedTimestamp: assignedMs,
-        dueTimestamp: dueMs,
-        description: asg.description || 'Öğretmen tarafından tanımlanan ödev görevi.',
-        period,
-        periodLabel,
-        accentColor: asg.subject === 'Türkçe' ? 'rose' : asg.subject === 'Hayat Bilgisi' ? 'emerald' : 'blue',
-        max_score: asg.max_score || 100,
-        teacher_name: asg.teacher_name || 'Sınıf Öğretmeni',
-      }
-    })
+        return {
+          id: String(asg.id || asg.assignment_uuid),
+          assignment_uuid: asg.assignment_uuid,
+          title: asg.title,
+          shortTitle: asg.title.split(':')?.[1]?.trim() || asg.title,
+          subject: (asg.subject as any) || 'Türkçe',
+          category: (asg.tool_type as any) || 'WHITEBOARD',
+          tool_type: asg.tool_type,
+          board_uuid: asg.board_uuid,
+          className,
+          assignedDate: new Date(assignedMs).toLocaleDateString('tr-TR'),
+          dueDate: asg.due_date ? new Date(asg.due_date).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) : '15.10.2026 23:59',
+          assignedTimestamp: assignedMs,
+          dueTimestamp: dueMs,
+          description: asg.description || 'Öğretmen tarafından tanımlanan ödev görevi.',
+          period,
+          periodLabel,
+          accentColor: asg.subject === 'Türkçe' ? 'rose' : asg.subject === 'Hayat Bilgisi' ? 'emerald' : 'blue',
+          max_score: asg.max_score || 100,
+          teacher_name: asg.teacher_name || 'Ebru TEKNECİ',
+        }
+      })
 
-    return [...convertedCustom, ...INITIAL_HOMEWORKS]
+    return convertedCustom
   }, [])
 
-  // Branch-specific students roster (Each branch now has full 30 students!)
+  // Branch-specific students roster
   const students = useMemo(() => {
     if (selectedBranch === 'all' || selectedBranch === 'Tüm Şubeler' || selectedBranch === 'Tüm Sınıflar ve Şubeler') {
       return ALL_INITIAL_STUDENTS
     }
-    const filtered = ALL_INITIAL_STUDENTS.filter((s) => s.className === selectedBranch)
-    return filtered.length > 0 ? filtered : ALL_INITIAL_STUDENTS.filter((s) => s.className === '1-A Şubesi')
+    const filtered = ALL_INITIAL_STUDENTS.filter((s) => s.className === selectedBranch || s.className?.includes('9-A'))
+    return filtered.length > 0 ? filtered : ALL_INITIAL_STUDENTS
   }, [selectedBranch])
 
   const [selectedStudentId, setSelectedStudentId] = useState<string>('s-1')
@@ -512,15 +212,17 @@ export default function MHomeworkClient({
     return {}
   })
 
-  // Sync active homework when selectedHomeworkId changes
+  // Sync active homework when selectedHomeworkId changes (returns null if empty)
   const currentHomework = useMemo(() => {
+    if (allSchoolHomeworks.length === 0) return null
     return allSchoolHomeworks.find((hw) => hw.id === selectedHomeworkId) || allSchoolHomeworks[0]
   }, [allSchoolHomeworks, selectedHomeworkId])
 
   // Current Homework's Submissions Map
   const currentSubmissions = useMemo(() => {
+    if (!currentHomework) return {}
     return allSubmissions[currentHomework.id] || {}
-  }, [allSubmissions, currentHomework.id])
+  }, [allSubmissions, currentHomework])
 
   // Grading form state for the currently active student
   const [currentScore, setCurrentScore] = useState<number>(100)
@@ -604,7 +306,7 @@ export default function MHomeworkClient({
 
   // Handle Save Evaluation
   const handleSaveEvaluation = () => {
-    if (!selectedStudent) return
+    if (!selectedStudent || !currentHomework) return
     const now = new Date()
     const timeFormatted = `${now.toLocaleDateString('tr-TR')} ${now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`
 
@@ -715,18 +417,41 @@ export default function MHomeworkClient({
         className="flex flex-col flex-1 w-full dash-stagger-items"
       >
 
-        {/* ── 2. HERO / ASSIGNMENT INFO CARD ── */}
-        <motion.section
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mx-4 mt-3 bg-[#0A0D15] text-white rounded-[22px] p-4 flex flex-col gap-3.5 shadow-xl border border-white/5 relative overflow-hidden"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 100% 0%,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 55%),linear-gradient(45deg,rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.04) 1px,transparent 1px)',
-            backgroundSize: 'auto,26px 26px,26px 26px',
-          }}
-        >
+        {/* ── 2. HERO / ASSIGNMENT INFO CARD & EMPTY STATE ── */}
+        {!currentHomework ? (
+          <div className="mx-4 my-8 bg-white dark:bg-[#111624] border border-dashed border-gray-200 dark:border-white/10 rounded-[26px] p-8 text-center flex flex-col items-center justify-center gap-3.5 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-[#6366F1] dark:text-indigo-300 flex items-center justify-center">
+              <CheckSquare size={28} />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-extrabold text-gray-900 dark:text-white">
+                Henüz Verilmiş Bir Ödev Bulunmuyor
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs leading-relaxed">
+                9-A şubesi için henüz tanımlanmış bir ödev görevi bulunmuyor. Yeni bir ödev veya çalışma oluşturduğunuzda öğrenci teslimleri ve değerlendirmeleri burada listelenecektir.
+              </p>
+            </div>
+            <Link
+              href="/m-student"
+              className="mt-1 px-4 py-2.5 rounded-xl bg-[#34D399] hover:bg-[#2ee59d] text-[#0A0D15] font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+            >
+              <span>Öğrenci Listesine Git</span>
+              <ChevronRight size={14} />
+            </Link>
+          </div>
+        ) : (
+          <>
+            <motion.section
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mx-4 mt-3 bg-[#0A0D15] text-white rounded-[22px] p-4 flex flex-col gap-3.5 shadow-xl border border-white/5 relative overflow-hidden"
+              style={{
+                backgroundImage:
+                  'radial-gradient(circle at 100% 0%,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 55%),linear-gradient(45deg,rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.04) 1px,transparent 1px)',
+                backgroundSize: 'auto,26px 26px,26px 26px',
+              }}
+            >
           {/* Title Row & Selectors */}
           <div className="flex items-start gap-3">
             <div className="w-[42px] h-[42px] rounded-[13px] bg-[#34D399]/15 border border-[#34D399]/35 text-[#34D399] flex items-center justify-center shrink-0 mt-0.5">
@@ -1309,7 +1034,9 @@ export default function MHomeworkClient({
           </section>
 
         </main>
-      </motion.div>
+      </>
+    )}
+  </motion.div>
 
         {/* ── 8. MODAL: ÖDEV SEÇİMİ VE TARİHSEL FİLTRELEME (İSTENEN YENİ MODAL) ── */}
         <AnimatePresence>
@@ -1453,7 +1180,7 @@ export default function MHomeworkClient({
                     </div>
                   ) : (
                     classHomeworks.map((hw) => {
-                      const isSelected = hw.id === currentHomework.id
+                      const isSelected = hw.id === currentHomework?.id
                       const subCount = Object.keys(allSubmissions[hw.id] || {}).length
 
                       // Tag Colors

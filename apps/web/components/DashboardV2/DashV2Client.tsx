@@ -192,6 +192,8 @@ export default function DashV2Client({
     branch?: string
     isFirstLogin?: boolean
     profileCompleted?: boolean
+    avatarUrl?: string
+    avatarImage?: string
   } | null>(null)
 
   useEffect(() => {
@@ -425,71 +427,18 @@ export default function DashV2Client({
   }, [selectedClass?.code])
 
   const classBoards = useMemo(() => {
-    const code = selectedClass?.code || '1-A'
-    const fromStorage = localBoards.filter((b) => b.className?.includes(code) || b.title?.includes(code))
-    if (fromStorage.length > 0) return fromStorage
-
-    // If none yet in storage for this class, generate contextual realistic boards for this class:
-    return [
-      {
-        id: `board-${code}-1`,
-        title: `${code} Türkçe: Okuma & Anlama ve Cümle Bilgisi`,
-        subject: 'TÜRKÇE',
-        date: '9 Ekim 2026',
-        time: 'Bugün, 11:15',
-        description: 'İnteraktif çizim ve ders sunumu için hazır',
-        className: `${code} Şubesi`,
-        url: 'http://localhost:3000/board/board_6be7ebed-4c00-4243-9a9b-ffef9933803b',
-        isOpen: true,
-      },
-      {
-        id: `board-${code}-2`,
-        title: `${code} Matematik: Ritmik Sayma & Dört İşlem Atölyesi`,
-        subject: 'MATEMATİK',
-        date: '9 Ekim 2026',
-        time: 'Bugün, 09:30',
-        description: 'Basamak değerleri, problem çözme stratejileri ve zihinden işlemler.',
-        className: `${code} Şubesi`,
-        url: 'http://localhost:3000/board/101_matematik',
-        isOpen: true,
-      },
-      {
-        id: `board-${code}-3`,
-        title: `${code} Hayat Bilgisi: Dünyamız ve Canlılar`,
-        subject: 'HAYAT BİLGİSİ',
-        date: '8 Ekim 2026',
-        time: 'Dün, 14:00',
-        description: 'Mevsimler, doğa olayları, sağlıklı yaşam ve çevre bilinci.',
-        className: `${code} Şubesi`,
-        url: 'http://localhost:3000/board/101_hayatbilgisi',
-        isOpen: true,
-      },
-      {
-        id: `board-${code}-4`,
-        title: `${code} Görsel Sanatlar: Çizim ve Tasarım`,
-        subject: 'GÖRSEL SANATLAR',
-        date: '8 Ekim 2026',
-        time: 'Dün, 11:30',
-        description: 'Renk teorisi ve dijital çizim etkinlikleri.',
-        className: `${code} Şubesi`,
-        url: 'http://localhost:3000/board/101_gorsel',
-        isOpen: true,
-      },
-      {
-        id: `board-${code}-5`,
-        title: `${code} Sınıf Panosu: Haftalık Yıldızlar & Etkinlikler`,
-        subject: 'SINIF PANOSU',
-        date: '7 Ekim 2026',
-        time: 'Çarşamba, 15:45',
-        description: 'Haftanın örnek öğrencileri ve haftalık ödev tablosu.',
-        className: `${code} Şubesi`,
-        url: 'http://localhost:3000/board/101_pano',
-        isOpen: true,
-      },
-    ]
+    const code = selectedClass?.code || '9-A'
+    const fromStorage = localBoards.filter((b) => {
+      const matchClass =
+        b.className?.toLowerCase().includes(code.toLowerCase()) ||
+        b.title?.toLowerCase().includes(code.toLowerCase()) ||
+        b.title?.toLowerCase().includes('sınıf panosu')
+      return matchClass
+    })
+    return fromStorage
   }, [localBoards, selectedClass?.code])
 
-  const latestClassBoard = classBoards[0]
+  const latestClassBoard = classBoards.length > 0 ? classBoards[0] : null
 
   // Fetch Classroom Assignments
   const { data: assignmentsData } = useQuery({
@@ -727,9 +676,17 @@ export default function DashV2Client({
                 title="Hesap ve Profil Ayarları"
               >
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-[#0A0D15] flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-105 transition-transform">
-                    {teacherInitials}
-                  </div>
+                  {teacherProfile?.avatarUrl || teacherProfile?.avatarImage ? (
+                    <img
+                      src={teacherProfile.avatarUrl || teacherProfile.avatarImage}
+                      alt={teacherName}
+                      className="w-10 h-10 rounded-xl object-cover border border-emerald-400/50 shadow-sm group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-[#0A0D15] flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-105 transition-transform">
+                      {teacherInitials}
+                    </div>
+                  )}
                   <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0A0D15]" />
                 </div>
                 <div className="text-left hidden xs:block sm:block pr-1">
@@ -842,7 +799,7 @@ export default function DashV2Client({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-3xl font-black text-gray-900 dark:text-white tracking-tight group-hover:text-teal-600 transition-colors">
-                    {classBoards.length || 5}
+                    {classBoards.length}
                   </span>
                   <div className="w-9 h-9 rounded-xl bg-[#E6F9F5] dark:bg-teal-950/60 text-[#0D9488] dark:text-teal-300 flex items-center justify-center">
                     <Tv size={17} />
@@ -1003,43 +960,66 @@ export default function DashV2Client({
               </span>
             </div>
 
-            {/* Featured Subcard (Shows the latest created board for the selected class with Date & Time) */}
-            <div className="bg-[#F8FAFC] dark:bg-[#0A0D15] p-4 rounded-2xl border border-gray-200/60 dark:border-gray-800/80 space-y-3">
-              <div>
-                <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug">
-                  <span className="w-2 h-2 rounded-full bg-[#10B981] shrink-0 animate-pulse" />
-                  <span className="truncate">{latestClassBoard.title}</span>
+            {/* Featured Subcard (Shows the latest created board for the selected class with Date & Time, or Empty State) */}
+            {latestClassBoard ? (
+              <div className="bg-[#F8FAFC] dark:bg-[#0A0D15] p-4 rounded-2xl border border-gray-200/60 dark:border-gray-800/80 space-y-3">
+                <div>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-900 dark:text-white leading-snug">
+                    <span className="w-2 h-2 rounded-full bg-[#10B981] shrink-0 animate-pulse" />
+                    <span className="truncate">{latestClassBoard.title}</span>
+                  </div>
+
+                  {/* Date & Time clearly displayed as requested */}
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <span className="inline-flex items-center gap-1 font-bold text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/60">
+                      <Clock size={11} />
+                      <span>{latestClassBoard.time}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                      <Calendar size={11} />
+                      <span>{latestClassBoard.date}</span>
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
+                    {latestClassBoard.description || 'İnteraktif çizim ve ders sunumu için hazır'}
+                  </p>
                 </div>
 
-                {/* Date & Time clearly displayed as requested */}
-                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                  <span className="inline-flex items-center gap-1 font-bold text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/60">
-                    <Clock size={11} />
-                    <span>{latestClassBoard.time}</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-                    <Calendar size={11} />
-                    <span>{latestClassBoard.date}</span>
-                  </span>
-                </div>
-
-                <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                  {latestClassBoard.description || 'İnteraktif çizim ve ders sunumu için hazır'}
-                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = latestClassBoard.url || `/board/${latestClassBoard.id}`
+                    window.open(url, '_blank')
+                  }}
+                  className="w-full py-3 px-4 bg-[#111827] dark:bg-[#1E293B] hover:bg-black text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98 transition-all"
+                >
+                  <span>Tahtayı Aç</span>
+                  <ArrowUpRight size={15} />
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const url = latestClassBoard.url || `/board/${latestClassBoard.id}`
-                  window.open(url, '_blank')
-                }}
-                className="w-full py-3 px-4 bg-[#111827] dark:bg-[#1E293B] hover:bg-black text-white font-bold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98 transition-all"
-              >
-                <span>Tahtayı Aç</span>
-                <ArrowUpRight size={15} />
-              </button>
-            </div>
+            ) : (
+              <div className="bg-[#F8FAFC] dark:bg-[#0A0D15] p-5 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800/80 text-center flex flex-col items-center justify-center gap-2.5">
+                <div className="w-11 h-11 rounded-2xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                  <Tv size={20} />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">
+                    Henüz Ders Tahtası Oluşturulmadı
+                  </h4>
+                  <p className="text-[11px] text-gray-400 max-w-xs">
+                    Sınıfınız için ilk akıllı ders tahtasını oluşturup derse hemen başlayabilirsiniz.
+                  </p>
+                </div>
+                <Link
+                  href="/m-boards?new=true"
+                  className="mt-1 px-3.5 py-2 rounded-xl bg-[#34D399] hover:bg-[#2ee59d] text-[#0A0D15] font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                >
+                  <Plus size={14} strokeWidth={2.5} />
+                  <span>+ İlk Tahtayı Oluştur</span>
+                </Link>
+              </div>
+            )}
 
             {/* Bottom Links */}
             <div className="flex items-center justify-between pt-1 px-1 text-xs">
@@ -1073,7 +1053,7 @@ export default function DashV2Client({
                   Verilen Ödevler
                 </h3>
                 <p className="text-xs text-gray-400 truncate mt-0.5">
-                  {assignments.length || 3} aktif · Teslimler sürüyor
+                  {assignments.length > 0 ? `${assignments.length} aktif · Teslimler sürüyor` : 'Henüz ödev verilmedi'}
                 </p>
               </div>
             </div>
