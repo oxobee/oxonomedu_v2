@@ -4,6 +4,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { clearAllClientAuthCookies } from '@components/Contexts/AuthContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
 import { getOrgLogoMediaDirectory } from '@services/media/media'
@@ -1671,31 +1672,36 @@ export default function PanoClient() {
   const isPhone = false
   const connectionStatus = 'connected' as const
 
-  // Handle successful pairing from Standby Screen
+  // Handle successful pairing from Standby Screen - isolates device strictly to mobile teacher session
   const handlePaired = async (teacherData: TeacherPairData) => {
     setPairedSession(teacherData)
     setIsPhoneConnected(true)
     setForceStandby(false)
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('oxonom_pano_force_standby')
-    }
 
     const sId = (teacherData as any).sessionId || searchParams?.get('session') || ''
     if (sId) {
       setActiveSessionId(sId)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('oxonom_pano_active_session_id', sId)
-      }
     }
 
+    // Isolate device session strictly to mobile teacher: clear stale sessions & establish teacher session
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('oxonom_pano_force_standby')
+      if (sId) {
+        localStorage.setItem('oxonom_pano_active_session_id', sId)
+      }
       localStorage.setItem('oxonom_pano_paired_session', JSON.stringify(teacherData))
-    }
-    if (teacherData.settings) {
-      setSettings(teacherData.settings)
-      if (typeof window !== 'undefined') {
+      if (teacherData.settings) {
         localStorage.setItem('oxonom_pano_settings', JSON.stringify(teacherData.settings))
       }
+      try {
+        const bc = new BroadcastChannel('learnhouse_auth_sync')
+        bc.postMessage({ type: 'LOGIN' })
+        bc.close()
+      } catch (_) {}
+    }
+
+    if (teacherData.settings) {
+      setSettings(teacherData.settings)
     } else if (teacherData.lock_pin) {
       setSettings(prev => ({ ...prev, pin: teacherData.lock_pin || '' }))
     }
@@ -1739,27 +1745,48 @@ export default function PanoClient() {
     toast.success(`Hoş geldiniz Sayın ${teacherData.first_name || teacherData.username || 'Öğretmenim'}!`)
   }
 
-  // Handle Logout -> clears local state, calls backend logout, resets to Standby Screen or redirects
-  const handleLogout = async () => {
+  // Logout modal state: 'closed' | 'ask_save' | 'confirm_discard'
+  const [logoutModalStep, setLogoutModalStep] = useState<'closed' | 'ask_save' | 'confirm_discard'>('closed')
+  const [isSavingBoard, setIsSavingBoard] = useState(false)
+
+  // Completely logs out of the device, server session, and clears all cookies
+  const executeFullDeviceLogout = async () => {
     try {
-      await fetch('/api/pano/pair/logout', {
+      if (activeSessionId) {
+        await fetch('/api/pano/pair/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: activeSessionId, target: 'both' }),
+        })
+      }
+    } catch (_) {}
+
+    try {
+      await fetch('/api/auth/logout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: activeSessionId }),
+        credentials: 'include',
       })
     } catch (_) {}
+
+    // Wipe all browser cookies and auth caches completely
+    clearAllClientAuthCookies()
 
     if (typeof window !== 'undefined') {
       localStorage.removeItem('oxonom_pano_paired_session')
       localStorage.removeItem('oxonom_pano_active_session_id')
       localStorage.removeItem('oxonom_pano_is_locked')
       localStorage.removeItem('oxonom_pano_selected_class_id')
+      localStorage.removeItem('oxonom_selected_class')
       localStorage.setItem('oxonom_pano_force_standby', 'true')
-    }
 
-    if (typeof document !== 'undefined') {
-      document.cookie = 'LH_session=; path=/; max-age=0'
-      document.cookie = 'LH_org=; path=/; max-age=0'
+      try {
+        const bc = new BroadcastChannel('learnhouse_auth_sync')
+        bc.postMessage({ type: 'LOGOUT' })
+        bc.close()
+      } catch (_) {}
+
+      window.dispatchEvent(new Event('oxonom_pano_sync'))
+      window.dispatchEvent(new Event('storage'))
     }
 
     setPairedSession(null)
@@ -1770,18 +1797,119 @@ export default function PanoClient() {
     setIsLocked(false)
     setIsProfileOpen(false)
     sessionInitializedRef.current = false
+    setForceStandby(true)
 
     if (session?.update) {
       session.update(true).catch(() => {})
     }
 
-    if (isPhone) {
-      toast.success('Pano oturumu kapatıldı.')
-      router.push('/dash/connect-board')
-    } else {
-      setForceStandby(true)
-      toast.success('Pano oturumu kapatıldı.')
+    toast.success('Pano ve cihaz oturumu tamamen kapatıldı.')
+  }
+
+  // Save current board to classroom history and perform full device logout
+  const handleSaveAndLogout = async () => {
+    setIsSavingBoard(true)
+    try {
+      const cls = selectedClassRef.current || selectedClass
+      const targetClassName = cls?.name || 'Sınıf'
+      const targetClassId = cls?.id || 1
+      const now = new Date()
+      const dateStr = now.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+      const boardTitle = `${targetClassName} - Canlı Ders Tahtası (${dateStr})`
+      const boardId = `board_${Date.now()}`
+
+      if (typeof window !== 'undefined') {
+        // 1. Save into oxonom_custom_boards (Classroom Board History)
+        try {
+          const rawCustom = localStorage.getItem('oxonom_custom_boards')
+          const existingCustom = rawCustom ? JSON.parse(rawCustom) : []
+          const newCustomBoard = {
+            id: Date.now(),
+            board_uuid: boardId,
+            name: boardTitle,
+            board_date: now.toISOString().split('T')[0],
+            date: dateStr,
+            time: timeStr,
+            usergroup_id: targetClassId,
+            className: targetClassName,
+            teacher_name: displayName,
+            createdAt: Date.now(),
+            lastOpenedAt: Date.now(),
+          }
+          localStorage.setItem('oxonom_custom_boards', JSON.stringify([newCustomBoard, ...existingCustom]))
+        } catch (_) {}
+
+        // 2. Save into oxonom_m_boards (Mobile Quick Access and Boards View)
+        try {
+          const rawM = localStorage.getItem('oxonom_m_boards')
+          const existingM = rawM ? JSON.parse(rawM) : []
+          const newMBoard = {
+            id: boardId,
+            title: boardTitle,
+            subject: 'SINIF PANOSU',
+            subjectLabel: 'Ders Tahtası',
+            description: `${targetClassName} akıllı tahtasında işlenen ve kaydedilen ders çizimleri`,
+            teacherName: displayName,
+            date: dateStr,
+            time: timeStr,
+            studentCount: cls?.studentCount || 28,
+            className: targetClassName,
+            isOpen: false,
+            url: `/board/${boardId}`,
+            isPublic: true,
+            hasPin: false,
+            accentColor: '#10B981',
+            createdAt: Date.now(),
+            lastOpenedAt: Date.now(),
+            usergroupId: targetClassId,
+          }
+          localStorage.setItem('oxonom_m_boards', JSON.stringify([newMBoard, ...existingM]))
+        } catch (_) {}
+
+        // 3. Update Classroom board counts in UI
+        if (cls) {
+          setSelectedClass((prev: any) => prev ? ({ ...prev, boardCount: (prev.boardCount || 0) + 1 }) : null)
+          setClassrooms((prev: any) => prev.map((c: any) => c.id === cls.id ? { ...c, boardCount: (c.boardCount || 0) + 1 } : c))
+        }
+
+        // 4. Notify all tabs & devices
+        window.dispatchEvent(new Event('oxonom_pano_sync'))
+        window.dispatchEvent(new Event('storage'))
+      }
+
+      // 5. Backend board creation call (non-blocking)
+      try {
+        if (org?.id) {
+          await createBoard(org.id, {
+            name: boardTitle,
+            board_date: now.toISOString().split('T')[0],
+            usergroup_id: targetClassId,
+          }).catch(() => {})
+        }
+      } catch (_) {}
+
+      toast.success('Ders tahtanız sınıf geçmişine kaydedildi! 🎨✨')
+    } catch (e) {
+      console.error('Error saving board before logout:', e)
+    } finally {
+      setIsSavingBoard(false)
+      setLogoutModalStep('closed')
+      await executeFullDeviceLogout()
     }
+  }
+
+  // Discard changes and perform full device logout
+  const handleDiscardAndLogout = async () => {
+    setLogoutModalStep('closed')
+    toast('Tahta kaydedilmeden çıkış yapıldı.', { icon: '👋' })
+    await executeFullDeviceLogout()
+  }
+
+  // Intercept normal logout triggers and open the cute modal
+  const handleLogout = () => {
+    setIsProfileOpen(false)
+    setLogoutModalStep('ask_save')
   }
 
 
@@ -2969,14 +3097,6 @@ export default function PanoClient() {
                     <School className="w-3.5 h-3.5 text-indigo-500" />
                     <span>Şube / Sınıf Değiştir</span>
                   </button>
-                  <Link
-                    href={getUriWithOrg(orgslug, '/dash')}
-                    onClick={() => setIsProfileOpen(false)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors"
-                  >
-                    <LayoutDashboard className="w-3.5 h-3.5 text-indigo-500" />
-                    <span>Yönetim Paneline Git</span>
-                  </Link>
                   <button
                     onClick={() => { lockPano(); setIsProfileOpen(false); }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer text-left"
@@ -3556,6 +3676,166 @@ export default function PanoClient() {
           </button>
         </div>
       )}
+
+      {/* ======================================================== */}
+      {/* SEVİMLİ VE ANİMASYONLU TAHTA KAYDETME & ÇIKIŞ POPUP MODAL */}
+      {/* ======================================================== */}
+      <AnimatePresence>
+        {logoutModalStep !== 'closed' && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md">
+            {/* Modal Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0"
+              onClick={() => {
+                if (!isSavingBoard) setLogoutModalStep('closed')
+              }}
+            />
+
+            {logoutModalStep === 'ask_save' && (
+              <motion.div
+                key="modal_ask_save"
+                initial={{ opacity: 0, scale: 0.85, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.85, y: -20 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+                className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[32px] p-6 sm:p-8 shadow-2xl border border-indigo-100 dark:border-indigo-900/40 text-center overflow-hidden z-10"
+              >
+                {/* Cute Floating Decorative Bubbles */}
+                <div className="absolute -top-12 -left-12 w-32 h-32 bg-indigo-200/40 dark:bg-indigo-600/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-emerald-200/40 dark:bg-emerald-600/10 rounded-full blur-2xl pointer-events-none" />
+
+                {/* Animated Cute Bouncy Icon */}
+                <motion.div
+                  animate={{ y: [0, -8, 0], rotate: [-2, 2, -2] }}
+                  transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut' }}
+                  className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-purple-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-5 relative"
+                >
+                  <Presentation className="w-10 h-10" />
+                  <motion.div
+                    animate={{ scale: [1, 1.25, 1], rotate: [0, 15, 0] }}
+                    transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                    className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center shadow-md font-black text-xs"
+                  >
+                    ✨
+                  </motion.div>
+                </motion.div>
+
+                {/* Class Badge */}
+                {selectedClass && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 text-xs font-black mb-3">
+                    <School className="w-3.5 h-3.5" />
+                    <span>{selectedClass.name}</span>
+                  </div>
+                )}
+
+                {/* Question Title */}
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+                  Ders Tahtanız Kaydedilsin mi? 🎨
+                </h3>
+
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mt-2 leading-relaxed max-w-sm mx-auto">
+                  Ders boyunca tahtaya yazdığınız notları ve çizimleri <strong>{selectedClass?.name || 'sınıf'} geçmişine</strong> ekleyip kaydedelim mi?
+                </p>
+
+                {/* Action Buttons */}
+                <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="button"
+                    disabled={isSavingBoard}
+                    onClick={() => setLogoutModalStep('confirm_discard')}
+                    className="flex-1 py-3.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+                  >
+                    <X className="w-4 h-4 opacity-70" />
+                    <span>Hayır</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isSavingBoard}
+                    onClick={handleSaveAndLogout}
+                    className="flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm shadow-lg shadow-emerald-600/30 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+                  >
+                    {isSavingBoard ? (
+                      <>
+                        <RotateCw className="w-4 h-4 animate-spin" />
+                        <span>Kaydediliyor...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Evet, Kaydet ve Çık</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {logoutModalStep === 'confirm_discard' && (
+              <motion.div
+                key="modal_confirm_discard"
+                initial={{ opacity: 0, scale: 0.85, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.85, y: -20 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+                className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[32px] p-6 sm:p-8 shadow-2xl border border-amber-200 dark:border-amber-900/40 text-center overflow-hidden z-10"
+              >
+                {/* Cute Floating Decorative Glow */}
+                <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-200/40 dark:bg-amber-600/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute -bottom-12 -left-12 w-36 h-36 bg-rose-200/40 dark:bg-rose-600/10 rounded-full blur-2xl pointer-events-none" />
+
+                {/* Animated Curious / Questioning Icon */}
+                <motion.div
+                  animate={{ scale: [1, 1.08, 1], rotate: [-4, 4, -4] }}
+                  transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
+                  className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30 mb-5 relative"
+                >
+                  <span className="text-3xl select-none">🥺</span>
+                  <motion.div
+                    animate={{ y: [0, -4, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+                    className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-white dark:bg-slate-800 text-amber-500 flex items-center justify-center shadow-md font-black text-xs"
+                  >
+                    ❓
+                  </motion.div>
+                </motion.div>
+
+                {/* Question Title */}
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+                  Emin misiniz? 🎨
+                </h3>
+
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mt-2 leading-relaxed max-w-sm mx-auto">
+                  Kaydedilmeyen tahta çizimleri ve ders içerikleri <strong>silinecektir</strong>. Yine de kaydetmeden oturumu kapatmak istediğinize emin misiniz?
+                </p>
+
+                {/* Action Buttons */}
+                <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setLogoutModalStep('ask_save')}
+                    className="flex-1 py-3.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+                  >
+                    <span>Vazgeç, Geri Dön</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDiscardAndLogout}
+                    className="flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-sm shadow-lg shadow-rose-600/30 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Kaydetmeden Çıkış Yap</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

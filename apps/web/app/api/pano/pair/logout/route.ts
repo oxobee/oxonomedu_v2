@@ -20,10 +20,11 @@ export async function POST(req: NextRequest) {
     // Only clear browser cookies if the board itself is logging out (not a mobile remote logout)
     if (role !== 'phone' && target !== 'board_only') {
       const cookieOptions = getCookieOptions(req)
-      response.cookies.set(ACCESS_TOKEN_COOKIE, '', { ...cookieOptions, maxAge: 0 })
-      response.cookies.set(REFRESH_TOKEN_COOKIE, '', { ...cookieOptions, maxAge: 0 })
-      response.cookies.set('LH_session', '', { ...cookieOptions, httpOnly: false, maxAge: 0 })
-      response.cookies.set('LH_org', '', { ...cookieOptions, httpOnly: false, maxAge: 0 })
+      const names = [ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, 'LH_session', 'LH_org', 'LH_custom_domain', 'LH_oauth_state']
+      for (const name of names) {
+        response.cookies.set(name, '', { ...cookieOptions, path: '/', maxAge: 0 })
+        response.cookies.set(name, '', { path: '/', maxAge: 0 })
+      }
     }
 
     return response

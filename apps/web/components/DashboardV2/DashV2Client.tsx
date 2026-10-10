@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -412,31 +412,101 @@ export default function DashV2Client({
     toast.success('Tebrikler! Profiliniz ve resmi evraklarınız başarıyla tamamlandı.', { duration: 5000, icon: '🎉' })
   }
 
+  // Helper to load and merge all saved boards (both mobile & Pano classroom boards)
+  const loadMergedBoards = useCallback(() => {
+    if (typeof window === 'undefined') return []
+    const results: any[] = []
+    const seenIds = new Set<string>()
+
+    // 1. Read mobile boards (oxonom_m_boards)
+    try {
+      const rawM = localStorage.getItem('oxonom_m_boards')
+      if (rawM) {
+        const parsed = JSON.parse(rawM)
+        if (Array.isArray(parsed)) {
+          for (const b of parsed) {
+            const bId = String(b.id || b.board_uuid || '')
+            if (bId && !seenIds.has(bId)) {
+              seenIds.add(bId)
+              results.push(b)
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    // 2. Read Pano custom boards (oxonom_custom_boards)
+    try {
+      const rawC = localStorage.getItem('oxonom_custom_boards')
+      if (rawC) {
+        const parsed = JSON.parse(rawC)
+        if (Array.isArray(parsed)) {
+          for (const c of parsed) {
+            const cId = String(c.board_uuid || c.id || '')
+            if (cId && !seenIds.has(cId)) {
+              seenIds.add(cId)
+              results.push({
+                id: cId,
+                title: c.name || c.title || 'Ders Tahtası',
+                className: c.className || selectedClass?.name || 'Sınıf',
+                usergroupId: c.usergroup_id,
+                date: c.date || c.board_date || 'Bugün',
+                time: c.time || '10:30',
+                description: `${c.className || selectedClass?.name || 'Sınıf'} akıllı tahtasında kaydedilen ders çizimleri`,
+                url: `/board/${cId}`,
+                createdAt: c.createdAt || Date.now(),
+                lastOpenedAt: c.lastOpenedAt || c.createdAt || Date.now(),
+                isOpen: false,
+                isPublic: true,
+              })
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    return results
+  }, [selectedClass?.name])
+
   // Boards for selected class (Synced from local storage / demo)
   const [localBoards, setLocalBoards] = useState<any[]>([])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem('oxonom_m_boards')
-        if (raw) {
-          setLocalBoards(JSON.parse(raw))
-        }
-      } catch (_) {}
+    setLocalBoards(loadMergedBoards())
+    const handleSync = () => {
+      setLocalBoards(loadMergedBoards())
     }
-  }, [selectedClass?.code])
+    window.addEventListener('oxonom_pano_sync', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      window.removeEventListener('oxonom_pano_sync', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
+  }, [loadMergedBoards, selectedClass?.code])
 
+  // Filter and sort so the most recently opened & saved board is displayed FIRST in Quick Access
   const classBoards = useMemo(() => {
-    const code = selectedClass?.code || '9-A'
-    const fromStorage = localBoards.filter((b) => {
-      const matchClass =
-        b.className?.toLowerCase().includes(code.toLowerCase()) ||
-        b.title?.toLowerCase().includes(code.toLowerCase()) ||
-        b.title?.toLowerCase().includes('sınıf panosu')
-      return matchClass
+    const code = selectedClass?.code?.toLowerCase() || ''
+    const cName = selectedClass?.name?.toLowerCase() || ''
+    const cId = selectedClass?.id
+
+    const matched = localBoards.filter((b) => {
+      const bClass = (b.className || '').toLowerCase()
+      const bTitle = (b.title || '').toLowerCase()
+      const matchId = cId && (Number(b.usergroupId) === Number(cId) || Number(b.usergroup_id) === Number(cId))
+      const matchCode = code && (bClass.includes(code) || bTitle.includes(code))
+      const matchName = cName && (bClass.includes(cName) || bTitle.includes(cName))
+      const matchPanosu = bTitle.includes('sınıf panosu')
+      return matchId || matchCode || matchName || matchPanosu
     })
-    return fromStorage
-  }, [localBoards, selectedClass?.code])
+
+    // Sort descending: most recently opened & saved board comes first
+    return matched.sort((a, b) => {
+      const timeA = a.lastOpenedAt || a.createdAt || (a.date ? new Date(a.date).getTime() : 0) || 0
+      const timeB = b.lastOpenedAt || b.createdAt || (b.date ? new Date(b.date).getTime() : 0) || 0
+      return timeB - timeA
+    })
+  }, [localBoards, selectedClass?.code, selectedClass?.name, selectedClass?.id])
 
   const latestClassBoard = classBoards.length > 0 ? classBoards[0] : null
 
@@ -488,12 +558,16 @@ export default function DashV2Client({
             : Array.isArray(data.activeBoards)
             ? data.activeBoards
             : []
+          if (list.length === 0 && storedSessionId && typeof window !== 'undefined') {
+            localStorage.removeItem('oxonom_pano_active_session_id')
+            sessionStorage.removeItem('oxonom_pano_active_session_id')
+          }
           return list
         }
       } catch (_) {}
       return []
     },
-    refetchInterval: 3500,
+    refetchInterval: 2500,
   })
 
   const activeQrBoards: any[] = Array.isArray(activeBoardsData) ? activeBoardsData : []

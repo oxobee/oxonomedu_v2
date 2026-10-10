@@ -213,7 +213,7 @@ function clearSessionMarker(): void {
   }
 }
 
-function clearAllClientAuthCookies(): void {
+export function clearAllClientAuthCookies(): void {
   if (typeof document === 'undefined') return
 
   const names = [
@@ -558,6 +558,60 @@ export function SessionProvider({
     // Invalidate cache when forcing
     if (force) {
       sessionCacheRef.current = null
+    }
+
+    // If an active paired teacher exists in localStorage (e.g. smartboard paired with teacher),
+    // strictly synchronize AuthContext with the paired teacher, isolating from any old background manager session.
+    if (typeof window !== 'undefined') {
+      try {
+        const rawPaired = localStorage.getItem('oxonom_pano_paired_session')
+        if (rawPaired) {
+          const paired = JSON.parse(rawPaired)
+          if (paired && (paired.token || paired.email || paired.username)) {
+            const teacherUser = {
+              id: paired.id || 100,
+              email: paired.email || 'ogretmen@oxonom.com',
+              username: paired.username || 'ogretmen',
+              first_name: paired.first_name || 'Öğretmen',
+              last_name: paired.last_name || '',
+              full_name: `${paired.first_name || 'Öğretmen'} ${paired.last_name || ''}`.trim(),
+              role: 'teacher',
+            }
+            const teacherSession: Session = {
+              user: teacherUser,
+              roles: [
+                {
+                  org: { id: 30, org_uuid: paired.orgSlug || 'oxonom' },
+                  role: {
+                    id: 3,
+                    role_uuid: 'teacher',
+                    name: 'Teacher',
+                    rights: {
+                      dashboard: { action_access: true },
+                      boards: { action_create: true, action_read: true, action_update: true, action_delete: true },
+                      usergroups: { action_create: true, action_read: true, action_update: true, action_delete: true },
+                      activities: { action_create: true, action_read: true, action_update: true, action_delete: true },
+                      courses: { action_create: true, action_read: true, action_update: true, action_delete: true },
+                    },
+                  },
+                } as any,
+              ],
+              tokens: {
+                access_token: paired.token || 'demo-token',
+                expiry: Date.now() + 30 * 24 * 60 * 60 * 1000,
+              },
+            }
+            setSession(teacherSession)
+            setAccessToken(teacherSession.tokens?.access_token || null)
+            setStatus('authenticated')
+            sessionCacheRef.current = {
+              data: teacherSession,
+              timestamp: Date.now(),
+            }
+            return teacherSession.tokens?.access_token || 'demo-token'
+          }
+        }
+      } catch (_) {}
     }
 
     try {

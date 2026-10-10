@@ -213,6 +213,16 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
       console.error('[PanoStandby] Claim error:', err)
     }
 
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('oxonom_pano_paired_session', JSON.stringify(finalTeacherData))
+      localStorage.removeItem('oxonom_pano_force_standby')
+      try {
+        const bc = new BroadcastChannel('learnhouse_auth_sync')
+        bc.postMessage({ type: 'LOGIN' })
+        bc.close()
+      } catch (_) {}
+    }
+
     if (typeof window !== 'undefined' && navigator.vibrate) {
       try { navigator.vibrate([100, 50, 100]) } catch (_) {}
     }

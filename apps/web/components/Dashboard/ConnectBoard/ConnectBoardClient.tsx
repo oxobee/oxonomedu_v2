@@ -400,6 +400,13 @@ export default function ConnectBoardClient({
       const data = await res.json()
       if (data.success && Array.isArray(data.boards)) {
         setActiveBoards(data.boards)
+        if (data.boards.length === 0 && (storedSessionId || sessionId)) {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('oxonom_pano_active_session_id')
+            sessionStorage.removeItem('oxonom_pano_active_session_id')
+          }
+          setSessionId('')
+        }
       }
     } catch (err) {
       console.error('[fetchActiveBoards] Error:', err)
@@ -408,13 +415,24 @@ export default function ConnectBoardClient({
     }
   }, [user?.id, user?.email, sessionId])
 
-  // Polling every 3.5 seconds so board class selection / logout appears live on phone
+  // Real-time synchronization & fast polling so Pano logout appears live on phone immediately
   useEffect(() => {
     fetchActiveBoards()
     const timer = setInterval(() => {
       fetchActiveBoards()
-    }, 3500)
-    return () => clearInterval(timer)
+    }, 2500)
+
+    const handleSync = () => {
+      fetchActiveBoards()
+    }
+    window.addEventListener('oxonom_pano_sync', handleSync)
+    window.addEventListener('storage', handleSync)
+
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener('oxonom_pano_sync', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
   }, [fetchActiveBoards])
 
   // Teacher board logout handler
