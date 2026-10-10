@@ -1134,7 +1134,7 @@ export async function getActivePanoSessionsForTeacher(
       if (activeSessionIdFallback) orClauses.push({ sessionId: activeSessionIdFallback })
 
       const query: any = {
-        status: { $in: ['paired', 'waiting'] },
+        status: 'paired',
         expiresAt: { $gt: now },
       }
       if (orClauses.length > 0) {
@@ -1151,7 +1151,7 @@ export async function getActivePanoSessionsForTeacher(
 
   // 2. Check in memory store
   for (const s of store.memorySessions.values()) {
-    if ((s.status === 'paired' || s.status === 'waiting') && s.expiresAt > now) {
+    if (s.status === 'paired' && s.expiresAt > now) {
       const matchesTeacher =
         (teacherId && (String(s.teacherData?.id) === String(teacherId))) ||
         (email && s.teacherData?.email?.toLowerCase() === email.toLowerCase()) ||
@@ -1167,7 +1167,7 @@ export async function getActivePanoSessionsForTeacher(
   if (activeSessionIdFallback && !results.has(activeSessionIdFallback)) {
     try {
       const s = await getPanoSession(activeSessionIdFallback)
-      if (s && (s.status === 'paired' || s.status === 'waiting') && s.expiresAt > now) {
+      if (s && s.status === 'paired' && s.expiresAt > now) {
         results.set(s.sessionId, s)
       }
     } catch (_) {}

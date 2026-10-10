@@ -56,6 +56,7 @@ import {
 import { createBoard } from '@services/boards/boards'
 import toast from 'react-hot-toast'
 import PanoStandbyScreen from './PanoStandbyScreen'
+import PanoLockScreen from './PanoLockScreen'
 import { TeacherPairData } from '@/lib/pano-pair/store'
 import { usePanoSync, AppItem, WindowState, ClassroomItem, PanoAction } from '@/hooks/usePanoSync'
 import screenfull from 'screenfull'
@@ -390,541 +391,7 @@ const GridItem = ({ item, onAction }: { item: AppItem; onAction: (app: AppItem) 
   )
 }
 
-// 3D Neon Glass Lock Screen with Red Crimson Theme & Mechanical Numpad Popup
-const NeonGlass3DLockScreen = ({
-  user,
-  org,
-  settings,
-  onUnlock,
-  onLogout
-}: {
-  user: any
-  org: any
-  settings: PanoSettings
-  onUnlock: () => void
-  onLogout?: () => void
-}) => {
-  const [pinInput, setPinInput] = useState('')
-  const [hasError, setHasError] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [sliderProgress, setSliderProgress] = useState(0)
-  const [isNumpadOpen, setIsNumpadOpen] = useState(false)
-  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const actualPin = settings.pin ? String(settings.pin).trim() : ''
-  const targetPinLength = actualPin.length > 0 ? actualPin.length : 4
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current)
-    }
-  }, [])
-
-  // Prevent scrollbar on body and document while lock screen is active
-  useEffect(() => {
-    const origBody = document.body.style.overflow
-    const origHtml = document.documentElement.style.overflow
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = origBody
-      document.documentElement.style.overflow = origHtml
-    }
-  }, [])
-
-  // Quotes State - slow, comfortable rotation (11 seconds)
-  const quotes: QuoteItem[] = (settings.quotes && settings.quotes.length > 0 ? settings.quotes : DEFAULT_PANO_QUOTES).map(normalizeQuote)
-  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0)
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentQuoteIndex(prev => (prev + 1) % quotes.length)
-    }, 11000)
-    return () => clearInterval(timer)
-  }, [quotes.length])
-
-  const activeQuote = quotes[currentQuoteIndex % quotes.length] || quotes[0]
-
-  const handleKeyClick = (digit: string) => {
-    if (typeof window !== 'undefined' && navigator.vibrate) {
-      try { navigator.vibrate(12) } catch (_) {}
-    }
-
-    if (isVerifying || isSuccess) return
-
-    // If there was an error showing, clear it immediately and start a fresh input with this digit
-    if (hasError) {
-      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current)
-      setHasError(false)
-      const next = digit
-      setPinInput(next)
-      checkPin(next)
-      return
-    }
-
-    // Never exceed the target pin length!
-    if (pinInput.length >= targetPinLength) return
-
-    const next = pinInput + digit
-    setPinInput(next)
-    checkPin(next)
-  }
-
-  const handleDelete = () => {
-    if (isSuccess || isVerifying) return
-    if (typeof window !== 'undefined' && navigator.vibrate) {
-      try { navigator.vibrate(10) } catch (_) {}
-    }
-    if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current)
-    setHasError(false)
-    setPinInput(prev => prev.slice(0, -1))
-  }
-
-  const handleClear = () => {
-    if (isSuccess || isVerifying) return
-    if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current)
-    setHasError(false)
-    setPinInput('')
-  }
-
-  const checkPin = (current: string) => {
-    if (!actualPin) {
-      setIsNumpadOpen(false)
-      onUnlock()
-      return
-    }
-
-    if (current.length === targetPinLength) {
-      if (current === actualPin) {
-        setIsSuccess(true)
-        setIsVerifying(true)
-        if (typeof window !== 'undefined' && navigator.vibrate) {
-          try { navigator.vibrate([30, 40, 30]) } catch (_) {}
-        }
-        setTimeout(() => {
-          setIsNumpadOpen(false)
-          setIsSuccess(false)
-          setIsVerifying(false)
-          setPinInput('')
-          onUnlock()
-        }, 400)
-      } else {
-        setHasError(true)
-        setIsVerifying(true)
-        if (typeof window !== 'undefined' && navigator.vibrate) {
-          try { navigator.vibrate([40, 60, 40]) } catch (_) {}
-        }
-        if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current)
-        errorTimeoutRef.current = setTimeout(() => {
-          setPinInput('')
-          setHasError(false)
-          setIsVerifying(false)
-        }, 650)
-      }
-    }
-  }
-
-  // Keyboard shortcut listener: Any numeric key opens numpad popup & types
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (/^[0-9]$/.test(e.key)) {
-        setIsNumpadOpen(true)
-        handleKeyClick(e.key)
-      } else if (e.key === 'Backspace') {
-        handleDelete()
-      } else if (e.key === 'Escape') {
-        setIsNumpadOpen(false)
-      } else if (e.key === 'Enter') {
-        if (!actualPin) {
-          setIsNumpadOpen(false)
-          onUnlock()
-        }
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [pinInput, actualPin, targetPinLength, hasError, isVerifying, isSuccess])
-
-  const handleScreenTap = () => {
-    if (settings.unlockType === 'slide') return
-    if (!actualPin) {
-      onUnlock()
-      return
-    }
-    setIsNumpadOpen(true)
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.94 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 1.05, filter: 'blur(12px)' }}
-      transition={{ type: "spring", damping: 28, stiffness: 200 }}
-      onClick={handleScreenTap}
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-between p-6 sm:p-10 select-none overflow-hidden h-screen w-screen max-h-screen max-w-screen font-sans [&::-webkit-scrollbar]:hidden cursor-pointer"
-      style={{
-        background: 'radial-gradient(ellipse at 50% 15%, #251014 0%, #15090b 50%, #070304 100%)',
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-        overflow: 'hidden'
-      }}
-    >
-      {/* Eye-Friendly High-Tech Refined Dot Pattern with Subtle Red Ruby Hue */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.12) 1.2px, transparent 0),
-            radial-gradient(circle at 19px 19px, rgba(244, 63, 94, 0.12) 1.2px, transparent 0)
-          `,
-          backgroundSize: '36px 36px',
-          maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 20%, rgba(0,0,0,0.95) 75%, rgba(0,0,0,0.3) 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 20%, rgba(0,0,0,0.95) 75%, rgba(0,0,0,0.3) 100%)'
-        }}
-      />
-
-      {/* Ambient Red Glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-rose-600/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[600px] h-[260px] bg-red-600/12 rounded-full blur-[130px] pointer-events-none" />
-
-      {/* Top Header / Oturumu Kapat Button */}
-      {onLogout && (
-        <div className="absolute top-5 right-5 z-40">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onLogout()
-            }}
-            className="px-3.5 py-1.5 rounded-full bg-white/[0.07] hover:bg-rose-500/25 active:bg-rose-500/35 border border-white/10 hover:border-rose-400/40 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-2 backdrop-blur-md transition-all cursor-pointer shadow-lg"
-            title="Oturumu Kapat ve Eşleştirme Ekranına Dön"
-          >
-            <div className="w-3.5 h-3.5 opacity-80"><Icons.LogOut /></div>
-            <span className="hidden sm:inline">Oturumu Kapat</span>
-          </button>
-        </div>
-      )}
-
-      {/* Top Header Spacer */}
-      <div className="w-full h-2 shrink-0 pointer-events-none" />
-
-      {/* Center Master Display */}
-      <div className="relative z-10 flex flex-col items-center max-w-5xl w-full my-auto text-center px-4">
-        {/* Futuristic Giant Clock (xx:xx format in Red Crimson Theme) */}
-        <Clock detailed={true} />
-
-        {/* Cinematic Animated Quotes Display (Large, No Header, Author in Separate Element Below) */}
-        <div className="w-full max-w-4xl my-6 sm:my-8 px-4 flex flex-col items-center text-center">
-          <div className="min-h-[100px] sm:min-h-[120px] flex items-center justify-center w-full">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentQuoteIndex}
-                initial={{ opacity: 0, y: 20, scale: 0.96, filter: 'blur(10px)' }}
-                animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -20, scale: 0.98, filter: 'blur(10px)' }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col items-center justify-center text-center w-full"
-              >
-                <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white text-center leading-snug tracking-tight drop-shadow-[0_4px_30px_rgba(0,0,0,0.95)] max-w-4xl">
-                  {activeQuote.text}
-                </p>
-                {activeQuote.author && activeQuote.author.trim() !== '' && (
-                  <span className="mt-3 sm:mt-4 text-base sm:text-lg md:text-xl font-semibold text-rose-300/90 tracking-wide drop-shadow-md">
-                    — {activeQuote.author.trim()}
-                  </span>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Footer Section: Static Unlock Button + OXONOM TECHNOLOGY with Sweeping Glow */}
-      <div className="relative z-10 flex flex-col items-center justify-center w-full pb-4 sm:pb-8 select-none shrink-0 space-y-6">
-        {/* Kilidi Açmak İçin Dokunun Butonu (OXONOM TECHNOLOGY'nin üstünde sabit) */}
-        {settings.unlockType === 'slide' ? (
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-xs flex flex-col items-center"
-          >
-            <div className="relative w-full h-14 bg-white/10 backdrop-blur-xl rounded-full border border-white/20 flex items-center p-1.5 overflow-hidden shadow-inner">
-              <motion.div
-                drag="x"
-                dragConstraints={{ left: 0, right: 230 }}
-                dragElastic={0.1}
-                onDrag={(_, info) => {
-                  const progress = Math.min(Math.max(info.point.x / 230, 0), 1)
-                  setSliderProgress(progress)
-                }}
-                onDragEnd={(_, info) => {
-                  if (info.offset.x > 180) {
-                    onUnlock()
-                  }
-                  setSliderProgress(0)
-                }}
-                className="w-11 h-11 rounded-full bg-gradient-to-r from-red-600 to-rose-500 text-white flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing z-20"
-              >
-                <ArrowRight className="w-5 h-5" />
-              </motion.div>
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-300 pointer-events-none tracking-wider">
-                Kilidi Açmak İçin Kaydırın ➔
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={(e) => {
-                e.stopPropagation()
-                handleScreenTap()
-              }}
-              className="px-9 py-3.5 rounded-full bg-white/[0.08] hover:bg-rose-500/20 active:bg-rose-500/30 border border-white/20 hover:border-rose-400/60 backdrop-blur-xl text-white font-bold text-sm sm:text-base flex items-center gap-3 shadow-2xl shadow-rose-950/40 transition-all cursor-pointer group"
-            >
-              <div className="w-8 h-8 rounded-full bg-rose-500/30 text-rose-300 flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-colors">
-                <Lock className="w-4 h-4" />
-              </div>
-              <span className="tracking-wide">Kilidi Açmak İçin Dokunun</span>
-            </motion.button>
-            <p className="text-[11px] text-slate-400 mt-2 font-medium">Ekrana dokunarak veya tuş takımından şifrenizi girebilirsiniz</p>
-          </div>
-        )}
-
-        {/* OXONOM TECHNOLOGY with left-to-right animated sweeping neon glow */}
-        <div className="relative overflow-hidden py-1 px-6 flex items-center justify-center">
-          <span className="font-mono text-xs sm:text-sm md:text-base font-black text-rose-200/90 uppercase tracking-[0.45em] sm:tracking-[0.6em] drop-shadow-[0_2px_15px_rgba(244,63,94,0.35)] relative z-10">
-            O X O N O M &nbsp; T E C H N O L O G Y
-          </span>
-          <motion.div
-            initial={{ x: '-160%' }}
-            animate={{ x: '260%' }}
-            transition={{
-              repeat: Infinity,
-              duration: 3.2,
-              ease: "easeInOut",
-              repeatDelay: 2
-            }}
-            className="absolute inset-y-0 w-28 bg-gradient-to-r from-transparent via-rose-300/80 to-transparent blur-xs pointer-events-none mix-blend-screen z-20"
-          />
-        </div>
-      </div>
-
-      {/* ======================================================== */}
-      {/* NUMPAD POPUP MODAL (Wider, Mechanical Feel, Shake on Error, Green Glow on Success) */}
-      {/* ======================================================== */}
-      <AnimatePresence>
-        {isNumpadOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsNumpadOpen(false)
-            }}
-            className="fixed inset-0 z-[230] flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl select-none"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.85, y: 30 }}
-              animate={
-                hasError
-                  ? { x: [-16, 16, -12, 12, -6, 6, 0], scale: 1, y: 0, opacity: 1 }
-                  : { x: 0, scale: 1, y: 0, opacity: 1 }
-              }
-              exit={{ opacity: 0, scale: 0.85, y: 30 }}
-              transition={{ type: "spring", damping: 25, stiffness: 320 }}
-              onClick={(e) => e.stopPropagation()}
-              className={`relative flex flex-col items-center p-8 sm:p-10 rounded-3xl bg-slate-900/95 ring-1 ring-white/10 max-w-md w-full sm:w-[420px] transition-all duration-300 ${
-                isSuccess
-                  ? 'border-2 border-emerald-500 shadow-[0_0_80px_rgba(16,185,129,0.8)]'
-                  : 'border border-rose-500/30 shadow-[0_25px_70px_rgba(244,63,94,0.25)]'
-              }`}
-            >
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={() => setIsNumpadOpen(false)}
-                className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-rose-500/20 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-                title="Kapat"
-              >
-                <X className="w-4 h-4" />
-              </button>
-
-              <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg transition-colors ${
-                  isSuccess
-                    ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 shadow-emerald-950/50'
-                    : 'bg-rose-500/20 border border-rose-500/30 text-rose-400 shadow-rose-950/50'
-                }`}
-              >
-                {isSuccess ? <Unlock className="w-7 h-7 animate-pulse text-emerald-400" /> : <Lock className="w-6 h-6" />}
-              </div>
-
-              <h3 className={`font-black text-lg mb-1 transition-colors ${isSuccess ? 'text-emerald-400 animate-pulse' : 'text-white'}`}>
-                {isSuccess ? 'Pano Açılıyor...' : 'Pano PIN Girişi'}
-              </h3>
-              <p className="text-xs text-slate-400 mb-6 text-center">
-                {settings.pin ? `${settings.pin.length} haneli şifrenizi girin` : 'Şifresiz hızlı giriş için dokunun'}
-              </p>
-
-              {/* PIN Status Dots */}
-              <div className="flex items-center gap-4 mb-7">
-                {Array.from({ length: settings.pin.length || 4 }).map((_, i) => {
-                  const isFilled = i < pinInput.length
-                  return (
-                    <div
-                      key={i}
-                      className={`w-4 h-4 rounded-full transition-all duration-300 ${
-                        isFilled
-                          ? isSuccess
-                            ? 'bg-gradient-to-tr from-emerald-500 to-teal-400 border border-emerald-200 scale-125 shadow-[0_0_20px_rgba(16,185,129,1)]'
-                            : 'bg-gradient-to-tr from-rose-500 to-red-400 border border-rose-200 scale-125 shadow-[0_0_15px_rgba(244,63,94,0.9)]'
-                          : 'border border-white/30 bg-white/5'
-                      } ${hasError ? '!border-red-500 !bg-red-500 animate-bounce' : ''}`}
-                    />
-                  )
-                })}
-              </div>
-
-              {hasError && (
-                <p className="text-red-400 text-xs font-bold mb-4 animate-pulse">
-                  Hatalı PIN Kodu! Tekrar deneyin.
-                </p>
-              )}
-
-              {/* Realistic Mechanical Keypad Grid (Wider, matching Image 1) */}
-              <div data-grid-container="lock-numpad" className="grid grid-cols-3 gap-3.5 sm:gap-4 w-full">
-                {[
-                  { num: '1', sub: '' },
-                  { num: '2', sub: 'ABC' },
-                  { num: '3', sub: 'DEF' },
-                  { num: '4', sub: 'GHI' },
-                  { num: '5', sub: 'JKL' },
-                  { num: '6', sub: 'MNO' },
-                  { num: '7', sub: 'PQRS' },
-                  { num: '8', sub: 'TUV' },
-                  { num: '9', sub: 'WXYZ' }
-                ].map(({ num, sub }) => (
-                  <button
-                    key={num}
-                    type="button"
-                    tabIndex={0}
-                    data-grid-item="lock-numpad-key"
-                    aria-label={`Rakam ${num}`}
-                    onClick={() => handleKeyClick(num)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleKeyClick(num)
-                      } else if (e.key.startsWith('Arrow')) {
-                        handleGridArrowNav(e, 'lock-numpad-key')
-                      } else if (e.key === 'Escape') {
-                        e.preventDefault()
-                        setIsNumpadOpen(false)
-                      }
-                    }}
-                    onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
-                    className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-700/80 via-slate-800 to-slate-900 border-t border-l border-white/20 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_8px_15px_rgba(0,0,0,0.6)] active:translate-y-1 active:shadow-[0_0px_0_#1e0a0e,0_2px_5px_rgba(0,0,0,0.6)] active:border-rose-400/80 active:bg-rose-950/40 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-rose-500 focus-visible:ring-offset-2 transition-all duration-75 text-white flex flex-col items-center justify-center cursor-pointer group"
-                  >
-                    <span className="font-mono text-2xl font-black group-hover:text-rose-300 transition-colors drop-shadow-xs">
-                      {num}
-                    </span>
-                    {sub && (
-                      <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase -mt-0.5 group-hover:text-rose-200">
-                        {sub}
-                      </span>
-                    )}
-                  </button>
-                ))}
-
-                {/* Bottom row: Clear, 0, Delete */}
-                <button
-                  type="button"
-                  tabIndex={0}
-                  data-grid-item="lock-numpad-key"
-                  aria-label="Temizle"
-                  onClick={handleClear}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleClear()
-                    } else if (e.key.startsWith('Arrow')) {
-                      handleGridArrowNav(e, 'lock-numpad-key')
-                    } else if (e.key === 'Escape') {
-                      e.preventDefault()
-                      setIsNumpadOpen(false)
-                    }
-                  }}
-                  onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
-                  className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-800/80 to-slate-900 border-t border-l border-white/10 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_6px_10px_rgba(0,0,0,0.5)] active:translate-y-1 active:shadow-none focus:outline-hidden focus-visible:ring-4 focus-visible:ring-rose-500 focus-visible:ring-offset-2 text-slate-400 hover:text-white text-sm font-bold flex items-center justify-center cursor-pointer transition-all"
-                  title="Temizle"
-                >
-                  C
-                </button>
-
-                <button
-                  type="button"
-                  tabIndex={0}
-                  data-grid-item="lock-numpad-key"
-                  aria-label="Rakam 0"
-                  onClick={() => handleKeyClick('0')}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleKeyClick('0')
-                    } else if (e.key.startsWith('Arrow')) {
-                      handleGridArrowNav(e, 'lock-numpad-key')
-                    } else if (e.key === 'Escape') {
-                      e.preventDefault()
-                      setIsNumpadOpen(false)
-                    }
-                  }}
-                  onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
-                  className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-700/80 via-slate-800 to-slate-900 border-t border-l border-white/20 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_8px_15px_rgba(0,0,0,0.6)] active:translate-y-1 active:shadow-[0_0px_0_#1e0a0e,0_2px_5px_rgba(0,0,0,0.6)] active:border-rose-400/80 active:bg-rose-950/40 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-rose-500 focus-visible:ring-offset-2 transition-all duration-75 text-white flex flex-col items-center justify-center cursor-pointer group"
-                >
-                  <span className="font-mono text-2xl font-black group-hover:text-rose-300 transition-colors drop-shadow-xs">
-                    0
-                  </span>
-                  <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase -mt-0.5">
-                    +
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  tabIndex={0}
-                  data-grid-item="lock-numpad-key"
-                  aria-label="Sil"
-                  onClick={handleDelete}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleDelete()
-                    } else if (e.key.startsWith('Arrow')) {
-                      handleGridArrowNav(e, 'lock-numpad-key')
-                    } else if (e.key === 'Escape') {
-                      e.preventDefault()
-                      setIsNumpadOpen(false)
-                    }
-                  }}
-                  onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
-                  className="h-16 sm:h-20 rounded-2xl bg-gradient-to-b from-slate-700/80 via-slate-800 to-slate-900 border-t border-l border-white/20 border-r border-b border-black/80 shadow-[0_4px_0_#1e0a0e,0_8px_15px_rgba(0,0,0,0.6)] active:translate-y-1 active:shadow-[0_0px_0_#1e0a0e,0_2px_5px_rgba(0,0,0,0.6)] active:border-rose-400/80 active:bg-rose-950/40 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-rose-500 focus-visible:ring-offset-2 transition-all duration-75 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer group"
-                  title="Sil"
-                >
-                  <Delete className="w-6 h-6 text-slate-400 group-hover:text-rose-400 transition-colors" />
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  )
-}
+const NeonGlass3DLockScreen = PanoLockScreen
 
 // Pano Settings Drawer / Modal
 const PanoSettingsModal = ({
@@ -1201,7 +668,7 @@ const ClassSelectionModal = ({
           </div>
           <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Ders Başlıyor! Lütfen Sınıfınızı Seçin</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
-            Akıllı tahta, öğrenci listesi, yoklama ve ödevler seçtiğiniz şubeye göre otomatik yapılandırılır.
+            Akıllı tahta, öğrenci listesi ve ödevler seçtiğiniz şubeye göre otomatik yapılandırılır.
           </p>
         </div>
 
@@ -1674,6 +1141,7 @@ export default function PanoClient() {
 
   // Handle successful pairing from Standby Screen - isolates device strictly to mobile teacher session
   const handlePaired = async (teacherData: TeacherPairData) => {
+    sessionInitializedRef.current = true
     setPairedSession(teacherData)
     setIsPhoneConnected(true)
     setForceStandby(false)
@@ -1693,6 +1161,10 @@ export default function PanoClient() {
       if (teacherData.settings) {
         localStorage.setItem('oxonom_pano_settings', JSON.stringify(teacherData.settings))
       }
+      localStorage.removeItem('oxonom_active_admin_session')
+      localStorage.removeItem('oxonom_admin_session')
+      localStorage.removeItem('admin_user')
+      localStorage.removeItem('learnhouse_admin_session')
       try {
         const bc = new BroadcastChannel('learnhouse_auth_sync')
         bc.postMessage({ type: 'LOGIN' })
@@ -1777,6 +1249,10 @@ export default function PanoClient() {
       localStorage.removeItem('oxonom_pano_is_locked')
       localStorage.removeItem('oxonom_pano_selected_class_id')
       localStorage.removeItem('oxonom_selected_class')
+      localStorage.removeItem('oxonom_active_admin_session')
+      localStorage.removeItem('oxonom_admin_session')
+      localStorage.removeItem('admin_user')
+      localStorage.removeItem('learnhouse_admin_session')
       localStorage.setItem('oxonom_pano_force_standby', 'true')
 
       try {
@@ -1804,6 +1280,11 @@ export default function PanoClient() {
     }
 
     toast.success('Pano ve cihaz oturumu tamamen kapatıldı.')
+
+    // Complete hard reload/redirect to /pano so the browser memory & iframes cleanly reset
+    if (typeof window !== 'undefined') {
+      window.location.href = '/pano'
+    }
   }
 
   // Save current board to classroom history and perform full device logout
@@ -2286,8 +1767,7 @@ export default function PanoClient() {
         }
       } catch (_) {}
     }
-    const realClassCount = selectedClass.boardCount || 0
-    return Math.max(realClassCount, customCount)
+    return customCount
   }, [selectedClass, dataSyncTrigger])
 
   const liveAssignmentCount = useMemo(() => {
@@ -2432,7 +1912,10 @@ export default function PanoClient() {
   // Ensure board has a STABLE active verified session for remote pairing (One-shot, non-looping)
   useEffect(() => {
     if (!hasActiveTeacher) return
-    if (sessionInitializedRef.current) return
+    if (pairedSession || sessionInitializedRef.current) {
+      sessionInitializedRef.current = true
+      return
+    }
 
     let isCancelled = false
     const ensureValidSession = async () => {
@@ -2461,44 +1944,6 @@ export default function PanoClient() {
             }
           } catch (_) {}
         }
-
-        // Only create a new session if no valid active session exists
-        const teacherPayload = pairedSession || (user ? {
-          id: user.id,
-          username: user.username || user.email,
-          email: user.email,
-          first_name: user.first_name || 'Öğretmen',
-          last_name: user.last_name || '',
-          orgSlug: orgslug,
-          classrooms: classrooms,
-          selectedClassId: selectedClassRef.current?.id || null,
-          activeClassName: selectedClassRef.current?.name || '',
-        } : null)
-
-        const res = await fetch('/api/pano/pair/session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            teacherData: teacherPayload,
-            ttlMs: 45 * 60 * 1000,
-          }),
-        })
-
-        if (res.ok) {
-          const data = await res.json()
-          if (data.success && data.session && !isCancelled) {
-            const newSessId = data.session.sessionId
-            setActiveSessionId(newSessId)
-            if (data.session.code) setPairingCode(data.session.code)
-            sessionInitializedRef.current = true
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('oxonom_pano_active_session_id', newSessId)
-              if (data.session.boardDeviceToken) {
-                localStorage.setItem('oxonom_pano_device_token', data.session.boardDeviceToken)
-              }
-            }
-          }
-        }
       } catch (_) {
       } finally {
         isEnsuringSessionRef.current = false
@@ -2507,7 +1952,7 @@ export default function PanoClient() {
 
     ensureValidSession()
     return () => { isCancelled = true }
-  }, [hasActiveTeacher])
+  }, [hasActiveTeacher, pairedSession])
 
   // Generate QR code for remote control pairing whenever activeSessionId is available or modal opens
   useEffect(() => {
@@ -2957,10 +2402,11 @@ export default function PanoClient() {
       {/* 1. PROFESSIONAL 3D NEON GLASS LOCK SCREEN (ONLY ON BOARD) */}
       <AnimatePresence>
         {isLocked && !isPhone && (
-          <NeonGlass3DLockScreen
+          <PanoLockScreen
             user={effectiveUser}
             org={org}
             settings={settings}
+            selectedClass={selectedClass}
             onUnlock={unlockPano}
             onLogout={handleLogout}
           />
@@ -3292,8 +2738,8 @@ export default function PanoClient() {
               </div>
             </div>
 
-            {/* 4 Stat Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 relative z-10">
+            {/* 3 Stat Cards (Kademe, Öğrenci, Tahta - Yoklama kaldırıldı) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 relative z-10">
               {/* 1. KADEME */}
               <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/60 to-slate-50/60 dark:from-slate-800/60 dark:to-indigo-950/20 border border-indigo-100/80 dark:border-slate-800 flex items-center gap-3.5 transition-all hover:border-indigo-300">
                 <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
@@ -3341,38 +2787,13 @@ export default function PanoClient() {
                   <span className="text-base sm:text-lg font-black text-cyan-700 dark:text-cyan-400">{liveBoardCount} Aktif</span>
                 </div>
               </div>
-
-              {/* 4. YOKLAMA */}
-              <div
-                onClick={() => {
-                  openAppInWindow({
-                    id: 'class_attendance',
-                    type: 'app',
-                    title: `${selectedClass.name} - Günlük Yoklama`,
-                    icon: 'Attendance',
-                    color: 'bg-purple-600',
-                    iconColor: 'text-white',
-                    path: `/dash/classrooms/${selectedClass.id}?tab=attendance&onlyTab=1`
-                  })
-                }}
-                className="p-4 rounded-2xl bg-gradient-to-br from-purple-50/60 to-slate-50/60 dark:from-slate-800/60 dark:to-purple-950/20 border border-purple-100/80 dark:border-slate-800 flex items-center gap-3.5 cursor-pointer hover:border-purple-400 transition-all hover:-translate-y-0.5"
-                title="Yoklama listesini aç"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
-                  <Calendar className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">YOKLAMA</span>
-                  <span className="text-base sm:text-lg font-black text-purple-700 dark:text-purple-400">{liveAttendanceRate} Katılım</span>
-                </div>
-              </div>
             </div>
 
             {/* ======================================================== */}
-            {/* HERO ALTINDAKİ BUTONLAR (GENİŞ & DOLDURAN 3'LÜ GRID)    */}
+            {/* HERO ALTINDAKİ BUTONLAR (GENİŞ 2'Lİ GRID: TAHTALAR & ÖDEVLER) */}
             {/* ======================================================== */}
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 relative z-10">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
                 {/* 1. Tahtalar Butonu */}
                 <button
                   type="button"
@@ -3384,7 +2805,7 @@ export default function PanoClient() {
                       icon: 'Board',
                       color: 'bg-blue-600',
                       iconColor: 'text-white',
-                      badge: `${selectedClass.boardCount} Tahta`,
+                      badge: `${liveBoardCount} Tahta`,
                       path: `/dash/boards?usergroupId=${selectedClass.id}`
                     })
                   }}
@@ -3401,34 +2822,7 @@ export default function PanoClient() {
                   </span>
                 </button>
 
-                {/* 2. Yoklama Butonu */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    openAppInWindow({
-                      id: 'class_attendance',
-                      type: 'app',
-                      title: `${selectedClass.name} - Günlük Yoklama`,
-                      icon: 'Attendance',
-                      color: 'bg-purple-600',
-                      iconColor: 'text-white',
-                      path: `/dash/classrooms/${selectedClass.id}?tab=attendance&onlyTab=1`
-                    })
-                  }}
-                  className="w-full px-5 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-purple-50/90 to-pink-50/80 dark:from-purple-950/40 dark:to-pink-950/30 text-purple-700 dark:text-purple-300 font-bold border border-purple-200/80 dark:border-purple-800/80 hover:bg-purple-100/90 dark:hover:bg-purple-900/60 transition-all flex items-center justify-between cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Calendar className="w-4 h-4" />
-                    </div>
-                    <span className="text-sm sm:text-base font-black">Yoklama</span>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-xl text-xs bg-purple-200/80 dark:bg-purple-900/80 text-purple-900 dark:text-purple-200 font-black">
-                    {liveAttendanceRate}
-                  </span>
-                </button>
-
-                {/* 3. Ödevler Butonu */}
+                {/* 2. Ödevler Butonu */}
                 <button
                   type="button"
                   onClick={() => {

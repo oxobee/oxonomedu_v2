@@ -306,20 +306,20 @@ export default function MobileFloatingDock({
           )}
         </Link>
 
-        {/* ── 6. EN SAĞDA: HAFİF YUMUŞATILMIŞ KARE QR BUTONU (Akıllı Tahtaya Bağlan) ── */}
+        {/* ── 6. EN SAĞDA: HAFİF YUMUŞATILMIŞ KARE QR BUTONU (DİĞERLERİNDEN DAHA BÜYÜK) ── */}
         <motion.button
           type="button"
           onClick={handleOpenConnect}
-          whileHover={{ scale: 1.06 }}
+          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           aria-label="Akıllı Tahtaya Bağlan"
           title="Akıllı Tahtaya Bağlan (QR Kod / Kod Gir)"
-          className="relative w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-[13px] bg-gradient-to-tr from-[#059669] via-[#10B981] to-[#34D399] text-white flex items-center justify-center shadow-md shadow-emerald-500/25 border border-white/20 dark:border-emerald-400/30 cursor-pointer shrink-0 ml-0.5 group active:scale-95 transition-all"
+          className="relative w-[44px] h-[44px] sm:w-[46px] sm:h-[46px] rounded-[15px] bg-gradient-to-tr from-[#047857] via-[#10B981] to-[#34D399] text-white flex items-center justify-center shadow-lg shadow-emerald-500/35 border border-white/30 dark:border-emerald-300/40 cursor-pointer shrink-0 ml-1 group active:scale-95 transition-all"
         >
           <QrCode
-            size={19}
+            size={22}
             strokeWidth={2.4}
-            className="text-white transition-transform group-hover:scale-110 drop-shadow-xs"
+            className="text-white transition-transform group-hover:scale-110 drop-shadow-sm"
           />
         </motion.button>
       </nav>

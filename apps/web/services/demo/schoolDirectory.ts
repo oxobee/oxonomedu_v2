@@ -101,7 +101,7 @@ export const ALL_CLASSROOMS: ClassroomItem[] = [
     teacher_name: 'Ebru TEKNECİ',
     teacher_email: 'ogretmen@oxonom.com',
     student_count: 1,
-    boards_count: 4,
+    boards_count: 0,
   },
 ]
 
@@ -353,91 +353,9 @@ export function getOrgClassrooms(orgId?: number): ClassroomItem[] {
   return ALL_CLASSROOMS
 }
 
-// Generate classroom boards for 9-A
+// Return classroom boards: empty by default so fresh teacher accounts start clean
 export function generateClassroomBoards(classItem?: ClassroomItem) {
-  const cls = classItem || ALL_CLASSROOMS[0]
-  return [
-    {
-      id: cls.id * 10 + 1,
-      board_uuid: `board_${cls.id}_edebiyat`,
-      name: `${cls.code} Türk Dili ve Edebiyatı: Metin Tahlili & Kompozisyon`,
-      description: `Öğretmen: ${cls.teacher_name}. Şiir tahlilleri, edebi akımlar, roman incelemeleri ve kompozisyon atölyesi.`,
-      subject: 'Türk Dili ve Edebiyatı',
-      date_tag: 'today',
-      last_activity: 'Bugün, 09:30',
-      usergroup_id: cls.id,
-      usergroup_name: cls.name,
-      teacher_name: cls.teacher_name,
-      class_code: cls.code,
-      grade_level: cls.grade_level,
-      member_count: cls.student_count || 1,
-      thumbnail_image: '',
-      public: true,
-      is_demo: false,
-      created_by: 3001,
-      org_id: cls.org_id,
-    },
-    {
-      id: cls.id * 10 + 2,
-      board_uuid: `board_${cls.id}_matematik`,
-      name: `${cls.code} Matematik: Fonksiyonlar ve Kümeler`,
-      description: `Öğretmen: ${cls.teacher_name}. İleri analitik geometri, denklem sistemleri ve problem çözme tahtası.`,
-      subject: 'Matematik',
-      date_tag: 'today',
-      last_activity: 'Bugün, 11:15',
-      usergroup_id: cls.id,
-      usergroup_name: cls.name,
-      teacher_name: cls.teacher_name,
-      class_code: cls.code,
-      grade_level: cls.grade_level,
-      member_count: cls.student_count || 1,
-      thumbnail_image: '',
-      public: true,
-      is_demo: false,
-      created_by: 3001,
-      org_id: cls.org_id,
-    },
-    {
-      id: cls.id * 10 + 3,
-      board_uuid: `board_${cls.id}_bilisim`,
-      name: `${cls.code} Bilişim ve Yazılım: Algoritmalar & Kodlama`,
-      description: `Öğretmen: ${cls.teacher_name}. Python ile programlama, mantıksal tasarım ve yapay zeka temelleri.`,
-      subject: 'Bilişim & Kodlama',
-      date_tag: 'this_week',
-      last_activity: 'Dün, 14:00',
-      usergroup_id: cls.id,
-      usergroup_name: cls.name,
-      teacher_name: cls.teacher_name,
-      class_code: cls.code,
-      grade_level: cls.grade_level,
-      member_count: cls.student_count || 1,
-      thumbnail_image: '',
-      public: true,
-      is_demo: false,
-      created_by: 3001,
-      org_id: cls.org_id,
-    },
-    {
-      id: cls.id * 10 + 4,
-      board_uuid: `board_${cls.id}_pano`,
-      name: `${cls.code} Sınıf Panosu & Haftalık Duyurular`,
-      description: `${cls.name} haftalık ders programı, zümre duyuruları ve kütüphane okuma listesi.`,
-      subject: 'Sınıf Panosu',
-      date_tag: 'archive',
-      last_activity: '2 gün önce',
-      usergroup_id: cls.id,
-      usergroup_name: cls.name,
-      teacher_name: cls.teacher_name,
-      class_code: cls.code,
-      grade_level: cls.grade_level,
-      member_count: cls.student_count || 1,
-      thumbnail_image: '',
-      public: true,
-      is_demo: false,
-      created_by: 3001,
-      org_id: cls.org_id,
-    },
-  ]
+  return []
 }
 
 export const ALL_CLASSROOM_BOARDS = generateClassroomBoards(ALL_CLASSROOMS[0])

@@ -198,17 +198,8 @@ export async function getBoards(orgId: number, access_token?: string) {
     return [...uniqueLocal, ...serverBoards]
   }
 
-  let activeCode = '1-A'
-  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-    const cookieMatch = document.cookie?.match(/oxonom_demo_student_active_class=([^;]+)/)
-    if (cookieMatch) activeCode = decodeURIComponent(cookieMatch[1])
-    else activeCode = localStorage.getItem('oxonom_demo_student_active_class') || '1-A'
-  }
-  const cls = getActiveClassroom(activeCode)
-  const baseBoards = generateClassroomBoards(cls)
-  const uuids = new Set(baseBoards.map((b) => b.board_uuid))
-  const uniqueLocal = localCustom.filter((b) => !uuids.has(b.board_uuid))
-  return [...uniqueLocal, ...baseBoards]
+  // Return actual saved custom boards (empty array for fresh teacher accounts)
+  return localCustom
 }
 
 export async function getBoard(boardUuid: string, access_token?: string) {

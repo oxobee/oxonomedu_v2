@@ -224,6 +224,10 @@ export function clearAllClientAuthCookies(): void {
     'LH_oauth_orgslug',
     'LH_oauth_org_id',
     'LH_custom_domain',
+    'next-auth.session-token',
+    '__Secure-next-auth.session-token',
+    'next-auth.callback-url',
+    'next-auth.csrf-token',
   ]
   const expired = '; expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; path=/'
 
@@ -253,6 +257,12 @@ export function clearAllClientAuthCookies(): void {
       localStorage.removeItem('oxonom_pano_device_type')
       localStorage.removeItem('oxonom_selected_class')
       localStorage.removeItem('oxonom_pano_selected_class_id')
+      localStorage.removeItem('oxonom_active_admin_session')
+      localStorage.removeItem('oxonom_admin_session')
+      localStorage.removeItem('admin_user')
+      localStorage.removeItem('learnhouse_admin_session')
+      localStorage.removeItem('oxonom_last_active_user')
+      localStorage.removeItem('oxonom_pano_is_locked')
       sessionStorage.clear()
     } catch (_) {}
   }
