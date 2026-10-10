@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ExternalLink, QrCode } from 'lucide-react'
 import Link from 'next/link'
@@ -13,70 +13,104 @@ interface ConnectBoardModalProps {
 }
 
 export default function ConnectBoardModal({ isOpen, onClose, theme = 'light' }: ConnectBoardModalProps) {
-  if (!isOpen) return null
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined') return
+
+    const handleViewportChange = () => {
+      if (!window.visualViewport) return
+      const vv = window.visualViewport
+      // Calculate how much keyboard is occupying at the bottom of the window
+      const offset = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop))
+      setKeyboardHeight(offset > 60 ? offset : 0)
+      setViewportHeight(vv.height)
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange)
+      window.visualViewport.addEventListener('scroll', handleViewportChange)
+      handleViewportChange()
+    }
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportChange)
+        window.visualViewport.removeEventListener('scroll', handleViewportChange)
+      }
+    }
+  }, [isOpen])
 
   return (
     <AnimatePresence>
-      <div className={`${theme} fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 font-jakarta`}>
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs"
-        />
+      {isOpen && (
+        <div className={`${theme} fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 font-jakarta pointer-events-auto`}>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+          />
 
-        {/* Modal / Bottom Sheet */}
-        <motion.div
-          initial={{ y: '100%', opacity: 0.5 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-          className="relative w-full md:max-w-lg bg-white dark:bg-[#0E1526] rounded-t-3xl md:rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 max-h-[92vh] flex flex-col z-10 overflow-hidden pb-[env(safe-area-inset-bottom)]"
-        >
-          {/* Mobile Drag Indicator */}
-          <div className="pt-2.5 pb-1 flex justify-center md:hidden">
-            <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full" />
-          </div>
+          {/* Modal / Bottom Sheet */}
+          <motion.div
+            initial={{ y: '100%', opacity: 0.5 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            style={{
+              marginBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : undefined,
+              maxHeight: viewportHeight ? `${Math.min(viewportHeight - 16, 680)}px` : '92dvh',
+              transition: 'margin-bottom 0.18s ease-out, max-height 0.18s ease-out',
+            }}
+            className="relative w-full md:max-w-lg bg-white dark:bg-[#0E1526] rounded-t-3xl md:rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 flex flex-col z-10 overflow-hidden pb-[env(safe-area-inset-bottom)]"
+          >
+            {/* Mobile Drag Indicator */}
+            <div className="pt-2.5 pb-1 flex justify-center md:hidden shrink-0">
+              <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full" />
+            </div>
 
-          {/* Modal Header */}
-          <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center shadow-xs">
-                <QrCode size={16} />
+            {/* Modal Header */}
+            <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center shadow-xs">
+                  <QrCode size={16} />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Tahtaya Bağlan</h3>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">QR Kod veya 6 Haneli Kod ile Hızlı Eşleşme</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Tahtaya Bağlan</h3>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400">QR Kod veya 6 Haneli Kod ile Hızlı Eşleşme</p>
+
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href="/dash/connect-board"
+                  className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                  title="Tam Ekran Aç"
+                >
+                  <ExternalLink size={16} />
+                </Link>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer"
+                  aria-label="Kapat"
+                >
+                  <X size={16} />
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <Link
-                href="/dash/connect-board"
-                className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
-                title="Tam Ekran Aç"
-              >
-                <ExternalLink size={16} />
-              </Link>
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer"
-                aria-label="Kapat"
-              >
-                <X size={16} />
-              </button>
+            {/* ConnectBoardClient Embedded Body */}
+            <div className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-5 dark:bg-[#0E1526]">
+              <ConnectBoardClient isModal={true} onSuccess={onClose} />
             </div>
-          </div>
-
-          {/* ConnectBoardClient Embedded Body */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-5 dark:bg-[#0E1526]">
-            <ConnectBoardClient isModal={true} onSuccess={onClose} />
-          </div>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   )
 }

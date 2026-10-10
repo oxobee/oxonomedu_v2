@@ -152,6 +152,10 @@ export default function ConnectBoardClient({
 
   // Handle switching to camera tab with direct user gesture
   const handleSwitchToCamera = async () => {
+    // Blur any active input so mobile software keyboard is dismissed immediately
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
     setActiveTab('camera')
     setCameraError(null)
 
@@ -197,7 +201,11 @@ export default function ConnectBoardClient({
 
       const config = {
         fps: 10,
-        qrbox: { width: 250, height: 250 },
+        qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight)
+          const qrboxSize = Math.max(160, Math.floor(minEdge * 0.72))
+          return { width: qrboxSize, height: qrboxSize }
+        },
         aspectRatio: 1.0,
       }
 
@@ -570,39 +578,41 @@ export default function ConnectBoardClient({
   }
 
   return (
-    <div className={`w-full max-w-xl mx-auto space-y-6 ${isModal ? 'p-1' : 'p-4 sm:p-6'}`}>
+    <div className={`w-full mx-auto ${isModal ? 'p-0 space-y-3' : 'max-w-xl space-y-6 p-4 sm:p-6'}`}>
       {/* ACTIVE SMART BOARDS LIST */}
       {activeBoards.length > 0 && (
-        <div className="bg-white dark:bg-[#121215] rounded-3xl border border-emerald-500/30 dark:border-emerald-500/20 shadow-xl overflow-hidden">
-          <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-950 via-slate-900 to-black text-white flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
-                <Tv className="w-5 h-5" />
+        <div className={`bg-white dark:bg-[#121215] border border-emerald-500/30 dark:border-emerald-500/20 shadow-md overflow-hidden ${isModal ? 'rounded-2xl' : 'rounded-3xl shadow-xl'}`}>
+          <div className={`${isModal ? 'p-3' : 'p-4 sm:p-5'} bg-gradient-to-r from-emerald-950 via-slate-900 to-black text-white flex items-center justify-between`}>
+            <div className="flex items-center gap-2.5">
+              <div className={`${isModal ? 'w-8 h-8 rounded-xl' : 'w-10 h-10 rounded-2xl'} bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0`}>
+                <Tv className={isModal ? 'w-4 h-4' : 'w-5 h-5'} />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
+                <h3 className={`${isModal ? 'text-xs sm:text-sm' : 'text-base sm:text-lg'} font-black tracking-tight flex items-center gap-1.5`}>
                   <span>Açık Akıllı Tahtalarım</span>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                     {activeBoards.length} Aktif
                   </span>
                 </h3>
-                <p className="text-xs text-slate-300">
-                  Şu an açık olan ve hesabınızla eşleşmiş tahtalar
-                </p>
+                {!isModal && (
+                  <p className="text-xs text-slate-300">
+                    Şu an açık olan ve hesabınızla eşleşmiş tahtalar
+                  </p>
+                )}
               </div>
             </div>
             <button
               type="button"
               onClick={() => fetchActiveBoards()}
               disabled={isLoadingBoards}
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all cursor-pointer"
               title="Yenile"
             >
-              <RotateCw className={`w-4 h-4 ${isLoadingBoards ? 'animate-spin' : ''}`} />
+              <RotateCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isLoadingBoards ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
-          <div className="p-4 sm:p-5 space-y-3">
+          <div className={`${isModal ? 'p-2.5 sm:p-3 space-y-2' : 'p-4 sm:p-5 space-y-3'}`}>
             {activeBoards.map((board) => (
               <div
                 key={board.sessionId}
@@ -691,59 +701,90 @@ export default function ConnectBoardClient({
       )}
 
       {/* CONNECT TO BOARD CARD */}
-      <div className="bg-white dark:bg-[#121215] rounded-3xl border border-gray-200/80 dark:border-white/10 shadow-xl overflow-hidden">
-        {/* Header Banner */}
-        <div className="p-6 bg-gradient-to-br from-indigo-900 via-slate-900 to-black text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-rose-500/20 rounded-full blur-2xl pointer-events-none" />
-          <div className="relative z-10 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-xl flex items-center justify-center text-rose-400 shadow-inner shrink-0">
-              <Tv className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-                <span>{activeBoards.length > 0 ? 'Yeni Bir Tahtaya Bağlan' : 'Tahtaya Bağlan'}</span>
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                  CANLI
-                </span>
-              </h2>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Sınıftaki akıllı tahtayı telefonunuzdan veya bilgisayarınızdan tek dokunuşla kontrol edin.
-              </p>
-            </div>
-          </div>
-
-          {/* Mode Switch Tabs */}
-          <div className="mt-5 grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
+      <div className={isModal ? 'w-full' : 'bg-white dark:bg-[#121215] rounded-3xl border border-gray-200/80 dark:border-white/10 shadow-xl overflow-hidden'}>
+        {/* Mode Switch Tabs in Modal Mode */}
+        {isModal ? (
+          <div className="grid grid-cols-2 p-1 rounded-2xl bg-gray-100 dark:bg-white/10 text-xs font-bold mb-3 gap-1">
             <button
               type="button"
               onClick={() => setActiveTab('otp')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'otp'
-                  ? 'bg-white text-slate-950 shadow-md scale-[1.02]'
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
+                  ? 'bg-white dark:bg-[#1E293B] text-slate-900 dark:text-white shadow-xs font-black'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              <KeyRound className="w-4 h-4 text-indigo-600" />
+              <KeyRound className="w-3.5 h-3.5 text-indigo-500" />
               <span>6 Haneli Kod Gir</span>
             </button>
 
             <button
               type="button"
               onClick={() => handleSwitchToCamera()}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'camera'
-                  ? 'bg-white text-slate-950 shadow-md scale-[1.02]'
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
+                  ? 'bg-white dark:bg-[#1E293B] text-slate-900 dark:text-white shadow-xs font-black'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              <Camera className="w-4 h-4 text-rose-500" />
+              <Camera className="w-3.5 h-3.5 text-rose-500" />
               <span>QR Kodu Tara</span>
             </button>
           </div>
-        </div>
+        ) : (
+          /* Full Page Header Banner */
+          <div className="p-6 bg-gradient-to-br from-indigo-900 via-slate-900 to-black text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-rose-500/20 rounded-full blur-2xl pointer-events-none" />
+            <div className="relative z-10 flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-xl flex items-center justify-center text-rose-400 shadow-inner shrink-0">
+                <Tv className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+                  <span>{activeBoards.length > 0 ? 'Yeni Bir Tahtaya Bağlan' : 'Tahtaya Bağlan'}</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                    CANLI
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Sınıftaki akıllı tahtayı telefonunuzdan veya bilgisayarınızdan tek dokunuşla kontrol edin.
+                </p>
+              </div>
+            </div>
+
+            {/* Mode Switch Tabs */}
+            <div className="mt-5 grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
+              <button
+                type="button"
+                onClick={() => setActiveTab('otp')}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  activeTab === 'otp'
+                    ? 'bg-white text-slate-950 shadow-md scale-[1.02]'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <KeyRound className="w-4 h-4 text-indigo-600" />
+                <span>6 Haneli Kod Gir</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSwitchToCamera()}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  activeTab === 'camera'
+                    ? 'bg-white text-slate-950 shadow-md scale-[1.02]'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Camera className="w-4 h-4 text-rose-500" />
+                <span>QR Kodu Tara</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Card Body */}
-        <div className="p-6 sm:p-8">
+        <div className={isModal ? 'p-1' : 'p-6 sm:p-8'}>
           <AnimatePresence mode="wait">
             {isSuccess ? (
               <motion.div
@@ -788,21 +829,21 @@ export default function ConnectBoardClient({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                className="space-y-6"
+                className={isModal ? 'space-y-4' : 'space-y-6'}
               >
                 <div className="text-center">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Tahtadaki 6 Haneli Kodu Girin
                   </span>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Tahta ekranının sağında yer alan 6 haneli kodu sırasıyla tuşlayın.
                   </p>
                 </div>
 
                 {/* ANIMATED 6-DIGIT OTP INPUTS */}
-                <div className="flex justify-center items-center gap-2 sm:gap-3" onPaste={handleDigitPaste}>
+                <div className="flex justify-center items-center gap-1.5 sm:gap-3" onPaste={handleDigitPaste}>
                   {/* First 3 Digits */}
-                  <div className="flex gap-1.5 sm:gap-2">
+                  <div className="flex gap-1 sm:gap-2">
                     {digits.slice(0, 3).map((digit, idx) => (
                       <motion.input
                         key={idx}
@@ -814,25 +855,27 @@ export default function ConnectBoardClient({
                         value={digit}
                         onChange={(e) => handleDigitChange(idx, e.target.value)}
                         onKeyDown={(e) => handleDigitKeyDown(idx, e)}
-                        whileFocus={{ scale: 1.08 }}
-                        className={`w-11 h-14 sm:w-13 sm:h-16 text-center text-2xl font-black rounded-2xl border-2 outline-none transition-all shadow-sm ${
+                        onFocus={(e) => {
+                          e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                        }}
+                        whileFocus={{ scale: 1.05 }}
+                        className={`w-10 h-13 sm:w-13 sm:h-16 text-center text-xl sm:text-2xl font-black rounded-xl sm:rounded-2xl border-2 outline-none transition-all shadow-sm ${
                           errorMessage
                             ? 'border-red-500 bg-red-50/50 dark:bg-red-950/20 text-red-600'
                             : digit
                             ? 'border-indigo-600 dark:border-indigo-400 bg-indigo-50/40 dark:bg-indigo-950/30 text-indigo-950 dark:text-white'
                             : 'border-gray-200 dark:border-white/15 bg-gray-50 dark:bg-black/30 text-slate-900 dark:text-white focus:border-indigo-500 focus:bg-white'
                         }`}
-                        autoFocus={idx === 0}
                       />
                     ))}
                   </div>
 
-                  <span className="text-xl font-bold text-gray-300 dark:text-gray-600 select-none">
+                  <span className="text-base sm:text-xl font-bold text-gray-300 dark:text-gray-600 select-none">
                     -
                   </span>
 
                   {/* Last 3 Digits */}
-                  <div className="flex gap-1.5 sm:gap-2">
+                  <div className="flex gap-1 sm:gap-2">
                     {digits.slice(3, 6).map((digit, idx) => (
                       <motion.input
                         key={idx + 3}
@@ -844,8 +887,11 @@ export default function ConnectBoardClient({
                         value={digit}
                         onChange={(e) => handleDigitChange(idx + 3, e.target.value)}
                         onKeyDown={(e) => handleDigitKeyDown(idx + 3, e)}
-                        whileFocus={{ scale: 1.08 }}
-                        className={`w-11 h-14 sm:w-13 sm:h-16 text-center text-2xl font-black rounded-2xl border-2 outline-none transition-all shadow-sm ${
+                        onFocus={(e) => {
+                          e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                        }}
+                        whileFocus={{ scale: 1.05 }}
+                        className={`w-10 h-13 sm:w-13 sm:h-16 text-center text-xl sm:text-2xl font-black rounded-xl sm:rounded-2xl border-2 outline-none transition-all shadow-sm ${
                           errorMessage
                             ? 'border-red-500 bg-red-50/50 dark:bg-red-950/20 text-red-600'
                             : digit
@@ -868,7 +914,7 @@ export default function ConnectBoardClient({
                   type="button"
                   onClick={() => handleConfirmPair()}
                   disabled={isSubmitting || digits.some((d) => !d)}
-                  className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full py-3 px-5 sm:py-3.5 sm:px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -886,19 +932,19 @@ export default function ConnectBoardClient({
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="flex flex-col items-center text-center space-y-4"
+                className={isModal ? 'flex flex-col items-center text-center space-y-3' : 'flex flex-col items-center text-center space-y-4'}
               >
                 <div className="text-center">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Kamera ile QR Kodu Hizalayın
                   </span>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Tahtadaki QR kodu kamera karesi içine getirdiğinizde anında bağlanacaksınız.
                   </p>
                 </div>
 
                 {/* CAMERA CONTAINER */}
-                <div className="w-full max-w-[320px] aspect-square rounded-3xl overflow-hidden bg-black relative border-2 border-indigo-500/40 shadow-inner flex items-center justify-center">
+                <div className="w-full max-w-[240px] sm:max-w-[300px] aspect-square rounded-2xl sm:rounded-3xl overflow-hidden bg-black relative border-2 border-indigo-500/40 shadow-inner flex items-center justify-center">
                   <div id={scannerContainerId} className="w-full h-full" />
 
                   {/* Corner viewfinder marks */}
@@ -981,13 +1027,20 @@ export default function ConnectBoardClient({
         </div>
 
         {/* Footer Info */}
-        <div className="px-6 py-4 bg-gray-50 dark:bg-black/30 border-t border-gray-100 dark:border-white/5 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>Uçtan Uca Şifreli Oturum</span>
+        {!isModal ? (
+          <div className="px-6 py-4 bg-gray-50 dark:bg-black/30 border-t border-gray-100 dark:border-white/5 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <span>Uçtan Uca Şifreli Oturum</span>
+            </div>
+            <span>Oxonom Edu Pano OS</span>
           </div>
-          <span>Oxonom Edu Pano OS</span>
-        </div>
+        ) : (
+          <div className="pt-2 pb-1 flex items-center justify-center gap-1.5 text-[10px] text-gray-400 dark:text-gray-500">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Uçtan Uca Şifreli Oturum Eşleşmesi</span>
+          </div>
+        )}
       </div>
 
       {/* IPHONE / SAFARI CAMERA PERMISSION MODAL */}
