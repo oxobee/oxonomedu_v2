@@ -316,19 +316,20 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
       const gid = Number(usergroupIdParam)
       const localCustom = getStoredCustomBoards()
       const classCustom = localCustom.filter((b) => Number(b.usergroup_id) === gid)
-      const classBoards = ALL_CLASSROOM_BOARDS.filter((b) => Number(b.usergroup_id) === gid)
+      const apiClassBoards = (boardsData || []).filter((b: any) => Number(b.usergroup_id) === gid)
       const uuids = new Set(classCustom.map((b) => b.board_uuid))
-      return [...classCustom, ...classBoards.filter((b) => !uuids.has(b.board_uuid))]
+      return [...classCustom, ...apiClassBoards.filter((b: any) => !uuids.has(b.board_uuid))]
     }
     if (isStudent) {
       const localCustom = getStoredCustomBoards()
       const classCustom = localCustom.filter(
         (b) => Number(b.usergroup_id) === Number(activeClass?.id)
       )
-      const classBoards = generateClassroomBoards(activeClass)
-      const uuids = new Set(classBoards.map((b) => b.board_uuid))
-      const uniqueLocal = classCustom.filter((b) => !uuids.has(b.board_uuid))
-      return [...uniqueLocal, ...classBoards]
+      const apiClassBoards = (boardsData || []).filter(
+        (b: any) => Number(b.usergroup_id) === Number(activeClass?.id)
+      )
+      const uuids = new Set(classCustom.map((b) => b.board_uuid))
+      return [...classCustom, ...apiClassBoards.filter((b: any) => !uuids.has(b.board_uuid))]
     }
     return boardsData || []
   }, [usergroupIdParam, isStudent, activeClass, boardsData])
@@ -754,29 +755,44 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
               />
             ))}
 
-            {/* No search results */}
+            {/* No search results or no boards */}
             {filteredBoards.length === 0 && (
               <div className="col-span-full flex flex-col justify-center items-center py-16 bg-white rounded-3xl nice-shadow border border-gray-100 text-center px-4">
                 <div className="w-16 h-16 rounded-3xl bg-indigo-50 text-indigo-500 flex items-center justify-center mb-4">
                   <ChalkboardSimple size={32} weight="duotone" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-1">
-                  Aradığınız kriterlere uygun pano bulunamadı
+                  {allBoards.length === 0
+                    ? 'Bu şubeye ait henüz akıllı tahta bulunmuyor'
+                    : 'Aradığınız kriterlere uygun pano bulunamadı'}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 max-w-md">
-                  Farklı bir arama terimi deneyebilir veya filtreleri temizleyerek tüm sınıf panolarını görüntüleyebilirsiniz.
+                  {allBoards.length === 0
+                    ? 'Ders işlemek veya not paylaşmak için hemen yeni bir akıllı tahta başlatabilirsiniz.'
+                    : 'Farklı bir arama terimi deneyebilir veya filtreleri temizleyerek tüm sınıf panolarını görüntüleyebilirsiniz.'}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedSubject('all')
-                    setSelectedDate('all')
-                    setSearchQuery('')
-                  }}
-                  className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
-                >
-                  Tüm Panoları Göster
-                </button>
+                {allBoards.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setCreateModalOpen(true)}
+                    className="mt-4 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
+                  >
+                    <Plus size={16} />
+                    <span>Yeni Pano Başlat</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedSubject('all')
+                      setSelectedDate('all')
+                      setSearchQuery('')
+                    }}
+                    className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
+                  >
+                    Tüm Panoları Göster
+                  </button>
+                )}
               </div>
             )}
           </div>

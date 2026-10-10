@@ -46,6 +46,7 @@ const PLAN_GRADIENT: Record<string, string> = {
   family: 'from-gray-50/80',
   standard: 'from-blue-50/80',
   pro: 'from-purple-50/80',
+  premium: 'from-purple-50/80',
   enterprise: 'from-amber-50/80',
 }
 

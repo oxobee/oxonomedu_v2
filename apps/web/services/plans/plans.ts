@@ -16,11 +16,11 @@ import { getDeploymentMode } from '@services/config/config'
 // family tier is 'personal-family', not 'family'. Using 'family' broke
 // PLAN_HIERARCHY.indexOf() (→ -1) so planMeetsRequirement() denied every gated
 // feature for those orgs.
-export type PlanLevel = 'free' | 'personal' | 'personal-family' | 'standard' | 'pro' | 'enterprise' | 'oss'
+export type PlanLevel = 'free' | 'personal' | 'personal-family' | 'standard' | 'pro' | 'premium' | 'enterprise' | 'oss'
 
 // Plan hierarchy for SaaS mode (lower index = lower tier).
 // 'oss' is kept as a display-only type value (not in hierarchy) for OSS mode label rendering.
-export const PLAN_HIERARCHY: PlanLevel[] = ['free', 'personal', 'personal-family', 'standard', 'pro', 'enterprise']
+export const PLAN_HIERARCHY: PlanLevel[] = ['free', 'personal', 'personal-family', 'standard', 'pro', 'premium', 'enterprise']
 
 // Features blocked in OSS mode — require EE or SaaS/enterprise plan
 const OSS_BLOCKED_FEATURES = new Set(['sso', 'audit_logs', 'payments', 'analytics_advanced', 'scorm'])
@@ -33,9 +33,23 @@ export function planMeetsRequirement(
   currentPlan: PlanLevel,
   requiredPlan: PlanLevel
 ): boolean {
+  if (!requiredPlan || requiredPlan === 'free') return true
   if (currentPlan === 'oss') return requiredPlan !== 'enterprise'
-  const currentIndex = PLAN_HIERARCHY.indexOf(currentPlan)
-  const requiredIndex = PLAN_HIERARCHY.indexOf(requiredPlan)
+
+  const normalizedCurrent = (typeof currentPlan === 'string' ? currentPlan.toLowerCase().trim() : '') as PlanLevel
+  const normalizedRequired = (typeof requiredPlan === 'string' ? requiredPlan.toLowerCase().trim() : '') as PlanLevel
+
+  // Premium and Enterprise meet all feature requirements (including boards, ai, podcasts, etc.)
+  if (normalizedCurrent === 'enterprise' || normalizedCurrent === 'premium') return true
+
+  const currentIndex = PLAN_HIERARCHY.indexOf(normalizedCurrent)
+  const requiredIndex = PLAN_HIERARCHY.indexOf(normalizedRequired)
+
+  if (currentIndex === -1) {
+    // If unknown custom/custom-billed plan, grant access if not free
+    return normalizedCurrent !== 'free'
+  }
+
   return currentIndex >= requiredIndex
 }
 

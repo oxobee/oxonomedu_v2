@@ -135,18 +135,18 @@ const INITIAL_CLASSROOMS: ClassroomItem[] = ALL_CLASSROOMS.map(c => ({
   name: c.name,
   gradeLevel: c.grade_level,
   studentCount: c.student_count || 30,
-  boardCount: 5,
+  boardCount: c.boards_count || 0,
   attendance: '%100',
   teacherName: c.teacher_name,
   subject: c.org_id === 10 ? 'Sınıf Öğretmeni' : 'Branş Öğretmeni',
 }))
 
 const DEFAULT_CLASSROOMS: ClassroomItem[] = INITIAL_CLASSROOMS.length > 0 ? INITIAL_CLASSROOMS : [
-  { id: 101, name: '1-A Şubesi', gradeLevel: '1. Sınıf', studentCount: 30, boardCount: 5, attendance: '%100', teacherName: 'Ahmet Hakan', subject: 'Matematik' },
-  { id: 102, name: '1-B Şubesi', gradeLevel: '1. Sınıf', studentCount: 28, boardCount: 5, attendance: '%96', teacherName: 'Ahmet Hakan', subject: 'Matematik' },
-  { id: 103, name: '2-A Şubesi', gradeLevel: '2. Sınıf', studentCount: 32, boardCount: 5, attendance: '%100', teacherName: 'Ayşe Öğretmen', subject: 'Sınıf Öğretmeni' },
-  { id: 104, name: '3-A Şubesi', gradeLevel: '3. Sınıf', studentCount: 29, boardCount: 5, attendance: '%98', teacherName: 'Ahmet Hakan', subject: 'Matematik' },
-  { id: 105, name: '4-B Şubesi', gradeLevel: '4. Sınıf', studentCount: 31, boardCount: 5, attendance: '%95', teacherName: 'Mehmet Öğretmen', subject: 'Fen Bilimleri' }
+  { id: 101, name: '1-A Şubesi', gradeLevel: '1. Sınıf', studentCount: 30, boardCount: 0, attendance: '%100', teacherName: 'Ahmet Hakan', subject: 'Matematik' },
+  { id: 102, name: '1-B Şubesi', gradeLevel: '1. Sınıf', studentCount: 28, boardCount: 0, attendance: '%96', teacherName: 'Ahmet Hakan', subject: 'Matematik' },
+  { id: 103, name: '2-A Şubesi', gradeLevel: '2. Sınıf', studentCount: 32, boardCount: 0, attendance: '%100', teacherName: 'Ayşe Öğretmen', subject: 'Sınıf Öğretmeni' },
+  { id: 104, name: '3-A Şubesi', gradeLevel: '3. Sınıf', studentCount: 29, boardCount: 0, attendance: '%98', teacherName: 'Ahmet Hakan', subject: 'Matematik' },
+  { id: 105, name: '4-B Şubesi', gradeLevel: '4. Sınıf', studentCount: 31, boardCount: 0, attendance: '%95', teacherName: 'Mehmet Öğretmen', subject: 'Fen Bilimleri' }
 ]
 
 // Groups classrooms by grade level (numeric order) and sorts branches with Turkish collation,
@@ -2145,8 +2145,7 @@ export default function PanoClient() {
   }, [])
 
   const liveBoardCount = useMemo(() => {
-    if (!selectedClass) return 5
-    const defaultCount = ALL_CLASSROOM_BOARDS.filter(b => b.usergroup_id === selectedClass.id).length
+    if (!selectedClass) return 0
     let customCount = 0
     if (typeof window !== 'undefined') {
       try {
@@ -2154,13 +2153,13 @@ export default function PanoClient() {
         if (raw) {
           const parsed = JSON.parse(raw)
           if (Array.isArray(parsed)) {
-            customCount = parsed.filter((b: any) => b.usergroup_id === selectedClass.id).length
+            customCount = parsed.filter((b: any) => Number(b.usergroup_id) === Number(selectedClass.id)).length
           }
         }
       } catch (_) {}
     }
-    const computedTotal = Math.max(5, (defaultCount || 5) + customCount)
-    return (selectedClass.boardCount && selectedClass.boardCount > computedTotal) ? selectedClass.boardCount : computedTotal
+    const realClassCount = selectedClass.boardCount || 0
+    return Math.max(realClassCount, customCount)
   }, [selectedClass, dataSyncTrigger])
 
   const liveAssignmentCount = useMemo(() => {
