@@ -465,6 +465,7 @@ export function resolveAnnouncementVariables(
   customContext?: TemplateResolveContext
 ): string {
   if (!text) return ''
+  let result = typeof text === 'string' ? text : String(text || '')
 
   let profile: any = null
   if (typeof window !== 'undefined') {
@@ -474,29 +475,33 @@ export function resolveAnnouncementVariables(
   }
 
   const now = new Date()
-  const defaultDate = `${now.getDate()} ${now.toLocaleString('tr-TR', { month: 'long' })} ${now.getFullYear()}`
-  const defaultTime = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+  let defaultDate = '18 Ekim 2026'
+  let defaultTime = '18:30'
+  try {
+    defaultDate = `${now.getDate()} ${now.toLocaleString('tr-TR', { month: 'long' })} ${now.getFullYear()}`
+    defaultTime = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+  } catch (_) {}
 
-  let mentorTeacher = profile?.mentorTeacher || 'Özlem ZOR'
+  let mentorTeacher = String(profile?.mentorTeacher || 'Özlem ZOR')
   if (mentorTeacher.includes('(')) {
     mentorTeacher = mentorTeacher.split('(')[0].trim()
   }
 
   const ctx = {
-    studentName: customContext?.studentName || customContext?.ogrenci_adi || profile?.name || 'Erçil UĞURLU',
-    parentName: customContext?.parentName || customContext?.veli_adi || profile?.parentName || 'Ebru UĞURLU',
-    className: customContext?.className || customContext?.sinif || profile?.className || '1/A',
-    teacherName: customContext?.teacherName || customContext?.ogretmen_adi || mentorTeacher || 'Özlem ZOR',
-    schoolName: customContext?.schoolName || customContext?.okul_adi || profile?.schoolName || 'Oxonom Okulları',
-    date: customContext?.date || customContext?.tarih || defaultDate,
-    time: customContext?.time || customContext?.saat || defaultTime,
-    studentNo: customContext?.studentNo || customContext?.ogrenci_no || profile?.studentNo || '101',
-    gpa: customContext?.gpa || customContext?.puan || profile?.gpa || '98.8',
-    gradeLevel: customContext?.gradeLevel || customContext?.kademe || profile?.gradeLevel || '1. Sınıf',
-    parentPhone: customContext?.parentPhone || customContext?.telefon || profile?.parentPhone || '+90 532 999 1100',
+    studentName: String(customContext?.studentName || customContext?.ogrenci_adi || profile?.name || 'Erçil UĞURLU'),
+    parentName: String(customContext?.parentName || customContext?.veli_adi || profile?.parentName || 'Ebru UĞURLU'),
+    className: String(customContext?.className || customContext?.sinif || profile?.className || '1/A'),
+    teacherName: String(customContext?.teacherName || customContext?.ogretmen_adi || mentorTeacher || 'Özlem ZOR'),
+    schoolName: String(customContext?.schoolName || customContext?.okul_adi || profile?.schoolName || 'Oxonom Okulları'),
+    date: String(customContext?.date || customContext?.tarih || defaultDate),
+    time: String(customContext?.time || customContext?.saat || defaultTime),
+    studentNo: String(customContext?.studentNo || customContext?.ogrenci_no || profile?.studentNo || '101'),
+    gpa: String(customContext?.gpa || customContext?.puan || profile?.gpa || '98.8'),
+    gradeLevel: String(customContext?.gradeLevel || customContext?.kademe || profile?.gradeLevel || '1. Sınıf'),
+    parentPhone: String(customContext?.parentPhone || customContext?.telefon || profile?.parentPhone || '+90 532 999 1100'),
   }
 
-  let result = text
+  try {
 
   // 1. Öğrenci Adı: {ogrenci_adi}, {ogrenciadi}, {öğrenci_adı}, {ogrenci}, (ogrenci_adi), [ogrenci_adi]
   result = result.replace(/[\{\[\(]\s*(?:ogrenci_adi|ogrenciadi|öğrenci_adı|öğrenciadı|ogrenci|öğrenci|ogrenci_ad|öğrenci_ad)\s*[\}\]\)]/gi, ctx.studentName!)
@@ -529,33 +534,45 @@ export function resolveAnnouncementVariables(
   result = result.replace(/[\{\[\(]\s*(?:kademe|seviye|sinif_seviyesi)\s*[\}\]\)]/gi, ctx.gradeLevel!)
 
   // 11. Veli Telefon: {telefon}, {tel}, {veli_tel}
-  result = result.replace(/[\{\[\(]\s*(?:telefon|tel|veli_tel|veli_telefon)\s*[\}\]\)]/gi, ctx.parentPhone!)
+  result = result.replace(/[\{\[\(]\s*(?:telefon|tel|veli_tel|veli_telefon)\s*[\}\]\)]/gi, ctx.parentPhone)
+  } catch (_) {}
 
   return result
 }
 
 export function getSynchronizedStudentAnnouncements(): StudentAnnouncement[] {
-  let list = STUDENT_ANNOUNCEMENTS
+  let list: StudentAnnouncement[] = STUDENT_ANNOUNCEMENTS
   if (typeof window !== 'undefined') {
     try {
       const raw = localStorage.getItem('oxonom_student_announcements')
       if (raw) {
         const parsed = JSON.parse(raw)
         if (Array.isArray(parsed) && parsed.length > 0) {
-          list = parsed
+          list = parsed.filter((item: any) => item && typeof item === 'object')
         }
       }
     } catch (_) {}
   }
-  return list.map((item: any) => {
-    let updated = { ...item }
-    if (updated.title && updated.title.includes('9-A')) {
+  return list.map((item: any, idx: number) => {
+    const fallbackId = `ann-${idx}`
+    const updated: StudentAnnouncement = {
+      id: String(item?.id || fallbackId),
+      title: String(item?.title || ''),
+      author: String(item?.author || 'Oxonom Okulları'),
+      authorRole: String(item?.authorRole || 'Okul Yönetimi'),
+      date: String(item?.date || 'Bugün'),
+      category: item?.category || 'general',
+      priority: item?.priority || 'normal',
+      content: String(item?.content || ''),
+      isPinned: Boolean(item?.isPinned),
+    }
+    if (updated.title.includes('9-A')) {
       updated.title = updated.title.replace(/9-A/g, '1/A')
     }
-    if (updated.content && updated.content.includes('9-A')) {
+    if (updated.content.includes('9-A')) {
       updated.content = updated.content.replace(/9-A/g, '1/A')
     }
-    if (updated.authorRole && updated.authorRole.includes('9-A')) {
+    if (updated.authorRole.includes('9-A')) {
       updated.authorRole = '1/A Sınıf Öğretmeni'
     }
     // Automatically resolve all bracketed variables with user info

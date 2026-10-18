@@ -65,13 +65,15 @@ export default function StudentCommunicationView({
   initialTab = 'all',
 }: StudentCommunicationViewProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'announcements' | 'messages' | 'notifications'>(initialTab)
-  const [announcements, setAnnouncements] = useState<StudentAnnouncement[]>(() => getSynchronizedStudentAnnouncements())
+  const [announcements, setAnnouncements] = useState<StudentAnnouncement[]>(STUDENT_ANNOUNCEMENTS)
   const [messages, setMessages] = useState<TeacherMessage[]>(INITIAL_MESSAGES)
   const [selectedMessage, setSelectedMessage] = useState<TeacherMessage | null>(null)
   const [replyText, setReplyText] = useState('')
 
   const syncAnnouncements = () => {
-    setAnnouncements(getSynchronizedStudentAnnouncements())
+    try {
+      setAnnouncements(getSynchronizedStudentAnnouncements())
+    } catch (_) {}
   }
 
   React.useEffect(() => {
@@ -163,21 +165,22 @@ export default function StudentCommunicationView({
             </div>
 
             <div className="space-y-4">
-              {announcements.map((ann) => {
+              {announcements.map((ann, idx) => {
                 let priorityBadge = null
-                if (ann.priority === 'emergency') {
+                const p = ann?.priority || 'normal'
+                if (p === 'emergency') {
                   priorityBadge = (
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30">
                       🚨 Acil / Kritik
                     </span>
                   )
-                } else if (ann.priority === 'important') {
+                } else if (p === 'important') {
                   priorityBadge = (
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                       ⚠️ Önemli
                     </span>
                   )
-                } else if (ann.priority === 'normal') {
+                } else if (p === 'normal') {
                   priorityBadge = (
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                       ✓ Normal
@@ -191,41 +194,47 @@ export default function StudentCommunicationView({
                   )
                 }
 
+                const authorName = String(ann?.author || 'Oxonom Okulları')
+                const authorInitial = authorName.charAt(0).toUpperCase() || 'O'
+                const authorRole = String(ann?.authorRole || 'Okul Yönetimi')
+                const annDate = String(ann?.date || 'Bugün')
+                const cardId = ann?.id || `ann-item-${idx}`
+
                 return (
                   <div
-                    key={ann.id}
+                    key={cardId}
                     className="p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-3"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
-                          {ann.author.slice(0, 1)}
+                          {authorInitial}
                         </div>
                         <div>
                           <div className="text-xs font-extrabold text-gray-900 dark:text-white">
-                            {ann.author}
+                            {authorName}
                           </div>
-                          <div className="text-[10px] text-gray-400">{ann.authorRole}</div>
+                          <div className="text-[10px] text-gray-400">{authorRole}</div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2">
                         {priorityBadge}
-                        {ann.isPinned && (
+                        {ann?.isPinned && (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
                             <Pin size={10} />
                             Sabitli
                           </span>
                         )}
-                        <span className="text-[11px] text-gray-400">{ann.date}</span>
+                        <span className="text-[11px] text-gray-400">{annDate}</span>
                       </div>
                     </div>
 
                     <h3 className="text-sm font-extrabold text-gray-900 dark:text-white">
-                      {resolveAnnouncementVariables(ann.title)}
+                      {resolveAnnouncementVariables(ann?.title || '')}
                     </h3>
                     <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                      {resolveAnnouncementVariables(ann.content)}
+                      {resolveAnnouncementVariables(ann?.content || '')}
                     </p>
                   </div>
                 )
@@ -281,7 +290,7 @@ export default function StudentCommunicationView({
                 className="p-4 rounded-2xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-3 mt-4"
               >
                 <div className="text-xs font-bold text-gray-900 dark:text-white">
-                  {selectedMessage.sender}'e Yanıt Yaz:
+                  {selectedMessage.sender} İçin Yanıt Yaz:
                 </div>
                 <textarea
                   rows={3}
