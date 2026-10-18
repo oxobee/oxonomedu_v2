@@ -122,13 +122,234 @@ const DEFAULT_TEMPLATES = [
 
 const QUICK_SCORES = [100, 95, 90, 85, 75, 60, 50]
 
-const BRANCH_OPTIONS = [
-  { id: 'all', title: 'Tüm Şubeler', desc: 'Oxonom Okulları', isAll: true },
-  { id: '9-A', title: '9-A Şubesi', desc: 'Sınıf Rehber Öğretmeni: Ebru TEKNECİ', isAll: false },
+export interface BranchOption {
+  id: string
+  title: string
+  code: string
+  desc: string
+  grade: string
+  gradeNumber?: number
+  category: 'ALL' | 'PRIMARY' | 'MIDDLE' | 'HIGH'
+  isAll: boolean
+  teacherName: string
+  studentCount: number
+}
+
+const BRANCH_TEACHERS_CATALOG = [
+  { name: 'Özlem ZOR', branch: 'Sınıf Öğretmeni (1/A)' },
+  { name: 'Beyzanur SALMANLI', branch: 'Sınıf Öğretmeni' },
+  { name: 'Özge KABA', branch: 'Sınıf Öğretmeni' },
+  { name: 'İpek ŞAHİN', branch: 'Sınıf Öğretmeni' },
+  { name: 'Meryem MACİT', branch: 'Sınıf Öğretmeni' },
+  { name: 'Hilal KAYA', branch: 'Sınıf Öğretmeni' },
+  { name: 'Sümeyra Nur TAŞDEMİR', branch: 'Sınıf Öğretmeni' },
+  { name: 'Aslı ERGÜN', branch: 'Sınıf Öğretmeni' },
+  { name: 'Zeliha EMAN', branch: 'Sınıf Öğretmeni' },
+  { name: 'Mehmet Akif YEŞİLYURT', branch: 'Sınıf Öğretmeni' },
+  { name: 'Ayşe GÜLER', branch: 'Sınıf Öğretmeni' },
+  { name: 'Fatma ÇELİK', branch: 'Sınıf Öğretmeni' },
+  { name: 'Murat YILDIZ', branch: 'Sınıf Öğretmeni' },
+  { name: 'Selin KOÇ', branch: 'Sınıf Öğretmeni' },
+  { name: 'Gökhan ŞAHİN', branch: 'Sınıf Öğretmeni' },
+  { name: 'Zeynep AKTAŞ', branch: 'Sınıf Öğretmeni' },
+  { name: 'Orkun AYDIN', branch: 'Matematik Zümresi' },
+  { name: 'Beritan ŞENATEŞ', branch: 'Fen Bilimleri Zümresi' },
+  { name: 'Deniz ARSLAN', branch: 'Sosyal Bilgiler Zümresi' },
+  { name: 'Canan YILDIRIM', branch: 'İngilizce Zümresi' },
+  { name: 'Murat DEMİR', branch: 'Bilişim Teknolojileri' },
+  { name: 'Gülşah ÖZTÜRK', branch: 'Görsel Sanatlar' },
+  { name: 'Selim AKSOY', branch: 'Beden Eğitimi' },
+  { name: 'Ebru TEKNECİ', branch: 'Türkçe / Edebiyat' },
 ]
+
+export function generateAllBranchOptions(): BranchOption[] {
+  const options: BranchOption[] = [
+    {
+      id: 'all',
+      title: 'Tüm Şubeler',
+      code: 'ALL',
+      desc: 'Oxonom Okulları · Bütün Sınıf ve Şubeler (Tüm Ödevler)',
+      grade: 'Tüm Sınıflar',
+      category: 'ALL',
+      isAll: true,
+      teacherName: 'Tüm Öğretmenler',
+      studentCount: 1,
+    },
+  ]
+
+  const letters = ['A', 'B', 'C', 'D']
+  let idx = 0
+
+  for (let g = 1; g <= 8; g++) {
+    for (const b of letters) {
+      const code = `${g}/${b}`
+      const is1A = g === 1 && b === 'A'
+      const teacher = is1A ? BRANCH_TEACHERS_CATALOG[0] : BRANCH_TEACHERS_CATALOG[idx % BRANCH_TEACHERS_CATALOG.length]
+      const category: 'PRIMARY' | 'MIDDLE' = g <= 4 ? 'PRIMARY' : 'MIDDLE'
+
+      options.push({
+        id: `branch-${g}-${b.toLowerCase()}`,
+        title: `${code} Şubesi`,
+        code,
+        desc: is1A
+          ? 'Sınıf Rehber Öğretmeni: Özlem ZOR · 1 Kayıtlı Öğrenci (Erçil UĞURLU)'
+          : `Sınıf Rehber Öğretmeni: ${teacher.name} (${teacher.branch})`,
+        grade: `${g}. Sınıf`,
+        gradeNumber: g,
+        category,
+        isAll: false,
+        teacherName: teacher.name,
+        studentCount: is1A ? 1 : 0,
+      })
+      idx++
+    }
+  }
+
+  // 9-A Şubesi for backward compatibility and secondary level testing
+  options.push({
+    id: 'branch-9-a',
+    title: '9-A Şubesi',
+    code: '9/A',
+    desc: 'Sınıf Rehber Öğretmeni: Ebru TEKNECİ (Türk Dili ve Edebiyatı)',
+    grade: '9. Sınıf',
+    gradeNumber: 9,
+    category: 'HIGH',
+    isAll: false,
+    teacherName: 'Ebru TEKNECİ',
+    studentCount: 0,
+  })
+
+  // Synchronize dynamic custom classes from localStorage if created in principal panel
+  if (typeof window !== 'undefined') {
+    try {
+      const raw =
+        localStorage.getItem('oxonom_admin_classes_30') ||
+        localStorage.getItem('oxonom_admin_classes_10') ||
+        localStorage.getItem('oxonom_school_classes')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+          parsed.forEach((c: any) => {
+            const rawCode = c.code || c.name || ''
+            const norm = normalizeClassCode(rawCode)
+            const exists = options.some(
+              (o) => normalizeClassCode(o.code) === norm || normalizeClassCode(o.title) === norm
+            )
+            if (!exists && norm) {
+              const gNum = parseInt(norm.split('/')[0] || '1', 10)
+              options.push({
+                id: `branch-custom-${c.id || norm.replace(/\//g, '-')}`,
+                title: c.name || `${norm} Şubesi`,
+                code: norm,
+                desc:
+                  c.description ||
+                  (c.teacherName ? `Sınıf Rehber Öğretmeni: ${c.teacherName}` : 'Oxonom Okulları Şubesi'),
+                grade: c.gradeLevel || `${gNum}. Sınıf`,
+                gradeNumber: isNaN(gNum) ? undefined : gNum,
+                category: gNum <= 4 ? 'PRIMARY' : gNum <= 8 ? 'MIDDLE' : 'HIGH',
+                isAll: false,
+                teacherName: c.teacherName || 'Rehber Öğretmen',
+                studentCount: c.studentCount || 0,
+              })
+            }
+          })
+        }
+      }
+    } catch (_) {}
+  }
+
+  return options
+}
+
+const BRANCH_OPTIONS = generateAllBranchOptions()
 
 // Real school assignments across classes covering all assignment combinations
 const INITIAL_HOMEWORKS: HomeworkItem[] = [
+  // ── 1/A ŞUBESİ (AKTİF VE BİRİNCİL ŞUBE) ──
+  {
+    id: 'hw-1a-math-1',
+    assignment_uuid: 'asg_ritmik_sayma_01',
+    title: '1-A Matematik: Ritmik Sayma & Sayı Doğrusu Etkinliği',
+    shortTitle: 'Ritmik Sayma & Sayı Doğrusu',
+    subject: 'Matematik',
+    category: 'WHITEBOARD',
+    tool_type: 'WHITEBOARD',
+    board_uuid: 'board_ritmik_sayma_1a',
+    className: '1/A Şubesi',
+    assignedDate: '12.10.2026',
+    dueDate: '19.10.2026',
+    assignedTimestamp: Date.now() - 3 * 86400000,
+    dueTimestamp: Date.now() + 2 * 86400000,
+    description: '1’er ve 2’şer ileriye doğru ritmik sayma kurallarını sayı doğrusunda zıplayarak tamamlayınız.',
+    period: 'this_week',
+    periodLabel: 'Bu Hafta',
+    accentColor: 'emerald',
+    max_score: 100,
+    teacher_name: 'Özlem ZOR',
+  },
+  {
+    id: 'hw-1a-reading-1',
+    assignment_uuid: 'asg_hizli_okuma_02',
+    title: '1-A Türkçe: 1 Dk Hızlı Okuma & Kelime Sayacı Çalışması',
+    shortTitle: '1 Dk Hızlı Okuma',
+    subject: 'Türkçe',
+    category: 'READING',
+    tool_type: 'READING',
+    className: '1/A Şubesi',
+    assignedDate: '10.10.2026',
+    dueDate: '17.10.2026',
+    assignedTimestamp: Date.now() - 5 * 86400000,
+    dueTimestamp: Date.now() + 1 * 86400000,
+    description: 'Verilen metni 1 dakika boyunca sesli okuyarak kelime sayacını başlatınız ve okuma puanınızı kaydediniz.',
+    period: 'this_week',
+    periodLabel: 'Bu Hafta',
+    accentColor: 'rose',
+    max_score: 100,
+    teacher_name: 'Özlem ZOR',
+  },
+  {
+    id: 'hw-1a-worksheet-1',
+    assignment_uuid: 'asg_harf_cizgi_03',
+    title: '1-A Türkçe: Harf Çizgi & Yazılış Yönü Atölyesi',
+    shortTitle: 'Harf Çizgi & Yazılış Yönü',
+    subject: 'Türkçe',
+    category: 'WORKSHEET',
+    tool_type: 'WORKSHEET',
+    className: '1/A Şubesi',
+    assignedDate: '06.10.2026',
+    dueDate: '13.10.2026',
+    assignedTimestamp: Date.now() - 8 * 86400000,
+    dueTimestamp: Date.now() - 1 * 86400000,
+    description: 'MEB standart dik temel harfleri ok yönlerini takip ederek tamamlayınız.',
+    period: 'past',
+    periodLabel: 'Geçen Hafta',
+    accentColor: 'amber',
+    max_score: 100,
+    teacher_name: 'Özlem ZOR',
+  },
+  {
+    id: 'hw-1a-hayat-1',
+    assignment_uuid: 'asg_hayat_bilgisi_nezaket',
+    title: '1-A Hayat Bilgisi: Okulumuzda Hayat ve Görgü Kuralları',
+    shortTitle: 'Okulumuzda Hayat & Görgü',
+    subject: 'Hayat Bilgisi',
+    category: 'QUIZ',
+    tool_type: 'QUIZ',
+    quiz_questions: DEFAULT_TEMPLATE_QUESTIONS,
+    className: '1/A Şubesi',
+    assignedDate: '14.10.2026',
+    dueDate: '21.10.2026',
+    assignedTimestamp: Date.now() - 1 * 86400000,
+    dueTimestamp: Date.now() + 4 * 86400000,
+    description: 'Sınıf içi dayanışma, nezaket kuralları ve okul kaynaklarını koruma interaktif değerlendirme testi.',
+    period: 'this_week',
+    periodLabel: 'Bu Hafta',
+    accentColor: 'blue',
+    max_score: 100,
+    teacher_name: 'Özlem ZOR',
+  },
+
+  // ── 9-A ŞUBESİ (TÜRK DİLİ & EDEBİYAT) ──
   {
     id: 'hw-reading-1',
     assignment_uuid: 'asg_dede_korkut_okuma',
@@ -234,6 +455,36 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
 ]
 
 const DEFAULT_INITIAL_SUBMISSIONS: Record<string, Record<string, SubmissionRecord>> = {
+  'hw-1a-math-1': {
+    's-1': {
+      studentId: 's-1',
+      score: 100,
+      feedback: 'Ritmik sayma adımlarını eksiksiz ve çok hızlı tamamladın, tebrikler!',
+      submittedAt: '15.10.2026 14:20',
+      status: 'submitted',
+      content: '1’er ve 2’şer ileriye doğru ritmik sayma başarıyla tamamlandı.',
+    },
+  },
+  'hw-1a-reading-1': {
+    's-1': {
+      studentId: 's-1',
+      score: 98,
+      feedback: 'Harika bir okuma performansı! Dakikada 88 kelime hatasız okundu.',
+      submittedAt: '14.10.2026 10:15',
+      status: 'submitted',
+      content: '1 Dk okuma tamamlandı: 88 kelime okundu.',
+    },
+  },
+  'hw-1a-worksheet-1': {
+    's-1': {
+      studentId: 's-1',
+      score: 95,
+      feedback: 'Harf yönleri ve çizgi disiplini gayet başarılı.',
+      submittedAt: '10.10.2026 11:00',
+      status: 'submitted',
+      content: 'Dik temel harf çalışma kağıdı tamamlandı.',
+    },
+  },
   'hw-reading-1': {
     's-1': {
       studentId: 's-1',
@@ -355,7 +606,26 @@ export default function MHomeworkClient({
   }, [])
 
   // Branch & Modals
-  const [selectedBranch, setSelectedBranch] = useState('9-A Şubesi')
+  const [branchOptions, setBranchOptions] = useState<BranchOption[]>(() => generateAllBranchOptions())
+  const [selectedBranch, setSelectedBranch] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('oxonom_teacher_active_branch')
+        if (saved) return saved
+      } catch (_) {}
+    }
+    return '1/A Şubesi'
+  })
+  const [selectedGradeCategory, setSelectedGradeCategory] = useState<string>('ALL')
+  const [createTargetClass, setCreateTargetClass] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('oxonom_teacher_active_branch')
+        if (saved && saved !== 'Tüm Şubeler') return saved
+      } catch (_) {}
+    }
+    return '1/A Şubesi'
+  })
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false)
   const [branchSearch, setBranchSearch] = useState('')
   const [isQrModalOpen, setIsQrModalOpen] = useState(false)
@@ -464,14 +734,25 @@ export default function MHomeworkClient({
       detailedDesc = `Ekli Çalışma Belgesi: ${createWorksheetFileName}${detailedDesc ? `\n\n${detailedDesc}` : ''}`
     }
 
+    const targetClassName = isIndividual ? (targetStudent.className || '1/A Şubesi') : createTargetClass
+    const targetNormCode = normalizeClassCode(targetClassName)
+    const targetBranchObj = branchOptions.find(
+      (b) => b.title === targetClassName || normalizeClassCode(b.code) === targetNormCode
+    )
+
     const newId = Date.now()
     const newAsg: SchoolAssignmentItem = {
       id: newId,
       assignment_uuid: `asg_${newId}`,
       title: createTitle.trim(),
       description: detailedDesc.trim() || 'Öğretmen tarafından tanımlanan ödev görevi.',
-      grade_level: '9. Sınıf',
-      grade_category: 'Lise (9-12)',
+      grade_level: targetBranchObj?.grade || '1. Sınıf',
+      grade_category:
+        targetBranchObj?.category === 'PRIMARY'
+          ? 'İlkokul (1-4)'
+          : targetBranchObj?.category === 'MIDDLE'
+          ? 'Ortaokul (5-8)'
+          : 'Lise (9-12)',
       subject: createSubject,
       tool_type: createToolType,
       quiz_questions: createToolType === 'QUIZ' ? createQuizQuestions : undefined,
@@ -489,11 +770,11 @@ export default function MHomeworkClient({
         whiteboardTopic: createWhiteboardTopic || null,
         whiteboardCanvasType: createWhiteboardCanvasType || null,
       },
-      classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
+      classes: [{ id: Date.now(), name: targetClassName, code: targetNormCode }],
       due_date: createDueDate || '2026-10-20T23:59:00',
       max_score: Number(createMaxScore) || 100,
       published: true,
-      teacher_name: 'Ebru TEKNECİ',
+      teacher_name: targetBranchObj?.teacherName || 'Özlem ZOR',
       creation_date: new Date().toISOString(),
     }
 
@@ -523,7 +804,7 @@ export default function MHomeworkClient({
     if (isIndividual) {
       toast.success(`Yeni ödev oluşturuldu ve ${targetStudent.name} öğrencisine atandı!`, { duration: 4000, icon: '🎉' })
     } else {
-      toast.success('Yeni ödev başarıyla oluşturuldu ve 9/A şubesine atandı!', { duration: 4000, icon: '🎉' })
+      toast.success(`Yeni ödev başarıyla oluşturuldu ve ${targetClassName} şubesine atandı!`, { duration: 4000, icon: '🎉' })
     }
   }
 
@@ -534,10 +815,9 @@ export default function MHomeworkClient({
     const deletedIds: string[] = rawDeleted ? JSON.parse(rawDeleted) : []
 
     const convertedCustom: HomeworkItem[] = customList
-      .filter((asg) => !asg.title?.includes('Ritmik Sayma') && !asg.title?.includes('1 Dk Hızlı Okuma'))
       .filter((asg) => !deletedIds.includes(String(asg.id)) && !deletedIds.includes(asg.assignment_uuid))
       .map((asg) => {
-        const className = asg.classes?.[0]?.name || '9-A Şubesi'
+        const className = asg.classes?.[0]?.name || asg.grade_level || '1/A Şubesi'
         const assignedMs = asg.creation_date ? new Date(asg.creation_date).getTime() : Date.now()
         const dueMs = asg.due_date ? new Date(asg.due_date).getTime() : Date.now() + 7 * 86400000
         const now = Date.now()
@@ -642,8 +922,18 @@ export default function MHomeworkClient({
   // Sync active homework when selectedHomeworkId changes (returns null if empty)
   const currentHomework = useMemo(() => {
     if (allSchoolHomeworks.length === 0) return null
-    return allSchoolHomeworks.find((hw) => hw.id === selectedHomeworkId) || allSchoolHomeworks[0]
-  }, [allSchoolHomeworks, selectedHomeworkId])
+    if (selectedHomeworkId) {
+      const match = allSchoolHomeworks.find((hw) => hw.id === selectedHomeworkId)
+      if (match) return match
+    }
+    // If a specific branch is selected, prioritize homeworks belonging to that branch
+    if (selectedBranch !== 'Tüm Şubeler' && selectedBranch !== 'all' && selectedBranch !== 'Tüm Sınıflar ve Şubeler') {
+      const normSelected = normalizeClassCode(selectedBranch)
+      const branchMatch = allSchoolHomeworks.find((hw) => normalizeClassCode(hw.className) === normSelected)
+      if (branchMatch) return branchMatch
+    }
+    return allSchoolHomeworks[0]
+  }, [allSchoolHomeworks, selectedHomeworkId, selectedBranch])
 
   // Current Homework's Submissions Map (checks both ID and assignment_uuid)
   const currentSubmissions = useMemo(() => {
@@ -762,25 +1052,27 @@ export default function MHomeworkClient({
     saveAllSubmissions(updatedAll)
 
     // Bridge into student submissions storage if grading Erçil (s-1)
-    if (selectedStudent.id === 's-1') {
+    if (selectedStudent && selectedStudent.id === 's-1') {
       try {
         const raw = localStorage.getItem('oxonom_student_submissions_ercil')
         const currentStudentSubs = raw ? JSON.parse(raw) : {}
-        const key = currentHomework.assignment_uuid || currentHomework.id
-        currentStudentSubs[key] = {
-          assignmentId: key,
-          submittedAt: timeFormatted,
-          content: currentFeedback || 'Öğretmen değerlendirdi.',
-          status: 'graded',
-          score: currentScore,
-          feedback: currentFeedback,
+        const key = currentHomework?.assignment_uuid || currentHomework?.id
+        if (key) {
+          currentStudentSubs[key] = {
+            assignmentId: key,
+            submittedAt: timeFormatted,
+            content: currentFeedback || 'Öğretmen değerlendirdi.',
+            status: 'graded',
+            score: currentScore,
+            feedback: currentFeedback,
+          }
+          localStorage.setItem('oxonom_student_submissions_ercil', JSON.stringify(currentStudentSubs))
+          window.dispatchEvent(new CustomEvent('oxonom_student_submission_updated', { detail: currentStudentSubs[key] }))
         }
-        localStorage.setItem('oxonom_student_submissions_ercil', JSON.stringify(currentStudentSubs))
-        window.dispatchEvent(new CustomEvent('oxonom_student_submission_updated', { detail: currentStudentSubs[key] }))
       } catch (_) {}
     }
 
-    toast.success(`${selectedStudent.name} için ${currentScore} puan ve geri bildirim kaydedildi!`, {
+    toast.success(`${selectedStudent?.name || 'Öğrenci'} için ${currentScore} puan ve geri bildirim kaydedildi!`, {
       icon: '🎉',
       duration: 3500,
     })
@@ -788,11 +1080,29 @@ export default function MHomeworkClient({
 
   // Filtered branches for the branch modal
   const filteredBranches = useMemo(() => {
-    if (!branchSearch.trim()) return BRANCH_OPTIONS
-    return BRANCH_OPTIONS.filter((b) =>
-      b.title.toLowerCase().includes(branchSearch.toLowerCase())
+    let list = branchOptions
+    if (selectedGradeCategory === 'PRIMARY') {
+      list = list.filter((b) => b.isAll || b.category === 'PRIMARY')
+    } else if (selectedGradeCategory === 'MIDDLE') {
+      list = list.filter((b) => b.isAll || b.category === 'MIDDLE')
+    } else if (selectedGradeCategory === 'HIGH') {
+      list = list.filter((b) => b.isAll || b.category === 'HIGH')
+    } else if (selectedGradeCategory !== 'ALL') {
+      const gNum = parseInt(selectedGradeCategory, 10)
+      list = list.filter((b) => b.isAll || b.gradeNumber === gNum || b.grade?.startsWith(`${gNum}.`))
+    }
+
+    if (!branchSearch.trim()) return list
+    const q = branchSearch.trim().toLowerCase()
+    return list.filter(
+      (b) =>
+        b.title.toLowerCase().includes(q) ||
+        b.code.toLowerCase().includes(q) ||
+        b.desc.toLowerCase().includes(q) ||
+        b.grade.toLowerCase().includes(q) ||
+        b.teacherName?.toLowerCase().includes(q)
     )
-  }, [branchSearch])
+  }, [branchOptions, selectedGradeCategory, branchSearch])
 
   // Filtered and Sorted Homework Items for the Homework Selection Modal
   const classHomeworks = useMemo(() => {
@@ -1094,20 +1404,25 @@ export default function MHomeworkClient({
                 Henüz Verilmiş Bir Ödev Bulunmuyor
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs leading-relaxed">
-                9/A şubesi için henüz tanımlanmış bir ödev görevi bulunmuyor. Yeni bir ödev veya çalışma oluşturduğunuzda öğrenci teslimleri ve değerlendirmeleri burada listelenecektir.
+                {selectedBranch} için henüz tanımlanmış bir ödev görevi bulunmuyor. Yeni bir ödev veya çalışma oluşturduğunuzda öğrenci teslimleri ve değerlendirmeleri burada listelenecektir.
               </p>
             </div>
             <div className="flex items-center gap-2 mt-1">
               <button
                 type="button"
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={() => {
+                  if (selectedBranch !== 'Tüm Şubeler') {
+                    setCreateTargetClass(selectedBranch)
+                  }
+                  setIsCreateModalOpen(true)
+                }}
                 className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0A0D15] font-black text-xs flex items-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer"
               >
                 <Plus size={15} strokeWidth={2.5} />
                 <span>Yeni Ödev Tanımla</span>
               </button>
               <Link
-                href="/teacher/classes?class=9/A"
+                href={`/teacher/classes?class=${encodeURIComponent(normalizeClassCode(selectedBranch))}`}
                 className="px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 text-gray-700 dark:text-gray-200 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <span>Öğrenci Listesi</span>
@@ -1172,9 +1487,14 @@ export default function MHomeworkClient({
                 {/* 3. Yeni Ödev Ver Butonu (Geniş, Yüksek Görünürlüklü Mavi Buton) */}
                 <button
                   type="button"
-                  onClick={() => setIsCreateModalOpen(true)}
+                  onClick={() => {
+                    if (selectedBranch !== 'Tüm Şubeler') {
+                      setCreateTargetClass(selectedBranch)
+                    }
+                    setIsCreateModalOpen(true)
+                  }}
                   className="w-full sm:w-auto h-11 px-4 sm:px-5 rounded-xl bg-[#1D77FF] hover:bg-blue-600 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-95 transition-all cursor-pointer border border-blue-400 group"
-                  title="9/A Şubesine Yeni Ödev Tanımla"
+                  title={`${selectedBranch} İçin Yeni Ödev Tanımla`}
                 >
                   <Plus size={16} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-200" />
                   <span>+ Yeni Ödev Ver</span>
@@ -1224,7 +1544,7 @@ export default function MHomeworkClient({
                     ) : (
                       <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-white/95 border border-white/25 text-[10.5px] font-bold flex items-center gap-1">
                         <Users size={11} />
-                        <span>Tüm Sınıf (9/A)</span>
+                        <span>Tüm Sınıf ({currentHomework.className || selectedBranch})</span>
                       </span>
                     )}
                     <span className="px-2.5 py-0.5 rounded-full bg-amber-400/25 text-amber-200 border border-amber-300/40 text-[10.5px] font-bold flex items-center gap-1">
@@ -1944,12 +2264,15 @@ export default function MHomeworkClient({
                     type="button"
                     onClick={() => {
                       setIsHomeworkModalOpen(false)
+                      if (selectedBranch !== 'Tüm Şubeler') {
+                        setCreateTargetClass(selectedBranch)
+                      }
                       setIsCreateModalOpen(true)
                     }}
                     className="w-full py-2.5 px-3 rounded-2xl bg-[#1D77FF] hover:bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 transition-all cursor-pointer"
                   >
                     <Plus size={15} strokeWidth={2.5} />
-                    <span>+ Yeni Ödev Oluştur (9/A Şubesi)</span>
+                    <span>+ Yeni Ödev Oluştur ({selectedBranch})</span>
                   </button>
                 </div>
 
@@ -2797,7 +3120,7 @@ export default function MHomeworkClient({
                         </div>
                         <div className="min-w-0">
                           <span className="font-extrabold text-xs block leading-tight truncate">Tüm Sınıfa Ata</span>
-                          <span className="text-[10px] text-gray-400 block mt-0.5 truncate">9/A Şubesi genelinde</span>
+                          <span className="text-[10px] text-gray-400 block mt-0.5 truncate">{createTargetClass} genelinde</span>
                         </div>
                       </button>
 
@@ -2826,6 +3149,32 @@ export default function MHomeworkClient({
                       </button>
                     </div>
 
+                    {/* Sınıf Seçici (Eğer Tüm Sınıf seçildiyse) */}
+                    {createTargetType === 'CLASS' && (
+                      <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 space-y-1.5 mt-2">
+                        <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <Users size={14} className="text-indigo-600 dark:text-indigo-400" />
+                            <span>Ödevin Atanacağı Sınıf / Şube</span>
+                          </span>
+                          <span className="text-[10px] text-gray-400 font-normal">1-8. Sınıf ve Tüm Şubeler</span>
+                        </label>
+                        <select
+                          value={createTargetClass}
+                          onChange={(e) => setCreateTargetClass(e.target.value)}
+                          className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                        >
+                          {branchOptions
+                            .filter((b) => !b.isAll)
+                            .map((br) => (
+                              <option key={br.id} value={br.title}>
+                                {br.title} ({br.grade} · {br.teacherName})
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    )}
+
                     {/* Bireysel Öğrenci Seçici (Eğer Bireysel seçildiyse) */}
                     {createTargetType === 'INDIVIDUAL' && (
                       <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 space-y-1.5 mt-2">
@@ -2840,7 +3189,7 @@ export default function MHomeworkClient({
                         >
                           {ALL_INITIAL_STUDENTS.map((st) => (
                             <option key={st.id} value={st.id}>
-                              {st.name} (No: {st.studentNo}) — 9/A Şubesi
+                              {st.name} (No: {st.studentNo}) — {st.className || '1/A Şubesi'}
                             </option>
                           ))}
                         </select>
@@ -3145,7 +3494,7 @@ export default function MHomeworkClient({
                           ? `Ödevi Oluştur ve ${
                               ALL_INITIAL_STUDENTS.find((s) => s.id === createTargetStudentId)?.name || 'Öğrenciye'
                             }'ya Ata`
-                          : 'Ödevi Oluştur ve 9/A Şubesine Ata'}
+                          : `Ödevi Oluştur ve ${createTargetClass} Şubesine Ata`}
                       </span>
                     </button>
                   </div>
@@ -3174,19 +3523,19 @@ export default function MHomeworkClient({
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="relative w-full max-w-[440px] sm:max-w-md mx-auto bg-white dark:bg-[#111624] text-[#0F172A] dark:text-white rounded-t-[30px] sm:rounded-3xl p-5 sm:p-6 shadow-2xl z-10 flex flex-col gap-3.5 pb-8 sm:pb-6 max-h-[85vh] overflow-y-auto"
+                className="relative w-full max-w-[500px] sm:max-w-xl mx-auto bg-white dark:bg-[#111624] text-[#0F172A] dark:text-white rounded-t-[30px] sm:rounded-3xl p-5 sm:p-6 shadow-2xl z-10 flex flex-col gap-3.5 pb-8 sm:pb-6 max-h-[88vh] overflow-hidden"
               >
                 {/* Drag Handle Pill (Mobile Only) */}
-                <div className="w-12 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-1 sm:hidden" />
+                <div className="w-12 h-1 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto mb-1 shrink-0 sm:hidden" />
 
                 {/* Modal Header */}
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3 shrink-0">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-[14px] bg-[#0A0D15] dark:bg-white/10 text-[#34D399] flex items-center justify-center shrink-0">
                       <Users size={20} strokeWidth={2.2} />
                     </div>
                     <div>
-                      <h3 className="text-[16px] font-extrabold text-gray-900 dark:text-white leading-tight m-0">
+                      <h3 className="text-[17px] font-extrabold text-gray-900 dark:text-white leading-tight m-0">
                         Sınıfsal Kategoriler & Şubeler
                       </h3>
                       <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-0.5 m-0">
@@ -3205,86 +3554,192 @@ export default function MHomeworkClient({
                 </div>
 
                 {/* Search Input */}
-                <div className="flex items-center gap-2.5 h-[48px] px-3.5 rounded-[16px] border border-emerald-400 dark:border-emerald-600/60 bg-emerald-50/20 dark:bg-emerald-950/20 mt-1">
+                <div className="flex items-center gap-2.5 h-[46px] px-3.5 rounded-[16px] border border-emerald-400/80 dark:border-emerald-600/60 bg-emerald-50/20 dark:bg-emerald-950/20 shrink-0">
                   <Search size={18} className="text-gray-500 dark:text-gray-400 shrink-0" />
                   <input
                     type="search"
                     value={branchSearch}
                     onChange={(e) => setBranchSearch(e.target.value)}
-                    placeholder="Şube veya sınıf adı ara..."
-                    className="flex-1 bg-transparent border-0 outline-hidden text-[13px] text-gray-900 dark:text-white placeholder-gray-400"
+                    placeholder="Şube veya sınıf adı ara... (Örn: 1/A, 4, Ebru)"
+                    className="flex-1 bg-transparent border-0 outline-hidden text-[13px] text-gray-900 dark:text-white placeholder-gray-400 font-medium"
                   />
                   {branchSearch && (
                     <button
                       type="button"
                       onClick={() => setBranchSearch('')}
-                      className="text-gray-400 p-1"
+                      className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
                     >
                       <X size={14} />
                     </button>
                   )}
                 </div>
 
-                {/* Options List */}
-                <div className="flex flex-col gap-2.5 mt-1">
-                  {filteredBranches.map((branch) => {
-                    const isSelected =
-                      branch.isAll
-                        ? selectedBranch === 'Tüm Şubeler'
-                        : selectedBranch === branch.title
-
+                {/* Grade & Level Filter Chips (Horizontal Scroll) */}
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide py-1 shrink-0 -mx-1 px-1">
+                  {[
+                    { id: 'ALL', label: `Tümü (${branchOptions.length})` },
+                    { id: 'PRIMARY', label: 'İlkokul (1-4)' },
+                    { id: 'MIDDLE', label: 'Ortaokul (5-8)' },
+                    { id: '1', label: '1. Sınıf' },
+                    { id: '2', label: '2. Sınıf' },
+                    { id: '3', label: '3. Sınıf' },
+                    { id: '4', label: '4. Sınıf' },
+                    { id: '5', label: '5. Sınıf' },
+                    { id: '6', label: '6. Sınıf' },
+                    { id: '7', label: '7. Sınıf' },
+                    { id: '8', label: '8. Sınıf' },
+                    { id: 'HIGH', label: '9. Sınıf / Lise' },
+                  ].map((tab) => {
+                    const isActive = selectedGradeCategory === tab.id
                     return (
-                      <div
-                        key={branch.id}
-                        onClick={() => {
-                          const newBranch = branch.isAll ? 'Tüm Şubeler' : branch.title
-                          setSelectedBranch(newBranch)
-                          setIsBranchModalOpen(false)
-
-                          // If the currently selected homework doesn't belong to the newly selected branch, pick the first one from that branch
-                          if (newBranch !== 'Tüm Şubeler') {
-                            const firstMatch = INITIAL_HOMEWORKS.find((hw) => hw.className === newBranch)
-                            if (firstMatch && firstMatch.id !== selectedHomeworkId) {
-                              setSelectedHomeworkId(firstMatch.id)
-                            }
-                          }
-                          toast.success(`${branch.title} seçildi`)
-                        }}
-                        className={`p-3.5 rounded-[18px] flex items-center justify-between gap-3 cursor-pointer transition-all ${
-                          isSelected
-                            ? 'border-[1.5px] border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/30'
-                            : 'border border-gray-200 dark:border-white/10 bg-white dark:bg-[#161c2d] hover:border-gray-300'
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setSelectedGradeCategory(tab.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+                          isActive
+                            ? 'bg-emerald-500 text-[#0A0D15] shadow-xs font-black'
+                            : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200/80 dark:hover:bg-white/10'
                         }`}
                       >
-                        <div className="flex items-center gap-3 min-w-0">
-                          {branch.isAll ? (
-                            <div className="w-10 h-10 rounded-[14px] bg-[#0A0D15] dark:bg-black text-[#34D399] flex items-center justify-center shrink-0">
-                              <Layers size={19} strokeWidth={2.2} />
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 rounded-[14px] bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 flex items-center justify-center shrink-0">
-                              <Users size={19} strokeWidth={2} />
-                            </div>
-                          )}
-
-                          <div className="min-w-0">
-                            <span className="block text-[14px] font-extrabold text-gray-900 dark:text-white leading-tight truncate">
-                              {branch.title}
-                            </span>
-                            <span className="block text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                              {branch.desc}
-                            </span>
-                          </div>
-                        </div>
-
-                        {isSelected && (
-                          <div className="w-6 h-6 rounded-full text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                            <CheckCircle2 size={20} strokeWidth={2.4} />
-                          </div>
-                        )}
-                      </div>
+                        {tab.label}
+                      </button>
                     )
                   })}
+                </div>
+
+                {/* Information Header / Result Count */}
+                <div className="flex items-center justify-between text-[11px] font-bold text-gray-400 dark:text-gray-500 px-1 shrink-0">
+                  <span>{filteredBranches.length} Şube Listeleniyor</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 truncate max-w-[200px]">
+                    Aktif: {selectedBranch}
+                  </span>
+                </div>
+
+                {/* Options List */}
+                <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[160px] max-h-[380px]">
+                  {filteredBranches.length === 0 ? (
+                    <div className="p-8 text-center rounded-2xl bg-gray-50 dark:bg-white/5 border border-dashed border-gray-200 dark:border-white/10 space-y-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-bold m-0">
+                        Arama kriterine uygun şube bulunamadı.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBranchSearch('')
+                          setSelectedGradeCategory('ALL')
+                        }}
+                        className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                      >
+                        Filtreleri Temizle
+                      </button>
+                    </div>
+                  ) : (
+                    filteredBranches.map((branch) => {
+                      const isSelected =
+                        branch.isAll
+                          ? selectedBranch === 'Tüm Şubeler' || selectedBranch === 'all'
+                          : selectedBranch === branch.title || normalizeClassCode(selectedBranch) === normalizeClassCode(branch.code)
+
+                      const isPrimary = branch.category === 'PRIMARY'
+                      const isMiddle = branch.category === 'MIDDLE'
+
+                      return (
+                        <div
+                          key={branch.id}
+                          onClick={() => {
+                            const newBranch = branch.isAll ? 'Tüm Şubeler' : branch.title
+                            setSelectedBranch(newBranch)
+                            if (typeof window !== 'undefined') {
+                              try {
+                                localStorage.setItem('oxonom_teacher_active_branch', newBranch)
+                              } catch (_) {}
+                            }
+                            setIsBranchModalOpen(false)
+
+                            // If newBranch is not Tüm Şubeler, sync createTargetClass
+                            if (!branch.isAll) {
+                              setCreateTargetClass(newBranch)
+                            }
+
+                            // If currently selected homework doesn't belong to newly selected branch, pick first one
+                            if (newBranch !== 'Tüm Şubeler') {
+                              const normNew = normalizeClassCode(newBranch)
+                              const match = allSchoolHomeworks.find(
+                                (hw) => normalizeClassCode(hw.className) === normNew
+                              )
+                              if (match) {
+                                setSelectedHomeworkId(match.id)
+                              }
+                            }
+                            toast.success(`${branch.title} seçildi`)
+                          }}
+                          className={`p-3 sm:p-3.5 rounded-[18px] flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                            isSelected
+                              ? 'border-[1.5px] border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/40 shadow-xs'
+                              : 'border border-gray-200 dark:border-white/10 bg-white dark:bg-[#161c2d] hover:border-gray-300 dark:hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {branch.isAll ? (
+                              <div className="w-10 h-10 rounded-[14px] bg-[#0A0D15] dark:bg-black text-[#34D399] flex items-center justify-center shrink-0">
+                                <Layers size={19} strokeWidth={2.2} />
+                              </div>
+                            ) : isPrimary ? (
+                              <div className="w-10 h-10 rounded-[14px] bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200/60 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-black text-xs sm:text-sm flex items-center justify-center shrink-0">
+                                {branch.code}
+                              </div>
+                            ) : isMiddle ? (
+                              <div className="w-10 h-10 rounded-[14px] bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/60 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-black text-xs sm:text-sm flex items-center justify-center shrink-0">
+                                {branch.code}
+                              </div>
+                            ) : (
+                              <div className="w-10 h-10 rounded-[14px] bg-purple-50 dark:bg-purple-950/70 border border-purple-200/60 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-black text-xs sm:text-sm flex items-center justify-center shrink-0">
+                                {branch.code}
+                              </div>
+                            )}
+
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[14px] font-extrabold text-gray-900 dark:text-white leading-tight truncate">
+                                  {branch.title}
+                                </span>
+                                {!branch.isAll && (
+                                  <span
+                                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                      isPrimary
+                                        ? 'bg-emerald-100/80 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200'
+                                        : isMiddle
+                                        ? 'bg-indigo-100/80 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200'
+                                        : 'bg-purple-100/80 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200'
+                                    }`}
+                                  >
+                                    {branch.grade}
+                                  </span>
+                                )}
+                                {branch.studentCount > 0 && (
+                                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-100/80 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-200">
+                                    {branch.studentCount} Öğrenci
+                                  </span>
+                                )}
+                              </div>
+                              <span className="block text-[11px] text-gray-500 dark:text-gray-400 mt-1 truncate">
+                                {branch.desc}
+                              </span>
+                            </div>
+                          </div>
+
+                          {isSelected ? (
+                            <div className="w-6 h-6 rounded-full text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                              <CheckCircle2 size={21} strokeWidth={2.4} />
+                            </div>
+                          ) : (
+                            <div className="w-5 h-5 rounded-full border border-gray-200 dark:border-gray-700 shrink-0 opacity-40 group-hover:opacity-100" />
+                          )}
+                        </div>
+                      )
+                    })
+                  )}
                 </div>
               </motion.div>
             </div>

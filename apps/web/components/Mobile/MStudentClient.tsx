@@ -149,7 +149,8 @@ export const ALL_INITIAL_STUDENTS: MStudentItem[] = [...INITIAL_STUDENTS]
 
 const CLASS_OPTIONS = [
   { label: 'Tüm Sınıflar (1)', value: 'all' },
-  { label: '9-A Şubesi (1)', value: '9-A Şubesi' },
+  { label: '1/A Şubesi (1)', value: '1/A Şubesi' },
+  { label: '9-A Şubesi (0)', value: '9-A Şubesi' },
 ]
 
 export interface MStudentClientProps {
