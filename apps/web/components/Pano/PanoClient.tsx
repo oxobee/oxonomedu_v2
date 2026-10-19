@@ -1889,8 +1889,8 @@ export default function PanoClient() {
     }
   ], [selectedClass, liveBoardCount, liveAssignmentCount])
 
-  // Check active teacher session (paired via QR/OTP or directly logged in)
-  const hasActiveTeacher = !forceStandby && (!!pairedSession || (!!user && isTeacher))
+  // Check active session (all profiles: teacher, admin, student, smartboard supported)
+  const hasActiveTeacher = !forceStandby
   const [isPhoneConnected, setIsPhoneConnected] = useState<boolean>(false)
   const processedActionIds = useRef<Set<string>>(new Set())
 
@@ -2346,40 +2346,16 @@ export default function PanoClient() {
   }
 
   // 1. Akıllı Tahta Doğrudan Kullanım Modu:
-  // Kullanıcı talebi: QR yapılandırması ve bekleme ekranı kaldırıldı, pano doğrudan masaüstü olarak açılır.
-
-  // User Guard: Only Teachers can access Pano (if logged in with non-teacher account and not paired)
-  if (!pairedSession && user && (isStudent || isAdmin)) {
-    return (
-      <div className="fixed inset-0 w-screen h-screen flex flex-col items-center justify-center p-6 bg-slate-950 text-white font-sans select-none">
-        <div className="max-w-md w-full p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl flex flex-col items-center text-center">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-4">
-            <Lock className="w-8 h-8" />
-          </div>
-          <h2 className="text-xl font-black text-white mb-2">Pano Modu Öğretmenlere Özeldir</h2>
-          <p className="text-xs text-slate-400 leading-relaxed mb-6">
-            Oxonom Edu Pano OS akıllı tahta ve sınıf etkileşimi için yalnızca öğretmen profillerine açıktır.
-            {isStudent ? ' Öğrenci hesabınızla panoya erişemezsiniz.' : ' İdare ve müdür hesapları yönetim panelini kullanmalıdır.'}
-          </p>
-          <Link
-            href="/dash"
-            className="w-full py-3 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-bold text-xs shadow-lg transition-all text-center"
-          >
-            Yönetim Paneline Dön
-          </Link>
-        </div>
-      </div>
-    )
-  }
+  // Tüm kullanıcı profilleri (Öğretmen, İdare, Öğrenci, Misafir, Tahta) /pano ekranına doğrudan erişebilir.
 
   const effectiveUser = pairedSession || user
   const displayName =
     (effectiveUser?.first_name ? `${effectiveUser.first_name} ${effectiveUser.last_name || ''}`.trim() : '') ||
     effectiveUser?.full_name ||
     effectiveUser?.name ||
-    selectedClass?.teacherName ||
+    (isAdmin ? 'Yönetici' : isStudent ? 'Öğrenci' : selectedClass?.teacherName || 'Öğretmen') ||
     effectiveUser?.username ||
-    'Öğretmen'
+    'Kullanıcı'
 
   // apps is already memoized above and ready for rendering and remote control
 
@@ -2526,7 +2502,9 @@ export default function PanoClient() {
                   </div>
                   <div className="min-w-0">
                     <h4 className="font-bold text-slate-800 dark:text-white text-xs leading-tight truncate">{displayName}</h4>
-                    <p className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">Sınıf Öğretmeni</p>
+                    <p className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">
+                      {isAdmin ? 'Yönetici / İdare' : isStudent ? 'Öğrenci Profili' : isTeacher ? 'Sınıf Öğretmeni' : 'Akıllı Tahta / Pano'}
+                    </p>
                   </div>
                 </div>
                 <div className="p-1.5 space-y-0.5">
