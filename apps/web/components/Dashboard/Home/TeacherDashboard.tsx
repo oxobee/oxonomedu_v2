@@ -77,7 +77,7 @@ export default function TeacherDashboard() {
   return (
     <div className="space-y-8 dash-stagger-items">
       {/* ── 1. Hero Teacher Banner ── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-800 to-indigo-900 p-6 sm:p-8 text-white shadow-md">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#241329] via-[#4B075F] to-[#8D49A6] p-6 sm:p-8 text-white shadow-xl">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2.5 flex-wrap">
@@ -85,14 +85,14 @@ export default function TeacherDashboard() {
                 <Sparkle size={14} weight="fill" className="text-amber-300" />
                 <span>Öğretmen Çalışma Alanı</span>
               </span>
-              <span className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
+              <span className="px-3 py-1 rounded-xl text-xs font-bold bg-white/20 text-white border border-white/25">
                 {org?.name || 'Oxonom Edu Kampüsü'}
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Hoş Geldiniz, {teacherName} 👋
             </h2>
-            <p className="text-sm text-emerald-100/90 max-w-xl font-normal leading-relaxed">
+            <p className="text-sm text-purple-100/90 max-w-xl font-normal leading-relaxed">
               Ders içeriklerinizi yönetin, akıllı tahtalarda interaktif dersler işleyin ve öğrencilerinizin ödev teslimlerini anlık takip edin.
             </p>
           </div>
@@ -101,31 +101,31 @@ export default function TeacherDashboard() {
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <Link
               href="/dash/assignments"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-emerald-950 font-bold text-xs sm:text-sm hover:bg-emerald-50 transition-all shadow-sm active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-[#4B075F] font-bold text-xs sm:text-sm hover:bg-purple-50 transition-all shadow-sm active:scale-95 cursor-pointer"
             >
-              <PlusCircle size={17} weight="bold" className="text-emerald-700" />
+              <PlusCircle size={17} weight="bold" className="text-[#4B075F]" />
               <span>Yeni Ödev Ver</span>
             </Link>
             <Link
               href="/dash/boards?new=true"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 transition-all cursor-pointer"
             >
-              <ChalkboardSimple size={17} weight="bold" className="text-amber-300" />
+              <ChalkboardSimple size={17} weight="bold" className="text-white" />
               <span>Yeni Pano Aç</span>
             </Link>
             <Link
               href="/dash/classrooms"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 transition-all cursor-pointer"
             >
-              <GraduationCap size={17} weight="bold" className="text-cyan-300" />
+              <GraduationCap size={17} weight="bold" className="text-white" />
               <span>Sınıflarım ({schoolClassrooms.length})</span>
             </Link>
           </div>
         </div>
 
         {/* Decorative background glow circles */}
-        <div className="absolute -end-16 -top-16 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -start-16 -bottom-16 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -end-16 -top-16 w-64 h-64 bg-[#D914C8]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -start-16 -bottom-16 w-64 h-64 bg-[#4B075F]/30 rounded-full blur-3xl pointer-events-none" />
       </div>
 
       {/* ── 2. Stat Cards Grid ── */}
@@ -168,13 +168,13 @@ export default function TeacherDashboard() {
         <div className="bg-white rounded-2xl p-5 border border-gray-100 nice-shadow transition-all hover:shadow-md group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Kayıtlı Şubeler</span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-[#FCE8FA] text-[#B90FAB] flex items-center justify-center group-hover:bg-[#FCE8FA]/80 transition-colors">
               <GraduationCap size={22} weight="duotone" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-black text-gray-900">{schoolClassrooms.length}</span>
-            <span className="text-xs font-semibold text-emerald-600">
+            <span className="text-xs font-semibold text-[#B90FAB]">
               {isPrimary ? '1-4. Sınıf' : '5-8. Sınıf'}
             </span>
           </div>
@@ -221,12 +221,12 @@ export default function TeacherDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {boards.slice(0, 6).map((b: any, idx: number) => {
             const gradients = [
-              'from-indigo-600 via-blue-600 to-cyan-500',
-              'from-emerald-600 via-teal-600 to-cyan-600',
-              'from-purple-600 via-pink-600 to-rose-500',
-              'from-amber-600 via-orange-600 to-red-500',
-              'from-sky-600 via-blue-700 to-indigo-800',
-              'from-rose-600 via-pink-600 to-purple-600',
+              'from-[#4B075F] via-[#620B79] to-[#8D49A6]',
+              'from-[#350444] via-[#4B075F] to-[#7A1D99]',
+              'from-[#620B79] via-[#8D49A6] to-[#D914C8]',
+              'from-[#8D49A6] via-[#B90FAB] to-[#D914C8]',
+              'from-[#241329] via-[#4B075F] to-[#8D49A6]',
+              'from-[#4B075F] via-[#8D49A6] to-[#D914C8]',
             ]
             const bgGrad = gradients[idx % gradients.length]
             const boardLink = b.board_uuid ? `/board/${b.board_uuid}` : `/dash/boards`

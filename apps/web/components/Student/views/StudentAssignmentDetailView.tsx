@@ -334,10 +334,10 @@ export default function StudentAssignmentDetailView({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs flex items-center gap-2 shadow-md shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50"
+              className="px-6 py-3 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center gap-2 shadow-md shadow-purple-950/20 transition-all cursor-pointer disabled:opacity-50"
             >
-              <Send size={15} />
-              <span>{isSubmitting ? 'Gönderiliyor...' : 'Ödevi Öğretmene Teslim Et'}</span>
+              <Send size={15} className="text-white" />
+              <span className="text-white">{isSubmitting ? 'Gönderiliyor...' : 'Ödevi Öğretmene Teslim Et'}</span>
             </button>
           </div>
         </form>

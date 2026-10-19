@@ -23,14 +23,65 @@ import {
 import toast from 'react-hot-toast'
 import MockBadge from '@components/Common/MockBadge'
 import { ALL_INITIAL_STUDENTS, MStudentItem } from '@components/Mobile/MStudentClient'
+import {
+  ALL_CLASSROOMS,
+  normalizeClassCode,
+} from '@services/demo/schoolDirectory'
 
 export default function TeacherProgressView() {
-  const [selectedClass, setSelectedClass] = useState('9-A Şubesi')
+  const [selectedClass, setSelectedClass] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const urlParams = new URLSearchParams(window.location.search)
+        const qClass = urlParams.get('class')
+        if (qClass) {
+          const match = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === normalizeClassCode(qClass))
+          if (match) return match.name
+        }
+        const saved = localStorage.getItem('oxonom_selected_class')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed.name) return parsed.name
+          if (parsed.code) {
+            const match = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === normalizeClassCode(parsed.code))
+            if (match) return match.name
+          }
+        }
+      } catch (_) {}
+    }
+    return '9-A Şubesi'
+  })
   const [search, setSearch] = useState('')
 
   // Active Teacher details for signing guidance notes
   const [teacherName, setTeacherName] = useState('Ebru TEKNECİ')
   const [teacherBranch, setTeacherBranch] = useState('Türk Dili ve Edebiyatı · Rehberlik')
+
+  useEffect(() => {
+    const handleClassChanged = (e: any) => {
+      if (e?.detail?.name) {
+        setSelectedClass(e.detail.name)
+      } else if (e?.detail?.code) {
+        const found = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === normalizeClassCode(e.detail.code))
+        if (found) setSelectedClass(found.name)
+      }
+    }
+    window.addEventListener('oxonom_class_changed', handleClassChanged)
+    return () => window.removeEventListener('oxonom_class_changed', handleClassChanged)
+  }, [])
+
+  const handleSelectClass = (name: string) => {
+    setSelectedClass(name)
+    if (typeof window !== 'undefined') {
+      try {
+        const found = ALL_CLASSROOMS.find((c) => c.name === name || c.code === name)
+        if (found) {
+          localStorage.setItem('oxonom_selected_class', JSON.stringify(found))
+          window.dispatchEvent(new CustomEvent('oxonom_class_changed', { detail: found }))
+        }
+      } catch (_) {}
+    }
+  }
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -92,12 +143,12 @@ export default function TeacherProgressView() {
 
   // Filter students by selected class
   const classStudents = useMemo(() => {
-    return students.filter((s) => {
-      if (selectedClass === '9-A Şubesi' || selectedClass === '9-A') {
-        return s.className === '9-A Şubesi' || s.className.startsWith('9-A')
-      }
-      return s.className === selectedClass
+    const norm = normalizeClassCode(selectedClass)
+    const filtered = students.filter((s) => {
+      const sNorm = normalizeClassCode(s.className || '')
+      return sNorm === norm || s.className === selectedClass || s.className?.includes(selectedClass) || selectedClass.includes(s.className)
     })
+    return filtered.length > 0 ? filtered : students
   }, [students, selectedClass])
 
   const filteredStudents = useMemo(() => {
@@ -152,7 +203,7 @@ export default function TeacherProgressView() {
       {/* ── HEADER BANNER ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-3xl p-6 shadow-sm">
         <div>
-          <div className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-xs text-[#8D49A6] dark:text-[#C58ADB] font-bold uppercase tracking-wider mb-1">
             <TrendingUp size={15} />
             <span>Akademik Gelişim & Pedagojik Rehberlik</span>
           </div>
@@ -171,12 +222,14 @@ export default function TeacherProgressView() {
           <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Şube:</span>
           <select
             value={selectedClass}
-            onChange={(e) => setSelectedClass(e.target.value)}
-            className="h-10 px-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-900 dark:text-white border-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            onChange={(e) => handleSelectClass(e.target.value)}
+            className="h-10 px-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-900 dark:text-white border-none focus:ring-2 focus:ring-[#8D49A6] cursor-pointer"
           >
-            <option value="9-A Şubesi">9-A Şubesi (Rehberlik Şubesi)</option>
-            <option value="9-B Şubesi">9-B Şubesi</option>
-            <option value="1-A Şubesi">1-A Şubesi</option>
+            {ALL_CLASSROOMS.map((cls) => (
+              <option key={cls.id} value={cls.name}>
+                {cls.name} ({cls.grade_level})
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -381,31 +434,31 @@ export default function TeacherProgressView() {
                 {/* 2. DEVAMSIZLIK DURUMU (GRAFİKSEL VE İSTATİSTİKSEL) */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <UserCheck size={15} className="text-emerald-500" />
+                    <UserCheck size={15} className="text-[#8D49A6]" />
                     <span>Devamsızlık & Okul Devam İstatistikleri</span>
                   </h4>
 
-                  <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="p-4 rounded-2xl bg-[#F0D8FA]/30 dark:bg-[#4B075F]/20 border border-[#8D49A6]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="space-y-1">
-                      <div className="text-sm font-black text-emerald-900 dark:text-emerald-200 flex items-center gap-2">
+                      <div className="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
                         <span>Ders Katılım Oranı: %{selectedStudent.attendanceRate}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold">
+                        <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#4B075F] text-white font-bold shadow-xs">
                           Kusursuz Devam
                         </span>
                       </div>
-                      <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                      <p className="text-xs text-gray-600 dark:text-gray-300">
                         Öğrenci 2026-2027 Güz Döneminde toplam 120 ders saatinin tamamına katılmıştır.
                       </p>
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0 text-center">
-                      <div className="px-3 py-2 rounded-xl bg-white dark:bg-[#0E1526] border border-emerald-200/60">
+                      <div className="px-3 py-2 rounded-xl bg-white dark:bg-[#0E1526] border border-[#8D49A6]/30">
                         <span className="text-gray-400 text-[10px] block">Özürsüz</span>
                         <strong className="text-xs font-black text-gray-900 dark:text-white">
                           {selectedStudent.absentUnexcusedDays} Gün
                         </strong>
                       </div>
-                      <div className="px-3 py-2 rounded-xl bg-white dark:bg-[#0E1526] border border-emerald-200/60">
+                      <div className="px-3 py-2 rounded-xl bg-white dark:bg-[#0E1526] border border-[#8D49A6]/30">
                         <span className="text-gray-400 text-[10px] block">Özürlü</span>
                         <strong className="text-xs font-black text-gray-900 dark:text-white">
                           {selectedStudent.absentExcusedDays} Gün

@@ -71,6 +71,7 @@ import {
 } from '@services/demo/attendanceService'
 import MockBadge from '@components/Common/MockBadge'
 import LiveClassRadar from '@components/Common/LiveClassRadar'
+import WeeklyCurriculumProgressWidget from '@components/Teacher/widgets/WeeklyCurriculumProgressWidget'
 
 export interface DashV2ClientProps {
   hideDock?: boolean
@@ -146,6 +147,21 @@ export default function DashV2Client({
       } catch (_) {}
     }
   }
+
+  // Reactively synchronize with external class changes
+  useEffect(() => {
+    const handleClassChanged = (e: any) => {
+      if (e?.detail) {
+        const detail = e.detail
+        const found = ALL_CLASSROOMS.find((c) => c.id === detail.id || c.code === detail.code || c.name === detail.name)
+        if (found) {
+          setSelectedClass(found)
+        }
+      }
+    }
+    window.addEventListener('oxonom_class_changed', handleClassChanged)
+    return () => window.removeEventListener('oxonom_class_changed', handleClassChanged)
+  }, [])
 
   // Real Classroom Daily Attendance Synchronization
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord | null>(() => {
@@ -854,6 +870,13 @@ export default function DashV2Client({
           </motion.div>
 
           {/* ══════════════════════════════════════════════════════════════════════════
+              HAFTALIK DERS KAZANIMLARI VE KONU İLERLEME PANELİ (ÖĞRETMEN WİDGETI)
+          ══════════════════════════════════════════════════════════════════════════ */}
+          <motion.div variants={itemVariants}>
+            <WeeklyCurriculumProgressWidget selectedClass={selectedClass} />
+          </motion.div>
+
+          {/* ══════════════════════════════════════════════════════════════════════════
               KATEGORİ 1: GÜNLÜK SINIF VE DEVAM YÖNETİMİ
           ══════════════════════════════════════════════════════════════════════════ */}
           <motion.div variants={itemVariants} className="space-y-3.5">
@@ -1025,7 +1048,7 @@ export default function DashV2Client({
                           <span>1. Ders · Türk Dili ve Edebiyatı</span>
                         </div>
                         <span className="text-[11px] text-gray-500 dark:text-gray-400 block truncate">
-                          9/A Şubesi · Derslik: 9-A
+                          {selectedClass.code} Şubesi · Derslik: {selectedClass.code}
                         </span>
                       </div>
                       <span className="font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md shrink-0">
@@ -1040,7 +1063,7 @@ export default function DashV2Client({
                           <span>2. Ders · Türk Dili ve Edebiyatı</span>
                         </div>
                         <span className="text-[11px] text-gray-500 dark:text-gray-400 block truncate">
-                          9/A Şubesi · Derslik: 9-A
+                          {selectedClass.code} Şubesi · Derslik: {selectedClass.code}
                         </span>
                       </div>
                       <span className="font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md shrink-0">
@@ -1173,7 +1196,7 @@ export default function DashV2Client({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#4B075F]/10 dark:bg-[#4B075F]/30 text-[#8D49A6] dark:text-[#D914C8] flex items-center justify-center shrink-0">
                         <QrCode size={19} />
                       </div>
                       <div>
@@ -1207,7 +1230,7 @@ export default function DashV2Client({
                         return (
                           <div
                             key={board.sessionId}
-                            className="p-3 rounded-xl bg-gray-50 dark:bg-[#0A0D15] border border-emerald-500/30 dark:border-emerald-500/20 space-y-2.5"
+                            className="p-3 rounded-xl bg-gray-50 dark:bg-[#0A0D15] border border-[#8D49A6]/30 dark:border-[#8D49A6]/20 space-y-2.5"
                           >
                             <div className="flex items-center justify-between">
                               <div className="min-w-0">
@@ -1228,7 +1251,7 @@ export default function DashV2Client({
                                 href={remoteUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="py-1.5 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center gap-1 transition-all"
+                                className="py-1.5 px-2 rounded-lg bg-brand-gradient hover:opacity-95 text-white text-[11px] font-bold flex items-center justify-center gap-1 transition-all"
                               >
                                 <Smartphone size={12} />
                                 <span>Kumanda</span>
@@ -1240,7 +1263,7 @@ export default function DashV2Client({
                                 className="py-1.5 px-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 border border-amber-200/80 dark:border-amber-800/50 text-[11px] font-bold flex items-center justify-center gap-1 transition-all cursor-pointer disabled:opacity-50"
                               >
                                 {isCurrentLocking ? (
-                                  <RotateCw size={12} className="animate-spin text-amber-600" />
+                                   <RotateCw size={12} className="animate-spin text-amber-600" />
                                 ) : (
                                   <Lock size={12} />
                                 )}
@@ -1253,7 +1276,7 @@ export default function DashV2Client({
                                 className="py-1.5 px-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/50 text-[11px] font-bold flex items-center justify-center gap-1 transition-all cursor-pointer disabled:opacity-50"
                               >
                                 {isCurrentLoggingOut ? (
-                                  <RotateCw size={12} className="animate-spin text-rose-600" />
+                                   <RotateCw size={12} className="animate-spin text-rose-600" />
                                 ) : (
                                   <LogOut size={12} />
                                 )}
@@ -1266,7 +1289,7 @@ export default function DashV2Client({
                     </div>
                   ) : (
                     <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#0A0D15] border border-dashed border-gray-200 dark:border-gray-800 text-center flex flex-col items-center justify-center gap-2">
-                      <QrCode size={24} className="text-emerald-500/70" />
+                      <QrCode size={24} className="text-[#8D49A6]/70" />
                       <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
                         Açık QR Oturumu Bulunmuyor
                       </p>
@@ -1412,9 +1435,9 @@ export default function DashV2Client({
 
               <Link
                 href="/teacher/reports"
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-100 dark:border-gray-800 shadow-xs hover:border-emerald-400 dark:hover:border-emerald-600 transition-all flex flex-col items-center text-center gap-2 group active:scale-95"
+                className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-100 dark:border-gray-800 shadow-xs hover:border-[#8D49A6] dark:hover:border-[#8D49A6] transition-all flex flex-col items-center text-center gap-2 group active:scale-95"
               >
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 rounded-xl bg-[#4B075F]/10 dark:bg-[#4B075F]/30 text-[#8D49A6] dark:text-[#D914C8] flex items-center justify-center group-hover:scale-105 transition-transform">
                   <BarChart3 size={18} />
                 </div>
                 <div>
@@ -1429,9 +1452,9 @@ export default function DashV2Client({
 
               <Link
                 href="/teacher/smartboard"
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-100 dark:border-gray-800 shadow-xs hover:border-teal-400 dark:hover:border-teal-600 transition-all flex flex-col items-center text-center gap-2 group active:scale-95"
+                className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-100 dark:border-gray-800 shadow-xs hover:border-[#8D49A6] dark:hover:border-[#8D49A6] transition-all flex flex-col items-center text-center gap-2 group active:scale-95"
               >
-                <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 rounded-xl bg-[#4B075F]/10 dark:bg-[#4B075F]/30 text-[#8D49A6] dark:text-[#D914C8] flex items-center justify-center group-hover:scale-105 transition-transform">
                   <Tv size={18} />
                 </div>
                 <div>
@@ -1505,15 +1528,15 @@ export default function DashV2Client({
               className="w-full sm:max-w-lg bg-white dark:bg-[#121826] rounded-t-[32px] sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden relative"
             >
               {/* Header */}
-              <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent">
+              <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0 bg-gradient-to-r from-[#4B075F]/15 via-[#8D49A6]/10 to-transparent">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shrink-0">
+                  <div className="w-10 h-10 rounded-2xl bg-brand-gradient text-white flex items-center justify-center shadow-md shrink-0">
                     <ShieldCheck size={22} />
                   </div>
                   <div>
                     <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white flex items-center gap-2">
                       <span>İlk Giriş: Profil & Evrak Tamamlama</span>
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#4B075F]/15 dark:bg-[#4B075F]/40 text-[#8D49A6] dark:text-[#D914C8]">
                         Zorunlu MEB Kaydı
                       </span>
                     </h3>
@@ -1539,7 +1562,7 @@ export default function DashV2Client({
                     onClick={() => setOnboardingStep(1)}
                     className={`py-2 rounded-xl transition-all cursor-pointer ${
                       onboardingStep === 1
-                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        ? 'bg-brand-gradient text-white shadow-sm font-black'
                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -1550,7 +1573,7 @@ export default function DashV2Client({
                     onClick={() => setOnboardingStep(2)}
                     className={`py-2 rounded-xl transition-all cursor-pointer ${
                       onboardingStep === 2
-                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        ? 'bg-brand-gradient text-white shadow-sm font-black'
                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -1561,7 +1584,7 @@ export default function DashV2Client({
                     onClick={() => setOnboardingStep(3)}
                     className={`py-2 rounded-xl transition-all cursor-pointer ${
                       onboardingStep === 3
-                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        ? 'bg-brand-gradient text-white shadow-sm font-black'
                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -1572,7 +1595,7 @@ export default function DashV2Client({
                     onClick={() => setOnboardingStep(4)}
                     className={`py-2 rounded-xl transition-all cursor-pointer ${
                       onboardingStep === 4
-                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        ? 'bg-brand-gradient text-white shadow-sm font-black'
                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -1586,7 +1609,7 @@ export default function DashV2Client({
                 {/* ── ADIM 1: KİMLİK & İLETİŞİM ── */}
                 {onboardingStep === 1 && (
                   <div className="space-y-3.5">
-                    <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 text-xs text-emerald-900 dark:text-emerald-200">
+                    <div className="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200/50 dark:border-purple-800/40 text-xs text-[#4B075F] dark:text-purple-200">
                       Sayın Öğretmenimiz, müdürlük tarafından oluşturulan temel bilgilerinizi teyit ediniz ve eksik iletişim bilgilerinizi tamamlayınız.
                     </div>
 
@@ -1601,7 +1624,7 @@ export default function DashV2Client({
                           value={onboardingFirstName}
                           onChange={(e) => setOnboardingFirstName(e.target.value)}
                           placeholder="Adınız"
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                       <div>
@@ -1614,7 +1637,7 @@ export default function DashV2Client({
                           value={onboardingLastName}
                           onChange={(e) => setOnboardingLastName(e.target.value)}
                           placeholder="Soyadınız"
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                     </div>
@@ -1631,7 +1654,7 @@ export default function DashV2Client({
                           value={onboardingTcNo}
                           onChange={(e) => setOnboardingTcNo(e.target.value.replace(/\D/g, ''))}
                           placeholder="11 haneli TC No"
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                       <div>
@@ -1643,7 +1666,7 @@ export default function DashV2Client({
                           value={onboardingPhone}
                           onChange={(e) => setOnboardingPhone(e.target.value)}
                           placeholder="+90 532 ..."
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                     </div>
@@ -1658,7 +1681,7 @@ export default function DashV2Client({
                           value={onboardingBirthDate}
                           onChange={(e) => setOnboardingBirthDate(e.target.value)}
                           placeholder="GG.AA.YYYY"
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                       <div>
@@ -1668,7 +1691,7 @@ export default function DashV2Client({
                         <select
                           value={onboardingBloodType}
                           onChange={(e) => setOnboardingBloodType(e.target.value)}
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         >
                           <option value="A Rh+">A Rh+</option>
                           <option value="A Rh-">A Rh-</option>
@@ -1691,7 +1714,7 @@ export default function DashV2Client({
                         value={onboardingAddress}
                         onChange={(e) => setOnboardingAddress(e.target.value)}
                         placeholder="İlçe / İl (Örn: Beşiktaş / İstanbul)"
-                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                       />
                     </div>
 
@@ -1705,7 +1728,7 @@ export default function DashV2Client({
                           value={onboardingEmergencyContact}
                           onChange={(e) => setOnboardingEmergencyContact(e.target.value)}
                           placeholder="Eşi / Babası"
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                       <div>
@@ -1717,7 +1740,7 @@ export default function DashV2Client({
                           value={onboardingEmergencyPhone}
                           onChange={(e) => setOnboardingEmergencyPhone(e.target.value)}
                           placeholder="+90 532 ..."
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                     </div>
@@ -1748,7 +1771,7 @@ export default function DashV2Client({
                         value={onboardingUniversity}
                         onChange={(e) => setOnboardingUniversity(e.target.value)}
                         placeholder="Örn: Boğaziçi Üniversitesi Eğitim Fakültesi"
-                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                       />
                     </div>
 
@@ -1762,7 +1785,7 @@ export default function DashV2Client({
                           value={onboardingGraduationYear}
                           onChange={(e) => setOnboardingGraduationYear(e.target.value)}
                           placeholder="2016"
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                       <div>
@@ -1774,7 +1797,7 @@ export default function DashV2Client({
                           value={onboardingBranch}
                           onChange={(e) => setOnboardingBranch(e.target.value)}
                           placeholder="Türk Dili ve Edebiyatı"
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-emerald-600 dark:text-emerald-400 outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-[#8D49A6] dark:text-[#D914C8] outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                     </div>
@@ -1788,7 +1811,7 @@ export default function DashV2Client({
                         value={onboardingSicilNo}
                         onChange={(e) => setOnboardingSicilNo(e.target.value)}
                         placeholder="MEB-34019284"
-                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                       />
                     </div>
 
@@ -1802,7 +1825,7 @@ export default function DashV2Client({
                           value={onboardingBankName}
                           onChange={(e) => setOnboardingBankName(e.target.value)}
                           placeholder="Vakıfbank"
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                       <div>
@@ -1814,7 +1837,7 @@ export default function DashV2Client({
                           value={onboardingIban}
                           onChange={(e) => setOnboardingIban(e.target.value)}
                           placeholder="TR..."
-                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-blue-600 dark:text-blue-400 outline-hidden focus:border-emerald-500"
+                          className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-blue-600 dark:text-blue-400 outline-hidden focus:border-[#8D49A6]"
                         />
                       </div>
                     </div>
@@ -1835,7 +1858,7 @@ export default function DashV2Client({
                 {/* ── ADIM 3: RESMİ BELGELERİN YÜKLENMESİ ── */}
                 {onboardingStep === 3 && (
                   <div className="space-y-3.5">
-                    <div className="p-3 rounded-2xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200/50 dark:border-teal-800/40 text-xs text-teal-900 dark:text-teal-200">
+                    <div className="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200/50 dark:border-purple-800/40 text-xs text-[#4B075F] dark:text-purple-200">
                       Milli Eğitim Bakanlığı mevzuatı gereği kurumumuza ibraz edilmesi gereken resmi evrakları lütfen yükleyiniz. (PDF / JPG formatında)
                     </div>
 
@@ -1844,7 +1867,7 @@ export default function DashV2Client({
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
                           uploadedDocs.diploma
-                            ? 'bg-emerald-500 text-white'
+                            ? 'bg-brand-gradient text-white'
                             : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
                         }`}>
                           {uploadedDocs.diploma ? <CheckCircle2 size={20} /> : <FileText size={20} />}
@@ -1863,8 +1886,8 @@ export default function DashV2Client({
                         onClick={() => handleSimulateUpload('diploma')}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all cursor-pointer ${
                           uploadedDocs.diploma
-                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
-                            : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                            ? 'bg-[#4B075F]/10 dark:bg-[#4B075F]/30 text-[#8D49A6] dark:text-[#D914C8] border border-purple-300/40'
+                            : 'bg-brand-gradient text-white hover:opacity-90 shadow-xs'
                         }`}
                       >
                         {uploadedDocs.diploma ? 'Değiştir' : 'Belge Yükle'}
@@ -1876,7 +1899,7 @@ export default function DashV2Client({
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
                           uploadedDocs.sicil
-                            ? 'bg-emerald-500 text-white'
+                            ? 'bg-brand-gradient text-white'
                             : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
                         }`}>
                           {uploadedDocs.sicil ? <CheckCircle2 size={20} /> : <ShieldCheck size={20} />}
@@ -1895,8 +1918,8 @@ export default function DashV2Client({
                         onClick={() => handleSimulateUpload('sicil')}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all cursor-pointer ${
                           uploadedDocs.sicil
-                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
-                            : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                            ? 'bg-[#4B075F]/10 dark:bg-[#4B075F]/30 text-[#8D49A6] dark:text-[#D914C8] border border-purple-300/40'
+                            : 'bg-brand-gradient text-white hover:opacity-90 shadow-xs'
                         }`}
                       >
                         {uploadedDocs.sicil ? 'Değiştir' : 'Belge Yükle'}
@@ -1908,7 +1931,7 @@ export default function DashV2Client({
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
                           uploadedDocs.saglik
-                            ? 'bg-emerald-500 text-white'
+                            ? 'bg-brand-gradient text-white'
                             : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
                         }`}>
                           {uploadedDocs.saglik ? <CheckCircle2 size={20} /> : <FileCheck size={20} />}
@@ -1927,8 +1950,8 @@ export default function DashV2Client({
                         onClick={() => handleSimulateUpload('saglik')}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all cursor-pointer ${
                           uploadedDocs.saglik
-                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
-                            : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                            ? 'bg-[#4B075F]/10 dark:bg-[#4B075F]/30 text-[#8D49A6] dark:text-[#D914C8] border border-purple-300/40'
+                            : 'bg-brand-gradient text-white hover:opacity-90 shadow-xs'
                         }`}
                       >
                         {uploadedDocs.saglik ? 'Değiştir' : 'Belge Yükle'}
@@ -1940,7 +1963,7 @@ export default function DashV2Client({
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
                           uploadedDocs.ikametgah
-                            ? 'bg-emerald-500 text-white'
+                            ? 'bg-brand-gradient text-white'
                             : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
                         }`}>
                           {uploadedDocs.ikametgah ? <CheckCircle2 size={20} /> : <FileText size={20} />}
@@ -1959,8 +1982,8 @@ export default function DashV2Client({
                         onClick={() => handleSimulateUpload('ikametgah')}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 active:scale-95 transition-all cursor-pointer ${
                           uploadedDocs.ikametgah
-                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40'
-                            : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                            ? 'bg-[#4B075F]/10 dark:bg-[#4B075F]/30 text-[#8D49A6] dark:text-[#D914C8] border border-purple-300/40'
+                            : 'bg-brand-gradient text-white hover:opacity-90 shadow-xs'
                         }`}
                       >
                         {uploadedDocs.ikametgah ? 'Değiştir' : 'Belge Yükle'}
@@ -1983,7 +2006,7 @@ export default function DashV2Client({
                 {/* ── ADIM 4: GÜVENLİK, ŞİFRE & ONAY ── */}
                 {onboardingStep === 4 && (
                   <div className="space-y-3.5">
-                    <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 text-xs text-emerald-900 dark:text-emerald-200">
+                    <div className="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200/50 dark:border-purple-800/40 text-xs text-[#4B075F] dark:text-purple-200">
                       İlk girişinizde okul idaresi tarafından size tanımlanan geçici şifrenin yerine kalıcı ve güvenli şifrenizi belirleyiniz.
                     </div>
 
@@ -1996,7 +2019,7 @@ export default function DashV2Client({
                         value={onboardingNewPass}
                         onChange={(e) => setOnboardingNewPass(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                       />
                     </div>
 
@@ -2009,7 +2032,7 @@ export default function DashV2Client({
                         value={onboardingNewPassConfirm}
                         onChange={(e) => setOnboardingNewPassConfirm(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                        className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
                       />
                     </div>
 
@@ -2020,7 +2043,7 @@ export default function DashV2Client({
                           type="checkbox"
                           checked={onboardingKvkkAccepted}
                           onChange={(e) => setOnboardingKvkkAccepted(e.target.checked)}
-                          className="mt-0.5 w-4 h-4 rounded-md text-emerald-600 accent-emerald-600 cursor-pointer"
+                          className="mt-0.5 w-4 h-4 rounded-md text-[#8D49A6] accent-[#8D49A6] cursor-pointer"
                         />
                         <span className="text-xs text-gray-600 dark:text-gray-300 leading-snug">
                           <span className="font-bold">KVKK ve Kurumsal Aydınlatma Metni</span>'ni okudum. Yüklediğim belgelerin ve beyan ettiğim bilgilerin doğruluğunu, Oxonom Okulları bünyesinde öğretmenlik yetkisiyle kullanacağımı taahhüt ederim.
@@ -2031,7 +2054,7 @@ export default function DashV2Client({
                     <div className="pt-3 border-t border-gray-100 dark:border-gray-800">
                       <button
                         type="submit"
-                        className="w-full h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer"
+                        className="w-full h-12 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer"
                       >
                         <CheckCircle2 size={18} />
                         <span>Profili ve Belgeleri Tamamla & Onayla</span>
@@ -2052,7 +2075,7 @@ export default function DashV2Client({
   }
 
   return (
-    <div className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#34D399]/30 selection:text-emerald-950 transition-colors duration-300 font-jakarta overscroll-none`}>
+    <div className={`${theme} min-h-[100dvh] w-full bg-[#0A0D15] sm:bg-[#E2E8F0] sm:dark:bg-[#06090F] flex justify-center selection:bg-[#8D49A6]/30 selection:text-white transition-colors duration-300 font-jakarta overscroll-none`}>
       {/* ── 390px MOBILE APP FIRST FRAME CONTAINER ── */}
       <div
         className="w-full sm:max-w-[390px] min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0A0D15] sm:shadow-2xl relative flex flex-col pb-20 sm:border-x border-gray-200/60 dark:border-gray-800/80 overflow-x-hidden overscroll-y-none"

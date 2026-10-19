@@ -390,10 +390,10 @@ export default function PanoLockScreen({
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={onUnlock}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-500/30 border border-white/20 cursor-pointer active:scale-95 transition-all"
+                  className="w-full py-4 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-lg shadow-purple-950/30 border border-white/20 cursor-pointer active:scale-95 transition-all"
                 >
-                  <Unlock className="w-5 h-5" />
-                  <span>Kilidi Aç</span>
+                  <Unlock className="w-5 h-5 text-white" />
+                  <span className="text-white">Kilidi Aç</span>
                 </motion.button>
                 <p className="text-[11px] text-slate-400 text-center">Ayarlardan tahta PIN kodu belirleyebilirsiniz.</p>
               </div>
@@ -409,7 +409,7 @@ export default function PanoLockScreen({
                         className={`w-4 h-4 rounded-full transition-all duration-300 ${
                           isFilled
                             ? isSuccess
-                              ? 'bg-gradient-to-tr from-emerald-400 to-teal-300 scale-125 border border-emerald-200 shadow-[0_0_15px_rgba(16,185,129,0.9)]'
+                              ? 'bg-gradient-to-tr from-[#8D49A6] to-[#D914C8] scale-125 border border-purple-200 shadow-[0_0_15px_rgba(217,20,200,0.9)]'
                               : 'bg-gradient-to-tr from-rose-500 to-red-400 scale-125 border border-rose-200 shadow-[0_0_15px_rgba(244,63,94,0.8)]'
                             : 'border border-white/30 bg-white/5'
                         } ${hasError ? '!border-red-500 !bg-red-500 animate-bounce' : ''}`}

@@ -120,11 +120,11 @@ export default function DemoClassSwitcher({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-xs font-bold shadow-xs hover:shadow-md transition-all cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white text-xs font-bold shadow-xs hover:shadow-md transition-all cursor-pointer"
         >
-          <GraduationCap size={15} />
-          <span>Sınıfım: {activeClassItem.code}</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/20">Değiştir</span>
+          <GraduationCap size={15} className="text-white" />
+          <span className="text-white">Sınıfım: {activeClassItem.code}</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/20 text-white">Değiştir</span>
         </button>
 
         {renderModal()}
@@ -134,18 +134,18 @@ export default function DemoClassSwitcher({
 
   // Full Hero Card View for /home
   return (
-    <div className="relative overflow-hidden rounded-3xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 p-6 sm:p-7 mb-6 shadow-sm">
+    <div className="relative overflow-hidden rounded-3xl border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-br from-[#4B075F]/10 via-[#8D49A6]/5 to-[#D914C8]/10 p-6 sm:p-7 mb-6 shadow-sm">
       {/* Top Row: Demo Student Profile & School Badge */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-emerald-200/70">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-purple-200/60 dark:border-purple-800/60">
         <div className="flex flex-wrap items-center gap-2.5">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-emerald-600 text-white shadow-xs">
-            <Sparkles size={14} />
-            <span>Demo Öğrenci Hesabı</span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-[#4B075F] text-white shadow-xs">
+            <Sparkles size={14} className="text-white" />
+            <span className="text-white">Demo Öğrenci Hesabı</span>
           </span>
-          <span className="text-sm font-black text-emerald-950">
+          <span className="text-sm font-black text-purple-950 dark:text-purple-100">
             {DEMO_STUDENT.name}
           </span>
-          <span className="text-xs font-mono font-bold text-emerald-800 bg-white/90 border border-emerald-200 px-2.5 py-0.5 rounded-lg shadow-2xs">
+          <span className="text-xs font-mono font-bold text-purple-900 dark:text-purple-200 bg-white/90 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 px-2.5 py-0.5 rounded-lg shadow-2xs">
             Okul No: {DEMO_STUDENT.studentNo} • T.C.: {DEMO_STUDENT.tcNo}
           </span>
         </div>
@@ -235,7 +235,7 @@ export default function DemoClassSwitcher({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white border border-gray-200 shadow-2xl rounded-3xl max-h-[90vh] flex flex-col">
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-800 px-6 py-5 text-white shrink-0">
+          <div className="bg-brand-gradient px-6 py-5 text-white shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shrink-0">
@@ -248,7 +248,7 @@ export default function DemoClassSwitcher({
                       58 MEB Şubesi
                     </span>
                   </DialogTitle>
-                  <DialogDescription className="text-xs text-emerald-100 mt-0.5 font-medium">
+                  <DialogDescription className="text-xs text-purple-100 mt-0.5 font-medium">
                     Demo öğrenci olarak istediğiniz sınıfı seçin. Seçtiğiniz sınıfın öğretmeni, ders tahtaları ve ödevleri anında yüklenecektir.
                   </DialogDescription>
                 </div>

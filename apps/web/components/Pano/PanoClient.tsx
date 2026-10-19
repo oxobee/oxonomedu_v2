@@ -367,7 +367,7 @@ const GridItem = ({ item, onAction }: { item: AppItem; onAction: (app: AppItem) 
       <motion.div
         whileHover={{ scale: 1.08, y: -6 }}
         whileTap={{ scale: 0.94 }}
-        className={`w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-2xl sm:rounded-3xl ${item.color} shadow-lg shadow-indigo-500/20 flex items-center justify-center relative transition-all duration-300 ring-1 ring-white/30 border-2 border-white/25 group-hover:shadow-2xl`}
+        className={`w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-2xl sm:rounded-3xl ${item.color} shadow-lg shadow-purple-950/20 flex items-center justify-center relative transition-all duration-300 ring-1 ring-white/30 border-2 border-white/25 group-hover:shadow-2xl`}
       >
         {/* Inner gradient highlight */}
         <div className="absolute inset-0 rounded-2xl sm:rounded-3xl overflow-hidden pointer-events-none">
@@ -380,7 +380,7 @@ const GridItem = ({ item, onAction }: { item: AppItem; onAction: (app: AppItem) 
 
         {/* Badge */}
         {item.badge && (
-          <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[10px] sm:text-xs font-black px-2 sm:px-2.5 py-0.5 rounded-full shadow-lg border-2 border-white dark:border-slate-900 z-20 whitespace-nowrap">
+          <span className="absolute -top-2 -right-2 bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-[10px] sm:text-xs font-black px-2 sm:px-2.5 py-0.5 rounded-full shadow-lg border-2 border-white dark:border-slate-900 z-20 whitespace-nowrap">
             {item.badge}
           </span>
         )}
@@ -721,10 +721,10 @@ const ClassSelectionModal = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] border border-[#E8DFEB] dark:border-[#49364F]">
                     {c.attendance} Katılım
                   </span>
-                  {isSelected && <Check className="w-5 h-5 text-indigo-600" />}
+                  {isSelected && <Check className="w-5 h-5 text-[#4B075F] dark:text-[#D914C8]" />}
                 </div>
               </div>
             )
@@ -1447,6 +1447,7 @@ export default function PanoClient() {
       }
 
       const savedClassId = localStorage.getItem('oxonom_pano_selected_class_id')
+      let foundClass: ClassroomItem | null = null
       if (savedClassId) {
         let teacherClasses = classrooms
         if (savedPair) {
@@ -1457,16 +1458,18 @@ export default function PanoClient() {
             }
           } catch (_) {}
         }
-        const found = teacherClasses.find((c: ClassroomItem) => c.id === Number(savedClassId))
-        if (found) {
-          setSelectedClass(found)
-        } else {
-          setSelectedClass(null)
-          localStorage.removeItem('oxonom_pano_selected_class_id')
-        }
-      } else {
-        setSelectedClass(null)
+        foundClass = teacherClasses.find((c: ClassroomItem) => c.id === Number(savedClassId)) || null
       }
+      if (!foundClass) {
+        try {
+          const globalSaved = localStorage.getItem('oxonom_selected_class')
+          if (globalSaved) {
+            const parsed = JSON.parse(globalSaved)
+            foundClass = classrooms.find((c) => c.id === parsed.id || c.name === parsed.name || (parsed.code && c.name?.includes(parsed.code))) || null
+          }
+        } catch (_) {}
+      }
+      setSelectedClass(foundClass || classrooms[0] || null)
     }
   }, [])
 
@@ -1850,7 +1853,7 @@ export default function PanoClient() {
       type: 'app',
       title: 'Ödevler',
       icon: 'Homework',
-      color: 'bg-purple-600',
+      color: 'bg-gradient-to-br from-[#4B075F] to-[#701A75]',
       iconColor: 'text-white',
       badge: `${liveAssignmentCount} Aktif`,
       path: selectedClass ? `/dash/assignments?usergroupId=${selectedClass.id}` : `/dash/assignments`
@@ -1860,7 +1863,7 @@ export default function PanoClient() {
       type: 'app',
       title: 'Modüller',
       icon: 'Playgrounds',
-      color: 'bg-emerald-600',
+      color: 'bg-gradient-to-br from-[#620B79] to-[#8D49A6]',
       iconColor: 'text-white',
       badge: 'İnteraktif',
       path: `/dash/playgrounds`
@@ -1870,7 +1873,7 @@ export default function PanoClient() {
       type: 'app',
       title: 'Kaynaklar',
       icon: 'Attendance',
-      color: 'bg-orange-500',
+      color: 'bg-gradient-to-br from-[#8D49A6] to-[#B90FAB]',
       iconColor: 'text-white',
       path: `/library`
     },
@@ -1879,7 +1882,7 @@ export default function PanoClient() {
       type: 'app',
       title: 'Oyunlar',
       icon: 'Games',
-      color: 'bg-indigo-600',
+      color: 'bg-gradient-to-br from-[#B90FAB] to-[#D914C8]',
       iconColor: 'text-white',
       badge: 'Atölye',
       path: `/games`
@@ -2342,11 +2345,8 @@ export default function PanoClient() {
     )
   }
 
-  // 1. Akıllı Tahta Bekleme Ekranı (Standby Screen):
-  // Eğer sistemde aktif bir öğretmen oturumu yoksa, Standby Ekranı gösterilir!
-  if (!hasActiveTeacher) {
-    return <PanoStandbyScreen onPaired={handlePaired} />
-  }
+  // 1. Akıllı Tahta Doğrudan Kullanım Modu:
+  // Kullanıcı talebi: QR yapılandırması ve bekleme ekranı kaldırıldı, pano doğrudan masaüstü olarak açılır.
 
   // User Guard: Only Teachers can access Pano (if logged in with non-teacher account and not paired)
   if (!pairedSession && user && (isStudent || isAdmin)) {
@@ -2363,7 +2363,7 @@ export default function PanoClient() {
           </p>
           <Link
             href="/dash"
-            className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all text-center"
+            className="w-full py-3 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-bold text-xs shadow-lg transition-all text-center"
           >
             Yönetim Paneline Dön
           </Link>
@@ -2629,15 +2629,15 @@ export default function PanoClient() {
                           }
                         }}
                         onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
-                        className="p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40 border-2 border-slate-200/80 dark:border-slate-800 hover:border-indigo-600 dark:hover:border-indigo-500 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between text-left cursor-pointer group select-none focus:outline-hidden focus-visible:ring-4 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                        className="p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 hover:bg-[#F0D8FA]/30 dark:hover:bg-[#350444]/40 border-2 border-slate-200/80 dark:border-slate-800 hover:border-[#8D49A6] dark:hover:border-[#D914C8] shadow-sm hover:shadow-xl transition-all flex flex-col justify-between text-left cursor-pointer group select-none focus:outline-hidden focus-visible:ring-4 focus-visible:ring-[#8D49A6] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                       >
                         <div className="flex items-start justify-between gap-3 w-full mb-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+                            <div className="w-12 h-12 rounded-2xl bg-brand-gradient text-white flex items-center justify-center font-black text-base shadow-md shadow-purple-950/20 group-hover:scale-105 transition-transform">
                               {c.name.split(' ')[0]}
                             </div>
                             <div>
-                              <h3 className="font-black text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                              <h3 className="font-black text-base text-slate-900 dark:text-white group-hover:text-[#4B075F] dark:group-hover:text-[#F17AE6] transition-colors">
                                 {c.name}
                               </h3>
                               <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
@@ -2645,7 +2645,7 @@ export default function PanoClient() {
                               </p>
                             </div>
                           </div>
-                          <span className="text-[11px] font-black px-2.5 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0">
+                          <span className="text-[11px] font-black px-2.5 py-1 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] border border-[#E8DFEB] dark:border-[#49364F] shrink-0">
                             {c.attendance || '%100'}
                           </span>
                         </div>
@@ -2655,7 +2655,7 @@ export default function PanoClient() {
                             <span>👥 <strong>{c.studentCount}</strong> Öğrenci</span>
                             <span>📋 <strong>{c.boardCount}</strong> Tahta</span>
                           </div>
-                          <span className="text-indigo-600 dark:text-indigo-400 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                          <span className="text-[#4B075F] dark:text-[#F17AE6] font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
                             <span>Seç</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </span>
@@ -2709,8 +2709,8 @@ export default function PanoClient() {
             className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/60 dark:border-slate-800 shadow-[0_12px_40px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.4)] p-6 sm:p-8 space-y-6"
           >
             {/* Ambient decorative glow */}
-            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 rounded-full bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-72 h-72 rounded-full bg-gradient-to-tr from-blue-500/10 via-emerald-500/10 to-transparent blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 rounded-full bg-gradient-to-br from-[#4B075F]/15 via-[#8D49A6]/10 to-transparent blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-72 h-72 rounded-full bg-gradient-to-tr from-[#8D49A6]/15 via-[#D914C8]/10 to-transparent blur-3xl pointer-events-none" />
 
             {/* Header: Class Name & Teacher Info */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
@@ -2719,13 +2719,13 @@ export default function PanoClient() {
                   <h2 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
                     {selectedClass.name}
                   </h2>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 text-xs font-black shadow-2xs">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-black shadow-2xs">
+                    <span className="w-2 h-2 rounded-full bg-[#D914C8] animate-pulse" />
                     Aktif Sınıf
                   </span>
                   <button
                     onClick={() => dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' })}
-                    className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs group"
+                    className="px-3 py-1.5 rounded-xl bg-[#F0D8FA]/70 dark:bg-[#350444]/60 text-[#4B075F] dark:text-[#F17AE6] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-bold hover:bg-[#F0D8FA] dark:hover:bg-[#350444] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs group"
                   >
                     <span>Şube Değiştir</span>
                     <ChevronDown className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
@@ -2734,16 +2734,16 @@ export default function PanoClient() {
                 <div className="flex items-center gap-2 mt-2 text-xs text-slate-500 dark:text-slate-400 font-medium flex-wrap">
                   <span>Kurum: <strong className="text-slate-800 dark:text-slate-200">{org?.name || 'Necla Görer İlkokulu'}</strong></span>
                   <span className="text-slate-300 dark:text-slate-700">•</span>
-                  <span>Sınıf Öğretmeni: <strong className="text-indigo-600 dark:text-indigo-400">{selectedClass.teacherName || displayName} ({selectedClass.subject || 'Matematik'})</strong></span>
+                  <span>Sınıf Öğretmeni: <strong className="text-[#4B075F] dark:text-[#F17AE6]">{selectedClass.teacherName || displayName} ({selectedClass.subject || 'Matematik'})</strong></span>
                 </div>
               </div>
             </div>
 
-            {/* 3 Stat Cards (Kademe, Öğrenci, Tahta - Yoklama kaldırıldı) */}
+            {/* 3 Stat Cards in Harmonious Brand Theme (Kademe, Öğrenci, Tahta) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 relative z-10">
               {/* 1. KADEME */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/60 to-slate-50/60 dark:from-slate-800/60 dark:to-indigo-950/20 border border-indigo-100/80 dark:border-slate-800 flex items-center gap-3.5 transition-all hover:border-indigo-300">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#F7F0FA] dark:from-[#211729] dark:to-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-[#8D49A6]/50">
+                <div className="w-12 h-12 rounded-2xl bg-[#4B075F]/10 dark:bg-[#4B075F]/40 border border-[#4B075F]/20 flex items-center justify-center text-[#4B075F] dark:text-[#E9D5FF] shrink-0">
                   <School className="w-6 h-6" />
                 </div>
                 <div>
@@ -2753,13 +2753,13 @@ export default function PanoClient() {
               </div>
 
               {/* 2. ÖĞRENCİ */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50/60 to-slate-50/60 dark:from-slate-800/60 dark:to-emerald-950/20 border border-emerald-100/80 dark:border-slate-800 flex items-center gap-3.5 transition-all hover:border-emerald-300">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#F7F0FA] dark:from-[#211729] dark:to-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-[#8D49A6]/50">
+                <div className="w-12 h-12 rounded-2xl bg-[#8D49A6]/10 dark:bg-[#8D49A6]/40 border border-[#8D49A6]/20 flex items-center justify-center text-[#8D49A6] dark:text-[#F0D8FA] shrink-0">
                   <Users className="w-6 h-6" />
                 </div>
                 <div>
                   <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">ÖĞRENCİ</span>
-                  <span className="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-400">{selectedClass.studentCount} Kayıtlı</span>
+                  <span className="text-base sm:text-lg font-black text-[#4B075F] dark:text-[#F0D8FA]">{selectedClass.studentCount} Kayıtlı</span>
                 </div>
               </div>
 
@@ -2771,21 +2771,21 @@ export default function PanoClient() {
                     type: 'app',
                     title: `${selectedClass.name} - Geçmiş Tahtalar`,
                     icon: 'Board',
-                    color: 'bg-blue-600',
+                    color: 'bg-brand-gradient',
                     iconColor: 'text-white',
                     badge: `${liveBoardCount} Tahta`,
                     path: `/dash/boards?usergroupId=${selectedClass.id}`
                   })
                 }}
-                className="p-4 rounded-2xl bg-gradient-to-br from-cyan-50/60 to-slate-50/60 dark:from-slate-800/60 dark:to-cyan-950/20 border border-cyan-100/80 dark:border-slate-800 flex items-center gap-3.5 cursor-pointer hover:border-cyan-400 transition-all hover:-translate-y-0.5"
+                className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#F7F0FA] dark:from-[#211729] dark:to-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 cursor-pointer hover:border-[#D914C8]/50 transition-all hover:-translate-y-0.5"
                 title="Sınıfın geçmiş tahtalarını aç"
               >
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 dark:bg-cyan-500/20 border border-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-[#D914C8]/10 dark:bg-[#D914C8]/40 border border-[#D914C8]/20 flex items-center justify-center text-[#D914C8] dark:text-[#FCF9FD] shrink-0">
                   <Presentation className="w-6 h-6" />
                 </div>
                 <div>
                   <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">TAHTA</span>
-                  <span className="text-base sm:text-lg font-black text-cyan-700 dark:text-cyan-400">{liveBoardCount} Aktif</span>
+                  <span className="text-base sm:text-lg font-black text-[#8D49A6] dark:text-[#FCF9FD]">{liveBoardCount} Aktif</span>
                 </div>
               </div>
             </div>
@@ -2803,13 +2803,13 @@ export default function PanoClient() {
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <Presentation className="w-4 h-4" />
+                      <Presentation className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-sm sm:text-base font-black truncate">Akıllı Tahta</span>
+                    <span className="text-sm sm:text-base font-black text-white truncate">Akıllı Tahta</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-white/25 text-white font-black shrink-0 flex items-center gap-1">
-                    <Sparkles size={11} />
-                    <span>Çizim</span>
+                    <Sparkles size={11} className="text-white" />
+                    <span className="text-white">Çizim</span>
                   </span>
                 </Link>
 
@@ -2822,21 +2822,21 @@ export default function PanoClient() {
                       type: 'app',
                       title: `${selectedClass.name} - Geçmiş Tahtalar`,
                       icon: 'Board',
-                      color: 'bg-blue-600',
+                      color: 'bg-brand-gradient',
                       iconColor: 'text-white',
                       badge: `${liveBoardCount} Tahta`,
                       path: `/dash/boards?usergroupId=${selectedClass.id}`
                     })
                   }}
-                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-indigo-50/90 to-blue-50/80 dark:from-indigo-950/40 dark:to-blue-950/30 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200/80 dark:border-indigo-800/80 hover:bg-indigo-100/90 dark:hover:bg-indigo-900/60 transition-all flex items-center justify-between cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
+                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#4B075F] to-[#701A75] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <FileText className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <FileText className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-sm sm:text-base font-black truncate">Tahtalar</span>
+                    <span className="text-sm sm:text-base font-black text-white truncate">Tahtalar</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-indigo-200/80 dark:bg-indigo-900/80 text-indigo-900 dark:text-indigo-200 font-black shrink-0">
+                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-white/25 text-white font-black shrink-0">
                     {liveBoardCount} Kayıt
                   </span>
                 </button>
@@ -2848,15 +2848,15 @@ export default function PanoClient() {
                     const hwApp = apps.find(a => a.id === 'homework')
                     if (hwApp) openAppInWindow(hwApp)
                   }}
-                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-emerald-50/90 to-teal-50/80 dark:from-emerald-950/40 dark:to-teal-950/30 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200/80 dark:border-emerald-800/80 hover:bg-emerald-100/90 dark:hover:bg-emerald-900/60 transition-all flex items-center justify-between cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
+                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#8D49A6] to-[#D914C8] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <CheckCircle2 className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <CheckCircle2 className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-sm sm:text-base font-black truncate">Ödevler</span>
+                    <span className="text-sm sm:text-base font-black text-white truncate">Ödevler</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-emerald-200/80 dark:bg-emerald-900/80 text-emerald-900 dark:text-emerald-200 font-black shrink-0">
+                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-white/25 text-white font-black shrink-0">
                     {liveAssignmentCount} Aktif
                   </span>
                 </button>
@@ -3169,7 +3169,7 @@ export default function PanoClient() {
                     type="button"
                     disabled={isSavingBoard}
                     onClick={handleSaveAndLogout}
-                    className="flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm shadow-lg shadow-emerald-600/30 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+                    className="flex-1 py-3.5 px-5 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-sm shadow-lg shadow-purple-950/25 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98"
                   >
                     {isSavingBoard ? (
                       <>

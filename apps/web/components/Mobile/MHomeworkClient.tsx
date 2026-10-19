@@ -66,6 +66,7 @@ import {
 } from '@services/school_assignments/school_assignments'
 import QuizQuestionBuilder, { DEFAULT_TEMPLATE_QUESTIONS } from './QuizQuestionBuilder'
 import { normalizeClassCode } from '@services/demo/attendanceService'
+import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
 export interface HomeworkItem {
   id: string
@@ -204,18 +205,26 @@ export function generateAllBranchOptions(): BranchOption[] {
     }
   }
 
-  // 9-A Şubesi for backward compatibility and secondary level testing
-  options.push({
-    id: 'branch-9-a',
-    title: '9-A Şubesi',
-    code: '9/A',
-    desc: 'Sınıf Rehber Öğretmeni: Ebru TEKNECİ (Türk Dili ve Edebiyatı)',
-    grade: '9. Sınıf',
-    gradeNumber: 9,
-    category: 'HIGH',
-    isAll: false,
-    teacherName: 'Ebru TEKNECİ',
-    studentCount: 0,
+  // Map all authentic school classrooms (1-A through 12-B) from ALL_CLASSROOMS
+  ALL_CLASSROOMS.forEach((c) => {
+    const norm = normalizeClassCode(c.code)
+    const exists = options.some((o) => normalizeClassCode(o.code) === norm)
+    if (!exists) {
+      const gNum = parseInt(norm.split('/')[0] || '1', 10)
+      const category: 'PRIMARY' | 'MIDDLE' | 'HIGH' = gNum <= 4 ? 'PRIMARY' : gNum <= 8 ? 'MIDDLE' : 'HIGH'
+      options.push({
+        id: `branch-all-${c.id}`,
+        title: c.name,
+        code: c.code,
+        desc: `Sınıf Rehber Öğretmeni: ${c.teacher_name} (${c.subject || 'Rehberlik'})`,
+        grade: c.grade_level || `${gNum}. Sınıf`,
+        gradeNumber: gNum,
+        category,
+        isAll: false,
+        teacherName: c.teacher_name,
+        studentCount: c.student_count || 1,
+      })
+    }
   })
 
   // Synchronize dynamic custom classes from localStorage if created in principal panel
@@ -609,24 +618,54 @@ export default function MHomeworkClient({
   const [selectedBranch, setSelectedBranch] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       try {
+        const urlParams = new URLSearchParams(window.location.search)
+        const qClass = urlParams.get('class')
+        if (qClass) return `${normalizeClassCode(qClass)} Şubesi`
+        const savedGlobal = localStorage.getItem('oxonom_selected_class')
+        if (savedGlobal) {
+          const parsed = JSON.parse(savedGlobal)
+          if (parsed.name) return parsed.name
+          if (parsed.code) return `${normalizeClassCode(parsed.code)} Şubesi`
+        }
         const saved = localStorage.getItem('oxonom_teacher_active_branch')
         if (saved) return saved
       } catch (_) {}
     }
-    return '1/A Şubesi'
+    return '9-A Şubesi'
   })
   const [selectedGradeCategory, setSelectedGradeCategory] = useState<string>('ALL')
   const [createTargetClass, setCreateTargetClass] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       try {
+        const savedGlobal = localStorage.getItem('oxonom_selected_class')
+        if (savedGlobal) {
+          const parsed = JSON.parse(savedGlobal)
+          if (parsed.name) return parsed.name
+          if (parsed.code) return `${normalizeClassCode(parsed.code)} Şubesi`
+        }
         const saved = localStorage.getItem('oxonom_teacher_active_branch')
         if (saved && saved !== 'Tüm Şubeler') return saved
       } catch (_) {}
     }
-    return '1/A Şubesi'
+    return '9-A Şubesi'
   })
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false)
   const [branchSearch, setBranchSearch] = useState('')
+
+  useEffect(() => {
+    const handleClassChanged = (e: any) => {
+      if (e?.detail?.name) {
+        setSelectedBranch(e.detail.name)
+        setCreateTargetClass(e.detail.name)
+      } else if (e?.detail?.code) {
+        const val = `${normalizeClassCode(e.detail.code)} Şubesi`
+        setSelectedBranch(val)
+        setCreateTargetClass(val)
+      }
+    }
+    window.addEventListener('oxonom_class_changed', handleClassChanged)
+    return () => window.removeEventListener('oxonom_class_changed', handleClassChanged)
+  }, [])
 
   // Homework Selector Modal state
   const [isHomeworkModalOpen, setIsHomeworkModalOpen] = useState(false)
@@ -1414,9 +1453,9 @@ export default function MHomeworkClient({
                   }
                   setIsCreateModalOpen(true)
                 }}
-                className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0A0D15] font-black text-xs flex items-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-purple-950/20 active:scale-95 transition-all cursor-pointer"
               >
-                <Plus size={15} strokeWidth={2.5} />
+                <Plus size={15} strokeWidth={2.5} className="text-white" />
                 <span>Yeni Ödev Tanımla</span>
               </button>
               <Link
@@ -2933,7 +2972,7 @@ export default function MHomeworkClient({
                     </button>
                     <button
                       type="submit"
-                      className="h-10 px-5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors cursor-pointer shadow-xs shadow-emerald-500/20"
+                      className="h-10 px-5 rounded-xl text-xs font-bold bg-brand-gradient hover:opacity-95 text-white transition-all cursor-pointer shadow-md shadow-purple-950/20"
                     >
                       Yetkileri Kaydet
                     </button>
@@ -3032,7 +3071,7 @@ export default function MHomeworkClient({
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3 shrink-0 mb-4 pb-3 border-b border-gray-100 dark:border-white/10">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-[14px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-[14px] bg-[#4B075F]/15 text-[#8D49A6] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
                       <Plus size={22} strokeWidth={2.5} />
                     </div>
                     <div>
@@ -3040,7 +3079,7 @@ export default function MHomeworkClient({
                         Yeni Ödev Oluştur
                       </h3>
                       <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-0.5 m-0">
-                        9/A Şubesine yeni ödev ve çalışma görevi tanımlayın
+                        {createTargetClass} için yeni ödev ve çalışma görevi tanımlayın
                       </p>
                     </div>
                   </div>
@@ -3058,14 +3097,14 @@ export default function MHomeworkClient({
                 <form onSubmit={handleCreateAssignment} className="flex-1 overflow-y-auto pr-0.5 space-y-4">
                   {/* Sınıf & Ders Seçimi 2 Sütun Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Sınıf & Şube Bilgisi (SADECE ŞUBE ADI, İSİM YAZMAZ) */}
-                    <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+                    {/* Sınıf & Şube Bilgisi */}
+                    <div className="p-3 rounded-2xl bg-[#F0D8FA]/40 dark:bg-[#4B075F]/20 border border-[#8D49A6]/30 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Users size={16} className="text-emerald-600 dark:text-emerald-400" />
+                        <Users size={16} className="text-[#8D49A6] dark:text-[#C58ADB]" />
                         <span className="text-xs font-bold text-gray-800 dark:text-gray-200">Hedef Şube</span>
                       </div>
-                      <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 bg-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                        9/A Şubesi
+                      <span className="text-xs font-black text-[#4B075F] dark:text-[#C58ADB] bg-[#4B075F]/15 px-2.5 py-0.5 rounded-full">
+                        {createTargetClass}
                       </span>
                     </div>
 
@@ -3485,9 +3524,9 @@ export default function MHomeworkClient({
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0A0D15] font-black text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 active:scale-98 transition-all cursor-pointer"
+                      className="w-full h-12 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 active:scale-98 transition-all cursor-pointer"
                     >
-                      <Plus size={18} strokeWidth={2.5} />
+                      <Plus size={18} strokeWidth={2.5} className="text-white" />
                       <span>
                         {createTargetType === 'INDIVIDUAL'
                           ? `Ödevi Oluştur ve ${
@@ -3597,7 +3636,7 @@ export default function MHomeworkClient({
                         onClick={() => setSelectedGradeCategory(tab.id)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                           isActive
-                            ? 'bg-emerald-500 text-[#0A0D15] shadow-xs font-black'
+                            ? 'bg-brand-gradient text-white shadow-xs font-bold'
                             : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200/80 dark:hover:bg-white/10'
                         }`}
                       >
@@ -3610,7 +3649,7 @@ export default function MHomeworkClient({
                 {/* Information Header / Result Count */}
                 <div className="flex items-center justify-between text-[11px] font-bold text-gray-400 dark:text-gray-500 px-1 shrink-0">
                   <span>{filteredBranches.length} Şube Listeleniyor</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 truncate max-w-[200px]">
+                  <span className="text-[#8D49A6] dark:text-[#C58ADB] truncate max-w-[200px]">
                     Aktif: {selectedBranch}
                   </span>
                 </div>
@@ -3628,7 +3667,7 @@ export default function MHomeworkClient({
                           setBranchSearch('')
                           setSelectedGradeCategory('ALL')
                         }}
-                        className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                        className="text-xs font-bold text-[#8D49A6] dark:text-[#C58ADB] hover:underline cursor-pointer"
                       >
                         Filtreleri Temizle
                       </button>
@@ -3652,6 +3691,13 @@ export default function MHomeworkClient({
                             if (typeof window !== 'undefined') {
                               try {
                                 localStorage.setItem('oxonom_teacher_active_branch', newBranch)
+                                if (!branch.isAll) {
+                                  const found = ALL_CLASSROOMS.find((c) => c.name === branch.title || normalizeClassCode(c.code) === normalizeClassCode(branch.code))
+                                  if (found) {
+                                    localStorage.setItem('oxonom_selected_class', JSON.stringify(found))
+                                    window.dispatchEvent(new CustomEvent('oxonom_class_changed', { detail: found }))
+                                  }
+                                }
                               } catch (_) {}
                             }
                             setIsBranchModalOpen(false)
@@ -3675,7 +3721,7 @@ export default function MHomeworkClient({
                           }}
                           className={`p-3 sm:p-3.5 rounded-[18px] flex items-center justify-between gap-3 cursor-pointer transition-all ${
                             isSelected
-                              ? 'border-[1.5px] border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/40 shadow-xs'
+                              ? 'border-[1.5px] border-[#8D49A6] bg-[#F0D8FA]/50 dark:bg-[#4B075F]/30 shadow-xs'
                               : 'border border-gray-200 dark:border-white/10 bg-white dark:bg-[#161c2d] hover:border-gray-300 dark:hover:border-white/20'
                           }`}
                         >

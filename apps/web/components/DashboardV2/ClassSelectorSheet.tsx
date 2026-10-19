@@ -125,7 +125,7 @@ export default function ClassSelectorSheet({
                   placeholder="Sınıf veya öğretmen ara (örn: 4-A)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-[#161D2E] border border-gray-200 dark:border-gray-700 rounded-2xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-[#161D2E] border border-gray-200 dark:border-gray-700 rounded-2xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#8D49A6]/20 focus:border-[#8D49A6] transition-all"
                 />
                 {searchQuery && (
                   <button
@@ -159,7 +159,7 @@ export default function ClassSelectorSheet({
                   onClick={() => setSelectedGradeTab(lvl)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                     selectedGradeTab === lvl
-                      ? 'bg-emerald-600 dark:bg-emerald-500 text-white shadow-xs'
+                      ? 'bg-[#4B075F] dark:bg-[#8D49A6] text-white shadow-xs'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -187,7 +187,7 @@ export default function ClassSelectorSheet({
                       }}
                       className={`w-full p-3.5 rounded-2xl flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.99] border ${
                         isSelected
-                          ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-600/80 shadow-xs'
+                          ? 'bg-[#F0D8FA]/50 dark:bg-[#4B075F]/30 border-[#4B075F] dark:border-[#8D49A6] shadow-xs'
                           : 'bg-white dark:bg-[#131A2B] hover:bg-gray-50 dark:hover:bg-[#1A2338] border-gray-100 dark:border-gray-800/80'
                       }`}
                     >
@@ -196,7 +196,7 @@ export default function ClassSelectorSheet({
                         <div
                           className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
                             isSelected
-                              ? 'bg-emerald-600 dark:bg-emerald-500 text-white'
+                              ? 'bg-brand-gradient text-white shadow-xs'
                               : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
                           }`}
                         >
@@ -209,7 +209,7 @@ export default function ClassSelectorSheet({
                               {c.name}
                             </span>
                             {c.code === '4-A' && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80">
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#F0D8FA]/50 dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#C58ADB] border border-[#8D49A6]/30">
                                 <Sparkles size={10} /> Varsayılan
                               </span>
                             )}
@@ -228,8 +228,8 @@ export default function ClassSelectorSheet({
                       {/* Right Selection Indicator */}
                       <div className="shrink-0 pl-2">
                         {isSelected ? (
-                          <div className="w-7 h-7 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white flex items-center justify-center shadow-xs">
-                            <Check size={14} strokeWidth={3} />
+                          <div className="w-7 h-7 rounded-full bg-[#4B075F] dark:bg-[#8D49A6] text-white flex items-center justify-center shadow-xs">
+                            <Check size={14} strokeWidth={3} className="text-white" />
                           </div>
                         ) : (
                           <div className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-300 dark:text-gray-600 hover:border-gray-400 dark:hover:border-gray-500" />

@@ -48,6 +48,8 @@ const COURSES = [
   'Tüm Dersler',
 ]
 
+import { ALL_CLASSROOMS, normalizeClassCode } from '@services/demo/schoolDirectory'
+
 const EXAM_TYPE_OPTIONS = [
   { id: 'exam', label: 'Yazılı Sınav', badgeBg: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30', dot: 'bg-indigo-500' },
   { id: 'oral', label: 'Sözlü Sınav', badgeBg: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30', dot: 'bg-amber-500' },
@@ -57,9 +59,56 @@ const EXAM_TYPE_OPTIONS = [
 ]
 
 export default function TeacherAssessmentsView() {
-  const [selectedClass, setSelectedClass] = useState('9-A Şubesi')
+  const [selectedClass, setSelectedClass] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const urlParams = new URLSearchParams(window.location.search)
+        const qClass = urlParams.get('class')
+        if (qClass) {
+          const match = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === normalizeClassCode(qClass))
+          if (match) return match.name
+        }
+        const saved = localStorage.getItem('oxonom_selected_class')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed.name) return parsed.name
+          if (parsed.code) {
+            const match = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === normalizeClassCode(parsed.code))
+            if (match) return match.name
+          }
+        }
+      } catch (_) {}
+    }
+    return '9-A Şubesi'
+  })
   const [filterType, setFilterType] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    const handleClassChanged = (e: any) => {
+      if (e?.detail?.name) {
+        setSelectedClass(e.detail.name)
+      } else if (e?.detail?.code) {
+        const found = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === normalizeClassCode(e.detail.code))
+        if (found) setSelectedClass(found.name)
+      }
+    }
+    window.addEventListener('oxonom_class_changed', handleClassChanged)
+    return () => window.removeEventListener('oxonom_class_changed', handleClassChanged)
+  }, [])
+
+  const handleSelectClass = (name: string) => {
+    setSelectedClass(name)
+    if (typeof window !== 'undefined' && name !== 'all') {
+      try {
+        const found = ALL_CLASSROOMS.find((c) => c.name === name || c.code === name)
+        if (found) {
+          localStorage.setItem('oxonom_selected_class', JSON.stringify(found))
+          window.dispatchEvent(new CustomEvent('oxonom_class_changed', { detail: found }))
+        }
+      } catch (_) {}
+    }
+  }
 
   // Exams State
   const [exams, setExams] = useState<SchoolExamItem[]>([])
@@ -524,13 +573,15 @@ export default function TeacherAssessmentsView() {
             <span className="text-xs font-bold text-gray-500 dark:text-gray-400 shrink-0">Şube:</span>
             <select
               value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
-              className="h-10 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-xs font-bold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              onChange={(e) => handleSelectClass(e.target.value)}
+              className="h-10 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-xs font-bold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-[#8D49A6] cursor-pointer"
             >
-              <option value="9-A Şubesi">9-A Şubesi (Rehberlik Şubesi)</option>
-              <option value="9-B Şubesi">9-B Şubesi</option>
-              <option value="1-A Şubesi">1-A Şubesi</option>
               <option value="all">Tüm Şubeler</option>
+              {ALL_CLASSROOMS.map((cls) => (
+                <option key={cls.id} value={cls.name}>
+                  {cls.name} ({cls.grade_level})
+                </option>
+              ))}
             </select>
           </div>
 
@@ -854,11 +905,13 @@ export default function TeacherAssessmentsView() {
                     <select
                       value={newClass}
                       onChange={(e) => setNewClass(e.target.value)}
-                      className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-xs font-bold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                      className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-xs font-bold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-[#8D49A6] cursor-pointer"
                     >
-                      <option value="9-A Şubesi">9-A Şubesi</option>
-                      <option value="9-B Şubesi">9-B Şubesi</option>
-                      <option value="1-A Şubesi">1-A Şubesi</option>
+                      {ALL_CLASSROOMS.map((cls) => (
+                        <option key={cls.id} value={cls.name}>
+                          {cls.name}
+                        </option>
+                      ))}
                       <option value="Tüm Sınıflar">Tüm Sınıflar (Ortak)</option>
                     </select>
                   </div>
@@ -1094,9 +1147,9 @@ export default function TeacherAssessmentsView() {
                   <button
                     type="button"
                     onClick={handleSaveGrading}
-                    className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0A0D15] font-black text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/20 cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-950/20 cursor-pointer"
                   >
-                    <Save size={15} />
+                    <Save size={15} className="text-white" />
                     <span>Notları Kaydet & Dosyaya İşle</span>
                   </button>
                 </div>

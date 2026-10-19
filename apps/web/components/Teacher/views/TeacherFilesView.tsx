@@ -49,6 +49,7 @@ import {
   dispatchFileToSmartboard,
   getSmartboardQueue,
 } from '@/lib/files/teacherFilesStorage'
+import { ALL_CLASSROOMS, normalizeClassCode } from '@services/demo/schoolDirectory'
 
 export default function TeacherFilesView() {
   const [folders, setFolders] = useState<TeacherFolderCategory[]>([])
@@ -66,7 +67,18 @@ export default function TeacherFilesView() {
   const [selectedFileObj, setSelectedFileObj] = useState<File | null>(null)
   const [customFileName, setCustomFileName] = useState<string>('')
   const [targetFolderForUpload, setTargetFolderForUpload] = useState<string>('folder-presentations')
-  const [uploadClassShare, setUploadClassShare] = useState<string>('9-A')
+  const [uploadClassShare, setUploadClassShare] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('oxonom_selected_class')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed.code) return parsed.code
+        }
+      } catch (_) {}
+    }
+    return ALL_CLASSROOMS[0]?.code || '9/A'
+  })
   const [fileDataUrl, setFileDataUrl] = useState<string>('')
 
   // Share Modal State
@@ -735,10 +747,12 @@ export default function TeacherFilesView() {
                     className="w-full h-10 px-3 text-xs bg-gray-50 dark:bg-[#161D2E] border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
                   >
                     <option value="none">Paylaşma (Yalnızca Ben)</option>
-                    <option value="9-A">9-A Şubesi</option>
-                    <option value="9-B">9-B Şubesi</option>
-                    <option value="9-A, 9-B">9-A ve 9-B Şubeleri</option>
-                    <option value="Tüm Şubeler">Tüm 9. Sınıf Şubeleri</option>
+                    {ALL_CLASSROOMS.map((cls) => (
+                      <option key={cls.id} value={cls.code}>
+                        {cls.name} ({cls.grade_level})
+                      </option>
+                    ))}
+                    <option value="Tüm Şubeler">Tüm Okul Şubeleri</option>
                   </select>
                 </div>
 
@@ -816,8 +830,8 @@ export default function TeacherFilesView() {
                 <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block">
                   Erişim Yetkisi Verilecek Sınıflar:
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['9-A', '9-B', '10-A', 'Öğretmen Zümresi'].map((cls) => {
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                  {[...ALL_CLASSROOMS.map((c) => c.code), 'Öğretmen Zümresi', 'Tüm Okul'].map((cls) => {
                     const isChecked = shareSelectedClasses.includes(cls)
                     return (
                       <button
@@ -826,18 +840,18 @@ export default function TeacherFilesView() {
                         onClick={() => handleToggleShareClass(cls)}
                         className={`p-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer ${
                           isChecked
-                            ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-700 dark:text-indigo-300'
+                            ? 'bg-[#F0D8FA]/50 dark:bg-[#4B075F]/30 border-[#4B075F] text-gray-900 dark:text-white'
                             : 'bg-white dark:bg-[#161D2E] border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
                         }`}
                       >
                         <div
                           className={`w-4 h-4 rounded flex items-center justify-center border text-[10px] ${
                             isChecked
-                              ? 'bg-[#4B075F] border-[#4B075F] text-white'
+                              ? 'bg-brand-gradient border-[#4B075F] text-white'
                               : 'border-gray-300 dark:border-gray-600'
                           }`}
                         >
-                          {isChecked && <Check size={12} />}
+                          {isChecked && <Check size={12} className="text-white" />}
                         </div>
                         <span>{cls}</span>
                       </button>
@@ -966,12 +980,14 @@ export default function TeacherFilesView() {
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       <span>Hızlı Seçim (Yalnızca Açık & Çevrim İçi Tahtalar):</span>
                     </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
                       {[
-                        { id: 'PANO-9A', label: '9/A Şubesi (1. Kat)', active: true },
-                        { id: 'PANO-9B', label: '9/B Şubesi (1. Kat)', active: true },
+                        ...ALL_CLASSROOMS.slice(0, 10).map((c) => ({
+                          id: `PANO-${c.code.replace(/[\/\s]/g, '')}`,
+                          label: `${c.name}`,
+                          active: true,
+                        })),
                         { id: 'TAHTA-901', label: 'Çalışma Tahtam', active: true },
-                        { id: 'PANO-FEN', label: 'Fen Laboratuvarı', active: false },
                       ]
                         .filter((b) => b.active)
                         .map((b) => (
@@ -981,15 +997,15 @@ export default function TeacherFilesView() {
                             onClick={() => setTargetBoardId(b.id)}
                             className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                               targetBoardId === b.id
-                                ? 'bg-teal-50 dark:bg-teal-950/50 border-teal-500 text-teal-800 dark:text-teal-200 font-bold shadow-xs ring-2 ring-teal-500/20'
-                                : 'bg-white dark:bg-[#161D2E] border-emerald-500/30 hover:border-emerald-500 text-gray-700 dark:text-gray-300'
+                                ? 'bg-[#F0D8FA]/50 dark:bg-[#4B075F]/30 border-[#4B075F] text-gray-900 dark:text-white font-bold shadow-xs ring-2 ring-[#8D49A6]/20'
+                                : 'bg-white dark:bg-[#161D2E] border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-mono text-xs font-black">{b.id}</span>
-                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                              <span className="w-2 h-2 rounded-full bg-[#8D49A6] animate-ping" />
                             </div>
-                            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium truncate mt-0.5">{b.label}</div>
+                            <div className="text-[10px] text-[#4B075F] dark:text-[#C58ADB] font-medium truncate mt-0.5">{b.label}</div>
                           </button>
                         ))}
                     </div>

@@ -23,6 +23,11 @@ import toast from 'react-hot-toast'
 import MockBadge from '@components/Common/MockBadge'
 import { ALL_INITIAL_STUDENTS, MStudentItem } from '@components/Mobile/MStudentClient'
 import {
+  ALL_CLASSROOMS,
+  normalizeClassCode,
+  ClassroomItem,
+} from '@services/demo/schoolDirectory'
+import {
   saveAttendanceForClass,
   getAttendanceForClass,
   getAllAttendanceHistory,
@@ -30,8 +35,23 @@ import {
   formatDateTurkish,
   AttendanceRecord,
 } from '@services/demo/attendanceService'
+
 export default function TeacherAttendanceView() {
-  const [selectedClass, setSelectedClass] = useState('9/A')
+  const [selectedClass, setSelectedClass] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const urlParams = new URLSearchParams(window.location.search)
+        const qClass = urlParams.get('class')
+        if (qClass) return normalizeClassCode(qClass)
+        const saved = localStorage.getItem('oxonom_selected_class')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed.code) return normalizeClassCode(parsed.code)
+        }
+      } catch (_) {}
+    }
+    return '9/A'
+  })
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString())
   const [activeTab, setActiveTab] = useState<'take' | 'history'>('take')
 
@@ -40,10 +60,39 @@ export default function TeacherAttendanceView() {
   const [historyFilterClass, setHistoryFilterClass] = useState<string>('all')
   const [historyList, setHistoryList] = useState<AttendanceRecord[]>(() => getAllAttendanceHistory())
 
-  // Students for the selected class (Erçil UĞURLU in 9/A)
-  const classStudents = useMemo(() => {
-    return ALL_INITIAL_STUDENTS
+  // Keep selectedClass synchronized with global class change events
+  useEffect(() => {
+    const handleClassChanged = (e: any) => {
+      if (e?.detail?.code) {
+        setSelectedClass(normalizeClassCode(e.detail.code))
+      }
+    }
+    window.addEventListener('oxonom_class_changed', handleClassChanged)
+    return () => window.removeEventListener('oxonom_class_changed', handleClassChanged)
   }, [])
+
+  const handleSelectClass = (newCode: string) => {
+    const norm = normalizeClassCode(newCode)
+    setSelectedClass(norm)
+    if (typeof window !== 'undefined') {
+      try {
+        const found = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === norm)
+        if (found) {
+          localStorage.setItem('oxonom_selected_class', JSON.stringify(found))
+          window.dispatchEvent(new CustomEvent('oxonom_class_changed', { detail: found }))
+        }
+      } catch (_) {}
+    }
+  }
+
+  // Students for the selected class
+  const classStudents = useMemo(() => {
+    const filtered = ALL_INITIAL_STUDENTS.filter((s) => {
+      const normClass = normalizeClassCode(s.className || '')
+      return normClass === selectedClass || s.className?.includes(selectedClass)
+    })
+    return filtered.length > 0 ? filtered : ALL_INITIAL_STUDENTS
+  }, [selectedClass])
 
   // Records state: studentId -> 'present' | 'absent'
   const [records, setRecords] = useState<Record<string, 'present' | 'absent'>>({})
@@ -172,10 +221,14 @@ export default function TeacherAttendanceView() {
                 <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Şube:</span>
                 <select
                   value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
-                  className="h-9 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold border-none text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  onChange={(e) => handleSelectClass(e.target.value)}
+                  className="h-9 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold border-none text-gray-900 dark:text-white focus:ring-2 focus:ring-[#8D49A6] cursor-pointer"
                 >
-                  <option value="9/A">9/A Şubesi (Sınıf Rehberliği)</option>
+                  {ALL_CLASSROOMS.map((cls) => (
+                    <option key={cls.id} value={cls.code}>
+                      {cls.name} ({cls.grade_level})
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -311,9 +364,9 @@ export default function TeacherAttendanceView() {
               <button
                 type="button"
                 onClick={handleSave}
-                className="w-full sm:w-auto h-11 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0A0D15] font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                className="w-full sm:w-auto h-11 px-6 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 transition-all cursor-pointer"
               >
-                <Save size={16} />
+                <Save size={16} className="text-white" />
                 <span>Yoklamayı Onayla & Kaydet</span>
               </button>
             </div>
@@ -353,10 +406,14 @@ export default function TeacherAttendanceView() {
               <select
                 value={historyFilterClass}
                 onChange={(e) => setHistoryFilterClass(e.target.value)}
-                className="h-8 px-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs font-bold border-none text-gray-900 dark:text-white"
+                className="h-8 px-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs font-bold border-none text-gray-900 dark:text-white focus:ring-2 focus:ring-[#8D49A6] cursor-pointer"
               >
                 <option value="all">Tüm Şubeler</option>
-                <option value="9/A">9/A Şubesi</option>
+                {ALL_CLASSROOMS.map((cls) => (
+                  <option key={cls.id} value={cls.code}>
+                    {cls.name}
+                  </option>
+                ))}
               </select>
 
               {historyFilterDate && (

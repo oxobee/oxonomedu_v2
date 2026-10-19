@@ -22,11 +22,53 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { ALL_INITIAL_STUDENTS, type MStudentItem } from '@components/Mobile/MStudentClient'
+import {
+  ALL_CLASSROOMS,
+  normalizeClassCode,
+} from '@services/demo/schoolDirectory'
 
 export default function TeacherReportsView() {
-  const [selectedClassId, setSelectedClassId] = useState<string>('9-A')
+  const [selectedClassId, setSelectedClassId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const urlParams = new URLSearchParams(window.location.search)
+        const qClass = urlParams.get('class')
+        if (qClass) return normalizeClassCode(qClass)
+        const saved = localStorage.getItem('oxonom_selected_class')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed.code) return normalizeClassCode(parsed.code)
+        }
+      } catch (_) {}
+    }
+    return '9/A'
+  })
   const [categoryTab, setCategoryTab] = useState<'academic' | 'attendance' | 'homework'>('academic')
   const [searchStudent, setSearchStudent] = useState<string>('')
+
+  useEffect(() => {
+    const handleClassChanged = (e: any) => {
+      if (e?.detail?.code) {
+        setSelectedClassId(normalizeClassCode(e.detail.code))
+      }
+    }
+    window.addEventListener('oxonom_class_changed', handleClassChanged)
+    return () => window.removeEventListener('oxonom_class_changed', handleClassChanged)
+  }, [])
+
+  const handleSelectClass = (clsCode: string) => {
+    const norm = normalizeClassCode(clsCode)
+    setSelectedClassId(norm)
+    if (typeof window !== 'undefined') {
+      try {
+        const found = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === norm)
+        if (found) {
+          localStorage.setItem('oxonom_selected_class', JSON.stringify(found))
+          window.dispatchEvent(new CustomEvent('oxonom_class_changed', { detail: found }))
+        }
+      } catch (_) {}
+    }
+  }
 
   const [students, setStudents] = useState<MStudentItem[]>(() => {
     if (typeof window !== 'undefined') {
@@ -60,7 +102,12 @@ export default function TeacherReportsView() {
   }, [])
 
   const classStudents = useMemo(() => {
-    return students.filter((s) => s.className?.includes(selectedClassId) || s.className?.includes('9-A'))
+    const norm = normalizeClassCode(selectedClassId)
+    const filtered = students.filter((s) => {
+      const sNorm = normalizeClassCode(s.className || '')
+      return sNorm === norm || s.className?.includes(selectedClassId) || selectedClassId.includes(s.className)
+    })
+    return filtered.length > 0 ? filtered : students
   }, [students, selectedClassId])
 
   const targetStudent = classStudents[0] || students[0]
@@ -78,17 +125,24 @@ export default function TeacherReportsView() {
     return typeof targetStudent.gpa === 'number' ? targetStudent.gpa : (Number(targetStudent.gpa) || 0)
   }, [targetStudent])
 
-  const activeClass = {
-    id: '9-A',
-    name: '9-A Şubesi',
-    course: 'Türk Dili ve Edebiyatı',
-    studentCount: classStudents.length || 1,
-    avgGrade: studentGpa,
-    attendanceRate: targetStudent?.attendanceRate ?? 100,
-    homeworkRate: 100,
-  }
+  const CLASSES = useMemo(() => {
+    return ALL_CLASSROOMS.map((c) => {
+      const isSelected = normalizeClassCode(c.code) === normalizeClassCode(selectedClassId)
+      return {
+        id: c.code,
+        name: c.name,
+        code: c.code,
+        grade_level: c.grade_level,
+        course: c.org_id === 10 ? 'Sınıf Öğretmenliği' : 'Türk Dili ve Edebiyatı',
+        studentCount: c.student_count || 1,
+        avgGrade: isSelected ? studentGpa : Math.floor(78 + (c.id % 16)),
+        attendanceRate: isSelected ? (targetStudent?.attendanceRate ?? 98) : 96,
+        homeworkRate: 100,
+      }
+    })
+  }, [studentGpa, targetStudent, selectedClassId])
 
-  const CLASSES = [activeClass]
+  const activeClass = CLASSES.find((c) => normalizeClassCode(c.code) === normalizeClassCode(selectedClassId)) || CLASSES[0]
 
   const handleExportCSV = () => {
     const csvContent =
@@ -207,14 +261,14 @@ export default function TeacherReportsView() {
         </div>
 
         {/* Class Selection Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pt-1 max-h-72 overflow-y-auto pr-1">
           {CLASSES.map((cls) => {
-            const isSelected = cls.id === selectedClassId
+            const isSelected = normalizeClassCode(cls.code) === normalizeClassCode(selectedClassId)
             return (
               <button
                 key={cls.id}
                 type="button"
-                onClick={() => setSelectedClassId(cls.id)}
+                onClick={() => handleSelectClass(cls.code)}
                 className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   isSelected
                     ? 'bg-[#F0D8FA]/50 dark:bg-[#4B075F]/30 border-[#4B075F] text-gray-900 dark:text-white shadow-xs'

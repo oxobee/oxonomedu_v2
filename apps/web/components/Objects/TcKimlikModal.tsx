@@ -115,7 +115,7 @@ export default function TcKimlikModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg p-0 overflow-hidden bg-white border border-gray-200 shadow-xl rounded-3xl">
         {/* Header Banner */}
-        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 px-6 py-5 text-white relative">
+        <div className="bg-brand-gradient px-6 py-5 text-white relative">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shrink-0">
               <ShieldCheck size={22} className="text-white" />
@@ -127,7 +127,7 @@ export default function TcKimlikModal({
                   MEB & Nüfus
                 </span>
               </DialogTitle>
-              <DialogDescription className="text-xs text-emerald-100 mt-0.5 font-medium">
+              <DialogDescription className="text-xs text-purple-100 mt-0.5 font-medium">
                 Öğrenci, veli ve öğretmen kimlik doğrulama & otomatik kayıt sorgulama sistemi
               </DialogDescription>
             </div>
@@ -218,28 +218,28 @@ export default function TcKimlikModal({
 
           {/* DOĞRULANDI EKRANI: Valid State */}
           {status === 'valid' && record && (
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/30 to-emerald-50/80 border border-emerald-200/90 space-y-3 animate-in fade-in-50 zoom-in-95 duration-200">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-50 via-fuchsia-50/30 to-purple-50/80 border border-purple-200/90 space-y-3 animate-in fade-in-50 zoom-in-95 duration-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-                    <CheckCircle2 size={18} />
+                  <div className="w-8 h-8 rounded-xl bg-[#4B075F] text-white flex items-center justify-center shadow-xs">
+                    <CheckCircle2 size={18} className="text-white" />
                   </div>
                   <div>
-                    <span className="text-xs font-extrabold text-emerald-950 block">
+                    <span className="text-xs font-extrabold text-purple-950 block">
                       T.C. Nüfus & Okul Kaydı Doğrulandı
                     </span>
-                    <span className="text-[11px] text-emerald-700 font-medium">
+                    <span className="text-[11px] text-[#4B075F] font-medium">
                       Aktif MEB Öğrenci Kütük Bilgisi
                     </span>
                   </div>
                 </div>
-                <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-extrabold uppercase border border-emerald-300">
+                <span className="px-2.5 py-1 rounded-full bg-[#F0D8FA] text-[#4B075F] text-[10px] font-extrabold uppercase border border-[#E8DFEB]">
                   {record.role || 'Öğrenci'}
                 </span>
               </div>
 
               {/* Record Details Card */}
-              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-3.5 border border-emerald-100 shadow-xs space-y-2">
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-3.5 border border-purple-100 shadow-xs space-y-2">
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">

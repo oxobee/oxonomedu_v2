@@ -599,16 +599,16 @@ export default function ConnectBoardClient({
     <div className={`w-full mx-auto ${isModal ? 'p-0 space-y-3' : 'max-w-xl space-y-6 p-4 sm:p-6'}`}>
       {/* ACTIVE SMART BOARDS LIST */}
       {activeBoards.length > 0 && (
-        <div className={`bg-white dark:bg-[#121215] border border-emerald-500/30 dark:border-emerald-500/20 shadow-md overflow-hidden ${isModal ? 'rounded-2xl' : 'rounded-3xl shadow-xl'}`}>
-          <div className={`${isModal ? 'p-3' : 'p-4 sm:p-5'} bg-gradient-to-r from-emerald-950 via-slate-900 to-black text-white flex items-center justify-between`}>
+        <div className={`bg-white dark:bg-[#121215] border border-[#8D49A6]/30 dark:border-[#8D49A6]/20 shadow-md overflow-hidden ${isModal ? 'rounded-2xl' : 'rounded-3xl shadow-xl'}`}>
+          <div className={`${isModal ? 'p-3' : 'p-4 sm:p-5'} bg-gradient-to-r from-[#350444] via-[#4B075F] to-[#241329] text-white flex items-center justify-between`}>
             <div className="flex items-center gap-2.5">
-              <div className={`${isModal ? 'w-8 h-8 rounded-xl' : 'w-10 h-10 rounded-2xl'} bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0`}>
-                <Tv className={isModal ? 'w-4 h-4' : 'w-5 h-5'} />
+              <div className={`${isModal ? 'w-8 h-8 rounded-xl' : 'w-10 h-10 rounded-2xl'} bg-white/20 border border-white/30 flex items-center justify-center text-white shrink-0`}>
+                <Tv className={isModal ? 'w-4 h-4 text-white' : 'w-5 h-5 text-white'} />
               </div>
               <div>
-                <h3 className={`${isModal ? 'text-xs sm:text-sm' : 'text-base sm:text-lg'} font-black tracking-tight flex items-center gap-1.5`}>
+                <h3 className={`${isModal ? 'text-xs sm:text-sm' : 'text-base sm:text-lg'} font-black text-white tracking-tight flex items-center gap-1.5`}>
                   <span>Açık Akıllı Tahtalarım</span>
-                  <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-white/20 text-white border border-white/25">
                     {activeBoards.length} Aktif
                   </span>
                 </h3>
@@ -818,7 +818,7 @@ export default function ConnectBoardClient({
                     setDigits(['', '', '', '', '', ''])
                     fetchActiveBoards()
                   }}
-                  className="w-full p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white shadow-lg shadow-emerald-600/20 border border-emerald-400/40 flex items-center justify-between gap-3 group transition-all cursor-pointer active:scale-[0.99]"
+                  className="w-full p-4 sm:p-5 rounded-2xl bg-brand-gradient hover:opacity-95 text-white shadow-lg shadow-purple-950/25 border border-white/20 flex items-center justify-between gap-3 group transition-all cursor-pointer active:scale-[0.99]"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shrink-0 shadow-inner">
