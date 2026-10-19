@@ -266,22 +266,12 @@ export default function PanoLockScreen({
           </div>
         </div>
 
-        {onLogout && (
-          <button
-            type="button"
-            onClick={onLogout}
-            className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-[#8D49A6]/30 active:bg-[#4B075F]/40 border border-white/15 hover:border-[#8D49A6]/40 text-slate-200 hover:text-white text-xs font-bold flex items-center gap-2 backdrop-blur-md transition-all cursor-pointer shadow-lg active:scale-95"
-            title="Cihazdan Tamamen Çıkış Yap"
-          >
-            <LogOut className="w-4 h-4 text-[#E9D5FF]" />
-            <span>Cihazdan Çıkış Yap</span>
-          </button>
-        )}
+        {/* Cihazdan Çıkış Yap kaldırıldı - Bağımsız Donanım Güvenlik Kilidi */}
       </header>
 
       {/* Main Content: Landscape 2-Column Responsive Layout */}
       <main className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center max-w-7xl w-full mx-auto my-auto px-2">
-        {/* LEFT COLUMN: Widescreen Clock, Teacher Card & Quote */}
+        {/* LEFT COLUMN: Widescreen Clock, Active Class Card & Quote */}
         <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
           {/* Big Digital Clock & Date */}
           <div className="space-y-1">
@@ -305,20 +295,20 @@ export default function PanoLockScreen({
             </div>
           </div>
 
-          {/* Teacher Profile Card */}
+          {/* Active Class Card */}
           <div className="p-4 sm:p-5 rounded-3xl bg-slate-900/75 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-4 max-w-md w-full text-left">
             <div className="w-14 h-14 rounded-2xl bg-brand-gradient text-white font-black text-2xl flex items-center justify-center shadow-lg shadow-purple-950/40 shrink-0 border border-white/20">
-              {userInitial}
+              {selectedClass?.name ? selectedClass.name.replace(/[^0-9A-Za-z]/g, '').slice(0, 2).toUpperCase() : '1A'}
             </div>
             <div className="min-w-0 flex-1">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#E9D5FF] block">
-                Aktif Öğretmen Oturumu
+                AKTİF SINIF
               </span>
               <h3 className="text-base sm:text-lg font-black text-white truncate">
-                Sayın {teacherName}
+                {selectedClass?.name || '1/A Şubesi'}
               </h3>
               <p className="text-xs text-slate-400 font-medium truncate mt-0.5">
-                {selectedClass ? `${selectedClass.name} · ${selectedClass.gradeLevel}` : 'Ders tahtası hazır'}
+                {selectedClass?.gradeLevel || 'Akıllı Tahta & İnteraktif Derslik Hazır'}
               </p>
             </div>
           </div>

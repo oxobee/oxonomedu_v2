@@ -23,6 +23,7 @@ import {
   AlertCircle,
   ExternalLink,
   CheckCircle2,
+  Edit3,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
@@ -32,7 +33,9 @@ import {
   getStoredAcademicEvents,
   saveStoredAcademicEvents,
   addAcademicEvent,
+  updateAcademicEvent,
   deleteAcademicEvent,
+  syncAcademicEventsFromServer,
 } from '@/lib/calendar/academicCalendarStorage'
 
 export interface AcademicCalendarViewProps {
@@ -84,6 +87,18 @@ export default function AcademicCalendarView({
   const [newLocation, setNewLocation] = useState('Okul Konferans Salonu')
   const [newDescription, setNewDescription] = useState('')
 
+  // Edit Event Form State (For Principal)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingEventId, setEditingEventId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editCategory, setEditCategory] = useState<AcademicEventCategory>('activity')
+  const [editStartDate, setEditStartDate] = useState('')
+  const [editEndDate, setEditEndDate] = useState('')
+  const [editTime, setEditTime] = useState('')
+  const [editTarget, setEditTarget] = useState('')
+  const [editLocation, setEditLocation] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+
   // Sync events
   const sync = () => {
     setEvents(getStoredAcademicEvents())
@@ -91,6 +106,9 @@ export default function AcademicCalendarView({
 
   useEffect(() => {
     sync()
+    syncAcademicEventsFromServer().then((srvEvents) => {
+      if (srvEvents) setEvents(srvEvents)
+    })
     window.addEventListener('oxonom_academic_calendar_updated', sync)
     window.addEventListener('storage', sync)
     return () => {
@@ -233,6 +251,52 @@ export default function AcademicCalendarView({
     setIsAddModalOpen(false)
     setNewTitle('')
     setNewDescription('')
+  }
+
+  // Principal Open Edit Modal
+  const handleOpenEditModal = (ev: AcademicCalendarEvent) => {
+    setEditingEventId(ev.id)
+    setEditTitle(ev.title)
+    setEditCategory(ev.category)
+    setEditStartDate(ev.startDate)
+    setEditEndDate(ev.endDate || '')
+    setEditTime(ev.time || 'Tam Gün')
+    setEditTarget(ev.targetAudience || 'Tüm Okul')
+    setEditLocation(ev.location || 'Okul Kampüsü')
+    setEditDescription(ev.description || '')
+    setIsEditModalOpen(true)
+  }
+
+  // Principal Save Edited Event
+  const handleSaveEditEvent = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingEventId || !editTitle.trim()) {
+      toast.error('Lütfen etkinlik başlığı girin.')
+      return
+    }
+
+    const catObj = ACADEMIC_CATEGORIES.find((c) => c.id === editCategory)
+    const categoryLabel = catObj?.label || 'Etkinlik'
+
+    const updated = updateAcademicEvent(editingEventId, {
+      title: editTitle.trim(),
+      category: editCategory,
+      categoryLabel,
+      startDate: editStartDate,
+      endDate: editEndDate.trim() ? editEndDate : undefined,
+      time: editTime.trim() || 'Tam Gün',
+      targetAudience: editTarget.trim() || 'Tüm Okul',
+      location: editLocation.trim() || 'Okul Kampüsü',
+      description: editDescription.trim(),
+      color: catObj?.color || 'indigo',
+    })
+
+    setEvents(updated)
+    if (selectedEvent && selectedEvent.id === editingEventId) {
+      setSelectedEvent(updated.find((ev) => ev.id === editingEventId) || null)
+    }
+    toast.success(`✏️ "${editTitle}" etkinliği güncellendi ve tüm profillere yansıtıldı!`)
+    setIsEditModalOpen(false)
   }
 
   // Principal Delete Event
@@ -635,11 +699,26 @@ export default function AcademicCalendarView({
                         <span>{cat?.label}</span>
                       </span>
 
-                      <span
-                        className={`text-[10px] font-bold px-2.5 py-1 rounded-xl ${daysMeta.color}`}
-                      >
-                        {daysMeta.text}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {role === 'principal' && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenEditModal(ev)
+                            }}
+                            className="p-1 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
+                            title="Etkinliği Düzenle"
+                          >
+                            <Edit3 size={13} />
+                          </button>
+                        )}
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-xl ${daysMeta.color}`}
+                        >
+                          {daysMeta.text}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Title */}
@@ -802,26 +881,44 @@ export default function AcademicCalendarView({
               </div>
 
               {/* Footer Actions */}
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-                {role === 'principal' && !selectedEvent.isOfficialMeb ? (
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteEvent(selectedEvent.id, selectedEvent.title)}
-                    className="text-xs font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer"
-                  >
-                    <Trash2 size={14} />
-                    <span>Etkinliği Sil</span>
-                  </button>
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800 gap-2 flex-wrap">
+                {role === 'principal' ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleOpenEditModal(selectedEvent)
+                        setSelectedEvent(null)
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer border border-indigo-200 dark:border-indigo-800"
+                    >
+                      <Edit3 size={13} />
+                      <span>Etkinliği Düzenle</span>
+                    </button>
+
+                    {!selectedEvent.isOfficialMeb && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteEvent(selectedEvent.id, selectedEvent.title)}
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-1 cursor-pointer transition-colors"
+                      >
+                        <Trash2 size={13} />
+                        <span>Sil</span>
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <span className="text-[11px] text-gray-400">
-                    Milli Eğitim Bakanlığı Resmi Genelgesi
+                    {selectedEvent.isOfficialMeb
+                      ? 'Milli Eğitim Bakanlığı Resmi Genelgesi'
+                      : 'Okul Müdürlüğü Tarafından Eklenen Etkinlik'}
                   </span>
                 )}
 
                 <button
                   type="button"
                   onClick={() => setSelectedEvent(null)}
-                  className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-xs font-bold text-gray-700 dark:text-gray-300 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-xs font-bold text-gray-700 dark:text-gray-300 transition-colors cursor-pointer ml-auto"
                 >
                   Kapat
                 </button>
@@ -987,6 +1084,176 @@ export default function AcademicCalendarView({
                     className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-md shadow-indigo-600/30 cursor-pointer"
                   >
                     Takvime Kaydet & Yayınla
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── MODAL: MÜDÜR ETKİNLİK GÜNCELLEME MODALI ── */}
+      <AnimatePresence>
+        {isEditModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 font-jakarta">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsEditModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+            />
+
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-lg bg-white dark:bg-[#0E1526] rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 p-6 z-10 space-y-4 max-h-[92vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <Edit3 size={16} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-gray-900 dark:text-white">
+                      Akademik Etkinliği Güncelle
+                    </h3>
+                    <p className="text-xs text-gray-400">
+                      Yapılan değişiklikler anında öğretmen ve öğrenci takvimlerine yansıtılır
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEditEvent} className="space-y-4 text-xs">
+                {/* 1. Başlık */}
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 dark:text-gray-300">
+                    Etkinlik / Önemli Gün Başlığı:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="Örn: 1. Dönem Veli Toplantısı"
+                    className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                {/* 2. Kategori */}
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 dark:text-gray-300">Kategori:</label>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value as any)}
+                    className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 font-bold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    {ACADEMIC_CATEGORIES.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 3. Başlangıç ve Bitiş Tarihi */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-gray-700 dark:text-gray-300">Başlangıç Tarihi:</label>
+                    <input
+                      type="date"
+                      required
+                      value={editStartDate}
+                      onChange={(e) => setEditStartDate(e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 font-bold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-gray-700 dark:text-gray-300">Bitiş Tarihi (İsteğe Bağlı):</label>
+                    <input
+                      type="date"
+                      value={editEndDate}
+                      onChange={(e) => setEditEndDate(e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 font-bold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                {/* 4. Saat ve Konum */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-gray-700 dark:text-gray-300">Saat / Zaman Aralığı:</label>
+                    <input
+                      type="text"
+                      value={editTime}
+                      onChange={(e) => setEditTime(e.target.value)}
+                      placeholder="Örn: 10:00 - 14:00 veya Tam Gün"
+                      className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-gray-700 dark:text-gray-300">Konum / Yer:</label>
+                    <input
+                      type="text"
+                      value={editLocation}
+                      onChange={(e) => setEditLocation(e.target.value)}
+                      placeholder="Örn: Konferans Salonu"
+                      className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                {/* 5. Hedef Kitle */}
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 dark:text-gray-300">Hedef Kitle / Katılımcılar:</label>
+                  <input
+                    type="text"
+                    value={editTarget}
+                    onChange={(e) => setEditTarget(e.target.value)}
+                    placeholder="Örn: Tüm Okul, 9-A Şubesi, Öğretmenler"
+                    className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                {/* 6. Açıklama */}
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 dark:text-gray-300">Etkinlik Açıklaması:</label>
+                  <textarea
+                    rows={3}
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder="Etkinlik hakkında detaylar..."
+                    className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 resize-none leading-relaxed"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="px-4 py-2 rounded-xl font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                  >
+                    Vazgeç
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-md shadow-indigo-600/30 cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Edit3 size={14} />
+                    <span>Güncellemeyi Kaydet</span>
                   </button>
                 </div>
               </form>

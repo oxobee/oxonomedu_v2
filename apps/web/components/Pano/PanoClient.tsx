@@ -53,6 +53,10 @@ import {
   Dice5,
   Award,
   Zap,
+  Calculator,
+  Trophy,
+  Crown,
+  HelpCircle,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import {
@@ -333,23 +337,63 @@ const Clock = ({ detailed = false, className = "" }: { detailed?: boolean; class
   )
 }
 
-// Compact Weather Card
-const CompactWeatherCard = () => (
-  <div className="flex items-center gap-3.5 px-4 py-2.5 bg-white/90 dark:bg-[#211729]/90 backdrop-blur-xl rounded-2xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm">
-    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#F5C542] to-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0">
-      <CloudSun className="w-6 h-6 drop-shadow-xs" />
-    </div>
-    <div className="min-w-0">
-      <div className="flex items-center gap-1.5">
-        <span className="font-black text-[#241329] dark:text-white text-base tracking-tight">24°C</span>
-        <span className="text-[11px] font-bold text-[#8D49A6] dark:text-[#E9D5FF]">İstanbul</span>
+// Prominent Clock & Calendar Card (Hava durumu yerine dikkat çekici saat & takvim kartı)
+const PanoClockCalendarCard = () => {
+  const [now, setNow] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const hours = now.toLocaleTimeString('tr-TR', { hour: '2-digit' })
+  const minutes = now.toLocaleTimeString('tr-TR', { minute: '2-digit' })
+  const seconds = now.toLocaleTimeString('tr-TR', { second: '2-digit' })
+  const dateStr = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+  const dayName = now.toLocaleDateString('tr-TR', { weekday: 'long' })
+
+  return (
+    <div className="flex items-center gap-3.5 sm:gap-5 px-5 py-3 bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl rounded-3xl border border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-lg shadow-purple-950/10">
+      {/* Big Attention-Grabbing Digital Clock */}
+      <div className="flex items-center font-mono tabular-nums tracking-tight">
+        <span className="text-3xl sm:text-4xl lg:text-[2.6rem] font-black text-[#4B075F] dark:text-white drop-shadow-xs leading-none">
+          {hours}
+        </span>
+        <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#D914C8] mx-1 sm:mx-1.5 animate-pulse drop-shadow-[0_0_12px_rgba(217,20,200,0.6)]">
+          :
+        </span>
+        <span className="text-3xl sm:text-4xl lg:text-[2.6rem] font-black text-[#4B075F] dark:text-white drop-shadow-xs leading-none">
+          {minutes}
+        </span>
+        <div className="flex flex-col ml-2 self-center">
+          <span className="text-[10px] font-black text-[#D914C8] uppercase tracking-wider">SN</span>
+          <span className="text-xs sm:text-sm font-black text-[#8D49A6] dark:text-[#E9D5FF] bg-[#F0D8FA] dark:bg-[#350444] px-1.5 py-0.5 rounded-md font-mono">
+            {seconds}
+          </span>
+        </div>
       </div>
-      <p className="text-[11px] font-medium text-[#514458] dark:text-slate-400 truncate">
-        Açık & Güneşli • Nem %45
-      </p>
+
+      <div className="h-10 w-[1.5px] bg-[#E8DFEB] dark:bg-[#49364F]" />
+
+      {/* Date, Calendar & Day */}
+      <div className="flex flex-col justify-center">
+        <div className="flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-[#241329] dark:text-white">
+          <Calendar className="w-3.5 h-3.5 text-[#8D49A6] shrink-0" />
+          <span className="truncate">{dateStr}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-[11px] sm:text-xs font-bold text-[#D914C8] capitalize">
+            {dayName}
+          </span>
+          <span className="text-[9.5px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+            Ders Saati Aktif
+          </span>
+        </div>
+      </div>
     </div>
-  </div>
-)
+  )
+}
+const CompactWeatherCard = PanoClockCalendarCard
 
 // Grid App Item Component (Proportioned, Touch-Friendly for Smartboards in Single Row)
 const GridItem = ({ item, onAction }: { item: AppItem; onAction: (app: AppItem) => void }) => {
@@ -478,85 +522,209 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
   }
 
-  // Student Picker from Single Source of Truth
+  // 3. Smartboard Touch Calculator State
+  const [calcDisplay, setCalcDisplay] = useState('0')
+  const [calcEquation, setCalcEquation] = useState('')
+  const [calcPrev, setCalcPrev] = useState<number | null>(null)
+  const [calcOp, setCalcOp] = useState<string | null>(null)
+  const [calcResetOnNext, setCalcResetOnNext] = useState(false)
+
+  // 4. Student Picker Animation States
+  const [rollingName, setRollingName] = useState('')
+  const [isWinnerCelebration, setIsWinnerCelebration] = useState(false)
+
+  // Calculator Handlers (Touch & Smartboard optimized)
+  const handleCalcDigit = (d: string) => {
+    if (calcResetOnNext || calcDisplay === '0') {
+      setCalcDisplay(d)
+      setCalcResetOnNext(false)
+    } else {
+      if (calcDisplay.length < 10) {
+        setCalcDisplay((prev) => prev + d)
+      }
+    }
+  }
+
+  const handleCalcDot = () => {
+    if (calcResetOnNext) {
+      setCalcDisplay('0.')
+      setCalcResetOnNext(false)
+      return
+    }
+    if (!calcDisplay.includes('.')) {
+      setCalcDisplay((prev) => prev + '.')
+    }
+  }
+
+  const handleCalcOp = (op: string) => {
+    const current = parseFloat(calcDisplay)
+    if (calcPrev !== null && calcOp && !calcResetOnNext) {
+      let res = calcPrev
+      if (calcOp === '+') res = calcPrev + current
+      else if (calcOp === '-') res = calcPrev - current
+      else if (calcOp === '×') res = calcPrev * current
+      else if (calcOp === '÷') res = current !== 0 ? calcPrev / current : 0
+      res = Number(res.toFixed(4))
+      setCalcPrev(res)
+      setCalcDisplay(String(res))
+      setCalcEquation(`${res} ${op}`)
+    } else {
+      setCalcPrev(current)
+      setCalcEquation(`${current} ${op}`)
+    }
+    setCalcOp(op)
+    setCalcResetOnNext(true)
+  }
+
+  const handleCalcEquals = () => {
+    if (calcPrev === null || !calcOp) return
+    const current = parseFloat(calcDisplay)
+    let res = calcPrev
+    if (calcOp === '+') res = calcPrev + current
+    else if (calcOp === '-') res = calcPrev - current
+    else if (calcOp === '×') res = calcPrev * current
+    else if (calcOp === '÷') res = current !== 0 ? calcPrev / current : 0
+    res = Number(res.toFixed(4))
+    setCalcEquation(`${calcPrev} ${calcOp} ${current} =`)
+    setCalcDisplay(String(res))
+    setCalcPrev(null)
+    setCalcOp(null)
+    setCalcResetOnNext(true)
+  }
+
+  const handleCalcClear = () => {
+    setCalcDisplay('0')
+    setCalcEquation('')
+    setCalcPrev(null)
+    setCalcOp(null)
+    setCalcResetOnNext(false)
+  }
+
+  const handleCalcBackspace = () => {
+    if (calcResetOnNext) return
+    if (calcDisplay.length > 1) {
+      setCalcDisplay((prev) => prev.slice(0, -1))
+    } else {
+      setCalcDisplay('0')
+    }
+  }
+
+  const handleCalcPercent = () => {
+    const val = parseFloat(calcDisplay) / 100
+    setCalcDisplay(String(Number(val.toFixed(4))))
+  }
+
+  // Student Picker from Single Source of Truth with Progressive Deceleration Animation
   const handlePickStudent = () => {
+    if (isPickingStudent) return
     setIsPickingStudent(true)
+    setIsWinnerCelebration(false)
+
     const allStudents = getSingleSourceOfTruthStudents(30)
     const classCode = selectedClass ? normalizeClassCode(selectedClass.name.replace('Şubesi', '').trim()) : ''
-    const pool = allStudents.filter(s => {
+    const pool = allStudents.filter((s) => {
       if (!classCode) return true
       return normalizeClassCode(s.className) === classCode
     })
     const candidateList = pool.length > 0 ? pool : allStudents
 
-    let spinCount = 0
-    const maxSpins = 12
-    const interval = setInterval(() => {
+    // Progressive easing intervals: fast at start, slows down smoothly
+    const intervals = [40, 45, 55, 70, 90, 115, 145, 185, 235, 300, 380, 480, 600]
+    let step = 0
+
+    const runStep = () => {
       const randIdx = Math.floor(Math.random() * candidateList.length)
-      setSelectedStudent(candidateList[randIdx])
-      spinCount++
-      if (spinCount >= maxSpins) {
-        clearInterval(interval)
+      const cand = candidateList[randIdx]
+      setSelectedStudent(cand)
+      setRollingName(cand.name)
+
+      // Light tick audio tone
+      playChimeSound(550 + step * 25, 0)
+
+      step++
+      if (step < intervals.length) {
+        setTimeout(runStep, intervals[step])
+      } else {
+        // Final Winner
+        const finalWinner = candidateList[Math.floor(Math.random() * candidateList.length)]
+        setSelectedStudent(finalWinner)
+        setRollingName(finalWinner.name)
         setIsPickingStudent(false)
-        playChimeSound(523.25, 659.25)
+        setIsWinnerCelebration(true)
+        playChimeSound(523.25, 659.25) // C5 to E5 triumph chime
+        toast.success(`🎉 Tebrikler! Söz Hakkı: ${finalWinner.name}`, { icon: '🏆', duration: 3000 })
       }
-    }, 100)
+    }
+
+    runStep()
   }
 
   return (
     <div className="pt-2">
-      <h2 className="text-xs sm:text-sm font-black text-[#514458] dark:text-slate-400 uppercase tracking-wider mb-4 pl-1">
-        İnteraktif Sınıf Araçları
-      </h2>
+      <div className="flex items-center justify-between mb-4 pl-1">
+        <h2 className="text-xs sm:text-sm font-black text-[#514458] dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
+          <span>İnteraktif Sınıf Araçları</span>
+          <span className="text-[10px] font-bold text-[#8D49A6] dark:text-[#F0D8FA] bg-[#F0D8FA]/70 dark:bg-[#350444] px-2 py-0.5 rounded-full">
+            Akıllı Tahta OS
+          </span>
+        </h2>
+        <span className="text-xs text-[#716779] dark:text-[#B5A5BD] hidden sm:inline">
+          Dokunmatik ekran için optimize edilmiştir
+        </span>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* 1. Classroom Timer */}
-        <div className="p-5 rounded-2xl bg-white/90 dark:bg-[#1E1124]/90 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
-                <Timer className="w-4 h-4" />
+        <div className="p-5 rounded-3xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
+                  <Timer className="w-4 h-4" />
+                </div>
+                <span className="font-black text-sm text-[#241329] dark:text-white">Ders Kronometresi</span>
               </div>
-              <span className="font-black text-sm text-[#241329] dark:text-white">Ders Kronometresi</span>
+              <div className="flex items-center gap-1">
+                {[
+                  { label: '3 Dk', sec: 180 },
+                  { label: '5 Dk', sec: 300 },
+                  { label: '10 Dk', sec: 600 },
+                  { label: '15 Dk', sec: 900 },
+                ].map((p) => (
+                  <button
+                    key={p.sec}
+                    type="button"
+                    onClick={() => setTimerPreset(p.sec)}
+                    className={`px-2 py-0.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
+                      timerInitial === p.sec && !isTimerRunning
+                        ? 'bg-[#4B075F] text-white shadow-xs'
+                        : 'bg-[#FAF5FC] dark:bg-[#2A1833] text-[#514458] dark:text-slate-300 hover:bg-[#F0D8FA]'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              {[
-                { label: '3 Dk', sec: 180 },
-                { label: '5 Dk', sec: 300 },
-                { label: '10 Dk', sec: 600 },
-                { label: '15 Dk', sec: 900 },
-              ].map(p => (
-                <button
-                  key={p.sec}
-                  type="button"
-                  onClick={() => setTimerPreset(p.sec)}
-                  className={`px-2 py-0.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
-                    timerInitial === p.sec && !isTimerRunning
-                      ? 'bg-[#4B075F] text-white shadow-xs'
-                      : 'bg-[#FAF5FC] dark:bg-[#2A1833] text-[#514458] dark:text-slate-300 hover:bg-[#F0D8FA]'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Big Digital Display */}
-          <div className="text-center py-2">
-            <span className={`font-mono text-4xl sm:text-5xl font-black tracking-widest drop-shadow-xs ${
-              timerSeconds === 0
-                ? 'text-rose-600 animate-bounce'
-                : isTimerRunning
-                ? 'text-[#4B075F] dark:text-white'
-                : 'text-[#514458] dark:text-slate-300'
-            }`}>
-              {formatTimer(timerSeconds)}
-            </span>
+            {/* Big Digital Display */}
+            <div className="text-center py-4 my-auto">
+              <span
+                className={`font-mono text-4xl sm:text-5xl font-black tracking-widest drop-shadow-xs ${
+                  timerSeconds === 0
+                    ? 'text-rose-600 animate-bounce'
+                    : isTimerRunning
+                    ? 'text-[#4B075F] dark:text-white'
+                    : 'text-[#514458] dark:text-slate-300'
+                }`}
+              >
+                {formatTimer(timerSeconds)}
+              </span>
+            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
+          <div className="flex items-center gap-2 pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
             <button
               type="button"
               onClick={() => setIsTimerRunning(!isTimerRunning)}
@@ -580,7 +748,7 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
                 setIsTimerRunning(false)
                 setTimerSeconds(timerInitial)
               }}
-              className="px-3 py-2.5 rounded-xl bg-[#FAF5FC] dark:bg-[#2A1833] text-[#4B075F] dark:text-[#E9D5FF] border border-[#E8DFEB] dark:border-[#49364F] hover:bg-[#F0D8FA] transition-all cursor-pointer"
+              className="px-3.5 py-2.5 rounded-xl bg-[#FAF5FC] dark:bg-[#2A1833] text-[#4B075F] dark:text-[#E9D5FF] border border-[#E8DFEB] dark:border-[#49364F] hover:bg-[#F0D8FA] transition-all cursor-pointer"
               title="Sıfırla"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -588,88 +756,271 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
           </div>
         </div>
 
-        {/* 2. Random Student Picker */}
-        <div className="p-5 rounded-2xl bg-white/90 dark:bg-[#1E1124]/90 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
-                <Dice5 className="w-4 h-4" />
-              </div>
-              <span className="font-black text-sm text-[#241329] dark:text-white">Soru & Söz Hakkı</span>
-            </div>
-            <span className="text-[10.5px] font-bold text-[#8D49A6] bg-[#FAF5FC] dark:bg-[#2A1833] px-2 py-0.5 rounded-lg border border-[#E8DFEB] dark:border-[#49364F]">
-              Çark
-            </span>
-          </div>
+        {/* 2. Random Student Picker (Animasyonlu Soru & Söz Hakkı Çarkı) */}
+        <div className="p-5 rounded-3xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between relative overflow-hidden">
+          {/* Ambient Glow on Celebration */}
+          {isWinnerCelebration && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.4, 0.2] }}
+              transition={{ duration: 1 }}
+              className="absolute inset-0 bg-gradient-to-br from-[#D914C8]/20 via-[#8D49A6]/20 to-transparent pointer-events-none"
+            />
+          )}
 
-          {/* Selected Student Display */}
-          <div className="min-h-[58px] flex items-center justify-center text-center py-1">
-            {selectedStudent ? (
-              <div className={`transition-all ${isPickingStudent ? 'scale-95 opacity-70' : 'scale-100 opacity-100'}`}>
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="font-black text-lg text-[#4B075F] dark:text-white truncate max-w-[200px]">
-                    {selectedStudent.name}
-                  </span>
-                  <Award className="w-4 h-4 text-[#D914C8] shrink-0" />
+          <div>
+            <div className="flex items-center justify-between mb-3 relative z-10">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
+                  <Dice5 className={`w-4 h-4 ${isPickingStudent ? 'animate-spin' : ''}`} />
                 </div>
-                <p className="text-[11px] font-bold text-[#514458] dark:text-slate-400 mt-0.5">
-                  No: {selectedStudent.studentNo || '101'} • {selectedStudent.className || '1/A'}
-                </p>
+                <span className="font-black text-sm text-[#241329] dark:text-white">Soru & Söz Hakkı</span>
               </div>
-            ) : (
-              <p className="text-xs text-slate-400 font-medium">
-                Soru sormak veya tahtaya kaldırmak için öğrenci seçin.
-              </p>
-            )}
+              <span className="text-[10.5px] font-bold text-[#8D49A6] bg-[#FAF5FC] dark:bg-[#2A1833] px-2.5 py-0.5 rounded-lg border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-1">
+                <Sparkles size={11} className="text-[#D914C8]" />
+                <span>Animasyonlu</span>
+              </span>
+            </div>
+
+            {/* Selected Student Display with High-Impact Animation */}
+            <div className="min-h-[110px] flex flex-col items-center justify-center text-center py-2 relative z-10">
+              {isPickingStudent ? (
+                <motion.div
+                  key="rolling"
+                  initial={{ scale: 0.9, opacity: 0.5 }}
+                  animate={{ scale: [0.95, 1.05, 0.95], opacity: 1 }}
+                  transition={{ repeat: Infinity, duration: 0.2 }}
+                  className="p-3 rounded-2xl bg-gradient-to-r from-purple-100 to-pink-100 dark:from-[#350444] dark:to-[#4B075F] border border-[#8D49A6]/40 w-full shadow-inner"
+                >
+                  <span className="text-[10px] uppercase font-black tracking-wider text-[#8D49A6] dark:text-[#F0D8FA] block animate-pulse">
+                    Öğrenci Seçiliyor...
+                  </span>
+                  <div className="font-mono text-xl font-black text-[#4B075F] dark:text-white truncate mt-1">
+                    {rollingName || '...'}
+                  </div>
+                </motion.div>
+              ) : selectedStudent ? (
+                <motion.div
+                  key={selectedStudent.id || 'winner'}
+                  initial={{ scale: 0.8, opacity: 0, y: 10 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  transition={{ type: 'spring', damping: 15, stiffness: 300 }}
+                  className="space-y-1.5 w-full"
+                >
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-[10.5px] font-black shadow-md shadow-pink-900/20">
+                    <Trophy size={12} className="text-yellow-300" />
+                    <span>Söz Hakkı Sende!</span>
+                  </div>
+                  <div className="font-black text-lg sm:text-xl text-[#241329] dark:text-white truncate">
+                    {selectedStudent.name}
+                  </div>
+                  <p className="text-[11px] font-bold text-[#8D49A6] dark:text-[#E9D5FF]">
+                    Öğrenci No: {selectedStudent.studentNo || '101'} • Sınıf: {selectedStudent.className || '1/A'}
+                  </p>
+                </motion.div>
+              ) : (
+                <div className="space-y-1">
+                  <div className="w-10 h-10 rounded-2xl bg-[#F0D8FA]/70 dark:bg-[#350444]/60 mx-auto flex items-center justify-center text-[#8D49A6]">
+                    <Dice5 size={20} />
+                  </div>
+                  <p className="text-xs text-slate-400 font-medium">
+                    Soru sormak veya tahtaya kaldırmak için butona dokunun.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Action Button */}
-          <div className="mt-3 pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
+          <div className="pt-3 border-t border-[#E8DFEB] dark:border-[#49364F] relative z-10">
             <button
               type="button"
               disabled={isPickingStudent}
               onClick={handlePickStudent}
-              className="w-full py-2.5 rounded-xl bg-brand-gradient text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 rounded-xl bg-brand-gradient text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-purple-950/20 hover:opacity-95 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
             >
-              <Dice5 className="w-3.5 h-3.5 text-white animate-spin-reverse" />
+              <Dice5 className={`w-3.5 h-3.5 text-white ${isPickingStudent ? 'animate-spin' : ''}`} />
               <span className="text-white">
-                {isPickingStudent ? 'Seçiliyor...' : '🎲 Rastgele Öğrenci Seç'}
+                {isPickingStudent ? 'Çark Dönüyor...' : selectedStudent ? '🎲 Başka Öğrenci Seç' : '🎲 Rastgele Öğrenci Seç'}
               </span>
             </button>
           </div>
         </div>
 
-        {/* 3. Attention Chime / Bell */}
-        <div className="p-5 rounded-2xl bg-white/90 dark:bg-[#1E1124]/90 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#D914C8] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
-                <Volume2 className="w-4 h-4" />
+        {/* 3. Dokunmatik Akıllı Tahta Hesap Makinesi (Zil yerine Hesap Makinesi) */}
+        <div className="p-4 sm:p-5 rounded-3xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
+                  <Calculator className="w-4 h-4" />
+                </div>
+                <span className="font-black text-sm text-[#241329] dark:text-white">Hesap Makinesi</span>
               </div>
-              <span className="font-black text-sm text-[#241329] dark:text-white">Ders & Dikkat Zili</span>
+              <button
+                type="button"
+                onClick={handleCalcClear}
+                className="text-[10px] font-bold text-[#D914C8] hover:text-[#8D49A6] bg-[#FAF5FC] dark:bg-[#2A1833] px-2 py-0.5 rounded-lg border border-[#E8DFEB] dark:border-[#49364F] cursor-pointer active:scale-95 transition-all"
+              >
+                Sıfırla
+              </button>
             </div>
-            <span className="text-[10.5px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-800">
-              Canlı Akustik
-            </span>
-          </div>
 
-          <p className="text-xs text-[#514458] dark:text-slate-300 leading-relaxed py-1">
-            Sınıfta sessizliği sağlamak veya dikkati tahtaya toplamak için tek dokunuşla kibar sınıf zili çalın.
-          </p>
+            {/* Calculator Digital Screen */}
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-900 text-white font-mono text-right border border-white/10 shadow-inner mb-2.5">
+              <div className="text-[10px] text-slate-400 h-4 truncate">
+                {calcEquation || '\u00A0'}
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-emerald-400 truncate tracking-tight">
+                {calcDisplay}
+              </div>
+            </div>
 
-          {/* Action Button */}
-          <div className="mt-3 pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
-            <button
-              type="button"
-              onClick={() => {
-                playChimeSound(880, 1174.66)
-                toast.success('Dikkat zili çalındı 🔔', { duration: 1500 })
-              }}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#8D49A6] via-[#B90FAB] to-[#D914C8] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer"
-            >
-              <Volume2 className="w-3.5 h-3.5 text-white" />
-              <span className="text-white">🔔 Dikkat Zili Çal</span>
-            </button>
+            {/* Touch Keypad (Ergonomic for Smartboard & Phone) */}
+            <div className="grid grid-cols-4 gap-1.5 text-xs font-black">
+              {/* Row 1 */}
+              <button
+                type="button"
+                onClick={handleCalcClear}
+                className="h-8 rounded-xl bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 active:scale-90 transition-transform cursor-pointer"
+              >
+                C
+              </button>
+              <button
+                type="button"
+                onClick={handleCalcBackspace}
+                className="h-8 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 active:scale-90 transition-transform cursor-pointer"
+              >
+                ⌫
+              </button>
+              <button
+                type="button"
+                onClick={handleCalcPercent}
+                className="h-8 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 active:scale-90 transition-transform cursor-pointer"
+              >
+                %
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcOp('÷')}
+                className="h-8 rounded-xl bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
+              >
+                ÷
+              </button>
+
+              {/* Row 2 */}
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('7')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                7
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('8')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                8
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('9')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                9
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcOp('×')}
+                className="h-8 rounded-xl bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
+              >
+                ×
+              </button>
+
+              {/* Row 3 */}
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('4')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                4
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('5')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                5
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('6')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                6
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcOp('-')}
+                className="h-8 rounded-xl bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
+              >
+                -
+              </button>
+
+              {/* Row 4 */}
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('1')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                1
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('2')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                2
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('3')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                3
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCalcOp('+')}
+                className="h-8 rounded-xl bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
+              >
+                +
+              </button>
+
+              {/* Row 5 */}
+              <button
+                type="button"
+                onClick={() => handleCalcDigit('0')}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer col-span-2"
+              >
+                0
+              </button>
+              <button
+                type="button"
+                onClick={handleCalcDot}
+                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+              >
+                ,
+              </button>
+              <button
+                type="button"
+                onClick={handleCalcEquals}
+                className="h-8 rounded-xl bg-brand-gradient text-white active:scale-90 transition-transform cursor-pointer shadow-xs"
+              >
+                =
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1864,7 +2215,7 @@ export default function PanoClient() {
 
 
 
-  // Native Fullscreen State & Toggle
+  // Native Fullscreen State & Auto-Fullscreen on load / first touch
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
@@ -1872,7 +2223,23 @@ export default function PanoClient() {
       setIsFullscreen(!!document.fullscreenElement)
     }
     document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+
+    const triggerAutoFullscreen = () => {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {})
+      }
+    }
+
+    // Try immediately on mount
+    triggerAutoFullscreen()
+
+    // Also trigger on first user touch/click if restricted by browser security policy
+    window.addEventListener('pointerdown', triggerAutoFullscreen, { once: true })
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      window.removeEventListener('pointerdown', triggerAutoFullscreen)
+    }
   }, [])
 
   const toggleFullscreen = async () => {
@@ -2694,6 +3061,36 @@ export default function PanoClient() {
         overscrollBehavior: 'none'
       }}
     >
+      {/* ── ANIMATED SUBTLE BACKGROUND PATTERNS (Göz yormayan, dinamik desenler) ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {/* Ambient Pulsing Glow Orbs */}
+        <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-[#4B075F]/10 dark:bg-[#4B075F]/20 blur-[130px] animate-pulse" />
+        <div className="absolute top-1/2 -right-32 w-[550px] h-[550px] rounded-full bg-[#8D49A6]/10 dark:bg-[#8D49A6]/20 blur-[140px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute -bottom-32 left-1/3 w-[450px] h-[450px] rounded-full bg-[#D914C8]/08 dark:bg-[#D914C8]/15 blur-[120px] animate-pulse" style={{ animationDuration: '10s' }} />
+
+        {/* Floating Subtle Geometric SVGs with smooth drifting animations */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.06] dark:opacity-[0.11]" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="pano-dot-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.5" fill="currentColor" className="text-[#8D49A6]" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#pano-dot-grid)" />
+        </svg>
+
+        {/* Floating Educational / Mathematical Glyphs */}
+        <div className="absolute inset-0 select-none overflow-hidden font-mono font-black text-xl text-[#8D49A6]/15 dark:text-[#F0D8FA]/20">
+          <span className="absolute top-[12%] left-[8%] animate-bounce" style={{ animationDuration: '6s' }}>+</span>
+          <span className="absolute top-[28%] right-[10%] animate-pulse" style={{ animationDuration: '7s' }}>∑</span>
+          <span className="absolute top-[65%] left-[5%] animate-bounce" style={{ animationDuration: '9s' }}>×</span>
+          <span className="absolute top-[75%] right-[15%] animate-pulse" style={{ animationDuration: '8s' }}>π</span>
+          <span className="absolute top-[18%] left-[45%] animate-bounce" style={{ animationDuration: '11s' }}>÷</span>
+          <span className="absolute top-[85%] left-[60%] animate-pulse" style={{ animationDuration: '10s' }}>√</span>
+          <span className="absolute top-[42%] left-[92%] animate-bounce" style={{ animationDuration: '12s' }}>%</span>
+          <span className="absolute top-[55%] left-[18%] animate-pulse" style={{ animationDuration: '13s' }}>∞</span>
+        </div>
+      </div>
+
       {/* 1. PROFESSIONAL 3D NEON GLASS LOCK SCREEN (ONLY ON BOARD) */}
       <AnimatePresence>
         {isLocked && !isPhone && (
@@ -2724,76 +3121,30 @@ export default function PanoClient() {
         </div>
       )}
 
-      {/* 2. TOPBAR */}
-      <div className="w-full px-4 sm:px-6 py-2.5 sm:py-3 flex justify-between items-center z-40 relative border-b border-[#E8DFEB] dark:border-[#49364F] bg-white/85 dark:bg-[#1A0E21]/85 backdrop-blur-xl shrink-0">
-        {/* Left: Brand Logo */}
-        <div className="flex items-center">
-          <Link href={getUriWithOrg(orgslug, '/')} className="flex items-center group cursor-pointer" title="Ana Sayfaya Dön">
-            <div className="h-10 sm:h-12 flex items-center group-hover:scale-105 transition-transform">
-              <img
-                src="/oxonom_edu_logo.png"
-                alt="Oxonom Edu"
-                className="h-9 sm:h-11 md:h-12 w-auto object-contain dark:invert transition-all drop-shadow-xs"
-              />
-            </div>
-          </Link>
-        </div>
+      {/* 2. CENTERED BRANDING (HEADER TAMAMEN KALDIRILDI - LOGO MERKEZDE) */}
+      <div className="w-full pt-3 pb-1 px-4 sm:px-6 flex items-center justify-center relative z-30 shrink-0">
+        {/* Centered Brand Logo */}
+        <Link href={getUriWithOrg(orgslug, '/')} className="flex items-center group cursor-pointer" title="Ana Sayfaya Dön">
+          <div className="h-10 sm:h-12 flex items-center group-hover:scale-105 transition-transform">
+            <img
+              src="/oxonom_edu_logo.png"
+              alt="Oxonom Edu"
+              className="h-8 sm:h-10 md:h-11 w-auto object-contain dark:invert transition-all drop-shadow-xs"
+            />
+          </div>
+        </Link>
 
-        {/* Center: Live Clock */}
-        <Clock />
-
-        {/* Right: Fast Whiteboard, Fullscreen, Lock, Profile */}
-        <div className="flex items-center gap-2 sm:gap-2.5 relative" ref={popupRef}>
-          {/* Quick Whiteboard Launcher Pill */}
-          <Link
-            href="/pano/tahta"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-gradient text-white font-bold text-xs shadow-xs hover:shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
-            title="Yeni İnteraktif Akıllı Tahta Çizim Alanını Aç"
-          >
-            <Presentation className="w-3.5 h-3.5 text-white" />
-            <span className="text-white">⚡ Hızlı Tahta</span>
-          </Link>
-
-          {/* Fullscreen Toggle Button */}
-          <button
-            onClick={toggleFullscreen}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/80 dark:bg-[#241329]/80 shadow-2xs flex items-center justify-center text-[#514458] dark:text-slate-300 hover:bg-[#FAF5FC] dark:hover:bg-[#350444]/50 hover:text-[#4B075F] dark:hover:text-[#E9D5FF] transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
-            title={isFullscreen ? "Tam Ekrandan Çık" : "Tam Ekran Yap"}
-          >
-            {isFullscreen ? <Minimize className="w-4 h-4 text-[#8D49A6]" /> : <Maximize className="w-4 h-4 text-[#8D49A6]" />}
-          </button>
-
-          {/* Lock Screen Button */}
-          <button
-            onClick={lockPano}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/80 dark:bg-[#241329]/80 shadow-2xs flex items-center justify-center text-[#514458] dark:text-slate-300 hover:bg-[#FAF5FC] dark:hover:bg-[#350444]/50 hover:text-[#4B075F] dark:hover:text-[#E9D5FF] transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
-            title="Ekranı Kilitle"
-          >
-            <Lock className="w-4 h-4" />
-          </button>
-
-          {/* Smartboard Hardware Identity Capsule (Pano ID & Tahta No) */}
+        {/* Discreet Top Right Lock & Settings Dropdown */}
+        <div className="absolute right-4 sm:right-6 top-3 flex items-center gap-2" ref={popupRef}>
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className={`flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full shadow-xs cursor-pointer transition-all border ${
-                isProfileOpen
-                  ? 'bg-[#F0D8FA] dark:bg-[#350444] border-[#8D49A6] ring-2 ring-[#8D49A6]/30'
-                  : 'bg-white/90 dark:bg-[#241329]/90 hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] border-[#8D49A6]/30 dark:border-[#8D49A6]/50'
-              }`}
-              title={`Akıllı Tahta Donanım ID: ${boardIdentity.panoId}-${boardIdentity.boardNo}`}
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-white/80 dark:bg-[#241329]/80 shadow-2xs flex items-center justify-center text-[#514458] dark:text-slate-300 hover:bg-[#FAF5FC] dark:hover:bg-[#350444]/50 hover:text-[#4B075F] dark:hover:text-[#E9D5FF] transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
+              title="Donanım Ayarları & Ekranı Kilitle"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <div className="flex items-center gap-1.5 text-xs font-black tracking-tight">
-                <span className="text-[#8D49A6] dark:text-[#F0D8FA]">PANO:</span>
-                <span className="text-[#4B075F] dark:text-white">{boardIdentity.panoId}</span>
-                <span className="text-gray-300 dark:text-gray-600">|</span>
-                <span className="text-[#8D49A6] dark:text-[#F0D8FA]">TAHTA:</span>
-                <span className="text-[#D914C8]">{boardIdentity.boardNo}</span>
-              </div>
+              <Lock className="w-4 h-4 text-[#8D49A6]" />
             </button>
 
-            {/* Smartboard Hardware Dropdown */}
             <AnimatePresence>
               {isProfileOpen && (
                 <motion.div
@@ -2801,7 +3152,7 @@ export default function PanoClient() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ type: "spring", duration: 0.2 }}
-                  className="absolute right-0 top-12 w-64 bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-[#E8DFEB] dark:border-[#49364F] overflow-hidden flex flex-col z-[100]"
+                  className="absolute right-0 top-11 w-64 bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-[#E8DFEB] dark:border-[#49364F] overflow-hidden flex flex-col z-[100]"
                 >
                   <div className="p-3 bg-brand-gradient text-white flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -2809,7 +3160,7 @@ export default function PanoClient() {
                         <Tv className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase font-bold text-white/80">Akıllı Tahta OS</div>
+                        <div className="text-[10px] uppercase font-bold text-white/80">Akıllı Tahta</div>
                         <div className="text-xs font-black text-white">{boardIdentity.panoId}-{boardIdentity.boardNo}</div>
                       </div>
                     </div>
@@ -2959,16 +3310,16 @@ export default function PanoClient() {
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-8 md:px-12 py-6">
           <div className="max-w-6xl mx-auto w-full space-y-6">
 
-          {/* Top Row: Greeting & Compact Weather */}
+          {/* Top Row: Greeting & Prominent Clock/Calendar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex flex-col">
               <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-                <span className="text-xl sm:text-2xl font-bold text-[#241329] dark:text-slate-200 tracking-tight">
-                  Akıllı Tahta OS
+                <span className="text-xl sm:text-2xl font-black text-[#241329] dark:text-slate-100 tracking-tight">
+                  Akıllı Tahta
                 </span>
-                <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-brand-gradient text-white shadow-xs">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-2xl bg-brand-gradient text-white shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  <span className="text-lg sm:text-xl font-black text-white tracking-tight">
                     {boardIdentity.panoId}-{boardIdentity.boardNo}
                   </span>
                 </span>
@@ -2994,7 +3345,7 @@ export default function PanoClient() {
               <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 rounded-full bg-gradient-to-br from-[#4B075F]/15 via-[#8D49A6]/10 to-transparent blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-72 h-72 rounded-full bg-gradient-to-tr from-[#8D49A6]/15 via-[#D914C8]/10 to-transparent blur-3xl pointer-events-none" />
 
-              {/* Header: Class Name & Teacher Info */}
+              {/* Header: Class Name, Pano ID & Tahta ID, Status */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                 <div>
                   <div className="flex items-center gap-3 flex-wrap">
@@ -3005,6 +3356,15 @@ export default function PanoClient() {
                       <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                       Aktif Sınıf
                     </span>
+
+                    {/* Donanım Kimlik Rozeti (Pano ID & Tahta ID) */}
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-gradient-to-r from-[#4B075F] to-[#8D49A6] text-white text-xs font-black shadow-sm border border-white/20">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>PANO: <span className="text-white">{boardIdentity.panoId}</span></span>
+                      <span className="text-white/40">|</span>
+                      <span>TAHTA: <span className="text-pink-200">{boardIdentity.boardNo}</span></span>
+                    </div>
+
                     <button
                       onClick={() => dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' })}
                       className="px-3.5 py-1.5 rounded-xl bg-[#FAF5FC] hover:bg-[#F0D8FA] dark:bg-[#2A1833] dark:hover:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs group"

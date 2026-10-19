@@ -421,8 +421,37 @@ export function saveStoredAcademicEvents(events: AcademicCalendarEvent[]) {
 
 export function addAcademicEvent(event: AcademicCalendarEvent) {
   const current = getStoredAcademicEvents()
-  const updated = [event, ...current]
+  const updated = [event, ...current.filter((e) => e.id !== event.id)]
   saveStoredAcademicEvents(updated)
+
+  // Sync to server
+  if (typeof fetch !== 'undefined') {
+    fetch('/api/academic-calendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event }),
+    }).catch(() => {})
+  }
+
+  return updated
+}
+
+export function updateAcademicEvent(id: string, updates: Partial<AcademicCalendarEvent>) {
+  const current = getStoredAcademicEvents()
+  const updated = current.map((e) =>
+    e.id === id ? { ...e, ...updates, updatedAt: new Date().toISOString() } : e
+  )
+  saveStoredAcademicEvents(updated)
+
+  // Sync to server
+  if (typeof fetch !== 'undefined') {
+    fetch('/api/academic-calendar', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, updates }),
+    }).catch(() => {})
+  }
+
   return updated
 }
 
@@ -430,5 +459,28 @@ export function deleteAcademicEvent(id: string) {
   const current = getStoredAcademicEvents()
   const updated = current.filter((e) => e.id !== id)
   saveStoredAcademicEvents(updated)
+
+  // Sync to server
+  if (typeof fetch !== 'undefined') {
+    fetch(`/api/academic-calendar?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }).catch(() => {})
+  }
+
   return updated
 }
+
+export async function syncAcademicEventsFromServer(): Promise<AcademicCalendarEvent[] | null> {
+  if (typeof window === 'undefined') return null
+  try {
+    const res = await fetch('/api/academic-calendar', { cache: 'no-store' })
+    if (!res.ok) return null
+    const data = await res.json()
+    if (data && data.success && Array.isArray(data.events)) {
+      saveStoredAcademicEvents(data.events)
+      return data.events
+    }
+  } catch (_) {}
+  return null
+}
+

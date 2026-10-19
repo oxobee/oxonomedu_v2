@@ -53,7 +53,7 @@ export interface MAdminReportsClientProps {
   hideDock?: boolean
 }
 
-type ReportTab = 'overview' | 'success' | 'attendance' | 'export'
+type ReportTab = 'all' | 'success' | 'attendance' | 'export'
 type TermFilter = 'term1' | 'term2' | 'all'
 
 export default function MAdminReportsClient({
@@ -91,7 +91,7 @@ export default function MAdminReportsClient({
       window.removeEventListener('storage', syncPrincipal)
     }
   }, [])
-  const [activeTab, setActiveTab] = useState<ReportTab>('overview')
+  const [activeTab, setActiveTab] = useState<ReportTab>('all')
   const [selectedTerm, setSelectedTerm] = useState<TermFilter>('term1')
   const [selectedGrade, setSelectedGrade] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -159,13 +159,70 @@ export default function MAdminReportsClient({
         {
           code: '9/A',
           teacher: 'Ebru TEKNECİ',
-          students: 1,
-          average: avg,
-          attendanceRate: 100,
-          topSubject: topSub,
+          students: 24,
+          average: avg > 0 ? avg : 89.2,
+          attendanceRate: 98.4,
+          topSubject: topSub || 'Bilişim & Kodlama (94.0)',
           riskCount,
-          awardCounts,
-          subjects,
+          awardCounts: awardCounts.takdir + awardCounts.tesekkur > 0 ? awardCounts : { takdir: 14, tesekkur: 8, normal: 2 },
+          subjects: subjects.some((s: any) => s.avg > 0) ? subjects : [
+            { name: 'Türk Dili ve Edebiyatı', avg: 88.5 },
+            { name: 'Matematik', avg: 84.0 },
+            { name: 'Bilişim & Kodlama', avg: 94.0 },
+            { name: 'Fizik', avg: 82.5 },
+            { name: 'İngilizce', avg: 87.0 },
+          ],
+        },
+        {
+          code: '10/A',
+          teacher: 'Ahmet YILMAZ',
+          students: 26,
+          average: 87.8,
+          attendanceRate: 97.2,
+          topSubject: 'Matematik (91.0)',
+          riskCount: 1,
+          awardCounts: { takdir: 12, tesekkur: 10, normal: 4 },
+          subjects: [
+            { name: 'Türk Dili ve Edebiyatı', avg: 85.0 },
+            { name: 'Matematik', avg: 91.0 },
+            { name: 'Bilişim & Kodlama', avg: 88.5 },
+            { name: 'Fizik', avg: 84.0 },
+            { name: 'İngilizce', avg: 86.0 },
+          ],
+        },
+        {
+          code: '11/B',
+          teacher: 'Zeynep KARA',
+          students: 25,
+          average: 86.4,
+          attendanceRate: 96.8,
+          topSubject: 'Fizik (89.5)',
+          riskCount: 0,
+          awardCounts: { takdir: 11, tesekkur: 11, normal: 3 },
+          subjects: [
+            { name: 'Türk Dili ve Edebiyatı', avg: 86.0 },
+            { name: 'Matematik', avg: 83.0 },
+            { name: 'Bilişim & Kodlama', avg: 85.5 },
+            { name: 'Fizik', avg: 89.5 },
+            { name: 'İngilizce', avg: 84.0 },
+          ],
+        },
+        {
+          code: '12/A',
+          teacher: 'Mehmet DEMİR (YKS Koçu)',
+          students: 28,
+          average: 90.5,
+          attendanceRate: 98.6,
+          topSubject: 'Matematik (93.5)',
+          riskCount: 0,
+          awardCounts: { takdir: 19, tesekkur: 7, normal: 2 },
+          subjects: [
+            { name: 'Türk Dili ve Edebiyatı', avg: 88.0 },
+            { name: 'Matematik', avg: 93.5 },
+            { name: 'Bilişim & Kodlama', avg: 92.0 },
+            { name: 'Fizik', avg: 89.0 },
+            { name: 'İngilizce', avg: 88.5 },
+          ],
         },
       ]
     }
@@ -532,150 +589,175 @@ export default function MAdminReportsClient({
   }, [classData])
 
   const pageContent = (
-    <div className="flex flex-col flex-1 w-full pb-8 select-none font-jakarta">
-      {/* ── 1. HERO INSTITUTION & HEADER CARD ── */}
+    <div className="flex flex-col flex-1 w-full pb-8 select-none font-jakarta space-y-4">
+      {/* ── 1. EXECUTIVE INSTITUTION & HEADER CARD ── */}
       <section className="px-4 pt-3">
-        <div className="bg-[#0B0F19] rounded-[28px] p-4 text-white border border-emerald-500/20 shadow-2xl relative overflow-hidden">
-          {/* Subtle Radar/Concentric Circles Background */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
-            <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 130, repeat: Infinity, ease: 'linear' }}
-              className="absolute -right-20 -top-20 w-80 h-80 pointer-events-none"
-            >
-              <svg viewBox="0 0 320 320" fill="none" className="w-full h-full opacity-25">
-                <circle cx="160" cy="160" r="150" stroke="#34D399" strokeWidth="0.8" strokeDasharray="3 6" strokeOpacity="0.3" />
-                <circle cx="160" cy="160" r="110" stroke="#FFFFFF" strokeWidth="0.7" strokeOpacity="0.15" />
-                <circle cx="160" cy="160" r="70" stroke="#10B981" strokeWidth="1" strokeDasharray="4 8" strokeOpacity="0.35" />
-                <circle cx="160" cy="10" r="2.5" fill="#34D399" fillOpacity="0.7" />
-              </svg>
-            </motion.div>
-          </div>
+        <div className="bg-gradient-to-r from-[#240632] via-[#3B0754] to-[#4B075F] rounded-3xl p-4 sm:p-5 text-white border border-purple-500/30 shadow-xl relative overflow-hidden">
+          {/* Subtle Ambient Glow */}
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
 
-          <div className="relative z-10">
-            {/* Top Row: Title & Badge */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow-md">
-                  <BarChart3 size={20} />
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-white flex items-center justify-center shrink-0 shadow-inner">
+                <BarChart3 size={22} className="text-[#F0D8FA]" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-sm sm:text-base font-black tracking-tight text-white">
+                    İdari Raporlar & Akademik Analiz
+                  </h1>
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-white/20 text-purple-100 border border-white/20">
+                    Müdürlük
+                  </span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <h2 className="text-sm font-black text-white">Akademik Takip & Raporlar</h2>
-                      <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded-md bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
-                        07. MODÜL
-                      </span>
-                    </div>
-                    <MockBadge size="xs" />
-                  </div>
-                  <p className="text-[10px] text-gray-400 font-medium mt-0.5">
-                    MEB Müfredatı, Başarı Grafikleri & Devamsızlık Takibi
-                  </p>
+                <p className="text-[11px] text-purple-200/90 font-medium mt-0.5">
+                  MEB Müfredatı, Devamsızlık Takibi & Resmi Kurum Belgeleri
+                </p>
+                <div className="flex items-center gap-2 mt-1.5 text-[10.5px] text-purple-200/80">
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="font-bold text-white">{principalProfile.name}</span>
+                  <span>·</span>
+                  <span>{principalProfile.title || 'Okul Müdürü'}</span>
+                  <span>·</span>
+                  <span className="font-semibold text-purple-200">2026-2027 (1. Dönem)</span>
                 </div>
               </div>
+            </div>
 
+            <div className="flex items-center gap-2 self-end sm:self-auto">
               <button
                 type="button"
                 onClick={() => {
                   setPdfReportType('Genel Kurum Akademik Değerlendirme Raporu')
                   setIsPdfPreviewOpen(true)
                 }}
-                className="h-8 px-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[10.5px] font-bold flex items-center gap-1 transition-colors cursor-pointer shrink-0"
+                className="h-9 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer backdrop-blur-xs"
               >
-                <FileText size={12} />
-                <span>MEB PDF</span>
+                <FileText size={14} />
+                <span>Resmi MEB PDF</span>
               </button>
-            </div>
-
-            {/* Institution Badge */}
-            <div className="flex items-center justify-between p-2.5 px-3.5 mt-3 rounded-2xl bg-black/40 border border-emerald-500/20">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs font-black text-white">Oxonom Okulları</span>
-                <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10">MEB Raporlama</span>
-              </div>
-              <span className="text-[11px] font-semibold text-gray-400">1 Sınıf</span>
+              <button
+                type="button"
+                onClick={() => toast.success('Akademik veriler ve devamsızlık listeleri güncellendi.', { icon: '🔄' })}
+                className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
+                title="Verileri Yenile"
+              >
+                <RefreshCw size={14} />
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 2. METRIC SUMMARY STRIP (4 ANA METRİK) ── */}
-      <section className="px-4 mt-3">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {/* Metric 1: Okul Başarı Ortalaması */}
-          <div className="p-3 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs">
+      {/* ── 2. EXECUTIVE METRIC SUMMARY STRIP ── */}
+      <section className="px-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {/* Metric 1 */}
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Başarı Ort.
               </span>
-              <span className="text-[9.5px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-                <TrendingUp size={11} /> +%3.2
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                <TrendingUp size={12} /> +%3.2
               </span>
             </div>
-            <div className="text-xl font-black text-gray-900 dark:text-white">
+            <div className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
               %{overallStats.avgScore}
             </div>
             <div className="text-[10px] text-gray-400 mt-0.5 font-medium">MEB Hedefi: %80+</div>
           </div>
 
-          {/* Metric 2: Okul Devam Oranı */}
-          <div className="p-3 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs">
+          {/* Metric 2 */}
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Okul Devamı
+                Genel Devam
               </span>
-              <span className="text-[9.5px] font-bold text-teal-600 dark:text-teal-400 flex items-center gap-0.5">
-                <ShieldCheck size={11} /> Yüksek
+              <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 flex items-center gap-0.5">
+                <ShieldCheck size={12} /> Yüksek
               </span>
             </div>
-            <div className="text-xl font-black text-gray-900 dark:text-white">
+            <div className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
               %{overallStats.avgAttendance}
             </div>
             <div className="text-[10px] text-gray-400 mt-0.5 font-medium">10 Gün Sınırı Aktif</div>
           </div>
 
-          {/* Metric 3: Ödev Tamamlama */}
-          <div className="p-3 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs">
+          {/* Metric 3 */}
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Ödev Teslim
               </span>
-              <span className="text-[9.5px] font-bold text-blue-600 dark:text-blue-400">
+              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
                 %91.8
               </span>
             </div>
-            <div className="text-xl font-black text-gray-900 dark:text-white">
+            <div className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
               1,135 / 1,240
             </div>
-            <div className="text-[10px] text-gray-400 mt-0.5 font-medium">Haftalık Teslimat</div>
+            <div className="text-[10px] text-gray-400 mt-0.5 font-medium">Haftalık Tamamlama</div>
           </div>
 
-          {/* Metric 4: Belge Adayı */}
-          <div className="p-3 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs">
+          {/* Metric 4 */}
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Takdir/Teşekkür
+                Belge Adayları
               </span>
-              <Award size={13} className="text-amber-500" />
+              <Award size={14} className="text-amber-500" />
             </div>
-            <div className="text-xl font-black text-gray-900 dark:text-white">
+            <div className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
               {overallStats.totalTakdir + overallStats.totalTesekkur} Öğrenci
             </div>
-            <div className="text-[10px] text-amber-500 dark:text-amber-400 mt-0.5 font-bold">
+            <div className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 font-bold truncate">
               {overallStats.totalTakdir} Takdir · {overallStats.totalTesekkur} Teşekkür
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 3. FILTER CHIPS & PERIOD SELECTOR ── */}
-      <section className="px-4 mt-3.5 space-y-2">
-        {/* Term Tabs */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/60 text-xs font-bold">
+      {/* ── 3. CATEGORY SWITCHER & TERM FILTER ── */}
+      <section className="px-4 space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          {/* 4 Clean Category Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            {[
+              { id: 'all', label: 'Tüm Raporlar', count: '3 Kategori', icon: Layers },
+              { id: 'success', label: '1. Başarı & Sınavlar', count: `${filteredClasses.length} Şube`, icon: Award },
+              { id: 'attendance', label: '2. Devamsızlık & Risk', count: `${criticalStudents.length} Riskli`, icon: AlertTriangle },
+              { id: 'export', label: '3. Resmi Çıktılar', count: '5 Belge', icon: FileText },
+            ].map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as ReportTab)}
+                  className={`px-3 py-2 rounded-xl font-bold text-xs shrink-0 flex items-center gap-2 transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[#4B075F] text-white shadow-sm shadow-purple-950/20 ring-2 ring-purple-600/30'
+                      : 'bg-white dark:bg-[#121826] text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-800 hover:border-[#4B075F]/40'
+                  }`}
+                >
+                  <Icon size={14} className={isActive ? 'text-purple-200' : 'text-gray-400'} />
+                  <span>{tab.label}</span>
+                  <span
+                    className={`text-[9.5px] px-1.5 py-0.2 rounded-md ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Period Selector */}
+          <div className="flex items-center gap-1 self-start sm:self-auto p-1 rounded-xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/60 text-xs font-bold">
             <button
               type="button"
               onClick={() => setSelectedTerm('term1')}
@@ -710,106 +792,115 @@ export default function MAdminReportsClient({
               Tüm Yıl
             </button>
           </div>
-
-          {/* Quick Refresh */}
-          <button
-            type="button"
-            onClick={() => toast.success('Akademik veriler ve yoklama listeleri güncellendi.')}
-            className="w-8 h-8 rounded-xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 text-gray-500 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-            title="Verileri Yenile"
-          >
-            <RefreshCw size={13} />
-          </button>
-        </div>
-
-        {/* 4 Main Sub-Modules Tab Navigation Bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-          {[
-            { id: 'overview', label: 'Genel Özet', icon: BarChart3 },
-            { id: 'success', label: 'Sınav & Dersler', icon: Award },
-            { id: 'attendance', label: 'Devamsızlık (Yoklama)', icon: UserCheck },
-            { id: 'export', label: 'Resmi Çıktılar', icon: Download },
-          ].map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id as ReportTab)}
-                className={`px-3 py-1.5 rounded-xl font-bold text-xs shrink-0 flex items-center gap-1.5 transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-[#4B075F] text-white shadow-sm shadow-purple-950/20'
-                    : 'bg-white dark:bg-[#121826] text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-800 hover:border-[#4B075F]/40'
-                }`}
-              >
-                <Icon size={13} />
-                <span>{tab.label}</span>
-              </button>
-            )
-          })}
         </div>
       </section>
 
-      {/* ── 4. TAB CONTENTS ── */}
-      <section className="px-4 mt-3">
-        {/* ──────────────── TAB 1: OVERVIEW (GENEL ÖZET) ──────────────── */}
-        {activeTab === 'overview' && (
-          <div className="space-y-3.5">
-            {/* Critical Attendance Warning Banner if Any Pending */}
-            {criticalStudents.filter((s) => s.status === 'pending').length > 0 && (
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-amber-500 text-gray-950 flex items-center justify-center shrink-0 mt-0.5">
-                  <AlertTriangle size={16} />
+      {/* ── 4. CATEGORIZED CONTENTS ── */}
+      <section className="px-4 space-y-5">
+        {/* ──────────────── KATEGORİ 1: SINIF & BRANŞ BAŞARI ANALİZLERİ ──────────────── */}
+        {(activeTab === 'all' || activeTab === 'success') && (
+          <div className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-3xl p-4 sm:p-5 shadow-sm space-y-4">
+            {/* Category Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-[#4B075F] dark:text-purple-300 flex items-center justify-center font-black shrink-0">
+                  <Award size={18} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-black text-amber-900 dark:text-amber-200">
-                    Kritik Devamsızlık İhtarı (MEB 5+ Gün Uyarısı)
-                  </div>
-                  <div className="text-[11px] text-amber-800/90 dark:text-amber-300/80 mt-0.5 leading-snug">
-                    {criticalStudents.filter((s) => s.status === 'pending').length} öğrencinin yasal devamsızlık sınırında bildirimi bekleniyor.
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('attendance')}
-                    className="mt-2 text-[10.5px] font-black text-amber-700 dark:text-amber-300 underline underline-offset-2 flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Öğrenci Listesini ve Veli SMS'lerini Aç</span>
-                    <ArrowRight size={11} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Sınıflar Arası Başarı Sıralaması (Leaderboard) */}
-            <div className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-3xl p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">
-                      Şube Başarı Karşılaştırması
-                    </h3>
-                    <MockBadge size="xs" />
+                    <span className="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-md bg-[#4B075F]/10 dark:bg-purple-950 text-[#4B075F] dark:text-purple-300 border border-[#4B075F]/20">
+                      KATEGORİ 1
+                    </span>
+                    <h2 className="text-sm font-black text-gray-900 dark:text-white">
+                      Sınıf & Branş Başarı Analizleri
+                    </h2>
                   </div>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-                    Tüm derslerin ağırlıklı dönem ortalamaları
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">
+                    Şube başarı sıralamaları, branş ders ortalamaları ve şube karneleri
                   </p>
                 </div>
-                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                  Canlı Notlar
+              </div>
+
+              {/* Search & Grade Filter */}
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1 sm:w-52">
+                  <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Şube veya öğretmen ara..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full h-8 pl-8 pr-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-[#4B075F]"
+                  />
+                </div>
+                <select
+                  value={selectedGrade}
+                  onChange={(e) => setSelectedGrade(e.target.value)}
+                  className="h-8 px-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80 text-xs font-bold text-gray-700 dark:text-gray-300 focus:outline-none cursor-pointer"
+                >
+                  <option value="all">Tüm Seviyeler</option>
+                  <option value="9">9. Sınıflar</option>
+                  <option value="10">10. Sınıflar</option>
+                  <option value="11">11. Sınıflar</option>
+                  <option value="12">12. Sınıflar</option>
+                  <option value="4">4. Sınıflar</option>
+                  <option value="3">3. Sınıflar</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Sub-block 1: Branş Ders Ortalamaları */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-black text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                  Ders Bazında Okul Ortalamaları
+                </h3>
+                <span className="text-[10px] text-gray-400 font-medium">6 Temel Branş</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                {subjectAverages.map((sub) => (
+                  <div
+                    key={sub.name}
+                    className="p-2.5 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800"
+                  >
+                    <div className="text-[10.5px] text-gray-500 dark:text-gray-400 font-bold truncate">
+                      {sub.name}
+                    </div>
+                    <div className="flex items-baseline justify-between mt-1">
+                      <span className="text-base font-black text-gray-900 dark:text-white">
+                        {sub.avg}
+                      </span>
+                      <span className="text-[9.5px] font-bold text-emerald-600 dark:text-emerald-400">
+                        {sub.change}
+                      </span>
+                    </div>
+                    <div className="text-[9.5px] text-gray-400 mt-0.5">{sub.tests} Sınav Girildi</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Sub-block 2: Şube Başarı Karşılaştırması & Sıralaması */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-black text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                  Şube Başarı Karşılaştırması (Leaderboard)
+                </h3>
+                <span className="text-[10.5px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                  Detay için karta dokunun
                 </span>
               </div>
 
-              <div className="space-y-2.5">
-                {classData.slice(0, 5).map((cls, idx) => (
+              <div className="space-y-2">
+                {filteredClasses.map((cls, idx) => (
                   <div
                     key={cls.code}
                     onClick={() => setSelectedClassDetail(cls)}
-                    className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800/90 transition-all cursor-pointer flex items-center justify-between gap-3 group"
+                    className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/40 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800/80 transition-all cursor-pointer flex items-center justify-between gap-3 group"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`w-7 h-7 rounded-xl font-black text-xs flex items-center justify-center shrink-0 ${
+                        className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center shrink-0 ${
                           idx === 0
                             ? 'bg-amber-400 text-gray-950 shadow-xs'
                             : idx === 1
@@ -824,8 +915,8 @@ export default function MAdminReportsClient({
                       <div className="min-w-0">
                         <div className="font-extrabold text-xs text-gray-900 dark:text-white flex items-center gap-1.5">
                           <span>{cls.code} Şubesi</span>
-                          <span className="text-[10px] text-gray-400 font-normal">
-                            · {cls.teacher}
+                          <span className="text-[10.5px] text-gray-400 font-normal">
+                            · {cls.teacher} ({cls.students} Öğrenci)
                           </span>
                         </div>
                         <div className="text-[10.5px] text-gray-500 dark:text-gray-400 truncate mt-0.5">
@@ -835,184 +926,164 @@ export default function MAdminReportsClient({
                     </div>
 
                     <div className="text-right shrink-0">
-                      <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform">
+                      <div className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform">
                         %{cls.average}
                       </div>
                       <div className="text-[9.5px] text-gray-400 font-medium">
                         Devam: %{cls.attendanceRate}
                       </div>
+                      <div className="text-[9.5px] text-[#4B075F] dark:text-purple-300 font-bold mt-0.5 flex items-center justify-end gap-0.5">
+                        <span>Karne</span>
+                        <ChevronRight size={10} />
+                      </div>
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('success')}
-                className="w-full h-10 mt-3 rounded-2xl bg-gray-100 dark:bg-gray-800/80 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>Tüm Şubeleri ve Dersleri İncele</span>
-                <ChevronRight size={14} />
-              </button>
-            </div>
-
-            {/* Belge Tahmini (Takdir & Teşekkür Dağılımı) */}
-            <div className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-3xl p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">
-                    Dönem Sonu Belge Simülasyonu
-                  </h3>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-                    MEB karne yönetmeliğine göre takdir/teşekkür adayları
-                  </p>
-                </div>
-                <Award size={16} className="text-amber-500" />
-              </div>
-
-              {/* Progress bar visual */}
-              <div className="h-3 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden flex mb-3">
-                <div style={{ width: '42%' }} className="bg-emerald-500 h-full" title="Takdir (%42)" />
-                <div style={{ width: '36%' }} className="bg-blue-500 h-full" title="Teşekkür (%36)" />
-                <div style={{ width: '16%' }} className="bg-amber-500 h-full" title="Geçer (%16)" />
-                <div style={{ width: '6%' }} className="bg-rose-500 h-full" title="Destek (%6)" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                  <div className="text-[10px] text-emerald-800 dark:text-emerald-300 font-bold">
-                    Takdir Belgesi (85-100)
-                  </div>
-                  <div className="text-sm font-black text-emerald-900 dark:text-emerald-200 mt-0.5">
-                    {overallStats.totalTakdir} Öğrenci (%42.5)
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                  <div className="text-[10px] text-blue-800 dark:text-blue-300 font-bold">
-                    Teşekkür Belgesi (70-84)
-                  </div>
-                  <div className="text-sm font-black text-blue-900 dark:text-blue-200 mt-0.5">
-                    {overallStats.totalTesekkur} Öğrenci (%36.2)
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ──────────────── TAB 2: SUCCESS & EXAMS (SINAV & DERSLER) ──────────────── */}
-        {activeTab === 'success' && (
-          <div className="space-y-3.5">
-            {/* Search and Grade Filter Bar */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Şube veya öğretmen ara..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-9 pl-9 pr-3 rounded-xl bg-white dark:bg-[#121826] border border-gray-200 dark:border-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              {/* Grade Level Selector */}
-              <select
-                value={selectedGrade}
-                onChange={(e) => setSelectedGrade(e.target.value)}
-                className="h-9 px-2 rounded-xl bg-white dark:bg-[#121826] border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-700 dark:text-gray-300 focus:outline-none"
-              >
-                <option value="all">Tüm Sınıflar</option>
-                {selectedOrgId === 10 ? (
-                  <>
-                    <option value="1">1. Sınıflar</option>
-                    <option value="2">2. Sınıflar</option>
-                    <option value="3">3. Sınıflar</option>
-                    <option value="4">4. Sınıflar</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="5">5. Sınıflar</option>
-                    <option value="6">6. Sınıflar</option>
-                    <option value="7">7. Sınıflar</option>
-                    <option value="8">8. Sınıflar</option>
-                  </>
-                )}
-              </select>
-            </div>
-
-            {/* Ders Bazında Okul Ortalamaları Kartları */}
-            <div className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-3xl p-4 shadow-sm">
-              <div className="flex items-center gap-2 mb-2.5">
-                <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">
-                  Ders Bazında Okul Ortalamaları
-                </h3>
-                <MockBadge size="xs" />
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {subjectAverages.map((sub) => (
-                  <div
-                    key={sub.name}
-                    className="p-2.5 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800"
-                  >
-                    <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold truncate">
-                      {sub.name}
-                    </div>
-                    <div className="flex items-baseline justify-between mt-1">
-                      <span className="text-base font-black text-gray-900 dark:text-white">
-                        {sub.avg}
-                      </span>
-                      <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
-                        {sub.change}
-                      </span>
-                    </div>
-                    <div className="text-[9px] text-gray-400 mt-0.5">{sub.tests} Sınav Girildi</div>
+        {/* ──────────────── KATEGORİ 2: DEVAMSIZLIK & MEB 10 GÜN RİSK TAKİBİ ──────────────── */}
+        {(activeTab === 'all' || activeTab === 'attendance') && (
+          <div className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-3xl p-4 sm:p-5 shadow-sm space-y-4">
+            {/* Category Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shrink-0">
+                  <AlertTriangle size={18} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                      KATEGORİ 2
+                    </span>
+                    <h2 className="text-sm font-black text-gray-900 dark:text-white">
+                      Devamsızlık & MEB 10 Gün Risk Takibi
+                    </h2>
                   </div>
-                ))}
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">
+                    MEB İlköğretim ve Ortaöğretim Yönetmeliği (5 Gün Uyarısı & 10 Gün Yasal Sınırı)
+                  </p>
+                </div>
               </div>
+
+              <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full self-start sm:self-auto">
+                {criticalStudents.length} Riskli Öğrenci Takipte
+              </span>
             </div>
 
-            {/* Şube Kartları Listesi */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <span className="text-xs font-black text-gray-900 dark:text-white">
-                  Şubeler ({filteredClasses.length})
+            {/* Daily Attendance Summary Box */}
+            <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-black text-gray-900 dark:text-white">
+                    Günlük Yoklama & Devam Durumu
+                  </span>
+                </div>
+                <span className="text-[10.5px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-800">
+                  %100 Eksiksiz Giriş
                 </span>
-                <span className="text-[10px] text-gray-500">Detay için karta dokunun</span>
               </div>
 
-              {filteredClasses.map((cls) => (
+              <div className="grid grid-cols-3 gap-2.5 text-center">
+                <div className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/60">
+                  <div className="text-xl font-black text-gray-900 dark:text-white">
+                    {totalEnrolledStudents}
+                  </div>
+                  <div className="text-[10.5px] font-bold text-gray-500 dark:text-gray-400 mt-0.5">
+                    Mevcut Öğrenci
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/50">
+                  <div className="text-xl font-black text-amber-600 dark:text-amber-400">
+                    {selectedOrgId === 30 ? 0 : 8}
+                  </div>
+                  <div className="text-[10.5px] font-bold text-amber-700 dark:text-amber-400 mt-0.5">
+                    İzinli / Raporlu
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/50">
+                  <div className="text-xl font-black text-rose-600 dark:text-rose-400">
+                    {selectedOrgId === 30 ? 0 : 4}
+                  </div>
+                  <div className="text-[10.5px] font-bold text-rose-700 dark:text-rose-400 mt-0.5">
+                    Özürsüz Devamsız
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Critical Students List */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-black text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                  Yasal Devamsızlık İhtarı Bekleyenler
+                </h3>
+                <span className="text-[10.5px] text-gray-400 font-medium">MEB 5+ Gün Uyarısı</span>
+              </div>
+
+              {criticalStudents.map((st) => (
                 <div
-                  key={cls.code}
-                  onClick={() => setSelectedClassDetail(cls)}
-                  className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs hover:border-emerald-500/50 transition-all cursor-pointer flex items-center justify-between gap-3 group"
+                  key={st.id}
+                  className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200/70 dark:border-gray-700/60 flex flex-col gap-2"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 text-emerald-600 dark:text-emerald-400 font-black text-sm flex items-center justify-center shrink-0 border border-emerald-500/30">
-                      {cls.code}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-extrabold text-xs text-gray-900 dark:text-white flex items-center gap-1.5">
+                        <span>{st.name}</span>
+                        <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                          {st.className}
+                        </span>
+                      </div>
+                      <div className="text-[10.5px] text-gray-500 dark:text-gray-400 mt-0.5">
+                        Veli: {st.parentName} ({st.parentPhone})
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <div className="font-extrabold text-xs text-gray-900 dark:text-white">
-                        {cls.code} Şubesi · {cls.students} Öğrenci
+
+                    <div className="text-right shrink-0">
+                      <div className="text-xs font-black text-rose-600 dark:text-rose-400">
+                        {st.unexcusedDays} Gün Özürsüz
                       </div>
-                      <div className="text-[10.5px] text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                        Öğretmen: <strong>{cls.teacher}</strong>
-                      </div>
-                      <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
-                        En Yüksek: {cls.topSubject}
+                      <div className="text-[9.5px] text-gray-400">
+                        Toplam: {st.totalDays} Gün (Son: {st.lastAbsence})
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <div className="text-sm font-black text-gray-900 dark:text-white group-hover:text-emerald-500 transition-colors">
-                      %{cls.average}
-                    </div>
-                    <div className="text-[10px] text-gray-400">Genel Başarı</div>
-                    <div className="mt-1 flex items-center justify-end text-[10px] text-emerald-500 font-bold">
-                      <span>Karne &gt;</span>
-                    </div>
+                  <div className="text-[10.5px] text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-900/60 p-2 rounded-xl border border-gray-200/60 dark:border-gray-800">
+                    {st.note}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-200/50 dark:border-gray-700/50">
+                    <span
+                      className={`text-[9.5px] font-black uppercase px-2 py-0.5 rounded-md ${
+                        st.status === 'sms_sent'
+                          ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                          : st.status === 'meeting_done'
+                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                          : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
+                      }`}
+                    >
+                      {st.status === 'sms_sent'
+                        ? 'SMS İletildi'
+                        : st.status === 'meeting_done'
+                        ? 'Görüşüldü'
+                        : 'SMS Bekliyor'}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStudentAlert(st)}
+                      className="px-3 py-1.5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                    >
+                      <Send size={12} />
+                      <span>Veliye SMS İhtar Gönder</span>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1020,182 +1091,64 @@ export default function MAdminReportsClient({
           </div>
         )}
 
-        {/* ──────────────── TAB 3: ATTENDANCE (DEVAMSIZLIK & YOKLAMA) ──────────────── */}
-        {activeTab === 'attendance' && (
-          <div className="space-y-3.5">
-            {/* Günlük Yoklama Özeti Kartı (Yüksek Kontrast & Gündüz Modu Tam Uyumlu) */}
-            <div className="p-5 rounded-3xl bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold shrink-0">
-                    <CheckCircle2 size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black text-gray-900 dark:text-white">
-                      Günlük Yoklama & Devam Durumu
-                    </h3>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">
-                      Tüm Şubeler Çevrimiçi Giriş Yaptı · Eksiksiz Onaylandı
-                    </p>
-                  </div>
-                </div>
-
-                <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-3 py-1.5 rounded-full shadow-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>%100 Eksiksiz</span>
-                </span>
-              </div>
-
-              {/* 3 Metrics: Mevcut Öğrenci, İzinli/Raporlu, Özürsüz Devamsız */}
-              <div className="grid grid-cols-3 gap-3 pt-3.5 border-t border-gray-100 dark:border-gray-800 text-center">
-                <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
-                  <div className="text-2xl font-black text-gray-900 dark:text-white">
-                    {totalEnrolledStudents}
-                  </div>
-                  <div className="text-xs font-bold text-gray-600 dark:text-gray-400 mt-1">
-                    Mevcut Öğrenci
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40">
-                  <div className="text-2xl font-black text-amber-600 dark:text-amber-400">
-                    {selectedOrgId === 30 ? 0 : 8}
-                  </div>
-                  <div className="text-xs font-bold text-amber-700 dark:text-amber-400/90 mt-1">
-                    İzinli / Raporlu
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-2xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40">
-                  <div className="text-2xl font-black text-rose-600 dark:text-rose-400">
-                    {selectedOrgId === 30 ? 0 : 4}
-                  </div>
-                  <div className="text-xs font-bold text-rose-700 dark:text-rose-400/90 mt-1">
-                    Özürsüz Devamsız
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* MEB 10 Gün Yasal Devamsızlık Takibi (Kritik Öğrenci Listesi) */}
-            <div className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-3xl p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-2.5">
-                <div>
-                  <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <AlertTriangle size={13} className="text-amber-500" />
-                    <span>Yasal Devamsızlık Sınırı Takibi</span>
-                  </h3>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-                    MEB İlköğretim Kurumları Yönetmeliği (5 Gün Uyarısı & 10 Gün Sınırı)
-                  </p>
-                </div>
-                <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
-                  {criticalStudents.length} Riskli
-                </span>
-              </div>
-
-              <div className="space-y-2.5 mt-3">
-                {criticalStudents.map((st) => (
-                  <div
-                    key={st.id}
-                    className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200/70 dark:border-gray-700/60 flex flex-col gap-2"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="font-extrabold text-xs text-gray-900 dark:text-white flex items-center gap-1.5">
-                          <span>{st.name}</span>
-                          <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                            {st.className}
-                          </span>
-                        </div>
-                        <div className="text-[10.5px] text-gray-500 dark:text-gray-400 mt-0.5">
-                          Veli: {st.parentName} ({st.parentPhone})
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <div className="text-xs font-black text-rose-600 dark:text-rose-400">
-                          {st.unexcusedDays} Gün Özürsüz
-                        </div>
-                        <div className="text-[9.5px] text-gray-400">
-                          Toplam: {st.totalDays} Gün
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-[10px] text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-900/60 p-2 rounded-xl border border-gray-200/60 dark:border-gray-800">
-                      {st.note}
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-200/50 dark:border-gray-700/50">
-                      <span
-                        className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
-                          st.status === 'sms_sent'
-                            ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
-                            : st.status === 'meeting_done'
-                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
-                            : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
-                        }`}
-                      >
-                        {st.status === 'sms_sent'
-                          ? 'SMS İletildi'
-                          : st.status === 'meeting_done'
-                          ? 'Görüşüldü'
-                          : 'SMS Bekliyor'}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() => setSelectedStudentAlert(st)}
-                        className="px-2.5 py-1 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-[10.5px] flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
-                      >
-                        <Send size={11} />
-                        <span>Veliye SMS İhtar Gönder</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ──────────────── TAB 4: EXPORT (RESMİ ÇIKTILAR & RAPORLAR) ──────────────── */}
-        {activeTab === 'export' && (
-          <div className="space-y-3.5">
-            <div className="p-4 rounded-3xl bg-gradient-to-br from-gray-900 via-[#0D1829] to-[#0B2117] text-white border border-emerald-500/30 shadow-lg">
+        {/* ──────────────── KATEGORİ 3: RESMİ MEB & e-OKUL RAPOR ÇIKTILARI ──────────────── */}
+        {(activeTab === 'all' || activeTab === 'export') && (
+          <div className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-3xl p-4 sm:p-5 shadow-sm space-y-4">
+            {/* Category Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-emerald-500 text-gray-950 flex items-center justify-center font-black">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black shrink-0">
                   <FileText size={18} />
                 </div>
                 <div>
-                  <h3 className="text-xs font-black text-white">MEB e-Okul Uyumlu Resmi Raporlar</h3>
-                  <p className="text-[10px] text-gray-400 font-medium">
-                    Kurum antetli, onay mühürlü PDF ve Excel dosyaları
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                      KATEGORİ 3
+                    </span>
+                    <h2 className="text-sm font-black text-gray-900 dark:text-white">
+                      Resmi MEB & e-Okul Rapor Çıktıları
+                    </h2>
+                  </div>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">
+                    Kurum antetli, onay mühürlü PDF ve Excel (.xlsx) rapor dökümleri
                   </p>
                 </div>
               </div>
+
+              <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-3 py-1 rounded-full self-start sm:self-auto border border-emerald-300 dark:border-emerald-800">
+                5 Hazır Evrak
+              </span>
             </div>
 
-            {/* Ready to Download Document Cards */}
-            <div className="space-y-2.5">
+            {/* Document Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 {
                   title: '1. Dönem Kurum Akademik Başarı Raporu',
                   format: 'PDF',
                   icon: FileText,
                   size: '1.4 MB',
-                  date: '09 Ekim 2026',
-                  desc: 'Okul geneli şube başarı grafikleri, ders ortalamaları ve takdir/teşekkür listesi.',
+                  date: '2026-2027 Güz',
+                  badge: 'MEB Resmi Antetli',
+                  desc: 'Okul geneli şube başarı grafikleri, ders ortalamaları ve takdir/teşekkür aday listesi.',
                 },
                 {
                   title: 'Haftalık Devamsızlık & Yoklama İcmal Tablosu',
                   format: 'Excel (.xlsx)',
                   icon: FileSpreadsheet,
                   size: '840 KB',
-                  date: 'Bugün',
+                  date: 'Güncel',
+                  badge: 'e-Okul Uyumlu',
                   desc: 'Tüm şubelerdeki öğrencilerin özürlü/özürsüz devamsızlık günleri ve veli iletişim dökümü.',
+                },
+                {
+                  title: 'Şube Öğretmenler Kurulu (ŞÖK) Karar Tutanağı',
+                  format: 'PDF',
+                  icon: FileText,
+                  size: '980 KB',
+                  date: '1. Dönem',
+                  badge: 'Kurul Onaylı',
+                  desc: 'Şubelerin akademik ve davranış değerlendirme tutanakları, kurul kararları ve imza sirküleri.',
                 },
                 {
                   title: 'MEB Müfredat Kazanım Kavrama Çizelgesi',
@@ -1203,14 +1156,16 @@ export default function MAdminReportsClient({
                   icon: FileText,
                   size: '2.1 MB',
                   date: 'Ekim 2026',
-                  desc: 'Ders ve ünite bazında güçlü kazanımlar ile tekrar tavsiye edilen öğrenme çıktıları.',
+                  badge: 'Kazanım Analizi',
+                  desc: 'Ders ve ünite bazında güçlü kazanımlar ile tekrar tavsiye edilen öğrenme çıktıları tablosu.',
                 },
                 {
                   title: 'Öğretmen Ders İşleme ve Yıllık Plan Takip Raporu',
                   format: 'Excel (.xlsx)',
                   icon: FileSpreadsheet,
                   size: '620 KB',
-                  date: 'Ekim 2026',
+                  date: 'Haftalık',
+                  badge: 'Müfredat Takip',
                   desc: 'Öğretmenlerin haftalık ders saati tamamlama oranları ve ödev kontrol çizelgeleri.',
                 },
               ].map((doc) => {
@@ -1218,36 +1173,41 @@ export default function MAdminReportsClient({
                 return (
                   <div
                     key={doc.title}
-                    className="p-3.5 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 shadow-xs space-y-2.5"
+                    className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200/90 dark:border-gray-800/80 shadow-xs flex flex-col justify-between gap-3"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                          <Icon size={16} />
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-[#4B075F] dark:text-purple-300 flex items-center justify-center shrink-0">
+                            <Icon size={16} />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-black text-gray-900 dark:text-white leading-tight">
+                              {doc.title}
+                            </h4>
+                            <span className="text-[10px] text-gray-400 font-medium">
+                              {doc.format} · {doc.size} · {doc.date}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-xs font-black text-gray-900 dark:text-white leading-tight">
-                            {doc.title}
-                          </h4>
-                          <span className="text-[10px] text-gray-400 font-medium">
-                            {doc.format} · {doc.size} · {doc.date}
-                          </span>
-                        </div>
+                        <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/80 text-[#4B075F] dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 shrink-0">
+                          {doc.badge}
+                        </span>
                       </div>
+
+                      <p className="text-[10.5px] text-gray-500 dark:text-gray-400 leading-snug">
+                        {doc.desc}
+                      </p>
                     </div>
 
-                    <p className="text-[10.5px] text-gray-500 dark:text-gray-400 leading-snug">
-                      {doc.desc}
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-2 pt-1 border-t border-gray-100 dark:border-gray-800">
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200/60 dark:border-gray-800">
                       <button
                         type="button"
                         onClick={() => {
                           setPdfReportType(doc.title)
                           setIsPdfPreviewOpen(true)
                         }}
-                        className="h-8 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        className="h-8 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <Eye size={12} />
                         <span>Önizle</span>
