@@ -14,7 +14,6 @@ import {
   TrendingUp,
   Award,
   ChevronRight,
-  Flame,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -70,7 +69,7 @@ export default function OxonomPlusModal({ isOpen, onClose }: OxonomPlusModalProp
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-[#060A14]/75 backdrop-blur-md transition-opacity"
+          className="fixed inset-0 bg-[#0E0617]/75 backdrop-blur-md transition-opacity"
         />
 
         {/* Modal Container */}
@@ -79,17 +78,18 @@ export default function OxonomPlusModal({ isOpen, onClose }: OxonomPlusModalProp
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 16 }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-lg my-auto rounded-[32px] overflow-hidden bg-gradient-to-b from-white via-white to-blue-50/40 dark:from-[#111A2E] dark:via-[#0F172A] dark:to-[#090F1D] border border-amber-200/60 dark:border-amber-500/30 shadow-[0_24px_70px_rgba(29,119,255,0.22)] z-10 flex flex-col max-h-[90vh]"
+          className="relative w-full max-w-lg my-auto rounded-[32px] overflow-hidden bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#49364F] shadow-[0_24px_70px_rgba(75,7,95,0.22)] z-10 flex flex-col max-h-[92vh]"
         >
-          {/* Subtle Ambient Continuous Radial Glow (NO blinking, smooth gradient) */}
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-amber-400/25 via-amber-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-blue-600/20 via-cyan-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+          {/* Subtle Ambient Continuous Radial Glows */}
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-gradient-to-br from-[#8D49A6]/20 via-[#D914C8]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-gradient-to-tr from-[#4B075F]/15 via-[#8D49A6]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#D914C8]/50 to-transparent pointer-events-none" />
 
           {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center transition-colors z-20 cursor-pointer shadow-xs"
+            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-[#F7F0FA] hover:bg-[#F0D8FA] dark:bg-[#2D2035] dark:hover:bg-[#350444] text-[#514458] dark:text-[#D2C5D8] hover:text-[#4B075F] dark:hover:text-[#F17AE6] flex items-center justify-center transition-colors z-20 cursor-pointer shadow-xs border border-[#E8DFEB] dark:border-[#49364F]"
             aria-label="Kapat"
           >
             <X size={17} />
@@ -99,52 +99,53 @@ export default function OxonomPlusModal({ isOpen, onClose }: OxonomPlusModalProp
           <div className="overflow-y-auto p-5 sm:p-7 space-y-5 custom-scrollbar">
             {/* Header Badge */}
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-400/40 text-amber-700 dark:text-amber-300 text-xs font-black tracking-wide">
-                <Sparkles size={13} className="text-amber-500" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCE8FA] dark:bg-[#350444]/60 border border-[#D914C8]/30 text-[#8D49A6] dark:text-[#F17AE6] text-xs font-black tracking-wide shadow-xs">
+                <Sparkles size={13} className="text-[#D914C8] dark:text-[#F17AE6]" />
                 <span>SINIRLI SÜREYE ÖZEL %78 İNDİRİM</span>
               </div>
 
               {/* Title & Crown */}
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 via-amber-500 to-yellow-300 text-white flex items-center justify-center shadow-lg shadow-amber-500/30 shrink-0">
-                  <Crown size={26} className="fill-white" />
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#4B075F] via-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shadow-lg shadow-[#4B075F]/30 shrink-0 border border-white/20">
+                  <Crown size={24} className="fill-white text-white drop-shadow-xs" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+                  <h2 className="text-xl sm:text-2xl font-black text-[#241329] dark:text-[#FCF9FD] tracking-tight leading-none">
                     Oxonom Plus Premium
                   </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-1">
+                  <p className="text-xs text-[#514458] dark:text-[#D2C5D8] font-semibold mt-1">
                     Okulda ve sınavda zirveye oynayan öğrenciler için
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Price Box with Continuous Gradient Border */}
-            <div className="relative rounded-3xl p-[2px] bg-gradient-to-r from-amber-400 via-orange-500 to-amber-300 shadow-md">
-              <div className="rounded-[22px] bg-white dark:bg-[#121B32] p-4 sm:p-5 flex items-center justify-between gap-4">
+            {/* Price Box with Continuous Brand Gradient Border */}
+            <div className="relative rounded-[26px] p-[1.5px] bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] shadow-md shadow-[#4B075F]/10">
+              <div className="rounded-[24px] bg-gradient-to-br from-[#FCF9FD] via-white to-[#F7F0FA] dark:from-[#211729] dark:via-[#1A1122] dark:to-[#251830] p-4.5 sm:p-5 flex items-center justify-between gap-4 border border-[#E8DFEB]/60 dark:border-[#49364F]/50">
                 <div>
-                  <div className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
+                  <div className="text-[11px] font-black text-[#716779] dark:text-[#B5A5BD] uppercase tracking-wider">
                     Özel Dönemlik Üyelik
                   </div>
                   <div className="flex items-baseline gap-2 mt-1">
-                    <span className="text-sm sm:text-base font-extrabold text-slate-400 dark:text-slate-500 line-through">
+                    <span className="text-sm sm:text-base font-extrabold text-[#716779]/80 dark:text-[#B5A5BD]/70 line-through decoration-rose-500/70">
                       899 ₺
                     </span>
-                    <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 dark:from-amber-400 dark:to-yellow-300">
+                    <span className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] dark:from-[#F17AE6] dark:via-[#C58ADB] dark:to-white">
                       199 ₺
                     </span>
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                    <span className="text-xs font-bold text-[#514458] dark:text-[#D2C5D8]">
                       / Dönemlik
                     </span>
                   </div>
-                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">
-                    Günde sadece 1.1 ₺ · İstediğin an iptal et
+                  <div className="text-[10.5px] text-[#16805D] dark:text-emerald-400 font-bold mt-1 flex items-center gap-1">
+                    <Check size={12} className="stroke-[3]" />
+                    <span>Günde sadece 1.1 ₺ · İstediğin an iptal et</span>
                   </div>
                 </div>
 
                 <div className="shrink-0 text-right">
-                  <span className="inline-block px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black border border-amber-500/20">
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-xl bg-[#FCE8FA] dark:bg-[#350444] text-[#B90FAB] dark:text-[#F17AE6] text-xs font-black border border-[#D914C8]/30 shadow-xs">
                     700 ₺ Tasarruf
                   </span>
                 </div>
@@ -153,7 +154,7 @@ export default function OxonomPlusModal({ isOpen, onClose }: OxonomPlusModalProp
 
             {/* Feature Highlights */}
             <div className="space-y-2.5">
-              <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+              <div className="text-xs font-black text-[#241329] dark:text-[#FCF9FD] uppercase tracking-wider">
                 Plus ile Neler Kazanacaksın?
               </div>
 
@@ -163,16 +164,16 @@ export default function OxonomPlusModal({ isOpen, onClose }: OxonomPlusModalProp
                   return (
                     <div
                       key={i}
-                      className="p-3 rounded-2xl bg-slate-50/80 dark:bg-[#141F38]/80 border border-slate-100 dark:border-blue-900/30 flex items-start gap-3"
+                      className="p-3 sm:p-3.5 rounded-2xl bg-[#FCF9FD] hover:bg-[#F7F0FA] dark:bg-[#211729]/90 dark:hover:bg-[#2D2035] border border-[#E8DFEB] dark:border-[#49364F] flex items-start gap-3 transition-colors shadow-xs"
                     >
-                      <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-8.5 h-8.5 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0 mt-0.5 border border-[#8D49A6]/20 shadow-xs">
                         <Icon size={16} />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                        <div className="text-xs font-bold text-[#241329] dark:text-[#FCF9FD] leading-tight">
                           {b.title}
                         </div>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
+                        <div className="text-[10.5px] text-[#514458] dark:text-[#D2C5D8] leading-relaxed mt-0.5">
                           {b.desc}
                         </div>
                       </div>
@@ -183,10 +184,10 @@ export default function OxonomPlusModal({ isOpen, onClose }: OxonomPlusModalProp
             </div>
 
             {/* Social Proof */}
-            <div className="flex items-center justify-center gap-2 py-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 text-center">
-              <div className="flex text-amber-400">
-                {'★★★★★'.split('').map((s, i) => (
-                  <span key={i}>{s}</span>
+            <div className="flex items-center justify-center gap-2 py-1 text-[11px] font-bold text-[#514458] dark:text-[#D2C5D8] text-center">
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={13} className="fill-[#F5C542] text-[#F5C542]" />
                 ))}
               </div>
               <span>4.9 / 5 · 12.000+ Öğrenci & Veli Onayladı</span>
@@ -197,14 +198,16 @@ export default function OxonomPlusModal({ isOpen, onClose }: OxonomPlusModalProp
               <button
                 type="button"
                 onClick={handleCtaClick}
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-sm tracking-wide shadow-lg shadow-orange-500/25 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-sm sm:text-base tracking-wide shadow-xl shadow-[#4B075F]/30 hover:shadow-2xl hover:shadow-[#4B075F]/40 border border-white/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer group"
               >
+                <Sparkles size={16} className="text-[#FCE8FA] group-hover:rotate-12 transition-transform" />
                 <span>Hemen Plus&apos;a Geç — 199 ₺</span>
-                <ChevronRight size={17} strokeWidth={3} />
+                <ChevronRight size={18} strokeWidth={2.8} className="text-[#FCE8FA] group-hover:translate-x-1 transition-transform" />
               </button>
 
-              <div className="text-[10px] text-slate-400 text-center font-medium">
-                Kredi kartı, banka kartı ve okul veli faturası ile 3D Secure güvenli ödeme
+              <div className="text-[10.5px] text-[#716779] dark:text-[#B5A5BD] text-center font-medium flex items-center justify-center gap-1.5 pt-0.5">
+                <ShieldCheck size={13} className="text-[#16805D] dark:text-emerald-400 shrink-0" />
+                <span>Kredi kartı, banka kartı ve okul veli faturası ile 3D Secure güvenli ödeme</span>
               </div>
             </div>
           </div>
