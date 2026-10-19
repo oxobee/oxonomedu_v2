@@ -3329,20 +3329,20 @@ export default function MAdminCurriculumClient({
         )}
 
         {/* ── ALTA SABİTLENEN KAYDET VE CANLIYA YAYINLA ÇUBUĞU ── */}
-        <section className="sticky bottom-0 z-30 px-3 py-3 mt-4 bg-white/95 dark:bg-[#0E1526]/95 backdrop-blur-md border border-gray-200/90 dark:border-gray-800/90 rounded-3xl shadow-xl">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+        <section className="sticky bottom-0 z-30 px-3 py-3 mt-4 bg-white/95 dark:bg-[#0E1526]/95 backdrop-blur-md border border-gray-200/90 dark:border-gray-800/90 rounded-3xl shadow-xl overflow-hidden min-w-0">
+          <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 min-w-0 w-full">
+            <div className="flex items-center gap-3 w-full xl:w-auto min-w-0">
               <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                 <CheckCircle2 size={20} />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-black text-gray-900 dark:text-white flex items-center gap-2">
+                <div className="text-xs font-black text-gray-900 dark:text-white flex items-center gap-2 flex-wrap">
                   <span>Haftalık Program Yayın Kontrolü</span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
                     {totalAssignedHours}/{targetWeeklyHours} Saat Yerleşik
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1 sm:line-clamp-none">
                   {lastPublishedTime
                     ? `Son Yayın: ${lastPublishedTime} · Öğretmen ve Öğrenci Panellerine Anında Yansır`
                     : 'Öğretmen ve öğrenci ekranlarını güncellemek için yayınlayın.'}
@@ -3350,11 +3350,11 @@ export default function MAdminCurriculumClient({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full xl:w-auto shrink-0 flex-wrap sm:flex-nowrap">
               <button
                 type="button"
                 onClick={handleSmartAutoFill}
-                className="flex-1 sm:flex-none h-11 px-3.5 rounded-2xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                className="flex-1 sm:flex-none h-11 px-3.5 rounded-2xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
               >
                 <Wand2 size={14} className="text-emerald-500" />
                 <span>Otomatik Doldur</span>
@@ -3363,7 +3363,7 @@ export default function MAdminCurriculumClient({
               <button
                 type="button"
                 onClick={handlePublishSchedule}
-                className="flex-1 sm:flex-none h-11 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 active:scale-98 transition-all cursor-pointer"
+                className="flex-1 sm:flex-none h-11 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 active:scale-98 transition-all cursor-pointer whitespace-nowrap"
               >
                 <CheckCircle2 size={16} />
                 <span>Kaydet ve Canlıya Yayınla</span>

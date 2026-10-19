@@ -168,17 +168,17 @@ export const PRINCIPAL_MENU_CONFIG: PrincipalMenuItem[] = [
     description: 'Sınıf bazında MEB ders kitaplarının öğrenciye gösterilme ve gizlenme ayarları.',
   },
 
-  // ── 5. DONANIM & AKILLI SİSTEM ──
+  // ── 5. DİJİTAL SİSTEMLER & PANO ──
   {
-    id: 'smartboards',
-    label: 'Akıllı Tahtalar & Pano',
-    path: '/principal/smartboards',
+    id: 'pano',
+    label: 'Dijital Okul Panosu',
+    path: '/pano',
     icon: Tv,
     status: 'active',
     sortOrder: 9,
     category: 'hardware',
     badge: 'Canlı',
-    description: 'Sınıf akıllı tahtalarının anlık oturum durumu, uzaktan kapatma ve pano yönetimi.',
+    description: 'Derslik ve okul koridorlarında yayınlanan dijital nöbetçi, ders saati ve duyuru panosu.',
   },
 
   // ── 6. DİĞER İDARİ MODÜLLER (08 — 14) ──

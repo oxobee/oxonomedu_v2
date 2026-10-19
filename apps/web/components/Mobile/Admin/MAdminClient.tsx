@@ -838,33 +838,30 @@ export default function MAdminClient({
             </div>
           </Link>
 
-          {/* 4. Canlı Akıllı Tahta Durumu */}
+          {/* 4. Dijital Okul Panosu */}
           <Link
-            href={getUrl('/m-admin-boards')}
+            href="/pano"
+            target="_blank"
             className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 rounded-3xl p-4 shadow-sm hover:border-blue-500/60 dark:hover:border-blue-500/50 hover:shadow-md transition-all group"
           >
             <div className="flex items-center justify-between mb-2.5">
               <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center group-hover:scale-105 transition-transform">
                 <Tv size={20} />
               </div>
-              <span className={`text-xs font-extrabold px-2 py-0.5 rounded-lg flex items-center gap-1 ${
-                realStats.activeBoardsCount > 0
-                  ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50'
-                  : 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
-              }`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${realStats.activeBoardsCount > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}`} />
-                <span>{realStats.activeBoardsCount > 0 ? `${realStats.activeBoardsCount} Bağlı` : 'Hazır'}</span>
+              <span className="text-xs font-extrabold px-2 py-0.5 rounded-lg flex items-center gap-1 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Canlı Yayında</span>
               </span>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-              {realStats.activeBoardsCount} / {realStats.classCount}
+              PANO-01
             </div>
             <div className="text-xs font-bold text-gray-600 dark:text-gray-400 mt-1 flex items-center justify-between">
-              <span>Akıllı Tahta</span>
+              <span>Okul Panosu</span>
               <ArrowUpRight size={13} className="text-gray-400 group-hover:text-blue-500 transition-colors" />
             </div>
             <div className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold mt-0.5 truncate">
-              Tahtaları Yönet &gt;
+              Panoyu Görüntüle &gt;
             </div>
           </Link>
         </div>
@@ -994,26 +991,27 @@ export default function MAdminClient({
             </div>
           </div>
 
-          {/* Tool 6: Akıllı Tahta QR Eşleştirme (1-Click Modal) */}
-          <div
-            onClick={() => setIsQrModalOpen(true)}
+          {/* Tool 6: Dijital Okul Panosu (Pano Ekranı) */}
+          <Link
+            href="/pano"
+            target="_blank"
             className="p-3.5 rounded-2xl bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 hover:border-cyan-500/50 hover:shadow-md transition-all group flex flex-col justify-between cursor-pointer"
           >
             <div className="flex items-center justify-between mb-2">
               <div className="w-9 h-9 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <QrCode size={18} />
+                <Tv size={18} />
               </div>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <div>
               <div className="text-xs font-black text-gray-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
-                Akıllı Tahta QR Eşle
+                Okul Panosunu Aç
               </div>
               <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
-                {realStats.className} sınıf panosu bağlantısı
+                Derslik ve koridor canlı yayını
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Tool 7: Toplu SMS & Duyuru (1-Click Modal) */}
           <div
@@ -1882,68 +1880,7 @@ export default function MAdminClient({
         )}
       </AnimatePresence>
 
-      {/* ── MODAL 3: AKILLI TAHTA QR EŞLEŞTİRME ── */}
-      <AnimatePresence>
-        {isQrModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 font-jakarta select-none">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsQrModalOpen(false)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-xs"
-            />
 
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-[#0E131F] text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 shadow-2xl p-5 z-10 text-center"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-                <span className="text-xs font-black">Akıllı Tahta QR Eşleştirme</span>
-                <button
-                  type="button"
-                  onClick={() => setIsQrModalOpen(false)}
-                  className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-
-              <div className="py-4 space-y-3">
-                <div className="w-44 h-44 mx-auto bg-white p-3 rounded-2xl shadow-md border border-gray-200 flex flex-col items-center justify-center">
-                  <QrCode size={130} className="text-gray-900" />
-                  <span className="text-[10px] font-mono font-bold text-gray-600 mt-1">
-                    PANO-901-OXONOM
-                  </span>
-                </div>
-
-                <div>
-                  <div className="text-sm font-black text-gray-900 dark:text-white">
-                    {realStats.className} Derslik Panosu
-                  </div>
-                  <p className="text-xs text-emerald-600 font-bold mt-0.5">
-                    ● Çevrim İçi & Aktif Senkronize
-                  </p>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 text-[11px] text-gray-500">
-                  Öğretmen tableti veya cep telefonundan kamerayı açarak tahtayı anında eşleştirebilirsiniz.
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsQrModalOpen(false)}
-                className="w-full h-10 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 font-bold text-xs"
-              >
-                Pencereyi Kapat
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* ── MODAL 4: HIZLI ÖĞRETMEN & DERS GÖREVLENDİRME MODALI ── */}
       <AnimatePresence>

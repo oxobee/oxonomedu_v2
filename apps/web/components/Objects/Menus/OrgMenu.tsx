@@ -1,6 +1,5 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import CopilotBubble from '@components/Copilot/CopilotBubble'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
@@ -411,16 +410,6 @@ export const OrgMenu = (props: any) => {
         userName={session?.data?.user?.username}
         userEmail={session?.data?.user?.email}
       />
-
-      {/* Copilot floating bubble */}
-      {config?.admin_toggles?.ai?.copilot_enabled !== false && isBubbleMode && (
-        <CopilotBubble
-          orgslug={orgslug}
-          open={bubbleOpen}
-          onOpenChange={setBubbleOpen}
-          sessionToLoad={bubbleSessionToLoad}
-        />
-      )}
     </>
   )
 }

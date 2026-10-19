@@ -1,10 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Home, Users, Tv, CheckSquare, User, QrCode } from 'lucide-react'
-import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
+import { Home, Users, Tv, CheckSquare, User } from 'lucide-react'
 
 export type DockTabType = 'home' | 'student' | 'boards' | 'assignments' | 'profile'
 
@@ -21,8 +20,6 @@ export default function MobileFloatingDock({
   orgSlug,
   onOpenConnectModal,
 }: MobileFloatingDockProps) {
-  const [isInternalConnectModalOpen, setIsInternalConnectModalOpen] = useState(false)
-
   const getPath = (tab: DockTabType) => {
     const prefix = orgSlug ? `/orgs/${orgSlug}` : ''
     switch (tab) {
@@ -31,7 +28,7 @@ export default function MobileFloatingDock({
       case 'student':
         return `${prefix}/m-student`
       case 'boards':
-        return `${prefix}/m-boards`
+        return '/pano'
       case 'assignments':
         return `${prefix}/m-homework`
       case 'profile':
@@ -41,13 +38,7 @@ export default function MobileFloatingDock({
     }
   }
 
-  const handleOpenConnect = () => {
-    if (onOpenConnectModal) {
-      onOpenConnectModal()
-    } else {
-      setIsInternalConnectModalOpen(true)
-    }
-  }
+
 
   return (
     <>
@@ -305,30 +296,7 @@ export default function MobileFloatingDock({
             </motion.div>
           )}
         </Link>
-
-        {/* ── 6. EN SAĞDA: HAFİF YUMUŞATILMIŞ KARE QR BUTONU (DİĞERLERİNDEN DAHA BÜYÜK) ── */}
-        <motion.button
-          type="button"
-          onClick={handleOpenConnect}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          aria-label="Akıllı Tahtaya Bağlan"
-          title="Akıllı Tahtaya Bağlan (QR Kod / Kod Gir)"
-          className="relative w-[44px] h-[44px] sm:w-[46px] sm:h-[46px] rounded-[15px] bg-gradient-to-tr from-[#047857] via-[#10B981] to-[#34D399] text-white flex items-center justify-center shadow-lg shadow-emerald-500/35 border border-white/30 dark:border-emerald-300/40 cursor-pointer shrink-0 ml-1 group active:scale-95 transition-all"
-        >
-          <QrCode
-            size={22}
-            strokeWidth={2.4}
-            className="text-white transition-transform group-hover:scale-110 drop-shadow-sm"
-          />
-        </motion.button>
       </nav>
-
-      {/* Akıllı Tahtaya Bağlan Modalı */}
-      <ConnectBoardModal
-        isOpen={isInternalConnectModalOpen}
-        onClose={() => setIsInternalConnectModalOpen(false)}
-      />
     </>
   )
 }

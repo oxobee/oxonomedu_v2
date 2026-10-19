@@ -33,7 +33,6 @@ import {
   type DayKey,
 } from '@components/Mobile/Admin/MAdminScheduleClient'
 import { CANONICAL_9A_SCHEDULE_30 } from '@/lib/student/studentData'
-import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import MockBadge from '@components/Common/MockBadge'
 import LiveClassRadar from '@components/Common/LiveClassRadar'
@@ -150,7 +149,6 @@ export default function TeacherScheduleView() {
   const [scopeFilter, setScopeFilter] = useState<'my_lessons' | 'all_school'>('my_lessons')
   const [selectedDayKey, setSelectedDayKey] = useState<DayKey>('mon')
   const [selectedLessonModal, setSelectedLessonModal] = useState<LessonPlanModalData | null>(null)
-  const [isConnectBoardModalOpen, setIsConnectBoardModalOpen] = useState(false)
   const [scheduleVersion, setScheduleVersion] = useState(0)
 
   // Current Logged-in Teacher Name
@@ -558,15 +556,6 @@ export default function TeacherScheduleView() {
                         <CheckSquare size={14} />
                         <span>Yoklama</span>
                       </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => setIsConnectBoardModalOpen(true)}
-                        className="h-10 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0A0D15] font-black text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                      >
-                        <Tv size={15} />
-                        <span>Tahtada Başlat</span>
-                      </button>
                     </div>
                   </div>
                 </motion.article>
@@ -785,12 +774,6 @@ export default function TeacherScheduleView() {
           </div>
         )}
       </AnimatePresence>
-
-      <ConnectBoardModal
-        isOpen={isConnectBoardModalOpen}
-        onClose={() => setIsConnectBoardModalOpen(false)}
-        theme={theme}
-      />
     </div>
   )
 }

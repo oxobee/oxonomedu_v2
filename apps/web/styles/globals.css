@@ -13,7 +13,7 @@
   font-family: var(--font-serif-display), Georgia, serif !important;
 }
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* Root layout fade-in (replaces framer-motion) */
 @keyframes fadeIn {

@@ -49,7 +49,6 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
 import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -86,9 +85,6 @@ export default function MProfileClient({
   const { theme: internalTheme, toggleTheme: internalToggleTheme } = useMobileTheme()
   const theme = propTheme || internalTheme
   const toggleTheme = propToggleTheme || internalToggleTheme
-
-  // Connect board modal state
-  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
 
   // Avatar State & File Input Ref
   const [avatarImage, setAvatarImage] = useState<string | null>(null)
@@ -1294,12 +1290,6 @@ export default function MProfileClient({
           </div>
         )}
       </AnimatePresence>
-
-      <ConnectBoardModal
-        isOpen={isConnectModalOpen}
-        onClose={() => setIsConnectModalOpen(false)}
-        theme={theme}
-      />
     </div>
   )
 }

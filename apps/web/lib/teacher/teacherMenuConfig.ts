@@ -159,20 +159,6 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     ],
   },
   {
-    id: 'smartboard',
-    label: 'Akıllı Tahta ve Ders Araçları',
-    path: '/teacher/smartboard',
-    icon: Tv,
-    status: 'active',
-    sortOrder: 7,
-    description: 'Sınıf akıllı tahtasına QR ile anında bağlanma, beyaz tahtalar, telefon kumandası ve canlı oturum.',
-    children: [
-      { id: 'smartboard-connect', label: 'Tahtaya Bağlan (QR)', path: '/teacher/smartboard/connect', status: 'active' },
-      { id: 'smartboard-whiteboard', label: 'Akıllı Tahtalarım', path: '/teacher/smartboard/whiteboard', status: 'active' },
-      { id: 'smartboard-remote', label: 'Telefon Kumandası', path: '/teacher/smartboard/remote', status: 'active' },
-    ],
-  },
-  {
     id: 'ai-assistant',
     label: 'Yapay Zekâ Öğretmen Asistanı',
     path: '/teacher/ai-assistant',

@@ -389,7 +389,7 @@ export default async function proxy(req: NextRequest) {
     '/m-admin-students': '/principal/students',
     '/m-admin-classes': '/principal/classes',
     '/m-admin-schedule': '/principal/schedule',
-    '/m-admin-boards': '/principal/smartboards',
+    '/m-admin-boards': '/pano',
     '/m-admin-reports': '/principal/reports',
     '/m-admin-curriculum': '/principal/curriculum',
     '/m-student': '/student/dashboard',
@@ -484,12 +484,6 @@ export default async function proxy(req: NextRequest) {
     return response
   }
 
-  // -------------------------------------------------------------------------
-  // 5. Standalone editors / boards — bypass org rewrite
-  // -------------------------------------------------------------------------
-  if (pathname.match(/^\/course\/[^/]+\/activity\/[^/]+\/edit$/)) {
-    return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url))
-  }
   if (
     pathname === '/student' ||
     pathname.startsWith('/student/') ||
@@ -499,18 +493,9 @@ export default async function proxy(req: NextRequest) {
     pathname.startsWith('/principal/') ||
     pathname === '/loginv2' ||
     pathname.startsWith('/loginv2/') ||
-    pathname.startsWith('/board/') ||
-    pathname.startsWith('/b/') ||
-    pathname === '/remote' ||
-    pathname.startsWith('/remote/') ||
     pathname === '/pano' ||
     pathname.startsWith('/pano/')
   ) {
-    const response = NextResponse.rewrite(new URL(pathname + search, req.url))
-    setInstanceCookies(response, instance)
-    return response
-  }
-  if (pathname.startsWith('/editor/playground/')) {
     const response = NextResponse.rewrite(new URL(pathname + search, req.url))
     setInstanceCookies(response, instance)
     return response
@@ -602,50 +587,11 @@ export default async function proxy(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
-  // 10. Apex root: Serve the default school organization landing directly
+  // 10. Apex root & fallback: Redirect directly to /loginv2
   // -------------------------------------------------------------------------
-  if (pathname === '/') {
-    const resolved = await resolveTenant(req, instance)
-    const requestHeaders = tenantRequestHeaders(req, resolved, instance)
-    const response = NextResponse.rewrite(
-      new URL(`/orgs/${resolved.slug}${search}`, req.url),
-      { request: { headers: requestHeaders } },
-    )
-    setOrgCookies(response, resolved, instance, fullhost)
-    setInstanceCookies(response, instance)
-    return response
+  if (pathname === '/' || !pathname.startsWith('/api')) {
+    return NextResponse.redirect(new URL(`/loginv2${search}`, req.url), 307)
   }
 
-  // -------------------------------------------------------------------------
-  // 11. Tenant-scoped rewrite — the catch-all that puts us under /orgs/{slug}
-  // -------------------------------------------------------------------------
-  if (pathname.startsWith('/orgs/')) {
-    const segments = pathname.split('/')
-    const pathOrgSlug = segments[2]
-    const pathResolved: ResolvedTenant = pathOrgSlug
-      ? { slug: pathOrgSlug, source: 'default' }
-      : await resolveTenant(req, instance)
-    const requestHeaders = tenantRequestHeaders(req, pathResolved, instance)
-    const response = NextResponse.rewrite(
-      new URL(`${pathname}${search}`, req.url),
-      { request: { headers: requestHeaders } },
-    )
-    setOrgCookies(response, pathResolved, instance, fullhost)
-    setInstanceCookies(response, instance)
-    return response
-  }
-
-  const resolved = await resolveTenant(req, instance)
-  const requestHeaders = tenantRequestHeaders(req, resolved, instance)
-  // `${search}` is load-bearing: a rewrite destination built from an absolute
-  // path drops the base URL's query, and Next treats the destination's search
-  // as the request's. Every other branch above appends it; this one did not, so
-  // org-scoped pages lost their query string (?page, ?q, ?tab, …).
-  const response = NextResponse.rewrite(
-    new URL(`/orgs/${resolved.slug}${pathname}${search}`, req.url),
-    { request: { headers: requestHeaders } },
-  )
-  setOrgCookies(response, resolved, instance, fullhost)
-  setInstanceCookies(response, instance)
-  return response
+  return NextResponse.next()
 }

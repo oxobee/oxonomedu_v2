@@ -62,7 +62,6 @@ import {
   formatDueDate,
 } from '@services/school_assignments/school_assignments'
 import ClassSelectorSheet from './ClassSelectorSheet'
-import ConnectBoardModal from './ConnectBoardModal'
 import TeacherNotesModal from './TeacherNotesModal'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import {
@@ -136,7 +135,6 @@ export default function DashV2Client({
 
   // Modal Dialog States
   const [isClassSheetOpen, setIsClassSheetOpen] = useState(false)
-  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false)
 
   const handleSelectClass = (cls: ClassroomItem) => {
@@ -1280,21 +1278,14 @@ export default function DashV2Client({
                 </div>
 
                 <div className="flex items-center gap-2 pt-1 border-t border-gray-100 dark:border-gray-800">
-                  <button
-                    type="button"
-                    onClick={() => setIsConnectModalOpen(true)}
-                    className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
-                  >
-                    <QrCode size={14} />
-                    <span>QR ile Tahtaya Bağlan</span>
-                  </button>
                   <a
                     href="/pano"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="py-2 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-xs flex items-center justify-center gap-1 transition-all"
+                    className="w-full py-2.5 px-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
                   >
-                    <span>Tahta Aç</span>
+                    <Tv size={14} />
+                    <span>Dijital Okul Panosunu Görüntüle</span>
                     <ArrowUpRight size={13} />
                   </a>
                 </div>
@@ -1492,12 +1483,6 @@ export default function DashV2Client({
         classrooms={ALL_CLASSROOMS}
         selectedClass={selectedClass}
         onSelect={handleSelectClass}
-        theme={theme}
-      />
-
-      <ConnectBoardModal
-        isOpen={isConnectModalOpen}
-        onClose={() => setIsConnectModalOpen(false)}
         theme={theme}
       />
 

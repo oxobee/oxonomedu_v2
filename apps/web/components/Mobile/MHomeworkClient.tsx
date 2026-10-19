@@ -51,7 +51,6 @@ import {
 import toast from 'react-hot-toast'
 import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
-import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import { ALL_INITIAL_STUDENTS, type MStudentItem } from '@components/Mobile/MStudentClient'
 import {
@@ -628,7 +627,6 @@ export default function MHomeworkClient({
   })
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false)
   const [branchSearch, setBranchSearch] = useState('')
-  const [isQrModalOpen, setIsQrModalOpen] = useState(false)
 
   // Homework Selector Modal state
   const [isHomeworkModalOpen, setIsHomeworkModalOpen] = useState(false)
@@ -1456,12 +1454,12 @@ export default function MHomeworkClient({
               </div>
 
               {/* Sağ: İstenen 3 Belirgin Kontrol (Sınıf Seçici, Ödev Seçici, Yeni Ödev Ver) */}
-              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap">
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap xl:flex-nowrap min-w-0">
                 {/* 1. Sınıf Seçimi Butonu */}
                 <button
                   type="button"
                   onClick={() => setIsBranchModalOpen(true)}
-                  className="flex-1 sm:flex-none h-11 px-3.5 sm:px-4 rounded-xl bg-gray-100 hover:bg-gray-200/80 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 group"
+                  className="flex-1 sm:flex-none h-11 px-3.5 sm:px-4 rounded-xl bg-gray-100 hover:bg-gray-200/80 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 group shrink-0"
                   title="Sınıf / Şube Değiştir"
                 >
                   <Users size={16} className="text-[#1D77FF] dark:text-blue-400 group-hover:scale-110 transition-transform" />
@@ -1473,7 +1471,7 @@ export default function MHomeworkClient({
                 <button
                   type="button"
                   onClick={() => setIsHomeworkModalOpen(true)}
-                  className="flex-1 sm:flex-none h-11 px-3.5 sm:px-4 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 group"
+                  className="flex-1 sm:flex-none h-11 px-3.5 sm:px-4 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 group shrink-0"
                   title="Bu sınıfa ait ödevleri seç ve tarihsel filtrele"
                 >
                   <BookOpenCheck size={16} className="text-[#1D77FF] dark:text-blue-400 group-hover:scale-110 transition-transform" />
@@ -1493,7 +1491,7 @@ export default function MHomeworkClient({
                     }
                     setIsCreateModalOpen(true)
                   }}
-                  className="w-full sm:w-auto h-11 px-4 sm:px-5 rounded-xl bg-[#1D77FF] hover:bg-blue-600 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-95 transition-all cursor-pointer border border-blue-400 group"
+                  className="w-full sm:w-auto h-11 px-4 sm:px-5 rounded-xl bg-[#1D77FF] hover:bg-blue-600 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-95 transition-all cursor-pointer border border-blue-400 group shrink-0 whitespace-nowrap"
                   title={`${selectedBranch} İçin Yeni Ödev Tanımla`}
                 >
                   <Plus size={16} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-200" />
@@ -1507,10 +1505,11 @@ export default function MHomeworkClient({
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
+              style={{ contain: 'paint' }}
               className="mx-4 mt-3 bg-gradient-to-br from-[#1E4FD8] via-[#1D77FF] to-[#0A58D0] dark:from-[#0E1A38] dark:via-[#162D63] dark:to-[#0F224D] text-white rounded-[26px] sm:rounded-[30px] p-5 sm:p-6 flex flex-col gap-4.5 shadow-[0_16px_45px_rgba(29,119,255,0.18)] border border-blue-400/30 dark:border-blue-800/40 relative overflow-hidden"
             >
               {/* Animated Background Subtle Concentric Circles */}
-              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-25">
+              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-25 overflow-hidden">
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 42, repeat: Infinity, ease: 'linear' }}
@@ -3745,13 +3744,6 @@ export default function MHomeworkClient({
             </div>
           )}
         </AnimatePresence>
-
-        {/* ── 10. MODAL: QR TAHTAYA BAĞLAN ── */}
-        <ConnectBoardModal
-          isOpen={isQrModalOpen}
-          onClose={() => setIsQrModalOpen(false)}
-          theme={theme}
-        />
     </div>
   )
 

@@ -35,7 +35,6 @@ import {
 import toast from 'react-hot-toast'
 import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
-import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import {
   getAttendanceForClass,
@@ -260,7 +259,6 @@ export default function MStudentClient({
   })
 
   // Modals state
-  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false)
   const [isNewStudentModalOpen, setIsNewStudentModalOpen] = useState(false)
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false)
   const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<MStudentItem | null>(null)
@@ -1352,13 +1350,6 @@ export default function MStudentClient({
           </div>
         )}
       </AnimatePresence>
-
-      {/* ── MODAL 5: QR BAĞLANTI (Akıllı Tahta) ── */}
-      <ConnectBoardModal
-        isOpen={isConnectModalOpen}
-        onClose={() => setIsConnectModalOpen(false)}
-        theme={theme}
-      />
     </div>
   )
 

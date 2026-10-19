@@ -21,7 +21,6 @@ import {
   BarChart3,
   Settings,
   X,
-  QrCode,
   Sun,
   Moon,
   LogOut,
@@ -32,7 +31,6 @@ import { TEACHER_MENU_CONFIG, getMenuItemByPath } from '@/lib/teacher/teacherMen
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { signOut } from '@components/Contexts/AuthContext'
-import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
 import HeaderLiveClock from '@components/Common/HeaderLiveClock'
 
 interface TeacherLayoutProps {
@@ -47,7 +45,6 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
   const user = session?.data?.user
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [isConnectBoardModalOpen, setIsConnectBoardModalOpen] = useState(false)
 
   // Teacher identity details (Authentic teacher profile, never mixes with principal)
   const [teacherProfile, setTeacherProfile] = useState<{ name: string; branch: string }>({
@@ -109,10 +106,10 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
       inactiveText: 'text-[#6366F1] dark:text-indigo-300',
     },
     {
-      id: 'smartboard',
-      label: 'Tahta',
-      path: '/teacher/smartboard',
-      icon: Tv,
+      id: 'assignments',
+      label: 'Ödevler',
+      path: '/teacher/assignments',
+      icon: BookOpen,
       activeIconBg: 'bg-[#112926] dark:bg-teal-100 text-[#2DD4BF] dark:text-teal-700',
       inactiveBg: 'bg-[#E6F9F5] dark:bg-teal-950/60',
       inactiveText: 'text-[#0D9488] dark:text-teal-300',
@@ -222,15 +219,6 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
         <div className="p-3 border-t border-gray-100 dark:border-gray-800/80 space-y-1.5">
           <button
             type="button"
-            onClick={() => setIsConnectBoardModalOpen(true)}
-            className="w-full h-10 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0A0D15] font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
-          >
-            <QrCode size={16} />
-            <span>Akıllı Tahtaya Bağlan</span>
-          </button>
-
-          <button
-            type="button"
             onClick={async () => {
               if (typeof window !== 'undefined') {
                 try {
@@ -278,15 +266,6 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
 
             <button
               type="button"
-              onClick={() => setIsConnectBoardModalOpen(true)}
-              className="h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs shadow-emerald-500/20 cursor-pointer"
-            >
-              <QrCode size={14} />
-              <span>Tahta QR</span>
-            </button>
-
-            <button
-              type="button"
               onClick={toggleTheme}
               className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer border border-gray-200/60 dark:border-gray-700/60"
               title="Temayı Değiştir"
@@ -320,15 +299,6 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
 
             <button
               type="button"
-              onClick={() => setIsConnectBoardModalOpen(true)}
-              className="h-8 px-2.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-              title="Tahtaya Bağlan"
-            >
-              <QrCode size={14} />
-              <span>Tahta</span>
-            </button>
-            <button
-              type="button"
               onClick={toggleTheme}
               className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 flex items-center justify-center cursor-pointer"
             >
@@ -338,7 +308,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
         </header>
 
         {/* ── MAIN CONTENT AREA ── */}
-        <main className="flex-1 min-w-0 pb-28 lg:pb-8 flex flex-col">
+        <main className="flex-1 min-w-0 pb-28 lg:pb-8 flex flex-col overflow-x-hidden">
           {children}
         </main>
       </div>
@@ -393,16 +363,6 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           title="Daha Fazla Modül"
         >
           <LayoutGrid size={19} strokeWidth={2.2} />
-        </button>
-
-        {/* 6th Item: QR Code Button on the Far Right (Rounded Square) */}
-        <button
-          type="button"
-          onClick={() => setIsConnectBoardModalOpen(true)}
-          className="w-11 h-11 rounded-[16px] bg-gradient-to-br from-[#10B981] to-[#059669] hover:from-[#059669] hover:to-[#047857] text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 active:scale-95 transition-all cursor-pointer shrink-0 ml-0.5"
-          title="Akıllı Tahtaya Bağlan (QR)"
-        >
-          <QrCode size={20} strokeWidth={2.4} />
         </button>
       </nav>
 
@@ -518,13 +478,6 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           </div>
         )}
       </AnimatePresence>
-
-      {/* QR Connect Board Modal */}
-      <ConnectBoardModal
-        isOpen={isConnectBoardModalOpen}
-        onClose={() => setIsConnectBoardModalOpen(false)}
-        theme={theme}
-      />
     </div>
   )
 }

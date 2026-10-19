@@ -15,7 +15,6 @@ import {
   BarChart3,
   Settings,
   X,
-  QrCode,
   Sun,
   Moon,
   LogOut,
@@ -35,7 +34,6 @@ import { PRINCIPAL_MENU_CONFIG, PRINCIPAL_CATEGORIES, getPrincipalMenuItemByPath
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { signOut } from '@components/Contexts/AuthContext'
-import ConnectBoardModal from '@components/DashboardV2/ConnectBoardModal'
 import toast from 'react-hot-toast'
 import { getStoredPrincipalProfile, getPrincipalInitials } from '@/lib/principal/principalProfileStorage'
 import HeaderLiveClock from '@components/Common/HeaderLiveClock'
@@ -52,7 +50,6 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
   const user = session?.data?.user
 
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
-  const [isConnectBoardModalOpen, setIsConnectBoardModalOpen] = useState(false)
 
   // Principal profile state (Authentic persistent identity)
   const [adminProfile, setAdminProfile] = useState<{
@@ -381,17 +378,6 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           })}
         </nav>
 
-        {/* Quick Board Connect Button */}
-        <div className="p-3 border-t border-gray-100 dark:border-gray-800/80">
-          <button
-            type="button"
-            onClick={() => setIsConnectBoardModalOpen(true)}
-            className="w-full h-10 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-emerald-600/20"
-          >
-            <QrCode size={15} />
-            <span>Akıllı Tahta QR Eşle</span>
-          </button>
-        </div>
 
         {/* Desktop Logout Footer */}
         <div className="p-3 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between">
@@ -475,14 +461,6 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
 
             <button
               type="button"
-              onClick={() => setIsConnectBoardModalOpen(true)}
-              className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center cursor-pointer"
-              title="Akıllı Tahta QR"
-            >
-              <QrCode size={15} />
-            </button>
-            <button
-              type="button"
               onClick={toggleTheme}
               className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 flex items-center justify-center cursor-pointer"
             >
@@ -492,7 +470,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
         </header>
 
         {/* Page Content Body (Fluid & Web-Compatible) */}
-        <main className="flex-1 w-full pb-24 lg:pb-10">
+        <main className="flex-1 w-full min-w-0 pb-24 lg:pb-10 overflow-x-hidden">
           {children}
         </main>
       </div>
@@ -533,16 +511,6 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
             </Link>
           )
         })}
-
-        {/* Center QR Connect Button */}
-        <button
-          type="button"
-          onClick={() => setIsConnectBoardModalOpen(true)}
-          className="w-[44px] h-[44px] rounded-full bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 cursor-pointer"
-          title="Akıllı Tahta QR"
-        >
-          <QrCode size={19} />
-        </button>
 
         {/* More Modules Button */}
         <button
@@ -643,12 +611,6 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           </div>
         )}
       </AnimatePresence>
-
-      {/* QR Connect Board Modal */}
-      <ConnectBoardModal
-        isOpen={isConnectBoardModalOpen}
-        onClose={() => setIsConnectBoardModalOpen(false)}
-      />
     </div>
   )
 }
