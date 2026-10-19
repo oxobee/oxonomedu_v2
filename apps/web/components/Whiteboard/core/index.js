@@ -28,7 +28,7 @@ export function buildWatermark(editor) {
     `<path d="M9 16C9 12.134 12.134 9 16 9C19.866 9 23 12.134 23 16" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="24 6" />` +
     `<defs><linearGradient id="ox-wm-g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">` +
     `<stop stop-color="#4B075F"/><stop offset="0.55" stop-color="#8D49A6"/><stop offset="1" stop-color="#D914C8"/>` +
-    `</linearGradient></defs></svg><span>Oxonom Tahta</span>`
+    `</linearGradient></defs></svg><span>OXONOM</span>`
   a.addEventListener('pointerdown', (e) => e.stopPropagation())
   editor.container.appendChild(a)
   return a
