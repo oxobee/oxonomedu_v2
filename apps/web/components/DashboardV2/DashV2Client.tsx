@@ -710,10 +710,10 @@ export default function DashV2Client({
           animate="show"
           className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full"
         >
-          {/* ── HERO ALANI (Vibrant Gradient Blue matching unified portal styling) ── */}
+          {/* ── HERO ALANI (Oxonom Corporate Purple & Orchid Premium Glow) ── */}
           <motion.section
             variants={itemVariants}
-            className="w-full bg-gradient-to-br from-[#1E4FD8] via-[#1D77FF] to-[#0A58D0] dark:from-[#0E1A38] dark:via-[#162D63] dark:to-[#0F224D] rounded-[30px] p-5 sm:p-6 space-y-4 sm:space-y-5 text-white shadow-[0_16px_45px_rgba(29,119,255,0.18)] border border-blue-400/30 dark:border-blue-800/40 relative overflow-hidden"
+            className="w-full bg-gradient-to-br from-[#241329] via-[#4B075F] to-[#8D49A6] dark:from-[#17101C] dark:via-[#211729] dark:to-[#350444] rounded-[30px] p-5 sm:p-6 space-y-4 sm:space-y-5 text-white shadow-[0_16px_45px_rgba(75,7,95,0.22)] border border-[#8D49A6]/30 dark:border-[#49364F] relative overflow-hidden"
           >
             {/* Animated Background Subtle Concentric Circles */}
             <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-25">
@@ -722,28 +722,28 @@ export default function DashV2Client({
                 transition={{ duration: 42, repeat: Infinity, ease: 'linear' }}
                 className="w-full h-full relative"
               >
-                <div className="absolute inset-0 rounded-full border border-cyan-200/40" />
+                <div className="absolute inset-0 rounded-full border border-[#D914C8]/40" />
                 <div className="absolute inset-6 rounded-full border border-white/20 border-dashed" />
-                <div className="absolute inset-12 rounded-full border border-cyan-200/30" />
+                <div className="absolute inset-12 rounded-full border border-[#F0D8FA]/30" />
               </motion.div>
             </div>
 
             {/* Subtle gradient sheen behind hero */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-cyan-400/20 to-transparent rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-[#D914C8]/20 to-transparent rounded-full blur-2xl pointer-events-none" />
 
             {/* Top Row: Tag & Greetings on Left + Prominent Clickable Account Link on Right */}
             <div className="flex items-start justify-between gap-3 relative z-10">
               <div className="space-y-1.5 min-w-0 flex-1">
-                <span className="text-[11px] font-extrabold tracking-widest text-cyan-200 uppercase block">
+                <span className="text-[11px] font-extrabold tracking-widest text-[#F0D8FA] uppercase block">
                   ÖĞRETMEN ÇALIŞMA ALANI
                 </span>
-                <div className="text-xs sm:text-sm text-blue-100 font-medium leading-none pt-0.5">
+                <div className="text-xs sm:text-sm text-[#F0D8FA]/90 font-medium leading-none pt-0.5">
                   Hoş Geldiniz,
                 </div>
                 <h1 className="text-[24px] sm:text-[28px] font-bold text-white tracking-tight leading-tight font-serif-display truncate">
                   {teacherName}
                 </h1>
-                <p className="text-[11px] text-blue-100/90 font-medium truncate">
+                <p className="text-[11px] text-[#F0D8FA]/80 font-medium truncate">
                   {teacherProfile?.branch || 'Türk Dili ve Edebiyatı'} · Oxonom Okulları
                 </p>
               </div>
@@ -751,7 +751,7 @@ export default function DashV2Client({
               {/* Prominent, Clearly Noticeable & Clickable Account / Profile Button */}
               <Link
                 href="/teacher/settings"
-                className="group flex items-center gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-white/15 hover:bg-white/25 active:scale-95 border border-white/25 backdrop-blur-md transition-all shadow-md shrink-0 cursor-pointer"
+                className="group flex items-center gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 active:scale-95 border border-white/20 backdrop-blur-md transition-all shadow-md shrink-0 cursor-pointer"
                 title="Hesap ve Profil Ayarları"
               >
                 <div className="relative">
@@ -759,23 +759,23 @@ export default function DashV2Client({
                     <img
                       src={teacherProfile.avatarUrl || teacherProfile.avatarImage}
                       alt={teacherName}
-                      className="w-10 h-10 rounded-xl object-cover border border-cyan-300/50 shadow-sm group-hover:scale-105 transition-transform"
+                      className="w-10 h-10 rounded-xl object-cover border border-[#D914C8]/60 shadow-sm group-hover:scale-105 transition-transform"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-xl bg-white text-[#1D77FF] flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-white text-[#4B075F] flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-105 transition-transform">
                       {teacherInitials}
                     </div>
                   )}
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-cyan-300 border-2 border-[#1D77FF]" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#D914C8] border-2 border-[#4B075F]" />
                 </div>
                 <div className="text-left hidden xs:block sm:block pr-1">
-                  <div className="text-[10px] text-cyan-100 font-bold uppercase tracking-wider flex items-center gap-1">
+                  <div className="text-[10px] text-[#F0D8FA] font-bold uppercase tracking-wider flex items-center gap-1">
                     <span>Hesabım</span>
-                    <Settings size={11} className="text-cyan-200 group-hover:rotate-45 transition-transform" />
+                    <Settings size={11} className="text-[#D914C8] group-hover:rotate-45 transition-transform" />
                   </div>
-                  <div className="text-xs font-bold text-white group-hover:text-cyan-200 transition-colors flex items-center gap-0.5">
+                  <div className="text-xs font-bold text-white group-hover:text-[#F0D8FA] transition-colors flex items-center gap-0.5">
                     <span>Profil</span>
-                    <ChevronRight size={13} className="text-blue-100 group-hover:translate-x-0.5 transition-transform" />
+                    <ChevronRight size={13} className="text-[#F0D8FA] group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </div>
               </Link>
@@ -792,7 +792,7 @@ export default function DashV2Client({
                     <div className="font-extrabold text-white">
                       Profil & Evrak Tamamlama Bekleniyor
                     </div>
-                    <div className="text-[11px] text-blue-100 truncate">
+                    <div className="text-[11px] text-[#F0D8FA] truncate">
                       MEB resmi kaydınız için evraklarınızı yükleyin
                     </div>
                   </div>
@@ -800,7 +800,7 @@ export default function DashV2Client({
                 <button
                   type="button"
                   onClick={() => setIsOnboardingModalOpen(true)}
-                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-blue-50 text-[#1D77FF] font-black text-xs shrink-0 active:scale-95 transition-all shadow-sm cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#F0D8FA] text-[#4B075F] font-black text-xs shrink-0 active:scale-95 transition-all shadow-sm cursor-pointer"
                 >
                   Tamamla
                 </button>
@@ -813,14 +813,14 @@ export default function DashV2Client({
               <button
                 type="button"
                 onClick={() => setIsClassSheetOpen(true)}
-                className="flex-1 bg-white/15 hover:bg-white/20 border border-white/20 rounded-2xl py-2.5 px-3.5 flex items-center justify-between text-left cursor-pointer active:scale-[0.98] transition-all shadow-inner group h-[50px]"
+                className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl py-2.5 px-3.5 flex items-center justify-between text-left cursor-pointer active:scale-[0.98] transition-all shadow-inner group h-[50px]"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-7.5 h-7.5 rounded-lg bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                     <GraduationCap size={17} />
                   </div>
                   <div className="min-w-0">
-                    <span className="text-[10px] text-blue-100 block leading-tight font-medium">
+                    <span className="text-[10px] text-[#F0D8FA] block leading-tight font-medium">
                       Sınıf
                     </span>
                     <span className="text-sm font-bold text-white block leading-tight truncate">
@@ -828,16 +828,16 @@ export default function DashV2Client({
                     </span>
                   </div>
                 </div>
-                <ChevronDown size={15} className="text-blue-100 shrink-0 group-hover:text-white transition-colors" />
+                <ChevronDown size={15} className="text-[#F0D8FA] shrink-0 group-hover:text-white transition-colors" />
               </button>
 
               {/* Notlar Butonu */}
               <button
                 type="button"
                 onClick={() => setIsNotesModalOpen(true)}
-                className="bg-white hover:bg-blue-50 text-[#1D77FF] font-bold text-sm px-4.5 py-2.5 rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all shadow-md shrink-0 h-[50px]"
+                className="bg-white hover:bg-[#FCE8FA] text-[#4B075F] font-bold text-sm px-4.5 py-2.5 rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all shadow-md shrink-0 h-[50px]"
               >
-                <FileText size={16} strokeWidth={2.5} className="text-[#1D77FF]" />
+                <FileText size={16} strokeWidth={2.5} className="text-[#D914C8]" />
                 <span>Notlar</span>
               </button>
             </div>

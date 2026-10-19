@@ -1814,18 +1814,18 @@ export default function MAdminClassesClient({
                   onClick={() => setActiveSubView(activeSubView === 'promotion' ? 'classes' : 'promotion')}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-black shadow-xs cursor-pointer transition-all active:scale-98 ${
                     activeSubView === 'promotion'
-                      ? 'bg-emerald-600 text-white border-emerald-500'
+                      ? 'bg-[#4B075F] text-white border-[#4B075F]'
                       : 'bg-white dark:bg-[#121826] hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200/90 dark:border-gray-800 text-gray-800 dark:text-gray-200'
                   }`}
                 >
-                  <Sparkles size={15} className={activeSubView === 'promotion' ? 'text-white' : 'text-emerald-500'} />
+                  <Sparkles size={15} className={activeSubView === 'promotion' ? 'text-white' : 'text-[#8D49A6]'} />
                   <span>{activeSubView === 'promotion' ? 'Şubeler Listesine Dön' : 'Dönem Sonu Sınıf Atlatma & Nakil'}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleOpenNewClass}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-purple-500/20 cursor-pointer transition-all active:scale-98"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand-gradient hover:opacity-95 text-white text-xs font-black shadow-lg shadow-purple-950/20 cursor-pointer transition-all active:scale-98"
                 >
                   <Plus size={16} strokeWidth={2.5} />
                   <span>Yeni Sınıf / Şube Ekle</span>
@@ -2007,7 +2007,7 @@ export default function MAdminClassesClient({
                   onClick={() => setActiveSubView('promotion')}
                   className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     activeSubView === 'promotion'
-                      ? 'bg-emerald-600 text-white shadow-xs'
+                      ? 'bg-[#4B075F] text-white shadow-xs'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
@@ -2018,7 +2018,7 @@ export default function MAdminClassesClient({
                 <button
                   type="button"
                   onClick={handleOpenNewClass}
-                  className="py-2 px-3.5 rounded-xl text-xs font-black bg-[#10B981] hover:bg-[#059669] text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                  className="py-2 px-3.5 rounded-xl text-xs font-black bg-[#4B075F] hover:bg-[#620B79] text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
                   <Plus size={15} strokeWidth={2.5} />
                   <span>Yeni Sınıf</span>
@@ -2900,7 +2900,7 @@ export default function MAdminClassesClient({
               <button
                 type="button"
                 onClick={() => setIsConfirmPromotionOpen(true)}
-                className="px-6 h-11 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-600/20 w-full sm:w-auto justify-center"
+                className="px-6 h-11 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-purple-950/20 w-full sm:w-auto justify-center"
               >
                 <Sparkles size={16} />
                 <span>Dönem Sonu Sınıf Atlatmayı Başlat ve Onayla</span>

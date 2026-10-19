@@ -378,7 +378,7 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
           <div className="p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText size={18} className="text-blue-500" />
+                <FileText size={18} className="text-[#8D49A6]" />
                 <h2 className="text-base font-extrabold text-gray-900 dark:text-white">
                   Kişisel Ders Notlarım
                 </h2>
@@ -386,7 +386,7 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
               <button
                 type="button"
                 onClick={() => setIsAddingNote(!isAddingNote)}
-                className="px-3 py-1.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center gap-1 cursor-pointer hover:bg-blue-500/20 transition-colors"
+                className="px-3 py-1.5 rounded-xl bg-[#F0D8FA] text-[#4B075F] dark:bg-[#2D2035] dark:text-[#C58ADB] text-xs font-bold flex items-center gap-1 cursor-pointer hover:bg-[#E8C8F7] transition-colors"
               >
                 <Plus size={13} />
                 <span>{isAddingNote ? 'Kapat' : 'Yeni Not'}</span>
@@ -404,19 +404,19 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
                   placeholder="Not Başlığı (örn: Hücre Bölünmesi Özeti)"
                   value={newNoteTitle}
                   onChange={(e) => setNewNoteTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200 dark:border-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200 dark:border-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#4B075F]/30"
                 />
                 <textarea
                   rows={3}
                   placeholder="Kişisel ders notunuzu buraya yazın..."
                   value={newNoteContent}
                   onChange={(e) => setNewNoteContent(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200 dark:border-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none"
+                  className="w-full p-3 rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200 dark:border-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#4B075F]/30"
                 />
                 <div className="flex justify-end gap-2">
                   <button
                     type="submit"
-                    className="px-4 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs cursor-pointer"
+                    className="px-4 py-1.5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs cursor-pointer shadow-xs transition-colors"
                   >
                     Kaydet
                   </button>
@@ -432,7 +432,7 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
                   className="p-4 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/50 dark:border-gray-800/50 space-y-2 group"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#F0D8FA] text-[#4B075F] dark:bg-[#2D2035] dark:text-[#C58ADB]">
                       {note.course}
                     </span>
                     <div className="flex items-center gap-2">
@@ -456,7 +456,7 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
                     <div className="pt-1">
                       <Link
                         href={`/student/library?bookId=${note.bookId}&page=${note.pageNumber || 1}`}
-                        className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-colors"
+                        className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-[#F0D8FA] text-[#4B075F] dark:bg-[#2D2035] dark:text-[#C58ADB] hover:bg-[#E8C8F7] transition-colors"
                       >
                         <BookOpen size={11} />
                         <span>{note.bookTitle} · Sayfa {note.pageNumber}</span>
@@ -555,7 +555,7 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
                       <div className="space-y-2">
                         {/* Top Badges: Course & Type */}
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-[#F0D8FA] text-[#4B075F] dark:bg-[#2D2035] dark:text-[#C58ADB]">
                             {exam.courseName}
                           </span>
                           <span

@@ -137,36 +137,36 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
       label: 'İdare',
       path: '/principal/dashboard',
       icon: LayoutDashboard,
-      activeIconBg: 'bg-[#112920] dark:bg-emerald-100 text-[#34D399] dark:text-emerald-700',
-      inactiveBg: 'bg-[#E3F3EF] dark:bg-emerald-950/60',
-      inactiveText: 'text-[#0F766E] dark:text-emerald-300',
+      activeIconBg: 'bg-[#4B075F] text-white',
+      inactiveBg: 'bg-[#F0D8FA] dark:bg-[#350444]',
+      inactiveText: 'text-[#4B075F] dark:text-[#F0D8FA]',
     },
     {
       id: 'teachers',
       label: 'Öğretmen',
       path: '/principal/teachers',
       icon: Briefcase,
-      activeIconBg: 'bg-[#1C2036] dark:bg-indigo-100 text-[#818CF8] dark:text-indigo-700',
-      inactiveBg: 'bg-[#EDF0FD] dark:bg-indigo-950/60',
-      inactiveText: 'text-[#4338CA] dark:text-indigo-300',
+      activeIconBg: 'bg-[#4B075F] text-white',
+      inactiveBg: 'bg-[#F0D8FA] dark:bg-[#350444]',
+      inactiveText: 'text-[#4B075F] dark:text-[#F0D8FA]',
     },
     {
       id: 'students',
       label: 'Öğrenci',
       path: '/principal/students',
       icon: GraduationCap,
-      activeIconBg: 'bg-[#291A36] dark:bg-fuchsia-100 text-[#E879F9] dark:text-fuchsia-700',
-      inactiveBg: 'bg-[#F9EDFD] dark:bg-fuchsia-950/60',
-      inactiveText: 'text-[#86198F] dark:text-fuchsia-300',
+      activeIconBg: 'bg-[#4B075F] text-white',
+      inactiveBg: 'bg-[#F0D8FA] dark:bg-[#350444]',
+      inactiveText: 'text-[#4B075F] dark:text-[#F0D8FA]',
     },
     {
       id: 'schedule',
       label: 'Program',
       path: '/principal/schedule',
       icon: Calendar,
-      activeIconBg: 'bg-[#2B2314] dark:bg-amber-100 text-[#FBBF24] dark:text-amber-700',
-      inactiveBg: 'bg-[#FEF6E7] dark:bg-amber-950/60',
-      inactiveText: 'text-[#B45309] dark:text-amber-300',
+      activeIconBg: 'bg-[#4B075F] text-white',
+      inactiveBg: 'bg-[#F0D8FA] dark:bg-[#350444]',
+      inactiveText: 'text-[#4B075F] dark:text-[#F0D8FA]',
     },
   ]
 
@@ -183,21 +183,21 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
   }
 
   return (
-    <div className={`${theme} min-h-screen bg-[#F8FAFC] dark:bg-[#0A0D15] text-gray-900 dark:text-white font-jakarta flex flex-col lg:flex-row transition-colors duration-200`}>
+    <div className={`${theme} min-h-screen bg-[#FCF9FD] dark:bg-[#17101C] text-[#241329] dark:text-[#FCF9FD] font-jakarta flex flex-col lg:flex-row transition-colors duration-200`}>
       {/* ── DESKTOP SIDEBAR (lg+) ── */}
-      <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 shrink-0 bg-white dark:bg-[#0E1526] border-r border-gray-200/80 dark:border-gray-800/80 z-30 select-none">
+      <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 shrink-0 bg-white dark:bg-[#211729] border-r border-[#E8DFEB] dark:border-[#49364F] z-30 select-none">
         {/* Brand Header */}
-        <div className="p-5 border-b border-gray-100 dark:border-gray-800/80 flex items-center justify-between">
+        <div className="p-5 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-emerald-800 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 font-black text-lg">
+            <div className="w-10 h-10 rounded-2xl bg-brand-gradient flex items-center justify-center text-white shadow-md shadow-[#4B075F]/20 font-black text-lg">
               OX
             </div>
             <div>
-              <div className="text-sm font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight">
+              <div className="text-sm font-extrabold tracking-tight text-[#241329] dark:text-white leading-tight">
                 Oxonom EDU
               </div>
-              <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1">
-                <ShieldCheck size={11} />
+              <div className="text-[10px] font-bold text-[#4B075F] dark:text-[#C58ADB] uppercase tracking-wider flex items-center gap-1">
+                <ShieldCheck size={11} className="text-[#D914C8]" />
                 <span>Müdür & İdare Portalı</span>
               </div>
             </div>
@@ -205,28 +205,28 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           <button
             type="button"
             onClick={toggleTheme}
-            className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#350444] text-[#514458] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
             title="Temayı Değiştir"
           >
             {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
           </button>
         </div>
 
-        {/* Principal Executive Pass / Identity Badge (Prestijli & Farklı Tasarım) */}
-        <div className="p-3.5 border-b border-gray-100 dark:border-gray-800/80">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0B132B] via-[#0E1A38] to-[#06241C] text-white p-3.5 shadow-md shadow-emerald-950/20 border border-emerald-500/25">
+        {/* Principal Executive Pass / Identity Badge */}
+        <div className="p-3.5 border-b border-[#E8DFEB] dark:border-[#49364F]">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#241329] via-[#350444] to-[#4B075F] text-white p-3.5 shadow-md shadow-[#4B075F]/25 border border-[#8D49A6]/40">
             {/* Ambient background glow */}
-            <div className="absolute -top-10 -right-10 w-24 h-24 rounded-full bg-emerald-500/15 blur-xl pointer-events-none" />
-            <div className="absolute -bottom-8 -left-8 w-20 h-20 rounded-full bg-teal-500/15 blur-lg pointer-events-none" />
+            <div className="absolute -top-10 -right-10 w-24 h-24 rounded-full bg-[#D914C8]/15 blur-xl pointer-events-none" />
+            <div className="absolute -bottom-8 -left-8 w-20 h-20 rounded-full bg-[#8D49A6]/20 blur-lg pointer-events-none" />
 
             {/* Top row: Authority badge & status */}
             <div className="flex items-center justify-between gap-2 mb-2.5 relative z-10">
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-[9px] font-black uppercase tracking-wider text-emerald-300">
-                <ShieldCheck size={11} className="text-emerald-400" />
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#F0D8FA]/15 border border-[#8D49A6]/30 text-[9px] font-black uppercase tracking-wider text-[#F0D8FA]">
+                <ShieldCheck size={11} className="text-[#D914C8]" />
                 <span>MEB Kurum Yetkilisi</span>
               </div>
-              <div className="flex items-center gap-1 text-[9px] font-bold text-emerald-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="flex items-center gap-1 text-[9px] font-bold text-[#F0D8FA]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D914C8] animate-pulse" />
                 <span>Çevrimiçi</span>
               </div>
             </div>
@@ -234,12 +234,12 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
             {/* Main identity row */}
             <div className="flex items-center gap-3 relative z-10">
               <div className="relative shrink-0">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-700 p-[1.5px] shadow-sm">
-                  <div className="w-full h-full rounded-[10px] bg-[#0F172A] flex items-center justify-center font-black text-sm text-emerald-300">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#8D49A6] via-[#D914C8] to-[#4B075F] p-[1.5px] shadow-sm">
+                  <div className="w-full h-full rounded-[10px] bg-[#241329] flex items-center justify-center font-black text-sm text-[#F0D8FA]">
                     {getPrincipalInitials(adminProfile.name)}
                   </div>
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#0F172A] flex items-center justify-center">
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#4B075F] border-2 border-[#241329] flex items-center justify-center">
                   <Check size={8} className="text-white stroke-[3]" />
                 </div>
               </div>
@@ -248,22 +248,22 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
                 <div className="text-[13px] font-extrabold tracking-tight text-white truncate">
                   {adminProfile.name}
                 </div>
-                <div className="text-[10px] font-bold text-emerald-300/90 truncate flex items-center gap-1 mt-0.5">
+                <div className="text-[10px] font-bold text-[#F0D8FA] truncate flex items-center gap-1 mt-0.5">
                   <span>{adminProfile.title}</span>
                 </div>
-                <div className="text-[9px] text-gray-300/80 truncate mt-1 flex items-center gap-1 font-medium">
-                  <Building2 size={10} className="text-emerald-400 shrink-0" />
+                <div className="text-[9px] text-[#D2C5D8] truncate mt-1 flex items-center gap-1 font-medium">
+                  <Building2 size={10} className="text-[#D914C8] shrink-0" />
                   <span className="truncate">{adminProfile.schoolName}</span>
                 </div>
               </div>
             </div>
 
             {/* Bottom quick meta */}
-            <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] font-semibold text-gray-300/80 relative z-10">
+            <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] font-semibold text-[#D2C5D8] relative z-10">
               <span className="flex items-center gap-1">
-                <span className="text-emerald-400 font-bold">Yetki:</span> Tam Yönetici
+                <span className="text-[#D914C8] font-bold">Yetki:</span> Tam Yönetici
               </span>
-              <span className="text-emerald-400/90">34OXON01</span>
+              <span className="text-[#F0D8FA]">34OXON01</span>
             </div>
           </div>
         </div>
@@ -339,13 +339,13 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
                       href={item.path}
                       className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                         active
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white'
+                          ? 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA] border border-[#D5C5DC] dark:border-[#8D49A6]/40 shadow-xs'
+                          : 'text-[#514458] dark:text-[#D2C5D8] hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035] hover:text-[#241329] dark:hover:text-white'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
-                          active ? 'bg-emerald-600 text-white' : 'text-gray-400 group-hover:text-gray-600'
+                          active ? 'bg-[#4B075F] text-white' : 'text-[#716779] group-hover:text-[#4B075F]'
                         }`}>
                           <Icon size={14} />
                         </div>
@@ -363,8 +363,8 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
                         return (
                           <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${
                             badgeText === 'Canlı'
-                              ? 'bg-rose-500/10 text-rose-500'
-                              : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                              ? 'bg-[#C62848]/15 text-[#C62848]'
+                              : 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA]'
                           }`}>
                             {badgeText}
                           </span>
@@ -380,11 +380,11 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
 
 
         {/* Desktop Logout Footer */}
-        <div className="p-3 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between">
+        <div className="p-3 border-t border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
           <button
             type="button"
             onClick={handleAdminLogout}
-            className="w-full h-9 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            className="w-full h-9 rounded-xl hover:bg-[#FCE8ED] dark:hover:bg-[#C62848]/20 text-[#C62848] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <LogOut size={14} />
             <span>Yönetici Çıkışı Yap</span>
@@ -395,12 +395,12 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
       {/* ── MAIN CONTENT WORKSPACE ── */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Desktop Top Header Bar (lg+) — Sleek & Minimal */}
-        <header className="hidden lg:flex items-center justify-between h-16 px-8 border-b border-gray-200/80 dark:border-gray-800/80 bg-white/80 dark:bg-[#0E1526]/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="hidden lg:flex items-center justify-between h-16 px-8 border-b border-[#E8DFEB] dark:border-[#49364F] bg-white/80 dark:bg-[#211729]/80 backdrop-blur-md sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-gray-400 font-medium">Müdürlük</span>
-              <ChevronRight size={13} className="text-gray-400" />
-              <span className="font-extrabold text-gray-900 dark:text-white">
+              <span className="text-[#716779] font-medium">Müdürlük</span>
+              <ChevronRight size={13} className="text-[#716779]" />
+              <span className="font-extrabold text-[#241329] dark:text-white">
                 {currentItem?.label || 'Genel Bakış'}
               </span>
             </div>
@@ -408,19 +408,19 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
 
           <div className="flex items-center gap-2.5">
             {/* Live Clock minimal */}
-            <HeaderLiveClock theme="emerald" variant="desktop" />
+            <HeaderLiveClock theme="oxonom" variant="desktop" />
 
             <Link
               href="/principal/schedule"
-              className="h-9 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs flex items-center gap-1.5 transition-colors border border-gray-200/60 dark:border-gray-700/60"
+              className="h-9 px-3 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#350444] text-[#241329] dark:text-[#FCF9FD] font-bold text-xs flex items-center gap-1.5 transition-colors border border-[#E8DFEB] dark:border-[#49364F]"
             >
-              <Calendar size={13} />
+              <Calendar size={13} className="text-[#4B075F] dark:text-[#C58ADB]" />
               <span>Program</span>
             </Link>
 
             <Link
               href="/principal/teachers"
-              className="h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs shadow-emerald-500/20"
+              className="h-9 px-3 rounded-xl bg-[#4B075F] hover:bg-[#620B79] active:bg-[#350444] text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs shadow-[#4B075F]/20"
             >
               <Plus size={13} />
               <span>Görevlendir</span>
@@ -429,7 +429,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
             <button
               type="button"
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer border border-gray-200/60 dark:border-gray-700/60"
+              className="w-9 h-9 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#350444] text-[#514458] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
               title="Temayı Değiştir"
             >
               {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
@@ -439,30 +439,30 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
 
         {/* Mobile Header Bar (<lg) — Sleek, Minimal & Notch Safe */}
         <header
-          className="lg:hidden flex items-center justify-between px-4 pb-2.5 bg-white/95 dark:bg-[#0E1526]/95 border-b border-gray-200/80 dark:border-gray-800/80 sticky top-0 z-30 backdrop-blur-md"
+          className="lg:hidden flex items-center justify-between px-4 pb-2.5 bg-white/95 dark:bg-[#211729]/95 border-b border-[#E8DFEB] dark:border-[#49364F] sticky top-0 z-30 backdrop-blur-md"
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.65rem)' }}
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
+            <div className="w-7 h-7 rounded-lg bg-brand-gradient text-white font-black text-xs flex items-center justify-center shadow-xs">
               OX
             </div>
             <div>
-              <div className="text-xs font-black text-gray-900 dark:text-white leading-tight">
+              <div className="text-xs font-black text-[#241329] dark:text-white leading-tight">
                 Oxonom EDU
               </div>
-              <div className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+              <div className="text-[9px] font-bold text-[#4B075F] dark:text-[#C58ADB]">
                 {adminProfile.name}
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <HeaderLiveClock theme="emerald" variant="mobile" />
+            <HeaderLiveClock theme="oxonom" variant="mobile" />
 
             <button
               type="button"
               onClick={toggleTheme}
-              className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 flex items-center justify-center cursor-pointer"
+              className="w-8 h-8 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] text-[#514458] dark:text-[#D2C5D8] flex items-center justify-center cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
             >
               {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
             </button>
@@ -477,7 +477,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
 
       {/* ── MOBILE BOTTOM FLOATING DOCK (<lg) ── */}
       <nav
-        className="lg:hidden fixed left-1/2 -translate-x-1/2 w-[94%] max-w-[380px] bg-white/95 dark:bg-[#0E1526]/95 backdrop-blur-md border border-gray-200/90 dark:border-gray-800/90 rounded-[28px] p-1.5 flex items-center justify-between shadow-2xl z-40 select-none"
+        className="lg:hidden fixed left-1/2 -translate-x-1/2 w-[94%] max-w-[380px] bg-white/95 dark:bg-[#211729]/95 backdrop-blur-md border border-[#E8DFEB] dark:border-[#49364F] rounded-[28px] p-1.5 flex items-center justify-between shadow-2xl z-40 select-none"
         style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.65rem)' }}
       >
         {mobileDockTabs.map((tab) => {
@@ -493,13 +493,13 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
                 <div className="relative flex items-center gap-1.5 h-full px-3.5 rounded-full z-10">
                   <motion.div
                     layoutId="principal-dock-pill"
-                    className="absolute inset-0 bg-[#0A0D15] dark:bg-white rounded-full shadow-md"
+                    className="absolute inset-0 bg-[#4B075F] dark:bg-[#F0D8FA] rounded-full shadow-md"
                     transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                   />
-                  <div className="w-5 h-5 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center relative z-10">
-                    <Icon size={13} className="text-[#34D399] dark:text-[#0A0D15]" />
+                  <div className="w-5 h-5 rounded-full bg-white/20 dark:bg-black/10 flex items-center justify-center relative z-10">
+                    <Icon size={13} className="text-[#FCE8FA] dark:text-[#4B075F]" />
                   </div>
-                  <span className="text-white dark:text-[#0A0D15] text-[11px] font-black relative z-10 pr-0.5">
+                  <span className="text-white dark:text-[#4B075F] text-[11px] font-black relative z-10 pr-0.5">
                     {tab.label}
                   </span>
                 </div>
@@ -516,7 +516,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
         <button
           type="button"
           onClick={() => setIsMoreSheetOpen(true)}
-          className="w-[42px] h-[42px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 flex items-center justify-center cursor-pointer"
+          className="w-[42px] h-[42px] rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] text-[#514458] dark:text-[#D2C5D8] flex items-center justify-center cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
           title="Tüm İdari Modüller"
         >
           <Grid size={18} />
@@ -539,21 +539,21 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="relative w-full max-w-lg bg-white dark:bg-[#0E1526] rounded-t-3xl shadow-2xl border border-gray-200 dark:border-gray-800 max-h-[85vh] flex flex-col z-10 overflow-hidden pb-[env(safe-area-inset-bottom)]"
+              className="relative w-full max-w-lg bg-white dark:bg-[#211729] rounded-t-3xl shadow-2xl border border-[#E8DFEB] dark:border-[#49364F] max-h-[85vh] flex flex-col z-10 overflow-hidden pb-[env(safe-area-inset-bottom)]"
             >
-              <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div className="p-4 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-extrabold text-gray-900 dark:text-white">
+                  <h3 className="text-base font-extrabold text-[#241329] dark:text-white">
                     Tüm Okul Yönetim Modülleri
                   </h3>
-                  <p className="text-[11px] text-gray-400 mt-0.5">
+                  <p className="text-[11px] text-[#716779] mt-0.5">
                     İdare, kadro, öğrenci ve derslik araçları
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsMoreSheetOpen(false)}
-                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] flex items-center justify-center text-[#514458] dark:text-[#D2C5D8] cursor-pointer"
                 >
                   <X size={16} />
                 </button>
@@ -570,18 +570,18 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
                       onClick={() => setIsMoreSheetOpen(false)}
                       className={`p-3 rounded-2xl border flex flex-col justify-between transition-all ${
                         active
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-white dark:bg-[#131C31] border-gray-200/60 dark:border-gray-800/60 text-gray-700 dark:text-gray-300'
+                          ? 'bg-[#F0D8FA] dark:bg-[#350444] border-[#D5C5DC] dark:border-[#8D49A6]/50 text-[#4B075F] dark:text-[#F0D8FA]'
+                          : 'bg-white dark:bg-[#2D2035] border-[#E8DFEB] dark:border-[#49364F] text-[#241329] dark:text-[#FCF9FD]'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                          active ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                          active ? 'bg-[#4B075F] text-white' : 'bg-[#F7F0FA] dark:bg-[#211729] text-[#4B075F] dark:text-[#F0D8FA]'
                         }`}>
                           <Icon size={16} />
                         </div>
                         {item.badge && (
-                          <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 font-bold">
+                          <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA] font-bold">
                             {item.badge}
                           </span>
                         )}
@@ -594,14 +594,14 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
                 })}
               </div>
 
-              <div className="p-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div className="p-4 border-t border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => {
                     setIsMoreSheetOpen(false)
                     handleAdminLogout()
                   }}
-                  className="text-xs font-bold text-rose-500 flex items-center gap-1.5 cursor-pointer"
+                  className="text-xs font-bold text-[#C62848] flex items-center gap-1.5 cursor-pointer"
                 >
                   <LogOut size={14} />
                   <span>Yönetici Oturumunu Kapat</span>

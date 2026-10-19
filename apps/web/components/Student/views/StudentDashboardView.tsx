@@ -672,11 +672,11 @@ export default function StudentDashboardView() {
     }
     if (gpa < 75) {
       return {
-        cardBg: 'bg-blue-50/90 dark:bg-blue-950/40',
-        cardBorder: 'border-blue-200 dark:border-blue-800/60',
-        avatarBg: 'from-blue-500 to-indigo-600',
-        scoreColor: 'text-[#1D77FF] dark:text-blue-400',
-        statusColor: 'text-blue-600 dark:text-blue-400',
+        cardBg: 'bg-[#F7F0FA] dark:bg-[#2D2035]',
+        cardBorder: 'border-[#E8DFEB] dark:border-[#49364F]',
+        avatarBg: 'from-[#4B075F] to-[#8D49A6]',
+        scoreColor: 'text-[#4B075F] dark:text-[#C58ADB]',
+        statusColor: 'text-[#8D49A6] dark:text-[#C58ADB]',
         statusLabel: 'Orta Düzey / Geliştirilebilir',
       }
     }
@@ -848,9 +848,9 @@ export default function StudentDashboardView() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start w-full min-w-0">
         {/* ── LEFT MAIN COLUMN (lg:col-span-8) ── */}
         <div className="lg:col-span-8 space-y-6 lg:space-y-7 min-w-0 w-full">
-          {/* ── VIBRANT GRADIENT BLUE HERO SLIDER (Sabit Yükseklik, Güzel Pattern & 3D Sürükleme) ── */}
+          {/* ── VIBRANT OXONOM BRAND HERO SLIDER (Sabit Yükseklik, Güzel Pattern & 3D Sürükleme) ── */}
           <div
-            className="relative mt-2 sm:mt-4 lg:mt-6 rounded-[28px] sm:rounded-[32px] bg-gradient-to-br from-[#1250DF] via-[#1D77FF] to-[#0A4CC2] dark:from-[#0B1528] dark:via-[#102454] dark:to-[#0A1633] border border-blue-400/40 dark:border-blue-800/50 p-5 sm:p-6 lg:p-7 text-white shadow-[0_16px_45px_rgba(29,119,255,0.18)] overflow-hidden select-none h-[255px] sm:h-[235px] lg:h-[235px] flex flex-col justify-between"
+            className="relative mt-2 sm:mt-4 lg:mt-6 rounded-[28px] sm:rounded-[32px] bg-gradient-to-br from-[#241329] via-[#4B075F] to-[#8D49A6] border border-purple-400/30 dark:border-purple-800/40 p-5 sm:p-6 lg:p-7 text-white shadow-[0_16px_45px_rgba(75,7,95,0.25)] overflow-hidden select-none h-[255px] sm:h-[235px] lg:h-[235px] flex flex-col justify-between"
             style={{ perspective: 1000 }}
           >
             {/* ── HIGH-DEFINITION EDUCATIONAL & GEOMETRIC PATTERN (Daha Belirgin Güzel Pattern) ── */}
@@ -986,7 +986,7 @@ export default function StudentDashboardView() {
                       <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                         <Link
                           href={heroSlides[heroSlideIndex].primaryBtn.href}
-                          className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-white hover:bg-blue-50 text-[#1D77FF] font-black text-xs sm:text-sm shadow-lg shadow-black/15 transition-all"
+                          className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-white hover:bg-[#FCE8FA] text-[#4B075F] font-black text-xs sm:text-sm shadow-lg shadow-black/15 transition-all"
                         >
                           <span>{heroSlides[heroSlideIndex].primaryBtn.label}</span>
                           {React.createElement(heroSlides[heroSlideIndex].primaryBtn.icon, {
@@ -1041,7 +1041,7 @@ export default function StudentDashboardView() {
               </h2>
               <Link
                 href="/student/courses"
-                className="text-xs font-bold text-[#1D77FF] hover:underline flex items-center gap-1"
+                className="text-xs font-bold text-[#4B075F] dark:text-[#C58ADB] hover:underline flex items-center gap-1"
               >
                 <span>Tüm Dersler</span>
                 <ChevronRight size={14} />
@@ -1055,10 +1055,10 @@ export default function StudentDashboardView() {
           {/* ── REHBERLİK & ÖĞRETMEN GÖRÜŞÜ VE YAKLAŞAN SINAV ÖZETİ (Aradaki boşluğu dolduran alan) ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
             {/* Card 1: Öğretmen & Rehberlik Görüşü */}
-            <div className="p-4 sm:p-5 rounded-[26px] bg-white dark:bg-[#111A2E] border border-blue-100/80 dark:border-blue-900/40 shadow-[0_6px_25px_rgb(29,119,255,0.03)] flex flex-col justify-between space-y-3">
+            <div className="p-4 sm:p-5 rounded-[26px] bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-[0_6px_25px_rgba(75,7,95,0.03)] flex flex-col justify-between space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
                     <MessageSquareQuote size={16} />
                   </div>
                   <div>
@@ -1070,26 +1070,26 @@ export default function StudentDashboardView() {
                     </p>
                   </div>
                 </div>
-                <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-200/50">
+                <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-[#FCE8FA] text-[#8D49A6] dark:text-[#F17AE6] border border-[#D5C5DC]/40">
                   Resmi Görüş
                 </span>
               </div>
 
-              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#15213B] border border-blue-50 dark:border-blue-900/30">
+              <div className="p-3 rounded-2xl bg-[#FCF9FD] dark:bg-[#2D2035] border border-[#E8DFEB] dark:border-[#49364F]">
                 <p className="text-xs text-slate-700 dark:text-slate-300 font-medium italic leading-relaxed">
                   "{guidanceNotes.length > 0
                     ? guidanceNotes[0].content
                     : 'Öğrencinin ders içi motivasyonu, ödev disiplini ve sınıf içi etkileşimi yüksek seviyededir.'}"
                 </p>
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/50 dark:border-slate-800/50 text-[10px] text-slate-400 font-bold">
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#E8DFEB] dark:border-[#49364F] text-[10px] text-slate-400 font-bold">
                   <span>{guidanceNotes.length > 0 ? guidanceNotes[0].date : '28.09.2026'}</span>
-                  <span className="text-purple-600 dark:text-purple-400">Danışman Öğretmen Onaylı</span>
+                  <span className="text-[#8D49A6] dark:text-[#C58ADB]">Danışman Öğretmen Onaylı</span>
                 </div>
               </div>
             </div>
 
             {/* Card 2: Yaklaşan Sınav & Değerlendirme Takvimi Özeti */}
-            <div className="p-4 sm:p-5 rounded-[26px] bg-white dark:bg-[#111A2E] border border-blue-100/80 dark:border-blue-900/40 shadow-[0_6px_25px_rgb(29,119,255,0.03)] flex flex-col justify-between space-y-3">
+            <div className="p-4 sm:p-5 rounded-[26px] bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-[0_6px_25px_rgba(75,7,95,0.03)] flex flex-col justify-between space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
@@ -1160,10 +1160,10 @@ export default function StudentDashboardView() {
           </div>
 
           {/* ── HAFTALIK DERS PROGRAMI (Müdürlük Onaylı Canlı Senkronize Matrix) ── */}
-          <div className="p-6 sm:p-7 rounded-[32px] bg-white dark:bg-[#111A2E] border border-blue-100/80 dark:border-blue-900/40 shadow-[0_8px_30px_rgb(29,119,255,0.04)] space-y-5">
+          <div className="p-6 sm:p-7 rounded-[32px] bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-[0_8px_30px_rgba(75,7,95,0.04)] space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#1D77FF]/10 text-[#1D77FF] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
                   <Calendar size={20} />
                 </div>
                 <div>
@@ -1171,10 +1171,10 @@ export default function StudentDashboardView() {
                     <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                       Haftalık Ders Programı ({profile.className})
                     </h2>
-                    <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                    <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[#E4F5ED] text-[#16805D] border border-[#16805D]/20">
                       Canlı Senkronize
                     </span>
-                    <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-500/10 text-[#1D77FF] border border-blue-500/20">
+                    <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[#F0D8FA] text-[#4B075F] border border-[#D5C5DC]">
                       Müdürlük Onaylı
                     </span>
                   </div>
@@ -1192,7 +1192,7 @@ export default function StudentDashboardView() {
                     onClick={() => setScheduleViewMode('matrix')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
                       scheduleViewMode === 'matrix'
-                        ? 'bg-white dark:bg-[#111A2E] text-[#1D77FF] shadow-xs'
+                        ? 'bg-white dark:bg-[#211729] text-[#4B075F] dark:text-[#C58ADB] shadow-xs'
                         : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
@@ -1204,7 +1204,7 @@ export default function StudentDashboardView() {
                     onClick={() => setScheduleViewMode('list')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
                       scheduleViewMode === 'list'
-                        ? 'bg-white dark:bg-[#111A2E] text-[#1D77FF] shadow-xs'
+                        ? 'bg-white dark:bg-[#211729] text-[#4B075F] dark:text-[#C58ADB] shadow-xs'
                         : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
@@ -1215,7 +1215,7 @@ export default function StudentDashboardView() {
 
                 <Link
                   href="/student/courses?tab=schedule"
-                  className="text-xs font-black text-[#1D77FF] hover:underline flex items-center gap-1 pl-1"
+                  className="text-xs font-black text-[#4B075F] dark:text-[#C58ADB] hover:underline flex items-center gap-1 pl-1"
                 >
                   <span>Tam Ekran</span>
                   <ChevronRight size={14} />
@@ -1225,7 +1225,7 @@ export default function StudentDashboardView() {
 
             {/* TABLO MATRİS GÖRÜNÜMÜ: 5 Gün x Periyotlar */}
             {scheduleViewMode === 'matrix' && (
-              <div className="w-full max-w-full rounded-2xl border border-blue-100/70 dark:border-blue-900/40 overflow-hidden">
+              <div className="w-full max-w-full rounded-2xl border border-[#E8DFEB] dark:border-[#49364F] overflow-hidden">
                 <div className="w-full max-w-full overflow-x-auto touch-pan-x custom-scrollbar">
                   <table className="w-full text-left border-collapse min-w-[620px]">
                     <thead>
@@ -1326,7 +1326,7 @@ export default function StudentDashboardView() {
                                           Not Var
                                         </span>
                                       ) : (
-                                        <span className="opacity-0 group-hover:opacity-100 text-[8px] transition-opacity font-bold text-[#1D77FF]">
+                                        <span className="opacity-0 group-hover:opacity-100 text-[8px] transition-opacity font-bold text-[#4B075F] dark:text-[#C58ADB]">
                                           + Not
                                         </span>
                                       )}
@@ -1365,7 +1365,7 @@ export default function StudentDashboardView() {
                         onClick={() => setSelectedScheduleDay(day.key)}
                         className={`py-2 px-1 sm:px-2 rounded-xl text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 min-w-0 ${
                           isSelected
-                            ? 'bg-white dark:bg-[#111A2E] text-[#1D77FF] font-black shadow-xs'
+                            ? 'bg-white dark:bg-[#211729] text-[#4B075F] dark:text-[#C58ADB] font-black shadow-xs'
                             : 'text-slate-500 hover:text-slate-900 dark:hover:text-white font-bold'
                         }`}
                       >
@@ -1408,10 +1408,10 @@ export default function StudentDashboardView() {
                               periodTime
                             )
                           }
-                          className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-blue-50 dark:border-blue-900/30 flex items-center justify-between gap-3 hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-pointer group"
+                          className="p-4 rounded-2xl bg-[#FCF9FD] dark:bg-[#2D2035] border border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between gap-3 hover:border-[#D5C5DC] dark:hover:border-[#C58ADB] transition-all cursor-pointer group"
                         >
                           <div className="flex items-center gap-3.5 min-w-0">
-                            <div className="w-12 h-12 rounded-2xl bg-[#1D77FF]/10 text-[#1D77FF] border border-blue-200/50 flex flex-col items-center justify-center shrink-0">
+                            <div className="w-12 h-12 rounded-2xl bg-[#F0D8FA] dark:bg-[#211729] text-[#4B075F] dark:text-[#C58ADB] border border-[#D5C5DC]/60 flex flex-col items-center justify-center shrink-0">
                               <span className="text-sm font-black">{item.period}</span>
                               <span className="text-[8px] font-bold uppercase text-slate-400">Ders</span>
                             </div>
@@ -1472,7 +1472,7 @@ export default function StudentDashboardView() {
               </h3>
               <Link
                 href="/student/progress"
-                className="text-xs font-bold text-[#1D77FF] hover:underline"
+                className="text-xs font-bold text-[#4B075F] dark:text-[#C58ADB] hover:underline"
               >
                 Detay &gt;
               </Link>
@@ -1540,7 +1540,7 @@ export default function StudentDashboardView() {
               </h3>
               <Link
                 href="/student/planner"
-                className="text-xs font-bold text-[#1D77FF] hover:underline"
+                className="text-xs font-bold text-[#4B075F] dark:text-[#C58ADB] hover:underline"
               >
                 Planlayıcı &gt;
               </Link>
@@ -1564,7 +1564,7 @@ export default function StudentDashboardView() {
                     cy="50"
                     r="40"
                     fill="transparent"
-                    stroke="#1D77FF"
+                    stroke="#8D49A6"
                     strokeWidth="8"
                     strokeDasharray="251.2"
                     strokeDashoffset={
@@ -1596,26 +1596,26 @@ export default function StudentDashboardView() {
                     ? `${totalTasksCount - completedTasksCount} görev bekliyor`
                     : 'Henüz görev eklenmedi'}
                 </div>
-                <div className="text-[10px] text-[#1D77FF] font-bold mt-2">
+                <div className="text-[10px] text-[#8D49A6] dark:text-[#C58ADB] font-bold mt-2">
                   %{totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0} İlerleme
                 </div>
               </div>
             </div>
 
             {/* Real Interactive Tasks List (Kaydırılabilir alan) */}
-            <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800 max-h-[195px] overflow-y-auto custom-scrollbar pr-1">
+            <div className="space-y-2 pt-1 border-t border-[#E8DFEB] dark:border-[#49364F] max-h-[195px] overflow-y-auto custom-scrollbar pr-1">
               {tasks.length > 0 ? (
                 tasks.map((task) => (
                   <button
                     key={task.id}
                     type="button"
                     onClick={() => handleToggleTask(task.id)}
-                    className="w-full text-left p-2.5 rounded-2xl bg-slate-50 dark:bg-[#15213B] hover:bg-slate-100/80 dark:hover:bg-slate-800/60 border border-blue-50 dark:border-blue-900/30 flex items-center gap-2.5 transition-colors cursor-pointer"
+                    className="w-full text-left p-2.5 rounded-2xl bg-[#FCF9FD] dark:bg-[#2D2035] hover:bg-[#F0D8FA]/50 dark:hover:bg-[#49364F]/50 border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-2.5 transition-colors cursor-pointer"
                   >
                     <div
                       className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
                         task.completed
-                          ? 'bg-[#1D77FF] border-[#1D77FF] text-white'
+                          ? 'bg-[#4B075F] border-[#4B075F] text-white'
                           : 'border-slate-300 dark:border-slate-600'
                       }`}
                     >
@@ -1644,10 +1644,10 @@ export default function StudentDashboardView() {
           </div>
 
           {/* ── WIDGET 3: ÖDEV VE ÇALIŞMA DURUMU (YENİLENMİŞ & ANLAŞILIR) ── */}
-          <div className="p-5 sm:p-6 rounded-[28px] sm:rounded-[32px] bg-white dark:bg-[#111A2E] border border-blue-100/80 dark:border-blue-900/40 shadow-[0_8px_30px_rgb(29,119,255,0.04)] space-y-4">
+          <div className="p-5 sm:p-6 rounded-[28px] sm:rounded-[32px] bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-[0_8px_30px_rgba(75,7,95,0.04)] space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#1D77FF] flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
                   <BookOpen size={16} />
                 </div>
                 <h3 className="text-base font-black text-slate-900 dark:text-white">
@@ -1656,7 +1656,7 @@ export default function StudentDashboardView() {
               </div>
               <Link
                 href="/student/assignments"
-                className="text-xs font-bold text-[#1D77FF] hover:underline"
+                className="text-xs font-bold text-[#4B075F] dark:text-[#C58ADB] hover:underline"
               >
                 Tümü &gt;
               </Link>
@@ -1713,11 +1713,11 @@ export default function StudentDashboardView() {
             <div className="space-y-1.5 pt-0.5">
               <div className="flex items-center justify-between text-xs font-bold">
                 <span className="text-slate-600 dark:text-slate-300">Ödev Teslim İlerlemesi</span>
-                <span className="text-[#1D77FF] font-black">%{homeworkProgressPercent}</span>
+                <span className="text-[#4B075F] dark:text-[#C58ADB] font-black">%{homeworkProgressPercent}</span>
               </div>
               <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#1D77FF] to-emerald-400 transition-all duration-500 ease-out"
+                  className="h-full rounded-full bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] transition-all duration-500 ease-out"
                   style={{ width: `${homeworkProgressPercent}%` }}
                 />
               </div>
@@ -1725,7 +1725,7 @@ export default function StudentDashboardView() {
           </div>
 
           {/* ── DERSLERİM & GELİŞİM ALANLARI (SAĞ PANELDE 2'Lİ SÜTUN + TÜMÜNÜ GÖR BUTONU) ── */}
-          <div className="p-5 sm:p-6 rounded-[28px] sm:rounded-[32px] bg-white dark:bg-[#111A2E] border border-blue-100/80 dark:border-blue-900/40 shadow-[0_8px_30px_rgb(29,119,255,0.04)] space-y-4">
+          <div className="p-5 sm:p-6 rounded-[28px] sm:rounded-[32px] bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-[0_8px_30px_rgba(75,7,95,0.04)] space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-black text-slate-900 dark:text-white">
@@ -1735,7 +1735,7 @@ export default function StudentDashboardView() {
                   {profile.className} MEB Haftalık Müfredat Branşları
                 </p>
               </div>
-              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-[#1D77FF] border border-blue-200/50">
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] border border-[#D5C5DC]/50">
                 {realCoreCourses.length} Branş
               </span>
             </div>
@@ -1778,7 +1778,7 @@ export default function StudentDashboardView() {
                       <div className="pt-2 flex justify-end">
                         <ArrowRight
                           size={12}
-                          className="text-[#1D77FF] group-hover:translate-x-1 transition-transform"
+                          className="text-[#4B075F] dark:text-[#C58ADB] group-hover:translate-x-1 transition-transform"
                         />
                       </div>
                     </Link>
@@ -1790,7 +1790,7 @@ export default function StudentDashboardView() {
             {/* Yatay Olarak Tümünü Gör Butonu ve İkonu */}
             <Link
               href="/student/courses"
-              className="w-full py-2.5 px-4 rounded-2xl bg-slate-50 dark:bg-[#15213B] hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-blue-100/70 dark:border-blue-900/40 text-xs font-black text-[#1D77FF] flex items-center justify-center gap-2 shadow-xs transition-all group cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-2xl bg-[#FCF9FD] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-black text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center gap-2 shadow-xs transition-all group cursor-pointer"
             >
               <span>Tümünü Gör</span>
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -1987,12 +1987,12 @@ export default function StudentDashboardView() {
               initial={{ scale: 0.95, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 15 }}
-              className="relative w-full max-w-lg bg-white dark:bg-[#111A2E] rounded-[32px] border border-blue-100 dark:border-blue-900/50 shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]"
+              className="relative w-full max-w-lg bg-white dark:bg-[#211729] rounded-[32px] border border-[#E8DFEB] dark:border-[#49364F] shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]"
             >
               {/* Modal Header */}
-              <div className="p-5 border-b border-blue-50 dark:border-blue-950/60 flex items-center justify-between gap-3 bg-gradient-to-r from-blue-50/50 via-white to-blue-50/30 dark:from-blue-950/20 dark:via-[#111A2E] dark:to-blue-950/10">
+              <div className="p-5 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between gap-3 bg-gradient-to-r from-[#FCF9FD] via-white to-[#F0D8FA]/30 dark:from-[#211729] dark:via-[#2D2035] dark:to-[#211729]">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-2xl bg-[#1D77FF]/10 text-[#1D77FF] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-2xl bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
                     <FileText size={20} />
                   </div>
                   <div className="min-w-0">
@@ -2002,7 +2002,7 @@ export default function StudentDashboardView() {
                           selectedLessonNoteTarget.lesson?.subject ||
                           'Ders Notu'}
                       </span>
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#1D77FF]/10 text-[#1D77FF] border border-blue-200/50">
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] border border-[#D5C5DC]/50">
                         {selectedLessonNoteTarget.dayLabel} • {selectedLessonNoteTarget.periodNumber}. Ders
                       </span>
                     </div>
@@ -2080,7 +2080,7 @@ export default function StudentDashboardView() {
                 {/* Form to Add New Note */}
                 <form onSubmit={handleSaveLessonNote} className="space-y-3.5 pt-2">
                   <div className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <Plus size={14} className="text-[#1D77FF]" />
+                    <Plus size={14} className="text-[#4B075F] dark:text-[#C58ADB]" />
                     <span>Yeni Ders Notu Ekle</span>
                   </div>
 
@@ -2093,7 +2093,7 @@ export default function StudentDashboardView() {
                       value={noteTitle}
                       onChange={(e) => setNoteTitle(e.target.value)}
                       placeholder="Örn: 3. Ders Konu Özeti & Formüller"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-slate-50 dark:bg-slate-800/50 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1D77FF]/30"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] bg-[#FCF9FD] dark:bg-[#2D2035] text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#4B075F]/30"
                     />
                   </div>
 
@@ -2109,7 +2109,7 @@ export default function StudentDashboardView() {
                           onClick={() => setNoteCategory(cat)}
                           className={`px-3 py-1.5 rounded-full text-[10px] font-black transition-all cursor-pointer ${
                             noteCategory === cat
-                              ? 'bg-[#1D77FF] text-white shadow-xs'
+                              ? 'bg-[#4B075F] text-white shadow-xs'
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                           }`}
                         >
@@ -2128,7 +2128,7 @@ export default function StudentDashboardView() {
                       value={noteContent}
                       onChange={(e) => setNoteContent(e.target.value)}
                       placeholder="Öğretmenin tahtaya yazdığı önemli formüller, sayfa numaraları veya hatırlatmalar..."
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1D77FF]/30 resize-none leading-relaxed"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] bg-[#FCF9FD] dark:bg-[#2D2035] text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#4B075F]/30 resize-none leading-relaxed"
                     />
                   </div>
 
@@ -2142,7 +2142,7 @@ export default function StudentDashboardView() {
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-full bg-[#1D77FF] hover:bg-blue-600 text-white font-black text-xs shadow-md shadow-blue-500/25 transition-transform active:scale-95 cursor-pointer flex items-center gap-1.5"
+                      className="px-5 py-2.5 rounded-full bg-[#4B075F] hover:bg-[#620B79] text-white font-black text-xs shadow-md shadow-purple-950/20 transition-transform active:scale-95 cursor-pointer flex items-center gap-1.5"
                     >
                       <span>Notu Kaydet</span>
                     </button>

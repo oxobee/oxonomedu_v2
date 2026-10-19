@@ -177,7 +177,7 @@ export default function TeacherReportsView() {
           <button
             type="button"
             onClick={handlePrint}
-            className="h-10 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs shadow-indigo-500/20"
+            className="h-10 px-3.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs shadow-purple-950/20"
           >
             <Printer size={14} />
             <span>Yazdır / PDF</span>
@@ -217,14 +217,14 @@ export default function TeacherReportsView() {
                 onClick={() => setSelectedClassId(cls.id)}
                 className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-500 text-gray-900 dark:text-white shadow-xs'
+                    ? 'bg-[#F0D8FA]/50 dark:bg-[#4B075F]/30 border-[#4B075F] text-gray-900 dark:text-white shadow-xs'
                     : 'bg-gray-50/50 dark:bg-[#161D2E] border-gray-200/70 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-extrabold">{cls.name}</span>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                    isSelected ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                    isSelected ? 'bg-[#4B075F] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                   }`}>
                     {cls.studentCount} Öğrenci
                   </span>
@@ -233,8 +233,8 @@ export default function TeacherReportsView() {
                   {cls.course}
                 </div>
                 <div className="flex items-center justify-between text-[11px] pt-2 border-t border-gray-200/60 dark:border-gray-800 font-bold">
-                  <span className="text-emerald-600 dark:text-emerald-400">Not Ort: {cls.avgGrade}</span>
-                  <span className="text-indigo-600 dark:text-indigo-400">Devam: %{cls.attendanceRate}</span>
+                  <span className="text-[#16805D] dark:text-[#45C7A2]">Not Ort: {cls.avgGrade}</span>
+                  <span className="text-[#4B075F] dark:text-[#C58ADB]">Devam: %{cls.attendanceRate}</span>
                 </div>
               </button>
             )
@@ -258,8 +258,8 @@ export default function TeacherReportsView() {
               onClick={() => setCategoryTab(tab.key as any)}
               className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 text-gray-600 dark:text-gray-300 hover:border-gray-300'
+                  ? 'bg-[#4B075F] text-white shadow-xs shadow-purple-950/20'
+                  : 'bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 text-gray-600 dark:text-gray-300 hover:border-[#4B075F]'
               }`}
             >
               <Icon size={14} />

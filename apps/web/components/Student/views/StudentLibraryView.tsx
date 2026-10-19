@@ -352,8 +352,8 @@ export default function StudentLibraryView({
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#070B14] pb-24">
-      {/* ── 1. BLUE HERO AREA (Modern, animated patterns, responsive) ── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#1E4FD8] via-[#1D77FF] to-[#0A58D0] text-white">
+      {/* ── 1. OXONOM BRAND HERO AREA (Modern, animated patterns, responsive) ── */}
+      <div className="relative overflow-hidden bg-brand-gradient-dark text-white">
         {/* Subtle geometric pattern overlay */}
         <div
           className="absolute inset-0 opacity-10 pointer-events-none"
@@ -364,8 +364,8 @@ export default function StudentLibraryView({
         />
 
         {/* Ambient glow blobs */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-900/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#D914C8]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#4B075F]/30 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
           {/* Top badges */}
@@ -565,7 +565,7 @@ export default function StudentLibraryView({
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 statusFilter === 'all'
-                  ? 'bg-blue-600 text-white shadow-xs'
+                  ? 'bg-[#4B075F] text-white shadow-xs'
                   : 'bg-white dark:bg-[#0E1526] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:border-gray-300'
               }`}
             >
@@ -577,7 +577,7 @@ export default function StudentLibraryView({
               onClick={() => setStatusFilter('in_progress')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1 ${
                 statusFilter === 'in_progress'
-                  ? 'bg-blue-600 text-white shadow-xs'
+                  ? 'bg-[#4B075F] text-white shadow-xs'
                   : 'bg-white dark:bg-[#0E1526] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:border-gray-300'
               }`}
             >
@@ -590,7 +590,7 @@ export default function StudentLibraryView({
               onClick={() => setStatusFilter('completed')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1 ${
                 statusFilter === 'completed'
-                  ? 'bg-blue-600 text-white shadow-xs'
+                  ? 'bg-[#4B075F] text-white shadow-xs'
                   : 'bg-white dark:bg-[#0E1526] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:border-gray-300'
               }`}
             >
@@ -603,7 +603,7 @@ export default function StudentLibraryView({
               onClick={() => setStatusFilter('favorites')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1 ${
                 statusFilter === 'favorites'
-                  ? 'bg-blue-600 text-white shadow-xs'
+                  ? 'bg-[#4B075F] text-white shadow-xs'
                   : 'bg-white dark:bg-[#0E1526] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:border-gray-300'
               }`}
             >
@@ -616,7 +616,7 @@ export default function StudentLibraryView({
               onClick={() => setStatusFilter('read_later')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1 ${
                 statusFilter === 'read_later'
-                  ? 'bg-blue-600 text-white shadow-xs'
+                  ? 'bg-[#4B075F] text-white shadow-xs'
                   : 'bg-white dark:bg-[#0E1526] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:border-gray-300'
               }`}
             >
@@ -688,7 +688,7 @@ export default function StudentLibraryView({
             <button
               type="button"
               onClick={handleClearFilters}
-              className="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer shadow-xs hover:bg-blue-500 transition-colors"
+              className="px-4 py-2 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
             >
               <RotateCcw size={13} />
               <span>Filtreleri Temizle</span>
@@ -776,7 +776,7 @@ export default function StudentLibraryView({
                           onClick={(e) => handleToggleReadLater(e, book.id)}
                           className={`w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-md transition-transform active:scale-90 cursor-pointer ${
                             isLater
-                              ? 'bg-blue-600 text-white shadow-md'
+                              ? 'bg-[#4B075F] text-white shadow-md'
                               : 'bg-black/40 text-white/80 hover:text-white hover:bg-black/60'
                           }`}
                           title={isLater ? 'Listeden çıkar' : 'Daha sonra oku'}
@@ -792,7 +792,7 @@ export default function StudentLibraryView({
                         {book.gradeName}
                       </span>
                       {prog && prog.percent > 0 && (
-                        <span className="px-1.5 py-0.5 rounded bg-blue-600/90 text-white font-extrabold backdrop-blur-xs">
+                        <span className="px-1.5 py-0.5 rounded bg-[#4B075F]/90 text-white font-extrabold backdrop-blur-xs">
                           %{prog.percent}
                         </span>
                       )}
@@ -802,11 +802,11 @@ export default function StudentLibraryView({
                   {/* Card Info Area */}
                   <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between space-y-2">
                     <div className="space-y-1">
-                      <div className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider line-clamp-1">
+                      <div className="text-[10px] font-extrabold text-[#4B075F] dark:text-[#C58ADB] uppercase tracking-wider line-clamp-1">
                         {book.subject}
                       </div>
                       <h3
-                        className="text-xs sm:text-sm font-extrabold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+                        className="text-xs sm:text-sm font-extrabold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-[#4B075F] dark:group-hover:text-[#C58ADB] transition-colors"
                         title={book.title}
                       >
                         {book.title}
@@ -826,7 +826,7 @@ export default function StudentLibraryView({
                           </div>
                           <div className="w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-blue-600 transition-all duration-300"
+                              className="h-full rounded-full bg-brand-gradient transition-all duration-300"
                               style={{ width: `${prog.percent}%` }}
                             />
                           </div>
@@ -843,7 +843,7 @@ export default function StudentLibraryView({
                             e.stopPropagation()
                             handleOpenReader(book, prog?.currentPage)
                           }}
-                          className="flex-1 py-1.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                          className="flex-1 py-1.5 px-2 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white text-[11px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                         >
                           <BookOpen size={12} />
                           <span>{prog && prog.percent > 0 ? 'Devam Et' : 'Oku'}</span>
@@ -936,7 +936,7 @@ export default function StudentLibraryView({
                           </div>
                           <div className="w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden mt-1">
                             <div
-                              className="h-full rounded-full bg-blue-600"
+                              className="h-full rounded-full bg-brand-gradient"
                               style={{ width: `${prog.percent}%` }}
                             />
                           </div>
@@ -966,7 +966,7 @@ export default function StudentLibraryView({
                         onClick={(e) => handleToggleReadLater(e, book.id)}
                         className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
                           isLater
-                            ? 'text-blue-600 bg-blue-50 dark:bg-blue-950/40'
+                            ? 'text-[#4B075F] bg-[#F0D8FA] dark:bg-[#2D2035]'
                             : 'text-gray-400 hover:text-gray-600 bg-gray-50 dark:bg-[#131C31]'
                         }`}
                         title="Daha sonra oku"
@@ -980,7 +980,7 @@ export default function StudentLibraryView({
                           e.stopPropagation()
                           handleOpenReader(book, prog?.currentPage)
                         }}
-                        className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <BookOpen size={13} />
                         <span>{prog && prog.percent > 0 ? 'Devam Et' : 'Kitabı Oku'}</span>
@@ -1014,7 +1014,7 @@ export default function StudentLibraryView({
                   />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB]">
                     {detailModalBook.gradeName} · {detailModalBook.subject}
                   </span>
                   <h3 className="text-sm font-black text-gray-900 dark:text-white mt-1 leading-snug">
@@ -1070,7 +1070,7 @@ export default function StudentLibraryView({
                   setDetailModalBook(null)
                   handleOpenReader(target, readingProgress[target.id]?.currentPage)
                 }}
-                className="flex-1 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                className="flex-1 py-2.5 rounded-2xl bg-[#4B075F] hover:bg-[#620B79] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
                 <BookOpen size={14} />
                 <span>Kitabı Aç ve Oku</span>

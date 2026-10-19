@@ -165,7 +165,7 @@ export default function OxonomPlusModal({ isOpen, onClose }: OxonomPlusModalProp
                       key={i}
                       className="p-3 rounded-2xl bg-slate-50/80 dark:bg-[#141F38]/80 border border-slate-100 dark:border-blue-900/30 flex items-start gap-3"
                     >
-                      <div className="w-8 h-8 rounded-xl bg-[#1D77FF]/10 text-[#1D77FF] dark:text-[#5BA0FF] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0 mt-0.5">
                         <Icon size={16} />
                       </div>
                       <div className="min-w-0">

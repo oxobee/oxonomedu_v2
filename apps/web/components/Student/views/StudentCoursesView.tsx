@@ -538,12 +538,12 @@ export default function StudentCoursesView() {
                         onClick={() => setSelectedScheduleDay(day.key)}
                         className={`p-3 rounded-xl text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                           isSelected
-                            ? 'bg-blue-600 text-white font-extrabold shadow-md'
+                            ? 'bg-[#4B075F] text-white font-extrabold shadow-md'
                             : 'bg-gray-50 dark:bg-[#131C31] text-gray-700 dark:text-gray-300 hover:bg-gray-100 font-medium'
                         }`}
                       >
                         <span className="text-xs sm:text-sm">{day.label}</span>
-                        <span className={`text-[10px] ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>
+                        <span className={`text-[10px] ${isSelected ? 'text-[#F0D8FA]' : 'text-gray-400'}`}>
                           {count} Ders Saati
                         </span>
                       </button>

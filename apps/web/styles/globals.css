@@ -277,6 +277,38 @@
   --color-chart-3: hsl(var(--chart-3));
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-5: hsl(var(--chart-5));
+
+  /* Oxonom Edu Brand Design Tokens */
+  --color-brand-deep: #4B075F;
+  --color-brand-hover: #620B79;
+  --color-brand-active: #350444;
+  --color-brand-orchid: #8D49A6;
+  --color-brand-magenta: #D914C8;
+  --color-brand-magenta-hover: #B90FAB;
+  --color-brand-magenta-soft: #FCE8FA;
+
+  --color-ox-surface: #FFFFFF;
+  --color-ox-surface-secondary: #F7F0FA;
+  --color-ox-lavender: #F0D8FA;
+  --color-ox-border: #E8DFEB;
+  --color-ox-border-strong: #D5C5DC;
+
+  --color-ox-ink: #241329;
+  --color-ox-subtext: #514458;
+  --color-ox-muted: #716779;
+  --color-ox-placeholder: #716779;
+  --color-ox-disabled: #887D8E;
+
+  --color-ox-success: #16805D;
+  --color-ox-success-bg: #E4F5ED;
+  --color-ox-warning: #B86B00;
+  --color-ox-warning-bg: #FFF3D9;
+  --color-ox-error: #C62848;
+  --color-ox-error-bg: #FCE8ED;
+  --color-ox-info: #2563EB;
+  --color-ox-info-bg: #EAF1FF;
+  --color-ox-yellow: #F5C542;
+  --color-ox-mint: #45C7A2;
 }
 
 /*
@@ -298,6 +330,51 @@
 }
 
 @layer utilities {
+  /* Oxonom Edu Brand Gradients */
+  .bg-brand-gradient {
+    background: linear-gradient(135deg, #4B075F 0%, #8D49A6 55%, #D914C8 100%);
+  }
+  .bg-brand-gradient-dark {
+    background: linear-gradient(135deg, #241329 0%, #4B075F 65%, #8D49A6 100%);
+  }
+  .bg-surface-gradient {
+    background: linear-gradient(135deg, #FCF9FD 0%, #F0D8FA 100%);
+  }
+  .bg-accent-gradient {
+    background: linear-gradient(135deg, #8D49A6 0%, #D914C8 100%);
+  }
+
+  /* Oxonom Edu Standard Buttons & Cards */
+  .btn-ox-primary {
+    background-color: #4B075F;
+    color: #FFFFFF;
+    transition: background-color 0.18s ease-in-out, transform 0.12s ease-in-out;
+  }
+  .btn-ox-primary:hover {
+    background-color: #620B79;
+  }
+  .btn-ox-primary:active {
+    background-color: #350444;
+  }
+  .btn-ox-secondary {
+    background-color: #F0D8FA;
+    color: #4B075F;
+    transition: background-color 0.18s ease-in-out, transform 0.12s ease-in-out;
+  }
+  .btn-ox-secondary:hover {
+    background-color: #E7C4F3;
+  }
+  .card-ox {
+    background-color: #FFFFFF;
+    border: 1px solid #E8DFEB;
+    border-radius: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .dark .card-ox {
+    background-color: #211729;
+    border-color: #49364F;
+  }
+
   .nice-shadow {
     @apply shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40;
   }
@@ -388,12 +465,7 @@
     box-sizing: border-box;
   }
 
-  @media (prefers-color-scheme: dark) {
-    body {
-      color: black;
-      background: #fbfbfb;
-    }
-  }
+
 
   /* Basic editor styles */
   .ProseMirror {
@@ -467,30 +539,66 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    /* Oxonom Edu Brand Color Tokens */
+    --color-primary: #4B075F;
+    --color-primary-hover: #620B79;
+    --color-primary-active: #350444;
+    --color-secondary: #8D49A6;
+    --color-accent: #D914C8;
+    --color-accent-hover: #B90FAB;
+    --color-accent-soft: #FCE8FA;
+
+    --color-background: #FCF9FD;
+    --color-surface: #FFFFFF;
+    --color-surface-secondary: #F7F0FA;
+    --color-surface-lavender: #F0D8FA;
+    --color-border: #E8DFEB;
+    --color-border-strong: #D5C5DC;
+
+    --color-text-primary: #241329;
+    --color-text-secondary: #514458;
+    --color-text-muted: #716779;
+    --color-text-on-primary: #FFFFFF;
+    --color-text-on-accent: #FFFFFF;
+    --color-placeholder: #716779;
+    --color-disabled-text: #887D8E;
+
+    --color-success: #16805D;
+    --color-success-bg: #E4F5ED;
+    --color-warning: #B86B00;
+    --color-warning-bg: #FFF3D9;
+    --color-error: #C62848;
+    --color-error-bg: #FCE8ED;
+    --color-info: #2563EB;
+    --color-info-bg: #EAF1FF;
+    --color-decorative-yellow: #F5C542;
+    --color-decorative-mint: #45C7A2;
+
+    /* Base Theme Variables for Tailwind / UI Components */
+    --background: 285 50% 98.4%;
+    --foreground: 286 37% 11.8%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 286 37% 11.8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
+    --popover-foreground: 286 37% 11.8%;
+    --primary: 286 86% 20.8%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 282 77% 91.4%;
+    --secondary-foreground: 286 86% 20.8%;
+    --muted: 282 56% 96.1%;
+    --muted-foreground: 273 8% 43.9%;
+    --accent: 306 77% 95%;
+    --accent-foreground: 286 86% 20.8%;
+    --destructive: 348 66% 47.1%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 285 23% 89.8%;
+    --input: 285 23% 89.8%;
+    --ring: 286 86% 20.8%;
+    --chart-1: 286 86% 20.8%;
+    --chart-2: 284 39% 47%;
+    --chart-3: 305 83% 46%;
     --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --chart-5: 160 70% 30%;
     --radius: 0.5rem;
 
     /* Z-Index Layering System */
@@ -520,30 +628,44 @@
     --z-max: 9999;
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;}}
+    /* Oxonom Edu Dark Theme Tokens */
+    --color-background: #17101C;
+    --color-surface: #211729;
+    --color-surface-elevated: #2D2035;
+    --color-border: #49364F;
+    --color-text-primary: #FCF9FD;
+    --color-text-secondary: #D2C5D8;
+    --color-text-muted: #B5A5BD;
+    --color-primary: #C58ADB;
+    --color-accent: #F17AE6;
+
+    /* Base Dark Theme Variables */
+    --background: 273 27% 8.6%;
+    --foreground: 285 50% 98.4%;
+    --card: 273 28% 12.5%;
+    --card-foreground: 285 50% 98.4%;
+    --popover: 276 25% 16.7%;
+    --popover-foreground: 285 50% 98.4%;
+    --primary: 284 51% 70%;
+    --primary-foreground: 273 27% 8.6%;
+    --secondary: 276 25% 16.7%;
+    --secondary-foreground: 285 50% 98.4%;
+    --muted: 273 28% 12.5%;
+    --muted-foreground: 279 14% 69.4%;
+    --accent: 306 83% 71%;
+    --accent-foreground: 273 27% 8.6%;
+    --destructive: 348 66% 47.1%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 282 19% 26.3%;
+    --input: 282 19% 26.3%;
+    --ring: 284 51% 70%;
+    --chart-1: 284 51% 70%;
+    --chart-2: 306 83% 71%;
+    --chart-3: 160 60% 45%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 220 70% 50%;
+  }
+}
 
 @layer base {
   * {

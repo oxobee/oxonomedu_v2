@@ -56,7 +56,7 @@ export default function MobileAdminDock({
 
   return (
     <nav
-      className="fixed safe-dock-bottom left-1/2 -translate-x-1/2 w-[94%] max-w-[365px] bg-white/95 dark:bg-[#0E131F]/95 backdrop-blur-md border border-gray-200/90 dark:border-gray-800/90 rounded-[30px] p-1.5 flex items-center justify-between shadow-2xl z-40 select-none"
+      className="fixed safe-dock-bottom left-1/2 -translate-x-1/2 w-[94%] max-w-[365px] bg-white/95 dark:bg-[#211729]/95 backdrop-blur-md border border-[#E8DFEB]/90 dark:border-[#49364F]/90 rounded-[30px] p-1.5 flex items-center justify-between shadow-2xl z-40 select-none"
       style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
       aria-label="İdare Paneli Menüsü"
     >
@@ -70,25 +70,20 @@ export default function MobileAdminDock({
           <div className="relative flex items-center gap-1.5 h-full px-3.5 rounded-full z-10">
             <motion.div
               layoutId="admin-dock-active-pill"
-              className="absolute inset-0 bg-[#0A0D15] dark:bg-white rounded-full shadow-lg"
+              className="absolute inset-0 bg-[#4B075F] dark:bg-white rounded-full shadow-lg"
               transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-              style={{
-                backgroundImage:
-                  'linear-gradient(45deg,rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.06) 1px,transparent 1px)',
-                backgroundSize: '14px 14px',
-              }}
             />
             <motion.div
               whileHover={{ rotate: 8, scale: 1.15 }}
               whileTap={{ scale: 0.88 }}
               className="w-5 h-5 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center relative z-10"
             >
-              <LayoutDashboard size={13} className="text-[#34D399] dark:text-[#0A0D15]" />
+              <LayoutDashboard size={13} className="text-[#D914C8] dark:text-[#4B075F]" />
             </motion.div>
             <motion.span
               initial={{ opacity: 0, x: -3 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-white dark:text-[#0A0D15] text-[12px] font-extrabold relative z-10 pr-0.5 select-none"
+              className="text-white dark:text-[#241329] text-[12px] font-extrabold relative z-10 pr-0.5 select-none"
             >
               Ana Sayfa
             </motion.span>
@@ -97,7 +92,7 @@ export default function MobileAdminDock({
           <motion.div
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.88 }}
-            className="w-[42px] h-[42px] rounded-full bg-[#E3F3EF] dark:bg-teal-950/60 text-[#0F766E] dark:text-teal-400 flex items-center justify-center transition-colors"
+            className="w-[42px] h-[42px] rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] text-[#716779] dark:text-[#D2C5D8] hover:text-[#4B075F] dark:hover:text-[#F17AE6] flex items-center justify-center transition-colors"
           >
             <LayoutDashboard size={19} strokeWidth={1.9} />
           </motion.div>
@@ -114,25 +109,20 @@ export default function MobileAdminDock({
           <div className="relative flex items-center gap-1.5 h-full px-3.5 rounded-full z-10">
             <motion.div
               layoutId="admin-dock-active-pill"
-              className="absolute inset-0 bg-[#0A0D15] dark:bg-white rounded-full shadow-lg"
+              className="absolute inset-0 bg-[#4B075F] dark:bg-white rounded-full shadow-lg"
               transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-              style={{
-                backgroundImage:
-                  'linear-gradient(45deg,rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.06) 1px,transparent 1px)',
-                backgroundSize: '14px 14px',
-              }}
             />
             <motion.div
               whileHover={{ rotate: 8, scale: 1.15 }}
               whileTap={{ scale: 0.88 }}
               className="w-5 h-5 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center relative z-10"
             >
-              <GraduationCap size={13} className="text-[#34D399] dark:text-[#0A0D15]" />
+              <GraduationCap size={13} className="text-[#D914C8] dark:text-[#4B075F]" />
             </motion.div>
             <motion.span
               initial={{ opacity: 0, x: -3 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-white dark:text-[#0A0D15] text-[12px] font-extrabold relative z-10 pr-0.5 select-none"
+              className="text-white dark:text-[#241329] text-[12px] font-extrabold relative z-10 pr-0.5 select-none"
             >
               Öğrenciler
             </motion.span>
@@ -141,7 +131,7 @@ export default function MobileAdminDock({
           <motion.div
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.88 }}
-            className="w-[42px] h-[42px] rounded-full bg-[#ECEBFD] dark:bg-indigo-950/60 text-[#4338CA] dark:text-indigo-300 flex items-center justify-center transition-colors"
+            className="w-[42px] h-[42px] rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] text-[#716779] dark:text-[#D2C5D8] hover:text-[#4B075F] dark:hover:text-[#F17AE6] flex items-center justify-center transition-colors"
           >
             <GraduationCap size={19} strokeWidth={1.9} />
           </motion.div>
@@ -158,25 +148,20 @@ export default function MobileAdminDock({
           <div className="relative flex items-center gap-1.5 h-full px-3.5 rounded-full z-10">
             <motion.div
               layoutId="admin-dock-active-pill"
-              className="absolute inset-0 bg-[#0A0D15] dark:bg-white rounded-full shadow-lg"
+              className="absolute inset-0 bg-[#4B075F] dark:bg-white rounded-full shadow-lg"
               transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-              style={{
-                backgroundImage:
-                  'linear-gradient(45deg,rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.06) 1px,transparent 1px)',
-                backgroundSize: '14px 14px',
-              }}
             />
             <motion.div
               whileHover={{ rotate: 8, scale: 1.15 }}
               whileTap={{ scale: 0.88 }}
               className="w-5 h-5 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center relative z-10"
             >
-              <Briefcase size={13} className="text-[#34D399] dark:text-[#0A0D15]" />
+              <Briefcase size={13} className="text-[#D914C8] dark:text-[#4B075F]" />
             </motion.div>
             <motion.span
               initial={{ opacity: 0, x: -3 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-white dark:text-[#0A0D15] text-[12px] font-extrabold relative z-10 pr-0.5 select-none"
+              className="text-white dark:text-[#241329] text-[12px] font-extrabold relative z-10 pr-0.5 select-none"
             >
               Öğretmenler
             </motion.span>
@@ -185,7 +170,7 @@ export default function MobileAdminDock({
           <motion.div
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.88 }}
-            className="w-[42px] h-[42px] rounded-full bg-[#E6F9F5] dark:bg-teal-950/60 text-[#0D9488] dark:text-teal-300 flex items-center justify-center transition-colors shadow-xs"
+            className="w-[42px] h-[42px] rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] text-[#716779] dark:text-[#D2C5D8] hover:text-[#4B075F] dark:hover:text-[#F17AE6] flex items-center justify-center transition-colors"
           >
             <Briefcase size={19} strokeWidth={1.9} />
           </motion.div>
@@ -202,25 +187,20 @@ export default function MobileAdminDock({
           <div className="relative flex items-center gap-1.5 h-full px-3.5 rounded-full z-10">
             <motion.div
               layoutId="admin-dock-active-pill"
-              className="absolute inset-0 bg-[#0A0D15] dark:bg-white rounded-full shadow-lg"
+              className="absolute inset-0 bg-[#4B075F] dark:bg-white rounded-full shadow-lg"
               transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-              style={{
-                backgroundImage:
-                  'linear-gradient(45deg,rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(-45deg,rgba(255,255,255,.06) 1px,transparent 1px)',
-                backgroundSize: '14px 14px',
-              }}
             />
             <motion.div
               whileHover={{ rotate: 8, scale: 1.15 }}
               whileTap={{ scale: 0.88 }}
               className="w-5 h-5 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center relative z-10"
             >
-              <Calendar size={13} className="text-[#34D399] dark:text-[#0A0D15]" />
+              <Calendar size={13} className="text-[#D914C8] dark:text-[#4B075F]" />
             </motion.div>
             <motion.span
               initial={{ opacity: 0, x: -3 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-white dark:text-[#0A0D15] text-[12px] font-extrabold relative z-10 pr-0.5 select-none"
+              className="text-white dark:text-[#241329] text-[12px] font-extrabold relative z-10 pr-0.5 select-none"
             >
               Program
             </motion.span>
@@ -229,7 +209,7 @@ export default function MobileAdminDock({
           <motion.div
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.88 }}
-            className="w-[42px] h-[42px] rounded-full bg-[#EEF0FF] dark:bg-indigo-950/60 text-[#6366F1] dark:text-indigo-300 flex items-center justify-center relative transition-colors shadow-xs"
+            className="w-[42px] h-[42px] rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] text-[#716779] dark:text-[#D2C5D8] hover:text-[#4B075F] dark:hover:text-[#F17AE6] flex items-center justify-center relative transition-colors"
           >
             <Calendar size={19} strokeWidth={1.9} />
           </motion.div>
@@ -246,7 +226,7 @@ export default function MobileAdminDock({
         <motion.div
           whileHover={{ scale: 1.12 }}
           whileTap={{ scale: 0.88 }}
-          className="w-[42px] h-[42px] rounded-full bg-[#FDF0DC] dark:bg-orange-950/60 text-[#B45309] dark:text-orange-300 flex items-center justify-center transition-colors shadow-xs"
+          className="w-[42px] h-[42px] rounded-full bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#C58ADB] hover:text-[#D914C8] flex items-center justify-center transition-colors shadow-xs"
         >
           <Grid size={19} strokeWidth={2} />
         </motion.div>

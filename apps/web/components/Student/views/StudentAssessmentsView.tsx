@@ -383,7 +383,7 @@ export default function StudentAssessmentsView({
             onClick={() => setTypeTab('all')}
             className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               typeTab === 'all'
-                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xs'
+                ? 'bg-[#4B075F] text-white shadow-xs'
                 : 'bg-white dark:bg-[#121826] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50'
             }`}
           >
@@ -395,7 +395,7 @@ export default function StudentAssessmentsView({
             onClick={() => setTypeTab('written')}
             className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               typeTab === 'written'
-                ? 'bg-indigo-600 text-white shadow-xs'
+                ? 'bg-[#4B075F] text-white shadow-xs'
                 : 'bg-white dark:bg-[#121826] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50'
             }`}
           >

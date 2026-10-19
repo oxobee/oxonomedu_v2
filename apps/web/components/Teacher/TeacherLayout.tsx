@@ -92,36 +92,36 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
       label: 'Ana Sayfa',
       path: '/teacher/dashboard',
       icon: Home,
-      activeIconBg: 'bg-[#162920] dark:bg-emerald-100 text-[#10B981] dark:text-emerald-700',
-      inactiveBg: 'bg-[#F3F4F6] dark:bg-gray-800',
-      inactiveText: 'text-gray-700 dark:text-gray-300',
+      activeIconBg: 'bg-white/15 dark:bg-black/10 text-[#D914C8] dark:text-[#4B075F]',
+      inactiveBg: 'bg-[#F7F0FA] dark:bg-[#2D2035]',
+      inactiveText: 'text-[#716779] dark:text-[#D2C5D8]',
     },
     {
       id: 'classes',
       label: 'Sınıflarım',
       path: '/teacher/classes',
       icon: Users,
-      activeIconBg: 'bg-[#201A38] dark:bg-purple-100 text-[#818CF8] dark:text-purple-700',
-      inactiveBg: 'bg-[#F0EEFF] dark:bg-indigo-950/60',
-      inactiveText: 'text-[#6366F1] dark:text-indigo-300',
+      activeIconBg: 'bg-white/15 dark:bg-black/10 text-[#D914C8] dark:text-[#4B075F]',
+      inactiveBg: 'bg-[#F7F0FA] dark:bg-[#2D2035]',
+      inactiveText: 'text-[#716779] dark:text-[#D2C5D8]',
     },
     {
       id: 'assignments',
       label: 'Ödevler',
       path: '/teacher/assignments',
       icon: BookOpen,
-      activeIconBg: 'bg-[#112926] dark:bg-teal-100 text-[#2DD4BF] dark:text-teal-700',
-      inactiveBg: 'bg-[#E6F9F5] dark:bg-teal-950/60',
-      inactiveText: 'text-[#0D9488] dark:text-teal-300',
+      activeIconBg: 'bg-white/15 dark:bg-black/10 text-[#D914C8] dark:text-[#4B075F]',
+      inactiveBg: 'bg-[#F7F0FA] dark:bg-[#2D2035]',
+      inactiveText: 'text-[#716779] dark:text-[#D2C5D8]',
     },
     {
       id: 'attendance',
       label: 'Yoklama',
       path: '/teacher/attendance',
       icon: CheckSquare,
-      activeIconBg: 'bg-[#1E2342] dark:bg-blue-100 text-[#6366F1] dark:text-blue-700',
-      inactiveBg: 'bg-[#EEF2FF] dark:bg-blue-950/60',
-      inactiveText: 'text-[#4F46E5] dark:text-blue-300',
+      activeIconBg: 'bg-white/15 dark:bg-black/10 text-[#D914C8] dark:text-[#4B075F]',
+      inactiveBg: 'bg-[#F7F0FA] dark:bg-[#2D2035]',
+      inactiveText: 'text-[#716779] dark:text-[#D2C5D8]',
     },
   ]
 
@@ -129,20 +129,20 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
   const visibleMenuItems = TEACHER_MENU_CONFIG.filter((item) => !item.hidden)
 
   return (
-    <div className={`${theme} min-h-screen bg-[#F8FAFC] dark:bg-[#0A0D15] text-gray-900 dark:text-white font-jakarta flex flex-col lg:flex-row transition-colors duration-200`}>
+    <div className={`${theme} min-h-screen bg-[#FCF9FD] dark:bg-[#17101C] text-[#241329] dark:text-[#FCF9FD] font-jakarta flex flex-col lg:flex-row transition-colors duration-200`}>
       {/* ── DESKTOP SIDEBAR (lg+) ── */}
-      <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 shrink-0 bg-white dark:bg-[#0E1526] border-r border-gray-200/80 dark:border-gray-800/80 z-30 select-none">
+      <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 shrink-0 bg-white dark:bg-[#211729] border-r border-[#E8DFEB] dark:border-[#49364F] z-30 select-none">
         {/* Brand Header */}
-        <div className="p-5 border-b border-gray-100 dark:border-gray-800/80 flex items-center justify-between">
+        <div className="p-5 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 font-black text-lg">
+            <div className="w-10 h-10 rounded-2xl bg-brand-gradient flex items-center justify-center text-white shadow-md font-black text-lg">
               OX
             </div>
             <div>
-              <div className="text-sm font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight">
+              <div className="text-sm font-extrabold tracking-tight text-[#241329] dark:text-white leading-tight">
                 Oxonom EDU
               </div>
-              <div className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+              <div className="text-[10px] font-bold text-[#8D49A6] dark:text-[#C58ADB] uppercase tracking-wider">
                 Öğretmen Portalı
               </div>
             </div>
@@ -150,7 +150,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           <button
             type="button"
             onClick={toggleTheme}
-            className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#716779] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer"
             title="Temayı Değiştir"
           >
             {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
@@ -158,15 +158,15 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
         </div>
 
         {/* Teacher Identity Box */}
-        <div className="p-4 mx-3 my-2 rounded-2xl bg-gradient-to-br from-[#F1F4F9] to-white dark:from-[#131C31] dark:to-[#0F172A] border border-gray-200/60 dark:border-gray-800/60 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 font-extrabold text-sm flex items-center justify-center shrink-0 border border-indigo-500/20">
+        <div className="p-4 mx-3 my-2 rounded-2xl bg-[#F7F0FA] dark:bg-[#2D2035] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#F0D8FA] dark:bg-[#4B075F]/30 text-[#4B075F] dark:text-[#C58ADB] font-extrabold text-sm flex items-center justify-center shrink-0 border border-[#8D49A6]/20">
             {teacherName.slice(0, 2).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
+            <div className="text-xs font-bold text-[#241329] dark:text-white truncate">
               {teacherName}
             </div>
-            <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+            <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] truncate">
               {teacherBranch}
             </div>
           </div>
@@ -185,10 +185,10 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                 href={item.path}
                 className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   active
-                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 shadow-xs'
+                    ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#FCF9FD] shadow-xs'
                     : isPassive
-                    ? 'text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800/40'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white'
+                    ? 'text-[#716779]/60 dark:text-[#B5A5BD]/50 hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035]/40'
+                    : 'text-[#514458] dark:text-[#D2C5D8] hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035] hover:text-[#241329] dark:hover:text-white'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -196,17 +196,17 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                     size={17}
                     className={`shrink-0 transition-colors ${
                       active
-                        ? 'text-indigo-600 dark:text-indigo-400'
+                        ? 'text-[#4B075F] dark:text-[#D914C8]'
                         : isPassive
-                        ? 'text-gray-400 dark:text-gray-600'
-                        : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'
+                        ? 'text-[#716779]/50 dark:text-[#B5A5BD]/40'
+                        : 'text-[#716779] dark:text-[#B5A5BD] group-hover:text-[#4B075F] dark:group-hover:text-white'
                     }`}
                   />
                   <span className="truncate">{item.label}</span>
                 </div>
 
                 {isPassive && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold shrink-0">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-semibold shrink-0">
                     Geliştirme
                   </span>
                 )}
@@ -216,7 +216,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
         </nav>
 
         {/* Footer Actions */}
-        <div className="p-3 border-t border-gray-100 dark:border-gray-800/80 space-y-1.5">
+        <div className="p-3 border-t border-[#E8DFEB] dark:border-[#49364F] space-y-1.5">
           <button
             type="button"
             onClick={async () => {
@@ -230,7 +230,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               await signOut()
               window.location.href = '/loginv2'
             }}
-            className="w-full h-9 px-3 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="w-full h-9 px-3 rounded-xl hover:bg-[#FCE8ED] dark:hover:bg-[#C62848]/20 text-[#716779] hover:text-[#C62848] dark:hover:text-[#F17AE6] font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <LogOut size={14} />
             <span>Oturumu Kapat</span>
@@ -241,12 +241,12 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
       {/* ── MAIN CONTENT WORKSPACE ── */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Desktop Top Header Bar (lg+) — Sleek & Minimal */}
-        <header className="hidden lg:flex items-center justify-between h-16 px-8 border-b border-gray-200/80 dark:border-gray-800/80 bg-white/80 dark:bg-[#0E1526]/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="hidden lg:flex items-center justify-between h-16 px-8 border-b border-[#E8DFEB] dark:border-[#49364F] bg-white/80 dark:bg-[#211729]/80 backdrop-blur-md sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-gray-400 font-medium">Öğretmen</span>
-              <ChevronRight size={13} className="text-gray-400" />
-              <span className="font-extrabold text-gray-900 dark:text-white">
+              <span className="text-[#716779] font-medium">Öğretmen</span>
+              <ChevronRight size={13} className="text-[#716779]" />
+              <span className="font-extrabold text-[#241329] dark:text-white">
                 {currentItem?.label || 'Dersler & Yoklama'}
               </span>
             </div>
@@ -254,11 +254,11 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
 
           <div className="flex items-center gap-2.5">
             {/* Live Clock minimal */}
-            <HeaderLiveClock theme="indigo" variant="desktop" />
+            <HeaderLiveClock theme="oxonom" variant="desktop" />
 
             <Link
               href="/teacher/schedule"
-              className="h-9 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs flex items-center gap-1.5 transition-colors border border-gray-200/60 dark:border-gray-700/60"
+              className="h-9 px-3 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#241329] dark:text-[#FCF9FD] font-bold text-xs flex items-center gap-1.5 transition-colors border border-[#E8DFEB] dark:border-[#49364F]"
             >
               <Calendar size={13} />
               <span>Program</span>
@@ -267,7 +267,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
             <button
               type="button"
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer border border-gray-200/60 dark:border-gray-700/60"
+              className="w-9 h-9 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#716779] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
               title="Temayı Değiştir"
             >
               {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
@@ -277,30 +277,30 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
 
         {/* ── MOBILE HEADER (<lg) — Sleek, Minimal & Notch Safe ── */}
         <header
-          className="lg:hidden sticky top-0 z-30 bg-white/95 dark:bg-[#0E1526]/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-800/80 px-4 pb-2.5 flex items-center justify-between"
+          className="lg:hidden sticky top-0 z-30 bg-white/95 dark:bg-[#211729]/95 backdrop-blur-md border-b border-[#E8DFEB] dark:border-[#49364F] px-4 pb-2.5 flex items-center justify-between"
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.65rem)' }}
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-800 flex items-center justify-center text-white shadow-xs font-black text-xs">
+            <div className="w-7 h-7 rounded-lg bg-brand-gradient flex items-center justify-center text-white shadow-xs font-black text-xs">
               OX
             </div>
             <div>
-              <div className="text-xs font-extrabold text-gray-900 dark:text-white leading-tight">
+              <div className="text-xs font-extrabold text-[#241329] dark:text-white leading-tight">
                 Oxonom EDU
               </div>
-              <div className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400">
+              <div className="text-[9px] font-bold text-[#8D49A6] dark:text-[#C58ADB]">
                 {teacherName}
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <HeaderLiveClock theme="indigo" variant="mobile" />
+            <HeaderLiveClock theme="oxonom" variant="mobile" />
 
             <button
               type="button"
               onClick={toggleTheme}
-              className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 flex items-center justify-center cursor-pointer"
+              className="w-8 h-8 rounded-lg bg-[#F7F0FA] dark:bg-[#2D2035] text-[#716779] dark:text-[#D2C5D8] flex items-center justify-center cursor-pointer"
             >
               {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
             </button>
@@ -315,7 +315,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
 
       {/* ── MOBILE FLOATING BOTTOM DOCK (Visual Matched to Design Mockup) ── */}
       <nav
-        className="lg:hidden fixed safe-dock-bottom left-1/2 -translate-x-1/2 w-[95%] max-w-[400px] bg-white/95 dark:bg-[#0E131F]/95 backdrop-blur-xl border border-gray-200/90 dark:border-gray-800/90 rounded-full px-2 py-1.5 flex items-center justify-between gap-1 shadow-2xl z-40 select-none"
+        className="lg:hidden fixed safe-dock-bottom left-1/2 -translate-x-1/2 w-[95%] max-w-[400px] bg-white/95 dark:bg-[#211729]/95 backdrop-blur-xl border border-[#E8DFEB]/90 dark:border-[#49364F]/90 rounded-full px-2 py-1.5 flex items-center justify-between gap-1 shadow-2xl z-40 select-none"
         style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
         aria-label="Öğretmen alt menü"
       >
@@ -329,7 +329,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               <Link
                 key={item.id}
                 href={item.path}
-                className="h-11 px-3.5 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center gap-2 font-bold text-xs shadow-md shrink-0 transition-all"
+                className="h-11 px-3.5 rounded-full bg-[#4B075F] dark:bg-white text-white dark:text-[#241329] flex items-center gap-2 font-bold text-xs shadow-md shrink-0 transition-all"
               >
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center ${item.activeIconBg}`}>
                   <Icon size={15} strokeWidth={2.4} />
@@ -357,8 +357,8 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           onClick={() => setIsMoreSheetOpen(true)}
           className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95 ${
             isMoreSheetOpen
-              ? 'bg-[#FDE68A] text-[#B45309] font-bold'
-              : 'bg-[#FFF4E5] dark:bg-amber-950/60 text-[#D97706] dark:text-amber-300'
+              ? 'bg-[#F0D8FA] text-[#4B075F] font-bold'
+              : 'bg-[#F7F0FA] dark:bg-[#2D2035] text-[#716779] dark:text-[#D2C5D8]'
           }`}
           title="Daha Fazla Modül"
         >
@@ -385,22 +385,22 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="relative w-full max-w-lg bg-white dark:bg-[#0E1526] rounded-t-3xl shadow-2xl border border-gray-200 dark:border-gray-800 max-h-[85vh] flex flex-col z-10 overflow-hidden pb-[env(safe-area-inset-bottom)]"
+              className="relative w-full max-w-lg bg-white dark:bg-[#211729] rounded-t-3xl shadow-2xl border border-[#E8DFEB] dark:border-[#49364F] max-h-[85vh] flex flex-col z-10 overflow-hidden pb-[env(safe-area-inset-bottom)]"
             >
               {/* Header */}
-              <div className="p-4.5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div className="p-4.5 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-extrabold text-gray-900 dark:text-white">
+                  <h3 className="text-base font-extrabold text-[#241329] dark:text-white">
                     Tüm Öğretmen Modülleri
                   </h3>
-                  <p className="text-[11px] text-gray-400 mt-0.5">
+                  <p className="text-[11px] text-[#716779] dark:text-[#B5A5BD] mt-0.5">
                     Kapsamlı çalışma alanları ve araçlar
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsMoreSheetOpen(false)}
-                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] flex items-center justify-center text-[#716779] cursor-pointer"
                 >
                   <X size={16} />
                 </button>
@@ -420,24 +420,24 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                       onClick={() => setIsMoreSheetOpen(false)}
                       className={`p-3 rounded-2xl border flex flex-col justify-between transition-all ${
                         active
-                          ? 'bg-indigo-50/70 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300'
+                          ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/30 border-[#8D49A6]/40 text-[#4B075F] dark:text-[#FCF9FD]'
                           : isPassive
-                          ? 'bg-gray-50/50 dark:bg-[#12192B] border-gray-100 dark:border-gray-800 text-gray-400 dark:text-gray-500'
-                          : 'bg-white dark:bg-[#131C31] border-gray-200/60 dark:border-gray-800/60 text-gray-700 dark:text-gray-300 hover:border-gray-300'
+                          ? 'bg-[#F7F0FA]/50 dark:bg-[#17101C]/60 border-[#E8DFEB]/50 dark:border-[#49364F]/50 text-[#716779]/60 dark:text-[#B5A5BD]/50'
+                          : 'bg-[#FCF9FD] dark:bg-[#17101C] border-[#E8DFEB] dark:border-[#49364F] text-[#514458] dark:text-[#D2C5D8] hover:border-[#8D49A6]/40'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                           active
-                            ? 'bg-indigo-600 text-white'
+                            ? 'bg-[#4B075F] text-white'
                             : isPassive
-                            ? 'bg-gray-200/50 dark:bg-gray-800 text-gray-400'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                            ? 'bg-[#E8DFEB]/50 dark:bg-[#2D2035] text-[#716779]'
+                            : 'bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB]'
                         }`}>
                           <Icon size={16} />
                         </div>
                         {isPassive && (
-                          <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">
+                          <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-bold">
                             Pasif
                           </span>
                         )}
@@ -453,7 +453,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               </div>
 
               {/* Bottom Quick Logout */}
-              <div className="p-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div className="p-4 border-t border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
                 <button
                   type="button"
                   onClick={async () => {
@@ -468,7 +468,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                     await signOut()
                     window.location.href = '/loginv2'
                   }}
-                  className="text-xs font-bold text-rose-500 flex items-center gap-1.5 cursor-pointer"
+                  className="text-xs font-bold text-[#C62848] dark:text-[#F17AE6] flex items-center gap-1.5 cursor-pointer"
                 >
                   <LogOut size={14} />
                   <span>Oturumu Kapat</span>

@@ -335,7 +335,7 @@ export default function TeacherFilesView() {
           <button
             type="button"
             onClick={handleOpenNativePicker}
-            className="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-xs shadow-indigo-500/20"
+            className="h-10 px-4 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-xs shadow-purple-950/20"
           >
             <Upload size={15} />
             <span>Yeni Dosya Yükle</span>
@@ -752,7 +752,7 @@ export default function TeacherFilesView() {
                   </button>
                   <button
                     type="submit"
-                    className="h-10 px-5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-xs shadow-indigo-500/20"
+                    className="h-10 px-5 rounded-xl text-xs font-bold bg-brand-gradient hover:opacity-95 text-white transition-all cursor-pointer shadow-xs shadow-purple-950/20"
                   >
                     Klasöre Kaydet ve Yükle
                   </button>
@@ -833,7 +833,7 @@ export default function TeacherFilesView() {
                         <div
                           className={`w-4 h-4 rounded flex items-center justify-center border text-[10px] ${
                             isChecked
-                              ? 'bg-indigo-600 border-indigo-600 text-white'
+                              ? 'bg-[#4B075F] border-[#4B075F] text-white'
                               : 'border-gray-300 dark:border-gray-600'
                           }`}
                         >
@@ -855,7 +855,7 @@ export default function TeacherFilesView() {
                   <input
                     type="text"
                     readOnly
-                    value={`https://agenapos.vercel.app/student/library?file=${shareModalFile.id}`}
+                    value={`https://oxonomeduv2.vercel.app/student/library?file=${shareModalFile.id}`}
                     className="flex-1 h-9 px-3 text-[11px] bg-gray-50 dark:bg-[#161D2E] border border-gray-200 dark:border-gray-700 rounded-xl text-gray-600 dark:text-gray-400 select-all"
                   />
                   <button
@@ -863,7 +863,7 @@ export default function TeacherFilesView() {
                     onClick={handleCopyShareLink}
                     className="h-9 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5 shrink-0 cursor-pointer"
                   >
-                    {copiedShareLink ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                    {copiedShareLink ? <Check size={13} className="text-[#16805D]" /> : <Copy size={13} />}
                     <span>{copiedShareLink ? 'Kopyalandı' : 'Kopyala'}</span>
                   </button>
                 </div>
@@ -880,7 +880,7 @@ export default function TeacherFilesView() {
                 <button
                   type="button"
                   onClick={handleSaveShare}
-                  className="h-10 px-5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-xs shadow-indigo-500/20"
+                  className="h-10 px-5 rounded-xl text-xs font-bold bg-brand-gradient hover:opacity-95 text-white transition-all cursor-pointer shadow-xs shadow-purple-950/20"
                 >
                   Paylaşımı Güncelle
                 </button>
@@ -1555,7 +1555,7 @@ export default function TeacherFilesView() {
                   <button
                     type="button"
                     onClick={() => handleDownload(previewFile)}
-                    className="h-10 px-5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs shadow-indigo-500/20"
+                    className="h-10 px-5 rounded-xl text-xs font-bold bg-brand-gradient hover:opacity-95 text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-xs shadow-purple-950/20"
                   >
                     <Download size={14} />
                     <span>İndir</span>

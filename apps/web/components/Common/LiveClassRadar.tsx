@@ -439,7 +439,7 @@ export default function LiveClassRadar({
       {/* ── 1. COMPACT COLLAPSIBLE SUMMARY CARD (Default View on Load) ── */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="p-3.5 sm:p-4.5 bg-gradient-to-r from-blue-50/60 via-indigo-50/30 to-white dark:from-[#10182E] dark:via-[#131D36] dark:to-[#10182E] cursor-pointer hover:bg-blue-50/80 dark:hover:bg-[#14203D] transition-all select-none"
+        className="p-3.5 sm:p-4.5 bg-gradient-to-r from-[#FCF9FD] via-[#F7F0FA] to-white dark:from-[#17101C] dark:via-[#211729] dark:to-[#17101C] cursor-pointer hover:bg-[#F0D8FA]/40 dark:hover:bg-[#2D2035] transition-all select-none"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
           {/* Left: Mini Radial Progress Ring (Özet Grafik) + Özet Bilgiler */}
@@ -461,14 +461,14 @@ export default function LiveClassRadar({
                   r="20"
                   className={`transition-all duration-700 ${
                     liveState.status === 'in_lesson'
-                      ? 'stroke-[#1D77FF]'
+                      ? 'stroke-[#4B075F]'
                       : liveState.status === 'recess_break'
                       ? 'stroke-amber-500'
                       : liveState.status === 'lunch_break'
                       ? 'stroke-orange-500'
                       : liveState.status === 'before_school'
-                      ? 'stroke-blue-400'
-                      : 'stroke-purple-500'
+                      ? 'stroke-[#8D49A6]'
+                      : 'stroke-[#D914C8]'
                   }`}
                   strokeWidth="3.5"
                   strokeDasharray={2 * Math.PI * 20}
@@ -484,7 +484,7 @@ export default function LiveClassRadar({
                     <span className="text-xs font-black text-slate-900 dark:text-white leading-none">
                       {liveState.activePeriod?.period}
                     </span>
-                    <span className="text-[7px] font-extrabold text-[#1D77FF] uppercase tracking-tighter mt-0.5">
+                    <span className="text-[7px] font-extrabold text-[#4B075F] dark:text-[#C58ADB] uppercase tracking-tighter mt-0.5">
                       DERS
                     </span>
                   </>
@@ -493,9 +493,9 @@ export default function LiveClassRadar({
                 ) : liveState.status === 'lunch_break' ? (
                   <Utensils size={15} className="text-orange-500" />
                 ) : liveState.status === 'before_school' ? (
-                  <Clock size={15} className="text-[#1D77FF]" />
+                  <Clock size={15} className="text-[#4B075F] dark:text-[#C58ADB]" />
                 ) : (
-                  <CheckCircle2 size={15} className="text-purple-500" />
+                  <CheckCircle2 size={15} className="text-[#8D49A6]" />
                 )}
               </div>
             </div>
@@ -506,7 +506,7 @@ export default function LiveClassRadar({
                 <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white tracking-tight">
                   {titleOverride || 'Canlı Ders Takibi'}
                 </span>
-                <span className="px-2 py-0.5 rounded-lg text-[10.5px] font-black bg-blue-100/70 dark:bg-blue-900/40 text-[#1D77FF] dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40">
+                <span className="px-2 py-0.5 rounded-lg text-[10.5px] font-black bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] border border-[#8D49A6]/20">
                   {selectedClass} Şubesi
                 </span>
 
@@ -527,7 +527,7 @@ export default function LiveClassRadar({
                     <span>Öğle Arası</span>
                   </span>
                 ) : liveState.status === 'before_school' ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500 text-white shadow-xs">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#8D49A6] text-white shadow-xs">
                     <Clock size={11} />
                     <span>Canlı Ders Henüz Başlamadı</span>
                   </span>
@@ -584,10 +584,10 @@ export default function LiveClassRadar({
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       liveState.status === 'in_lesson'
-                        ? 'bg-gradient-to-r from-[#1D77FF] to-indigo-600'
+                        ? 'bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8]'
                         : liveState.status === 'recess_break' || liveState.status === 'lunch_break'
                         ? 'bg-gradient-to-r from-amber-400 to-orange-500'
-                        : 'bg-[#1D77FF]'
+                        : 'bg-[#4B075F]'
                     }`}
                     style={{ width: `${liveState.elapsedPercent}%` }}
                   />
@@ -605,7 +605,7 @@ export default function LiveClassRadar({
             {(showClassSelector || role === 'principal') && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-[#15213B] p-0.5 rounded-xl border border-blue-100/80 dark:border-blue-900/40 flex items-center gap-0.5 shadow-xs"
+                className="bg-white dark:bg-[#211729] p-0.5 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-0.5 shadow-xs"
               >
                 {CLASS_LIST.map((cls) => (
                   <button
@@ -617,7 +617,7 @@ export default function LiveClassRadar({
                     }}
                     className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all ${
                       selectedClass === cls
-                        ? 'bg-[#1D77FF] text-white shadow-xs'
+                        ? 'bg-[#4B075F] text-white shadow-xs'
                         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
@@ -634,7 +634,7 @@ export default function LiveClassRadar({
                 e.stopPropagation()
                 setIsExpanded(!isExpanded)
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#EAF2FF] hover:bg-[#D5E5FF] dark:bg-[#1A2849] dark:hover:bg-[#223560] text-[#1D77FF] dark:text-[#5BA0FF] text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#F0D8FA] hover:bg-[#E7C4F3] dark:bg-[#2D2035] dark:hover:bg-[#350444] text-[#4B075F] dark:text-[#C58ADB] text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"
             >
               <span>{isExpanded ? 'Daralt' : 'Tüm Akışı Gör'}</span>
               <ChevronDown
@@ -654,10 +654,10 @@ export default function LiveClassRadar({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.32, ease: 'easeInOut' }}
-            className="overflow-hidden border-t border-blue-100/70 dark:border-blue-900/40"
+            className="overflow-hidden border-t border-[#E8DFEB] dark:border-[#49364F]"
           >
             {/* ── TOP GRAPHIC AREA: MEVCUT DERSİN İŞ SÜRESİ & DETAYLARI ── */}
-            <div className="p-4 sm:p-6 bg-gradient-to-b from-gray-50/70 to-white dark:from-[#0E1526] dark:to-[#121A2F] border-b border-gray-200/80 dark:border-gray-800/80">
+            <div className="p-4 sm:p-6 bg-gradient-to-b from-[#FCF9FD] to-white dark:from-[#17101C] dark:to-[#211729] border-b border-[#E8DFEB] dark:border-[#49364F]">
               <div className="w-full space-y-4">
                 {/* Header: Status Pill + Live Lesson State Info */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-gray-100 dark:border-gray-800">
@@ -678,12 +678,12 @@ export default function LiveClassRadar({
                         <span>Öğle Arası</span>
                       </span>
                     ) : liveState.status === 'before_school' ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-500 text-white shadow-sm">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-[#8D49A6] text-white shadow-sm">
                         <Bell size={14} />
                         <span>Canlı Ders Henüz Başlamadı</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-purple-600 text-white shadow-sm">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-[#4B075F] text-white shadow-sm">
                         <CheckCircle2 size={14} />
                         <span>Dersler Bitti</span>
                       </span>
@@ -701,9 +701,9 @@ export default function LiveClassRadar({
                       <span>Canlı Ders Devam Ediyor</span>
                     </div>
                   ) : (
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/60 text-xs font-bold shadow-xs shrink-0 self-start sm:self-auto">
-                      <Clock size={15} className="text-[#1D77FF]" />
-                      <span className="font-extrabold text-slate-800 dark:text-slate-200">Canlı ders henüz başlamadı</span>
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#F0D8FA]/60 dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] border border-[#8D49A6]/20 text-xs font-bold shadow-xs shrink-0 self-start sm:self-auto">
+                      <Clock size={15} className="text-[#4B075F] dark:text-[#C58ADB]" />
+                      <span className="font-extrabold text-[#4B075F] dark:text-[#C58ADB]">Canlı ders henüz başlamadı</span>
                     </div>
                   )}
                 </div>
@@ -757,8 +757,8 @@ export default function LiveClassRadar({
                     </>
                   ) : liveState.status === 'before_school' ? (
                     <>
-                      <h3 className="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400 flex items-center gap-2">
-                        <Clock size={22} className="text-[#1D77FF]" />
+                      <h3 className="text-xl sm:text-2xl font-black text-[#4B075F] dark:text-[#C58ADB] flex items-center gap-2">
+                        <Clock size={22} className="text-[#4B075F] dark:text-[#C58ADB]" />
                         <span>Canlı ders henüz başlamadı</span>
                       </h3>
                       <p className="text-xs text-gray-600 dark:text-gray-300">
@@ -771,7 +771,7 @@ export default function LiveClassRadar({
                     </>
                   ) : (
                     <>
-                      <h3 className="text-xl sm:text-2xl font-black text-purple-600 dark:text-purple-400">
+                      <h3 className="text-xl sm:text-2xl font-black text-[#4B075F] dark:text-[#C58ADB]">
                         Bugünkü 6 Ders Başarıyla Tamamlandı 🎉
                       </h3>
                       <p className="text-xs text-gray-600 dark:text-gray-300">
@@ -796,10 +796,10 @@ export default function LiveClassRadar({
                     <motion.div
                       className={`h-full rounded-full transition-all duration-500 ${
                         liveState.status === 'in_lesson'
-                          ? 'bg-gradient-to-r from-[#1D77FF] via-blue-500 to-indigo-600 shadow-sm shadow-blue-500/30'
+                          ? 'bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] shadow-sm shadow-purple-950/20'
                           : liveState.status === 'lunch_break' || liveState.status === 'recess_break'
                           ? 'bg-gradient-to-r from-amber-400 to-orange-500'
-                          : 'bg-[#1D77FF]'
+                          : 'bg-[#4B075F]'
                       }`}
                       style={{ width: `${liveState.elapsedPercent}%` }}
                     />
@@ -983,7 +983,7 @@ export default function LiveClassRadar({
               <button
                 type="button"
                 onClick={() => setIsExpanded(false)}
-                className="text-xs font-bold text-[#1D77FF] dark:text-[#5BA0FF] hover:underline flex items-center gap-1 cursor-pointer"
+                className="text-xs font-bold text-[#4B075F] dark:text-[#C58ADB] hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <span>Akışı Daralt</span>
                 <ChevronDown size={13} className="rotate-180" />

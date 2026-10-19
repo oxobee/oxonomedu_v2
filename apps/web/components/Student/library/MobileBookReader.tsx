@@ -299,7 +299,7 @@ export default function MobileBookReader({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-[#1D77FF]/15 text-[#1D77FF] border border-[#1D77FF]/30">
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-[#F0D8FA] text-[#4B075F] border border-[#D5C5DC]">
                 {book.gradeName}
               </span>
               <span className="text-[10px] font-bold opacity-75 truncate hidden sm:inline">
@@ -399,7 +399,7 @@ export default function MobileBookReader({
       {/* ── PROGRESS BAR (Top hairline indicator) ── */}
       <div className="w-full h-1 bg-gray-200 dark:bg-white/10 overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-r from-[#1E4FD8] to-[#1D77FF]"
+          className="h-full bg-gradient-to-r from-[#4B075F] to-[#D914C8]"
           style={{ width: `${readingPercent}%` }}
           initial={false}
           animate={{ width: `${readingPercent}%` }}
@@ -529,7 +529,7 @@ export default function MobileBookReader({
           }`}
           title="Sayfa numarasına dokunarak doğrudan sayfaya atlayın"
         >
-          <span className="text-[#1D77FF] font-black">{currentPage}</span>
+          <span className="text-[#4B075F] dark:text-[#C58ADB] font-black">{currentPage}</span>
           <span className="opacity-50">/</span>
           <span>{totalPages}</span>
           <span className="text-[10px] opacity-70 hidden sm:inline">(%{readingPercent})</span>
@@ -581,7 +581,7 @@ export default function MobileBookReader({
             <FileText size={15} />
             <span className="hidden md:inline">Notlarım</span>
             {notes.length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-[#1D77FF] text-white text-[10px] font-black">
+              <span className="px-1.5 py-0.2 rounded-full bg-[#4B075F] text-white text-[10px] font-black">
                 {notes.length}
               </span>
             )}
@@ -592,7 +592,7 @@ export default function MobileBookReader({
             type="button"
             onClick={handleNextPage}
             disabled={currentPage >= totalPages}
-            className="h-10 px-3 sm:px-4 rounded-xl flex items-center gap-1 bg-[#1D77FF] hover:bg-blue-600 text-white font-extrabold text-xs transition-all cursor-pointer shadow-md shadow-blue-500/25 active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+            className="h-10 px-3 sm:px-4 rounded-xl flex items-center gap-1 bg-[#4B075F] hover:bg-[#620B79] text-white font-extrabold text-xs transition-all cursor-pointer shadow-md shadow-purple-900/25 active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
           >
             <span className="hidden sm:inline">Sonraki</span>
             <ChevronRight size={18} strokeWidth={2.4} />
@@ -630,7 +630,7 @@ export default function MobileBookReader({
                   value={jumpPageInput}
                   onChange={(e) => setJumpPageInput(e.target.value)}
                   placeholder={`Örn: ${currentPage}`}
-                  className="w-full h-11 px-3.5 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-sm font-bold text-center outline-hidden focus:border-[#1D77FF]"
+                  className="w-full h-11 px-3.5 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-sm font-bold text-center outline-hidden focus:border-[#4B075F]"
                 />
                 <div className="flex gap-2">
                   <button
@@ -642,7 +642,7 @@ export default function MobileBookReader({
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 rounded-xl bg-[#1D77FF] text-white text-xs font-bold cursor-pointer shadow-md"
+                    className="flex-1 py-2.5 rounded-xl bg-[#4B075F] text-white text-xs font-bold cursor-pointer shadow-md"
                   >
                     Sayfayı Aç
                   </button>
@@ -673,7 +673,7 @@ export default function MobileBookReader({
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <span className="text-[10px] font-black uppercase text-[#1D77FF] tracking-wider">
+                  <span className="text-[10px] font-black uppercase text-[#4B075F] dark:text-[#C58ADB] tracking-wider">
                     Defterim Entegrasyonu
                   </span>
                   <h3 className="text-base font-extrabold mt-0.5">
@@ -703,7 +703,7 @@ export default function MobileBookReader({
                     value={noteTitle}
                     onChange={(e) => setNoteTitle(e.target.value)}
                     placeholder={`${book.title} — Önemli Nokta`}
-                    className="w-full h-10 px-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-medium outline-hidden focus:border-[#1D77FF]"
+                    className="w-full h-10 px-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-medium outline-hidden focus:border-[#4B075F]"
                   />
                 </div>
 
@@ -717,7 +717,7 @@ export default function MobileBookReader({
                     value={noteContent}
                     onChange={(e) => setNoteContent(e.target.value)}
                     placeholder="Bu sayfada dikkat çeken konu, tanım, formül veya soru çözüm ipucunu yazın..."
-                    className="w-full p-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-medium outline-hidden focus:border-[#1D77FF] resize-none"
+                    className="w-full p-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-medium outline-hidden focus:border-[#4B075F] resize-none"
                   />
                 </div>
 
@@ -731,7 +731,7 @@ export default function MobileBookReader({
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 rounded-xl bg-[#1D77FF] text-white text-xs font-bold cursor-pointer shadow-md flex items-center justify-center gap-1.5"
+                    className="flex-1 py-2.5 rounded-xl bg-[#4B075F] text-white text-xs font-bold cursor-pointer shadow-md flex items-center justify-center gap-1.5"
                   >
                     <Save size={14} />
                     <span>Defterime Kaydet</span>
@@ -848,7 +848,7 @@ export default function MobileBookReader({
             >
               <div className="flex items-center justify-between mb-3 shrink-0">
                 <div className="flex items-center gap-2">
-                  <FileText className="text-[#1D77FF]" size={18} />
+                  <FileText className="text-[#8D49A6]" size={18} />
                   <h3 className="text-base font-extrabold">Kitap Notlarım (Defterim)</h3>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -858,7 +858,7 @@ export default function MobileBookReader({
                       setIsNotesOpen(false)
                       setIsAddNoteOpen(true)
                     }}
-                    className="px-2.5 py-1 rounded-xl bg-[#1D77FF] text-white text-xs font-bold cursor-pointer"
+                    className="px-2.5 py-1 rounded-xl bg-[#4B075F] text-white text-xs font-bold cursor-pointer"
                   >
                     + Yeni Not
                   </button>
@@ -884,7 +884,7 @@ export default function MobileBookReader({
                       className="p-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200/70 dark:border-white/10 space-y-1.5"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-black text-[#1D77FF]">
+                        <span className="text-[11px] font-black text-[#4B075F] dark:text-[#C58ADB]">
                           Sayfa {n.pageNumber || '—'} Notu
                         </span>
                         <div className="flex items-center gap-2">
@@ -919,7 +919,7 @@ export default function MobileBookReader({
                             setIsNotesOpen(false)
                             toast.success(`Sayfa ${n.pageNumber}'e geçildi.`)
                           }}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1D77FF] hover:underline cursor-pointer pt-1"
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#4B075F] dark:text-[#C58ADB] hover:underline cursor-pointer pt-1"
                         >
                           <span>Bu sayfaya git</span>
                           <ChevronRight size={12} />
@@ -954,7 +954,7 @@ export default function MobileBookReader({
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <span className="text-[10px] font-black uppercase text-[#1D77FF] tracking-wider">
+                  <span className="text-[10px] font-black uppercase text-[#4B075F] dark:text-[#C58ADB] tracking-wider">
                     Planlayıcım Entegrasyonu
                   </span>
                   <h3 className="text-base font-extrabold mt-0.5">
@@ -986,7 +986,7 @@ export default function MobileBookReader({
                       max={totalPages}
                       value={planPageStart}
                       onChange={(e) => setPlanPageStart(Number(e.target.value))}
-                      className="w-full h-10 px-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-bold outline-hidden focus:border-[#1D77FF]"
+                      className="w-full h-10 px-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-bold outline-hidden focus:border-[#4B075F]"
                     />
                   </div>
                   <div>
@@ -999,7 +999,7 @@ export default function MobileBookReader({
                       max={totalPages}
                       value={planPageEnd}
                       onChange={(e) => setPlanPageEnd(Number(e.target.value))}
-                      className="w-full h-10 px-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-bold outline-hidden focus:border-[#1D77FF]"
+                      className="w-full h-10 px-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-bold outline-hidden focus:border-[#4B075F]"
                     />
                   </div>
                 </div>
@@ -1011,7 +1011,7 @@ export default function MobileBookReader({
                   <select
                     value={planDateLabel}
                     onChange={(e) => setPlanDateLabel(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-bold outline-hidden focus:border-[#1D77FF] cursor-pointer"
+                    className="w-full h-10 px-3 rounded-xl border border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 text-xs font-bold outline-hidden focus:border-[#4B075F] cursor-pointer"
                   >
                     <option value="Bugün">Bugün</option>
                     <option value="Yarın">Yarın</option>
@@ -1021,7 +1021,7 @@ export default function MobileBookReader({
                   </select>
                 </div>
 
-                <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-[11px] text-blue-800 dark:text-blue-300 font-medium">
+                <div className="p-3 rounded-xl bg-[#F0D8FA]/50 dark:bg-[#2D2035] border border-[#D5C5DC]/60 dark:border-[#49364F] text-[11px] text-[#4B075F] dark:text-[#C58ADB] font-medium">
                   Görev: “{book.title}, {planPageStart}–{planPageEnd}. sayfaları oku ({planDateLabel})”
                 </div>
 
@@ -1035,7 +1035,7 @@ export default function MobileBookReader({
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 rounded-xl bg-[#1D77FF] text-white text-xs font-bold cursor-pointer shadow-md flex items-center justify-center gap-1.5"
+                    className="flex-1 py-2.5 rounded-xl bg-[#4B075F] text-white text-xs font-bold cursor-pointer shadow-md flex items-center justify-center gap-1.5"
                   >
                     <Calendar size={14} />
                     <span>Planlayıcıma Ekle</span>

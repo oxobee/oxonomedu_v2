@@ -4,14 +4,14 @@ import React, { useState, useEffect } from 'react'
 import { Clock, Calendar as CalendarIcon } from 'lucide-react'
 
 export interface HeaderLiveClockProps {
-  theme?: 'emerald' | 'indigo' | 'cyan' | 'purple' | 'amber'
+  theme?: 'emerald' | 'indigo' | 'cyan' | 'purple' | 'amber' | 'oxonom'
   variant?: 'desktop' | 'compact' | 'mobile'
   className?: string
   showSeconds?: boolean
 }
 
 export default function HeaderLiveClock({
-  theme = 'emerald',
+  theme = 'oxonom',
   variant = 'desktop',
   className = '',
   showSeconds = true,
@@ -95,9 +95,17 @@ export default function HeaderLiveClock({
       dateText: 'text-gray-700 dark:text-gray-200',
       dot: 'bg-amber-500',
     },
+    oxonom: {
+      border: 'border-[#E8DFEB] dark:border-[#49364F]',
+      bg: 'bg-[#FCF9FD]/90 dark:bg-[#211729]/90',
+      timeBadge: 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA] border border-[#D5C5DC] dark:border-[#8D49A6]/40',
+      icon: 'text-[#4B075F] dark:text-[#C58ADB]',
+      dateText: 'text-[#241329] dark:text-[#FCF9FD]',
+      dot: 'bg-[#D914C8]',
+    },
   }
 
-  const currentTheme = themeStyles[theme] || themeStyles.emerald
+  const currentTheme = themeStyles[theme] || themeStyles.oxonom
 
   // Mobile Compact Pill
   if (variant === 'mobile') {

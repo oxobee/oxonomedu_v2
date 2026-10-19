@@ -151,17 +151,17 @@ export default function StudentSettingsView({
       {activeTab === 'profile' && (
         <div className="space-y-6">
           {/* Identity Pass Card */}
-          <div className="p-6 lg:p-8 rounded-3xl bg-gradient-to-br from-[#1E4FD8] via-[#1D77FF] to-[#0A58D0] text-white shadow-xl shadow-blue-500/15 flex flex-col md:flex-row md:items-center justify-between gap-6 border border-blue-400/30 relative overflow-hidden">
+          <div className="p-6 lg:p-8 rounded-3xl bg-brand-gradient-dark text-white shadow-xl shadow-purple-950/20 flex flex-col md:flex-row md:items-center justify-between gap-6 border border-purple-400/30 relative overflow-hidden">
             <div className="flex items-center gap-4 relative z-10">
               <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-2xl text-white border border-white/20 shrink-0 shadow-inner">
                 {(profile.firstName?.slice(0, 1) || 'E') + (profile.lastName?.slice(0, 1) || 'U')}
               </div>
               <div>
                 <div className="text-xl font-black">{profile.name}</div>
-                <div className="text-xs text-blue-100 mt-0.5">
+                <div className="text-xs text-purple-200 mt-0.5">
                   {profile.schoolName || 'Oxonom Okulları'} · {profile.className} Şubesi
                 </div>
-                <div className="text-[11px] font-semibold text-cyan-200 mt-1 flex items-center gap-2">
+                <div className="text-[11px] font-semibold text-purple-200 mt-1 flex items-center gap-2">
                   <Award size={13} />
                   <span>Okul No: {profile.studentNo} · TC: {profile.tcNo}</span>
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-black">
@@ -172,7 +172,7 @@ export default function StudentSettingsView({
             </div>
 
             <div className="px-4 py-2.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold shrink-0 text-white relative z-10 flex items-center gap-2">
-              <ShieldCheck size={16} className="text-cyan-300" />
+              <ShieldCheck size={16} className="text-emerald-300" />
               <span>{profile.disciplineStatus}</span>
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function StudentSettingsView({
             <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
               <div>
                 <h2 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
-                  <User size={18} className="text-[#1D77FF]" />
+                  <User size={18} className="text-[#8D49A6]" />
                   <span>1. Kimlik & Nüfus Bilgileri (MERNİS Onaylı)</span>
                 </h2>
                 <p className="text-xs text-gray-400 mt-0.5">
@@ -271,7 +271,7 @@ export default function StudentSettingsView({
 
               <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/60 dark:border-gray-800/60 space-y-1">
                 <span className="text-[10px] text-gray-400 font-bold uppercase">Sınıf & Şube</span>
-                <div className="font-extrabold text-[#1D77FF] dark:text-blue-400">{profile.className} Şubesi (Derslik 101)</div>
+                <div className="font-extrabold text-[#4B075F] dark:text-[#C58ADB]">{profile.className} Şubesi (Derslik 101)</div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/60 dark:border-gray-800/60 space-y-1">
@@ -332,7 +332,7 @@ export default function StudentSettingsView({
                 <div className="text-gray-600 dark:text-gray-300 font-medium">
                   Meslek: Mimar
                 </div>
-                <div className="flex items-center gap-2 text-[#1D77FF] font-bold">
+                <div className="flex items-center gap-2 text-[#4B075F] dark:text-[#C58ADB] font-bold">
                   <Phone size={13} />
                   <span>{profile.parentPhone || '+90 532 999 1100'}</span>
                 </div>
@@ -352,7 +352,7 @@ export default function StudentSettingsView({
                 <div className="text-gray-600 dark:text-gray-300 font-medium">
                   Meslek: Kurum Müdürü
                 </div>
-                <div className="flex items-center gap-2 text-[#1D77FF] font-bold">
+                <div className="flex items-center gap-2 text-[#4B075F] dark:text-[#C58ADB] font-bold">
                   <Phone size={13} />
                   <span>{profile.secondParentPhone || '+90 532 999 2200'}</span>
                 </div>
@@ -377,7 +377,7 @@ export default function StudentSettingsView({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="p-4 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/60 dark:border-gray-800/60 space-y-1.5">
                 <span className="text-[10px] text-gray-400 font-bold uppercase flex items-center gap-1.5">
-                  <MapPin size={12} className="text-[#1D77FF]" />
+                  <MapPin size={12} className="text-[#8D49A6]" />
                   Kayıtlı Ev / İkamet Adresi
                 </span>
                 <div className="font-bold text-gray-900 dark:text-white leading-relaxed">

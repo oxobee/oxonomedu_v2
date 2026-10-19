@@ -792,7 +792,7 @@ export default function MAdminStudentsClient({
               setNewStudentTab('kimlik')
               setIsNewStudentModalOpen(true)
             }}
-            className="h-11 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
+            className="h-11 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 transition-all cursor-pointer"
           >
             <Plus size={16} strokeWidth={2.5} />
             <span>Yeni Öğrenci Ekle</span>
@@ -1036,7 +1036,7 @@ export default function MAdminStudentsClient({
                     className={`h-9 px-3 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                       isEditingStudent
                         ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-                        : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                        : 'bg-[#4B075F] hover:bg-[#620B79] text-white shadow-xs'
                     }`}
                   >
                     <Edit3 size={13} />
@@ -1665,7 +1665,7 @@ export default function MAdminStudentsClient({
                       </button>
                       <button
                         type="submit"
-                        className="h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-md transition-all cursor-pointer text-xs flex items-center justify-center gap-2"
+                        className="h-11 px-6 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-black shadow-md shadow-purple-950/20 transition-all cursor-pointer text-xs flex items-center justify-center gap-2"
                       >
                         <Save size={15} strokeWidth={2.5} />
                         <span>Değişiklikleri ve Kütüğü Kaydet</span>
@@ -1694,7 +1694,7 @@ export default function MAdminStudentsClient({
                             onClick={() => setActiveDetailTab(tab.id as any)}
                             className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 flex items-center gap-1.5 transition-all cursor-pointer ${
                               isActive
-                                ? 'bg-emerald-600 text-white shadow-xs'
+                                ? 'bg-[#4B075F] text-white shadow-xs'
                                 : 'bg-gray-100 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                           >
@@ -1968,7 +1968,7 @@ export default function MAdminStudentsClient({
                           onClick={() => {
                             toast.success(`${selectedStudentForDetail.name} velisine acil durum SMS bildirimi gönderildi.`)
                           }}
-                          className="w-full h-11 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors"
+                          className="w-full h-11 rounded-2xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors"
                         >
                           <Send size={14} />
                           <span>Veliye ve Acil İrtibat Numaralarına SMS Gönder</span>
@@ -2109,7 +2109,7 @@ export default function MAdminStudentsClient({
                       <button
                         type="button"
                         onClick={() => setIsEditingStudent(true)}
-                        className="h-11 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
+                        className="h-11 rounded-2xl bg-[#4B075F] hover:bg-[#620B79] text-white font-black text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 transition-all cursor-pointer"
                       >
                         <Edit3 size={15} />
                         <span>Öğrenci Kütük Bilgilerini Düzenle</span>
@@ -2164,7 +2164,7 @@ export default function MAdminStudentsClient({
               {/* Title & Close */}
               <div className="px-6 pt-4 pb-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">
+                  <div className="w-10 h-10 rounded-2xl bg-[#F0D8FA] text-[#4B075F] flex items-center justify-center font-black">
                     <Plus size={20} strokeWidth={2.5} />
                   </div>
                   <div>
@@ -2204,7 +2204,7 @@ export default function MAdminStudentsClient({
                       onClick={() => setNewStudentTab(tab.id as any)}
                       className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 flex items-center gap-1.5 transition-all cursor-pointer ${
                         isActive
-                          ? 'bg-emerald-600 text-white shadow-xs'
+                          ? 'bg-[#4B075F] text-white shadow-xs'
                           : 'bg-gray-100 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                       }`}
                     >
@@ -2349,7 +2349,7 @@ export default function MAdminStudentsClient({
                       <button
                         type="button"
                         onClick={() => setNewStudentTab('okul')}
-                        className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                        className="h-10 px-5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                       >
                         <span>İleri: Okul & Kayıt Bilgileri</span>
                         <ChevronRight size={14} />
@@ -2462,7 +2462,7 @@ export default function MAdminStudentsClient({
                       <button
                         type="button"
                         onClick={() => setNewStudentTab('ebeveyn')}
-                        className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                        className="h-10 px-5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                       >
                         <span>İleri: Anne & Baba Bilgileri</span>
                         <ChevronRight size={14} />
@@ -2666,7 +2666,7 @@ export default function MAdminStudentsClient({
                       <button
                         type="button"
                         onClick={() => setNewStudentTab('adres')}
-                        className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                        className="h-10 px-5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                       >
                         <span>İleri: İkametgah & Acil İrtibat</span>
                         <ChevronRight size={14} />
@@ -2775,7 +2775,7 @@ export default function MAdminStudentsClient({
                       <button
                         type="button"
                         onClick={() => setNewStudentTab('evraklar')}
-                        className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                        className="h-10 px-5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                       >
                         <span>İleri: Resmi Evraklar</span>
                         <ChevronRight size={14} />
@@ -2831,7 +2831,7 @@ export default function MAdminStudentsClient({
                       </button>
                       <button
                         type="submit"
-                        className="h-11 px-7 rounded-2xl bg-[#10B981] hover:bg-[#059669] text-white font-black text-sm shadow-md transition-all cursor-pointer flex items-center gap-2"
+                        className="h-11 px-7 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-sm shadow-md shadow-purple-950/20 transition-all cursor-pointer flex items-center gap-2"
                       >
                         <Check size={16} strokeWidth={2.5} />
                         <span>Öğrenciyi Sisteme & Kütüğe Kaydet</span>

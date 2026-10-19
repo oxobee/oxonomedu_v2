@@ -179,7 +179,7 @@ export default function TeacherCommunicationView() {
         <button
           type="button"
           onClick={() => setShowNewModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-colors cursor-pointer self-start sm:self-center"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-bold text-xs shadow-md shadow-purple-950/20 transition-all cursor-pointer self-start sm:self-center"
         >
           <Plus size={16} />
           <span>Sınıfa Duyuru Yayınla</span>
@@ -320,7 +320,7 @@ export default function TeacherCommunicationView() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold cursor-pointer transition-colors shadow-xs shadow-purple-950/20"
                 >
                   Yayınla
                 </button>

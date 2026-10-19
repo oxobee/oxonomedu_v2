@@ -320,8 +320,8 @@ export default function StudentProgressView({
 
         {/* Student Badge Pill */}
         <div className="flex items-center gap-3">
-          <div className="p-3 sm:p-3.5 px-3.5 sm:px-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/60 flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#1D77FF] text-white font-black text-sm flex items-center justify-center shadow-xs">
+          <div className="p-3 sm:p-3.5 px-3.5 sm:px-4 rounded-2xl bg-[#F0D8FA]/60 dark:bg-[#2D2035] border border-[#D5C5DC]/60 dark:border-[#49364F] flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-brand-gradient text-white font-black text-sm flex items-center justify-center shadow-xs">
               {profile.firstName.slice(0, 1)}
               {profile.lastName.slice(0, 1)}
             </div>
@@ -371,7 +371,7 @@ export default function StudentProgressView({
         >
           <div className="text-[10px] sm:text-[11px] text-gray-400 font-bold uppercase truncate">Sınıf Başarı Sırası</div>
           <div className={`text-xl sm:text-2xl font-black ${
-            profile.classRank <= 3 ? 'text-cyan-600 dark:text-cyan-400' : profile.classRank <= 15 ? 'text-[#1D77FF] dark:text-indigo-400' : 'text-rose-600 dark:text-rose-400'
+            profile.classRank <= 3 ? 'text-cyan-600 dark:text-cyan-400' : profile.classRank <= 15 ? 'text-[#4B075F] dark:text-[#C58ADB]' : 'text-rose-600 dark:text-rose-400'
           }`}>
             {profile.classRank}. Sıra <span className="text-xs font-normal text-gray-400">({profile.className})</span>
           </div>
@@ -403,10 +403,10 @@ export default function StudentProgressView({
           className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-1"
         >
           <div className="text-[10px] sm:text-[11px] text-gray-400 font-bold uppercase truncate">Ödev Teslim Başarısı</div>
-          <div className="text-xl sm:text-2xl font-black text-[#1D77FF] dark:text-indigo-400">
+          <div className="text-xl sm:text-2xl font-black text-[#4B075F] dark:text-[#C58ADB]">
             %{homeworkStats.rate}
           </div>
-          <div className="text-[10.5px] sm:text-[11px] text-[#1D77FF] dark:text-indigo-400 font-bold flex items-center gap-1 truncate">
+          <div className="text-[10.5px] sm:text-[11px] text-[#4B075F] dark:text-[#C58ADB] font-bold flex items-center gap-1 truncate">
             <FileText size={13} className="shrink-0" />
             <span className="truncate">
               {homeworkStats.completed}/{homeworkStats.total} Teslim
@@ -423,7 +423,7 @@ export default function StudentProgressView({
           onClick={() => setActiveTab('all')}
           className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'all'
-              ? 'bg-indigo-600 text-white shadow-xs'
+              ? 'bg-[#4B075F] text-white shadow-xs'
               : 'bg-white dark:bg-[#121826] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50'
           }`}
         >
@@ -614,7 +614,7 @@ export default function StudentProgressView({
                                     ? 'bg-transparent'
                                     : item.exam1Num < 50
                                     ? 'bg-rose-500'
-                                    : 'bg-[#1D77FF]'
+                                    : 'bg-[#4B075F]'
                                 }`}
                               />
                             </div>
@@ -661,7 +661,7 @@ export default function StudentProgressView({
                       <div className={`text-[11px] font-medium p-2 rounded-lg border leading-relaxed ${
                         item.isCritical
                           ? 'bg-rose-50/60 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-900/50'
-                          : 'bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border-indigo-100 dark:border-indigo-900/50'
+                          : 'bg-[#F0D8FA]/50 dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] border-[#D5C5DC]/50 dark:border-[#49364F]'
                       }`}>
                         <strong className="font-bold">Önerilen Çalışma Planı: </strong>
                         {item.recommendation}
@@ -681,7 +681,7 @@ export default function StudentProgressView({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
             <div>
               <h2 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
-                <BarChart2 size={18} className="text-indigo-500" />
+                <BarChart2 size={18} className="text-[#8D49A6]" />
                 <span>Ders Başarı ve Not Dağılım Grafikleri</span>
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -689,7 +689,7 @@ export default function StudentProgressView({
               </p>
             </div>
 
-            <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 font-mono">
+            <span className="text-xs font-black text-[#4B075F] dark:text-[#C58ADB] font-mono">
               Genel Başarı Ort: {profile.gpa > 0 ? `${profile.gpa} / 100` : 'Hesaplanıyor'}
             </span>
           </div>
@@ -697,7 +697,7 @@ export default function StudentProgressView({
           {/* Ders Başarı Grafikleri: MOBİLDE YATAY PERFORMANS KARTLARI, MASAÜSTÜNDE DİKEY KARŞILAŞTIRMA */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-              <Activity size={14} className="text-[#1D77FF]" />
+              <Activity size={14} className="text-[#8D49A6]" />
               <span>Ders Ortalamaları Başarı Grafiği (0 - 100 Puan)</span>
             </h3>
 
@@ -712,7 +712,7 @@ export default function StudentProgressView({
                     : score >= 85
                     ? { bg: 'bg-emerald-50/50 dark:bg-emerald-950/20', bar: 'bg-gradient-to-r from-emerald-500 to-teal-400', text: 'text-emerald-700 dark:text-emerald-300', pill: 'bg-emerald-500 text-white', status: 'Takdir Seviyesi' }
                     : score >= 70
-                    ? { bg: 'bg-blue-50/50 dark:bg-blue-950/20', bar: 'bg-gradient-to-r from-blue-500 to-indigo-500', text: 'text-blue-700 dark:text-blue-300', pill: 'bg-blue-500 text-white', status: 'Başarılı' }
+                    ? { bg: 'bg-[#F0D8FA]/30 dark:bg-[#2D2035]/50', bar: 'bg-gradient-to-r from-[#4B075F] to-[#8D49A6]', text: 'text-[#4B075F] dark:text-[#C58ADB]', pill: 'bg-[#4B075F] text-white', status: 'Başarılı' }
                     : score >= 50
                     ? { bg: 'bg-amber-50/50 dark:bg-amber-950/20', bar: 'bg-gradient-to-r from-amber-500 to-orange-400', text: 'text-amber-700 dark:text-amber-300', pill: 'bg-amber-500 text-white', status: 'Geçer Seviye' }
                     : { bg: 'bg-rose-50/50 dark:bg-rose-950/20', bar: 'bg-gradient-to-r from-rose-500 to-red-500', text: 'text-rose-700 dark:text-rose-300', pill: 'bg-rose-500 text-white', status: 'Kritik Seviye' }

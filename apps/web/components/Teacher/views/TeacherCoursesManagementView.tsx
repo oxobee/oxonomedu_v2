@@ -502,7 +502,7 @@ export default function TeacherCoursesManagementView() {
             onClick={() => setActiveTab('topics')}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'topics'
-                ? 'bg-indigo-600 text-white shadow-xs'
+                ? 'bg-[#4B075F] text-white shadow-xs shadow-purple-950/20'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -515,7 +515,7 @@ export default function TeacherCoursesManagementView() {
             onClick={() => setActiveTab('books')}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'books'
-                ? 'bg-indigo-600 text-white shadow-xs'
+                ? 'bg-[#4B075F] text-white shadow-xs shadow-purple-950/20'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -528,7 +528,7 @@ export default function TeacherCoursesManagementView() {
             onClick={() => setActiveTab('materials')}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'materials'
-                ? 'bg-indigo-600 text-white shadow-xs'
+                ? 'bg-[#4B075F] text-white shadow-xs shadow-purple-950/20'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -541,7 +541,7 @@ export default function TeacherCoursesManagementView() {
             onClick={() => setActiveTab('exams')}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'exams'
-                ? 'bg-indigo-600 text-white shadow-xs'
+                ? 'bg-[#4B075F] text-white shadow-xs shadow-purple-950/20'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -554,7 +554,7 @@ export default function TeacherCoursesManagementView() {
             onClick={() => setActiveTab('notes')}
             className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'notes'
-                ? 'bg-indigo-600 text-white shadow-xs'
+                ? 'bg-[#4B075F] text-white shadow-xs shadow-purple-950/20'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
@@ -586,7 +586,7 @@ export default function TeacherCoursesManagementView() {
               <button
                 type="button"
                 onClick={() => setShowAddTopicForm(!showAddTopicForm)}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-extrabold text-xs flex items-center gap-1.5 shadow-xs shadow-purple-950/20 transition-colors cursor-pointer"
               >
                 <Plus size={15} />
                 <span>Yeni Konu Ekle</span>
@@ -605,11 +605,11 @@ export default function TeacherCoursesManagementView() {
                   value={newTopicTitle}
                   onChange={(e) => setNewTopicTitle(e.target.value)}
                   placeholder="Örn: Harfleri Tanıyalım: E ve L Sesleri ile Hece Oluşturma"
-                  className="flex-1 h-10 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 h-10 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-[#4B075F]"
                 />
                 <button
                   type="submit"
-                  className="px-4 h-10 rounded-xl bg-indigo-600 text-white font-black text-xs hover:bg-indigo-500 transition-colors cursor-pointer"
+                  className="px-4 h-10 rounded-xl bg-[#4B075F] text-white font-black text-xs hover:bg-[#620B79] transition-colors cursor-pointer"
                 >
                   Ekle
                 </button>
@@ -839,7 +839,7 @@ export default function TeacherCoursesManagementView() {
                     onClick={() => setNewMatTarget('all')}
                     className={`py-2 px-3 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                       newMatTarget === 'all'
-                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        ? 'bg-[#4B075F] text-white border-[#4B075F]'
                         : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
                     }`}
                   >
@@ -850,7 +850,7 @@ export default function TeacherCoursesManagementView() {
                     onClick={() => setNewMatTarget('individual')}
                     className={`py-2 px-3 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                       newMatTarget === 'individual'
-                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        ? 'bg-[#4B075F] text-white border-[#4B075F]'
                         : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
                     }`}
                   >
@@ -916,7 +916,7 @@ export default function TeacherCoursesManagementView() {
 
               <button
                 type="submit"
-                className="w-full h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                className="w-full h-10 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm shadow-purple-950/20 transition-all cursor-pointer"
               >
                 <Plus size={16} />
                 <span>Materyali Yayınla</span>
@@ -1051,7 +1051,7 @@ export default function TeacherCoursesManagementView() {
               <div className="p-4 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/80 dark:border-gray-800/80 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-indigo-600 text-white font-extrabold text-xs flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-brand-gradient text-white font-extrabold text-xs flex items-center justify-center">
                       E
                     </div>
                     <div>
@@ -1070,7 +1070,7 @@ export default function TeacherCoursesManagementView() {
                       max={100}
                       value={studentScore}
                       onChange={(e) => setStudentScore(e.target.value)}
-                      className="w-16 h-9 px-2 text-center rounded-xl bg-white dark:bg-[#0E1526] border border-gray-300 dark:border-gray-700 text-xs font-black text-emerald-600 dark:text-emerald-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-16 h-9 px-2 text-center rounded-xl bg-white dark:bg-[#0E1526] border border-gray-300 dark:border-gray-700 text-xs font-black text-emerald-600 dark:text-emerald-400 focus:outline-hidden focus:ring-2 focus:ring-[#4B075F]"
                     />
                   </div>
                 </div>
@@ -1091,7 +1091,7 @@ export default function TeacherCoursesManagementView() {
 
               <button
                 type="submit"
-                className="w-full h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                className="w-full h-10 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm shadow-purple-950/20 transition-all cursor-pointer"
               >
                 <Save size={16} />
                 <span>Notu Kaydet ve Öğrenciye Yayınla</span>
@@ -1187,7 +1187,7 @@ export default function TeacherCoursesManagementView() {
 
             <button
               type="submit"
-              className="w-full h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+              className="w-full h-10 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm shadow-purple-950/20 transition-all cursor-pointer"
             >
               <Send size={15} />
               <span>Gelişim Notunu Kaydet</span>

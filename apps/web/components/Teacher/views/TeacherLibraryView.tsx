@@ -153,8 +153,8 @@ export default function TeacherLibraryView() {
               onClick={() => setSelectedCategory(tab.key as any)}
               className={`px-4 py-2 rounded-2xl text-xs font-bold shrink-0 transition-all cursor-pointer ${
                 isSelected
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 text-gray-700 dark:text-gray-300 hover:border-indigo-400'
+                  ? 'bg-[#4B075F] text-white shadow-sm shadow-purple-950/20'
+                  : 'bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 text-gray-700 dark:text-gray-300 hover:border-[#4B075F]'
               }`}
             >
               {tab.label}
@@ -199,7 +199,7 @@ export default function TeacherLibraryView() {
               {res.category === 'interactive' ? (
                 <Link
                   href="/games"
-                  className="h-8 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors"
+                  className="h-8 px-3 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs shadow-purple-950/20"
                 >
                   <Gamepad2 size={13} />
                   <span>Oyna / Başlat</span>

@@ -153,26 +153,26 @@ export default function MobileAdminMoreSheet({
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
             className={`relative w-full sm:max-w-[420px] max-h-[88vh] rounded-t-[32px] sm:rounded-[32px] shadow-2xl flex flex-col z-10 overflow-hidden ${
               theme === 'dark'
-                ? 'bg-[#0E131F] text-white border-t sm:border border-gray-800'
-                : 'bg-white text-gray-900 border-t sm:border border-gray-200'
+                ? 'bg-[#211729] text-[#FCF9FD] border-t sm:border border-[#49364F]'
+                : 'bg-white text-[#241329] border-t sm:border border-[#E8DFEB]'
             }`}
           >
             {/* Header Handle */}
             <div className="pt-3 pb-1 flex justify-center sm:hidden">
-              <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full" />
+              <div className="w-12 h-1.5 bg-[#E8DFEB] dark:bg-[#49364F] rounded-full" />
             </div>
 
             {/* Title Bar */}
-            <div className="px-5 pt-3 pb-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/80">
+            <div className="px-5 pt-3 pb-3 flex items-center justify-between border-b border-[#E8DFEB] dark:border-[#49364F]/80">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#34D399]/15 text-[#34D399] flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-[#F0D8FA] dark:bg-[#4B075F]/30 text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center">
                   <Layers size={18} strokeWidth={2.2} />
                 </div>
                 <div>
                   <h3 className="text-sm font-extrabold tracking-tight">
                     İdare Paneli Menüsü
                   </h3>
-                  <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                  <p className="text-[11px] text-[#716779] dark:text-[#B5A5BD] font-medium">
                     Tüm okul yönetim modülleri (01 — 14)
                   </p>
                 </div>
@@ -181,7 +181,7 @@ export default function MobileAdminMoreSheet({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#716779] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Kapat"
               >
                 <X size={16} />
@@ -193,7 +193,7 @@ export default function MobileAdminMoreSheet({
               <div className="relative">
                 <Search
                   size={15}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#716779]"
                 />
                 <input
                   type="text"
@@ -202,15 +202,15 @@ export default function MobileAdminMoreSheet({
                   placeholder="Modül veya özellik ara (örn: devamsızlık, müfredat)..."
                   className={`w-full h-10 pl-9 pr-3.5 rounded-xl text-xs font-medium outline-hidden transition-all ${
                     theme === 'dark'
-                      ? 'bg-[#151D2F] text-white placeholder-gray-500 border border-gray-800 focus:border-[#34D399]/50'
-                      : 'bg-gray-100 text-gray-900 placeholder-gray-400 border border-gray-200 focus:border-[#10B981]'
+                      ? 'bg-[#17101C] text-white placeholder-[#716779] border border-[#49364F] focus:border-[#8D49A6]'
+                      : 'bg-[#FCF9FD] text-[#241329] placeholder-[#716779] border border-[#E8DFEB] focus:border-[#8D49A6]'
                   }`}
                 />
               </div>
             </div>
 
             {/* Modules List Scrollable Area */}
-            <div className="flex-1 overflow-y-auto px-5 py-2 space-y-2.5 divide-y divide-gray-100 dark:divide-gray-800/40">
+            <div className="flex-1 overflow-y-auto px-5 py-2 space-y-2.5 divide-y divide-[#E8DFEB]/50 dark:divide-[#49364F]/40">
               {filteredModules.map((mod) => {
                 const isExpanded = expandedModuleId === mod.id
 
@@ -220,11 +220,11 @@ export default function MobileAdminMoreSheet({
                       className={`rounded-2xl p-3 border transition-all ${
                         mod.isAvailable
                           ? theme === 'dark'
-                            ? 'bg-[#121826] border-emerald-900/40 hover:border-emerald-700/60'
-                            : 'bg-emerald-50/40 border-emerald-200/70 hover:border-emerald-300'
+                            ? 'bg-[#2D2035] border-[#8D49A6]/40 hover:border-[#8D49A6]'
+                            : 'bg-[#FCF9FD] border-[#8D49A6]/30 hover:border-[#8D49A6]'
                           : theme === 'dark'
-                          ? 'bg-[#121826]/60 border-gray-800/70'
-                          : 'bg-gray-50/80 border-gray-200/70'
+                          ? 'bg-[#17101C]/60 border-[#49364F]/50'
+                          : 'bg-[#F7F0FA]/80 border-[#E8DFEB]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -233,10 +233,10 @@ export default function MobileAdminMoreSheet({
                           <div
                             className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
                               mod.isAvailable
-                                ? 'bg-[#34D399]/20 text-[#34D399]'
+                                ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#C58ADB]'
                                 : theme === 'dark'
-                                ? 'bg-gray-800 text-gray-400'
-                                : 'bg-gray-200 text-gray-600'
+                                ? 'bg-[#2D2035] text-[#716779]'
+                                : 'bg-[#E8DFEB] text-[#716779]'
                             }`}
                           >
                             {renderModuleIcon(mod.icon, 'w-4 h-4')}
@@ -244,15 +244,15 @@ export default function MobileAdminMoreSheet({
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-[#F0D8FA] dark:bg-[#4B075F]/30 text-[#4B075F] dark:text-[#C58ADB]">
                                 {mod.code}
                               </span>
-                              <h4 className="text-xs font-extrabold truncate text-gray-900 dark:text-white">
+                              <h4 className="text-xs font-extrabold truncate text-[#241329] dark:text-white">
                                 {mod.title}
                               </h4>
                             </div>
 
-                            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                            <p className="text-[11px] text-[#716779] dark:text-[#B5A5BD] mt-1 line-clamp-1">
                               {mod.description}
                             </p>
                           </div>
@@ -264,7 +264,7 @@ export default function MobileAdminMoreSheet({
                             <Link
                               href={getUrl(mod.href)}
                               onClick={onClose}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#34D399]/15 text-[#10B981] dark:text-[#34D399] border border-[#34D399]/30 hover:bg-[#34D399]/25 transition-colors cursor-pointer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#4B075F] text-white hover:bg-[#620B79] transition-colors cursor-pointer"
                             >
                               <CheckCircle2 size={11} />
                               <span>Aç</span>
@@ -274,7 +274,7 @@ export default function MobileAdminMoreSheet({
                             <button
                               type="button"
                               onClick={() => handleUnavailableClick(mod.title)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors cursor-pointer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] border border-[#B86B00]/20 transition-colors cursor-pointer"
                             >
                               <Clock size={11} />
                               <span>Yakında</span>
@@ -285,7 +285,7 @@ export default function MobileAdminMoreSheet({
                           <button
                             type="button"
                             onClick={() => toggleExpand(mod.id)}
-                            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#716779] hover:text-[#241329] dark:hover:text-white transition-colors"
                             aria-label="Detayları göster"
                           >
                             {isExpanded ? (
@@ -305,9 +305,9 @@ export default function MobileAdminMoreSheet({
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="overflow-hidden mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-800/80"
+                            className="overflow-hidden mt-3 pt-2.5 border-t border-[#E8DFEB] dark:border-[#49364F]/80"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-[#716779] dark:text-[#B5A5BD] mb-1.5">
                               İçerdiği Alt Özellikler:
                             </div>
                             <div className="grid grid-cols-1 gap-1">
@@ -323,18 +323,18 @@ export default function MobileAdminMoreSheet({
                                   }}
                                   className={`px-2.5 py-1.5 rounded-lg text-[11px] flex items-center justify-between transition-colors cursor-pointer ${
                                     mod.isAvailable
-                                      ? 'text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/10'
-                                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+                                      ? 'text-[#4B075F] dark:text-[#C58ADB] hover:bg-[#F0D8FA]/50 dark:hover:bg-[#4B075F]/20'
+                                      : 'text-[#716779] dark:text-[#B5A5BD] hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035]/60'
                                   }`}
                                 >
                                   <span className="flex items-center gap-1.5 truncate">
-                                    <span className="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-600 shrink-0" />
+                                    <span className="w-1 h-1 rounded-full bg-[#716779] dark:bg-[#B5A5BD] shrink-0" />
                                     <span className="truncate">{item}</span>
                                   </span>
                                   {mod.isAvailable ? (
-                                    <ExternalLink size={10} className="text-emerald-500 shrink-0" />
+                                    <ExternalLink size={10} className="text-[#8D49A6] shrink-0" />
                                   ) : (
-                                    <span className="text-[9px] text-amber-500 font-bold shrink-0">
+                                    <span className="text-[9px] text-[#B86B00] dark:text-[#F5C542] font-bold shrink-0">
                                       Eklenecek
                                     </span>
                                   )}
@@ -350,19 +350,19 @@ export default function MobileAdminMoreSheet({
               })}
 
               {filteredModules.length === 0 && (
-                <div className="py-10 text-center text-xs text-gray-400">
+                <div className="py-10 text-center text-xs text-[#716779]">
                   Aradığınız kriterlere uygun idare modülü bulunamadı.
                 </div>
               )}
             </div>
 
             {/* Bottom Footer Info */}
-            <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-800/80 bg-gray-50/50 dark:bg-[#0A0D15]/50 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+            <div className="px-5 py-3 border-t border-[#E8DFEB] dark:border-[#49364F]/80 bg-[#FCF9FD] dark:bg-[#17101C]/60 flex items-center justify-between text-[11px] text-[#716779] dark:text-[#B5A5BD]">
               <span className="flex items-center gap-1.5 font-medium">
-                <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-[#D914C8] animate-pulse" />
                 <span>3 Aktif Modül</span>
               </span>
-              <span className="font-semibold text-gray-400 dark:text-gray-500">
+              <span className="font-semibold text-[#716779] dark:text-[#B5A5BD]">
                 11 Modül Sırayla Eklenecek
               </span>
             </div>

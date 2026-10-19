@@ -723,7 +723,7 @@ export default function MAdminScheduleClient({
       <main className={`w-full ${hideHeader ? 'max-w-7xl mx-auto p-2 sm:p-4 lg:p-6' : 'max-w-[430px] sm:max-w-[460px] mx-auto'} min-h-screen`}>
         {/* ── 2. HERO CARD & PROGRAM SUMMARY STATS ── */}
         <section className="px-4 pt-3">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0E131F] via-[#121826] to-[#0A0D15] border border-gray-800 p-4 shadow-xl">
+          <div className="relative overflow-hidden rounded-3xl bg-brand-gradient-dark border border-white/10 p-4 shadow-xl">
             {/* Animated Background Circles */}
             <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full pointer-events-none opacity-40">
               <motion.div
@@ -731,16 +731,16 @@ export default function MAdminScheduleClient({
                 transition={{ duration: 35, repeat: Infinity, ease: 'linear' }}
                 className="w-full h-full relative"
               >
-                <div className="absolute inset-0 rounded-full border border-indigo-400/20" />
+                <div className="absolute inset-0 rounded-full border border-[#8D49A6]/20" />
                 <div className="absolute inset-6 rounded-full border border-white/10 border-dashed" />
-                <div className="absolute inset-12 rounded-full border border-indigo-400/30" />
+                <div className="absolute inset-12 rounded-full border border-[#D914C8]/30" />
               </motion.div>
             </div>
 
             {/* School Switcher */}
             <div className="relative z-10 flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-white/10 text-white flex items-center justify-center">
                   <Calendar size={16} />
                 </div>
                 <div>
@@ -761,7 +761,7 @@ export default function MAdminScheduleClient({
                 onClick={() => setIsRevisionModalOpen(true)}
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-[10px] font-bold transition-all cursor-pointer"
               >
-                <History size={12} className="text-indigo-400" />
+                <History size={12} className="text-white/80" />
                 <span>Geçmiş</span>
               </button>
             </div>
@@ -865,7 +865,7 @@ export default function MAdminScheduleClient({
               onClick={() => setViewMode('class')}
               className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                 viewMode === 'class'
-                  ? 'bg-white dark:bg-[#121826] text-indigo-600 dark:text-indigo-400 shadow-sm'
+                  ? 'bg-white dark:bg-[#121826] text-[#4B075F] dark:text-[#C58ADB] shadow-sm font-black'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -878,7 +878,7 @@ export default function MAdminScheduleClient({
               onClick={() => setViewMode('teacher')}
               className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                 viewMode === 'teacher'
-                  ? 'bg-white dark:bg-[#121826] text-teal-600 dark:text-teal-400 shadow-sm'
+                  ? 'bg-white dark:bg-[#121826] text-[#4B075F] dark:text-[#C58ADB] shadow-sm font-black'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -891,7 +891,7 @@ export default function MAdminScheduleClient({
               onClick={() => setViewMode('room')}
               className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                 viewMode === 'room'
-                  ? 'bg-white dark:bg-[#121826] text-purple-600 dark:text-purple-400 shadow-sm'
+                  ? 'bg-white dark:bg-[#121826] text-[#4B075F] dark:text-[#C58ADB] shadow-sm font-black'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -988,7 +988,7 @@ export default function MAdminScheduleClient({
                   onClick={() => setActiveDay(day.key)}
                   className={`py-2 px-1 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-indigo-600 text-white shadow-md'
+                      ? 'bg-[#4B075F] text-white shadow-md shadow-purple-950/20'
                       : 'bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >
@@ -1012,23 +1012,23 @@ export default function MAdminScheduleClient({
         {/* ── 6. CURRICULUM PROGRESS CARD (WHEN IN CLASS MODE) ── */}
         {viewMode === 'class' && (
           <section className="px-4 mt-3">
-            <div className="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/70 dark:border-indigo-900/50">
+            <div className="p-3.5 rounded-2xl bg-[#F0D8FA]/40 dark:bg-[#4B075F]/20 border border-[#E8DFEB] dark:border-[#49364F]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400" />
-                  <span className="text-xs font-black text-indigo-950 dark:text-indigo-300">
+                  <Sparkles size={14} className="text-[#4B075F] dark:text-[#C58ADB]" />
+                  <span className="text-xs font-black text-[#241329] dark:text-[#FCF9FD]">
                     {selectedClass} MEB Haftalık Müfredat Dağılımı
                   </span>
                 </div>
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-indigo-600 text-white">
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#4B075F] text-white">
                   {curriculumStats.totalAssigned} / {curriculumStats.targetTotal} Saat
                 </span>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-indigo-200 dark:bg-indigo-900/60 rounded-full h-2 mt-2 overflow-hidden">
+              <div className="w-full bg-[#E8DFEB] dark:bg-[#49364F] rounded-full h-2 mt-2 overflow-hidden">
                 <div
-                  className="bg-indigo-600 h-full rounded-full transition-all duration-300"
+                  className="bg-brand-gradient h-full rounded-full transition-all duration-300"
                   style={{
                     width: `${Math.min(
                       100,
@@ -1091,7 +1091,7 @@ export default function MAdminScheduleClient({
                       }}
                       className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
                         isSelected
-                          ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-950/80 border-indigo-500 text-indigo-900 dark:text-indigo-100 shadow-xs'
+                          ? 'ring-2 ring-[#4B075F] bg-[#F0D8FA]/60 dark:bg-[#4B075F]/40 border-[#4B075F] text-[#4B075F] dark:text-[#FCF9FD] shadow-xs'
                           : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
                       }`}
                     >
@@ -1102,7 +1102,7 @@ export default function MAdminScheduleClient({
               </div>
 
               {quickSelectedSubject && (
-                <div className="mt-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center justify-between">
+                <div className="mt-2 text-[11px] font-bold text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-between">
                   <span>👉 Seçili: <strong>{quickSelectedSubject}</strong> — Boş saate dokunun</span>
                   <button
                     type="button"
@@ -1430,7 +1430,7 @@ export default function MAdminScheduleClient({
 
                   <button
                     type="submit"
-                    className="flex-1 h-12 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                    className="flex-1 h-12 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs shadow-md shadow-purple-950/20 transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Save size={16} />
                     <span>{slotToEdit.entry ? 'Dersi Güncelle' : 'Dersi Programa Ekle'}</span>
@@ -1511,7 +1511,7 @@ export default function MAdminScheduleClient({
                   </button>
                   <button
                     type="submit"
-                    className="h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-md transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    className="h-11 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black shadow-md shadow-purple-950/20 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <Check size={16} strokeWidth={2.5} />
                     <span>Yayımla</span>
@@ -1779,7 +1779,7 @@ export default function MAdminScheduleClient({
                   </button>
                   <button
                     type="submit"
-                    className="h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="h-10 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-black shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Send size={14} />
                     <span>Gönder</span>

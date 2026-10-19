@@ -739,8 +739,8 @@ export default function MAdminReportsClient({
                 onClick={() => setActiveTab(tab.id as ReportTab)}
                 className={`px-3 py-1.5 rounded-xl font-bold text-xs shrink-0 flex items-center gap-1.5 transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-[#121826] text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-800 hover:border-emerald-500/40'
+                    ? 'bg-[#4B075F] text-white shadow-sm shadow-purple-950/20'
+                    : 'bg-white dark:bg-[#121826] text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-800 hover:border-[#4B075F]/40'
                 }`}
               >
                 <Icon size={13} />
@@ -1148,7 +1148,7 @@ export default function MAdminReportsClient({
                       <button
                         type="button"
                         onClick={() => setSelectedStudentAlert(st)}
-                        className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10.5px] flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
+                        className="px-2.5 py-1 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-[10.5px] flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
                       >
                         <Send size={11} />
                         <span>Veliye SMS İhtar Gönder</span>
@@ -1256,7 +1256,7 @@ export default function MAdminReportsClient({
                       <button
                         type="button"
                         onClick={() => handleDownloadReport(doc.format.includes('Excel') ? 'excel' : 'pdf', doc.title)}
-                        className="h-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                        className="h-8 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                       >
                         <Download size={12} />
                         <span>İndir</span>
@@ -1395,7 +1395,7 @@ export default function MAdminReportsClient({
                       handleDownloadReport('pdf', `${selectedClassDetail.code} Şubesi Not Çizelgesi`)
                       setSelectedClassDetail(null)
                     }}
-                    className="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
+                    className="w-full h-11 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 transition-all cursor-pointer"
                   >
                     <Download size={14} />
                     <span>Şube Karnesini PDF Olarak İndir</span>
@@ -1486,7 +1486,7 @@ export default function MAdminReportsClient({
                   <button
                     type="button"
                     onClick={() => handleSendSmsAlert(selectedStudentAlert)}
-                    className="h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-md transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    className="h-10 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black shadow-md shadow-purple-950/20 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <Send size={13} />
                     <span>Onayla & SMS Gönder</span>
@@ -1625,7 +1625,7 @@ export default function MAdminReportsClient({
                       handleDownloadReport('pdf', pdfReportType)
                       setIsPdfPreviewOpen(false)
                     }}
-                    className="h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition-colors cursor-pointer"
+                    className="h-10 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md shadow-purple-950/20 transition-colors cursor-pointer"
                   >
                     <Download size={13} />
                     <span>PDF Olarak İndir</span>

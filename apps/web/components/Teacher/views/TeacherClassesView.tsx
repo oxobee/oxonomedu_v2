@@ -329,7 +329,7 @@ export default function TeacherClassesView() {
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <span className="w-12 h-12 rounded-2xl bg-indigo-600 text-white font-black text-base flex items-center justify-center shadow-md shadow-indigo-600/20 group-hover:scale-105 transition-transform">
+                      <span className="w-12 h-12 rounded-2xl bg-brand-gradient text-white font-black text-base flex items-center justify-center shadow-md shadow-purple-950/20 group-hover:scale-105 transition-transform">
                         {cls.code}
                       </span>
                       {isLead && (
@@ -439,7 +439,7 @@ export default function TeacherClassesView() {
                 onClick={() => setStatusFilter('all')}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer ${
                   statusFilter === 'all'
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-[#4B075F] text-white shadow-xs'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                 }`}
               >
@@ -450,7 +450,7 @@ export default function TeacherClassesView() {
                 onClick={() => setStatusFilter('active')}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer ${
                   statusFilter === 'active'
-                    ? 'bg-emerald-600 text-white'
+                    ? 'bg-[#4B075F] text-white shadow-xs'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                 }`}
               >
@@ -546,7 +546,7 @@ export default function TeacherClassesView() {
               <button
                 type="button"
                 onClick={() => setSelectedClass(null)}
-                className="mt-2 px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs cursor-pointer hover:bg-indigo-700"
+                className="mt-2 px-4 py-2 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs cursor-pointer shadow-xs shadow-purple-950/20 transition-colors"
               >
                 Tüm Sınıflara Dön
               </button>
@@ -576,7 +576,7 @@ export default function TeacherClassesView() {
               {/* Modal Header */}
               <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white font-black text-base flex items-center justify-center">
+                  <div className="w-11 h-11 rounded-2xl bg-brand-gradient text-white font-black text-base flex items-center justify-center shadow-md shadow-purple-950/20">
                     {selectedStudent.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
@@ -702,7 +702,7 @@ export default function TeacherClassesView() {
                             <button
                               type="button"
                               onClick={handleStartEditingGrades}
-                              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                              className="px-3 py-1.5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                             >
                               <Edit3 size={13} />
                               <span>Notları Düzenle</span>
@@ -877,7 +877,7 @@ export default function TeacherClassesView() {
                           <button
                             type="button"
                             onClick={handleSaveEditedGrades}
-                            className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0A0D15] font-black text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/20 cursor-pointer"
+                            className="px-5 py-2.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-purple-950/20 cursor-pointer"
                           >
                             <Save size={15} />
                             <span>Notları Kaydet & Ortalamayı Güncelle</span>

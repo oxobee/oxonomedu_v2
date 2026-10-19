@@ -111,8 +111,9 @@ const Icons = {
       <circle cx="18" cy="18" r="4" fill="white" />
       <defs>
         <linearGradient id="oxonom-grad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#6366F1" />
-          <stop offset="1" stopColor="#4F46E5" />
+          <stop stopColor="#4B075F" />
+          <stop offset="0.55" stopColor="#8D49A6" />
+          <stop offset="1" stopColor="#D914C8" />
         </linearGradient>
       </defs>
     </svg>

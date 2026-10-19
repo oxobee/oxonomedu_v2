@@ -2541,7 +2541,7 @@ export default function MAdminCurriculumClient({
                     <button
                       type="button"
                       onClick={handlePublishSchedule}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-md transition-all cursor-pointer active:scale-98"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-brand-gradient hover:opacity-95 text-white text-xs font-black shadow-md shadow-purple-950/20 transition-all cursor-pointer active:scale-98"
                     >
                       <CheckCircle2 size={14} />
                       <span>Kaydet & Canlıya Yayınla</span>
@@ -2625,7 +2625,7 @@ export default function MAdminCurriculumClient({
                     <button
                       type="button"
                       onClick={handleSmartAutoFill}
-                      className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-xs flex items-center gap-2 shadow-md cursor-pointer hover:brightness-110"
+                      className="px-4 py-2.5 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center gap-2 shadow-md shadow-purple-950/20 cursor-pointer"
                     >
                       <Wand2 size={15} />
                       <span>Akıllı Otomatik Program Oluştur (35 Saat)</span>
@@ -2748,7 +2748,7 @@ export default function MAdminCurriculumClient({
                           onClick={() => setActiveDay(day.key)}
                           className={`py-2.5 px-1 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer ${
                             isActive
-                              ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400/40 scale-102'
+                              ? 'bg-[#4B075F] text-white shadow-md shadow-purple-950/20 ring-2 ring-[#8D49A6]/40 scale-102'
                               : 'bg-white dark:bg-[#111827] border border-gray-200/90 dark:border-gray-800/80 text-gray-700 dark:text-gray-300'
                           }`}
                         >
@@ -2889,7 +2889,7 @@ export default function MAdminCurriculumClient({
                     <button
                       type="button"
                       onClick={handleOpenNewCourseModal}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white text-xs font-bold shadow-xs shadow-purple-950/20 transition-all cursor-pointer"
                     >
                       <Plus size={13} strokeWidth={2.5} />
                       <span>Yeni Ders Tanımla</span>
@@ -2914,7 +2914,7 @@ export default function MAdminCurriculumClient({
                       <button
                         type="button"
                         onClick={handleOpenNewCourseModal}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs cursor-pointer shadow-xs shadow-purple-950/20"
                       >
                         + Bu Sınıfa Ders Ekle
                       </button>
@@ -3031,7 +3031,7 @@ export default function MAdminCurriculumClient({
                       onClick={() => setActiveDay(day.key)}
                       className={`py-2.5 px-1 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer ${
                         isActive
-                          ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400/40 scale-102'
+                          ? 'bg-[#4B075F] text-white shadow-md shadow-purple-950/20 ring-2 ring-[#8D49A6]/40 scale-102'
                           : 'bg-white dark:bg-[#111827] border border-gray-200/90 dark:border-gray-800/80 text-gray-700 dark:text-gray-300'
                       }`}
                     >
@@ -3050,7 +3050,7 @@ export default function MAdminCurriculumClient({
                 <button
                   type="button"
                   onClick={handleSmartAutoFill}
-                  className="h-10 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer active:scale-98"
+                  className="h-10 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 transition-all cursor-pointer active:scale-98"
                 >
                   <Wand2 size={15} />
                   <span>Akıllı Otomatik Doldur</span>
@@ -3232,7 +3232,7 @@ export default function MAdminCurriculumClient({
                 <button
                   type="button"
                   onClick={handleOpenNewCourseModal}
-                  className="h-8 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                  className="h-8 px-3 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs shadow-purple-950/20 transition-all cursor-pointer"
                 >
                   <Plus size={14} />
                   <span>Yeni Ders Tanımla</span>
@@ -3363,7 +3363,7 @@ export default function MAdminCurriculumClient({
               <button
                 type="button"
                 onClick={handlePublishSchedule}
-                className="flex-1 sm:flex-none h-11 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 active:scale-98 transition-all cursor-pointer whitespace-nowrap"
+                className="flex-1 sm:flex-none h-11 px-5 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-950/25 active:scale-98 transition-all cursor-pointer whitespace-nowrap"
               >
                 <CheckCircle2 size={16} />
                 <span>Kaydet ve Canlıya Yayınla</span>
@@ -3655,7 +3655,7 @@ export default function MAdminCurriculumClient({
                         }}
                         className={`py-2 px-2 rounded-xl text-xs font-extrabold flex flex-col items-center gap-1 border transition-all cursor-pointer ${
                           formRoomType === 'normal'
-                            ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
+                            ? 'bg-[#4B075F] text-white border-[#4B075F] shadow-sm shadow-purple-950/20'
                             : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'
                         }`}
                       >
@@ -3671,7 +3671,7 @@ export default function MAdminCurriculumClient({
                         }}
                         className={`py-2 px-2 rounded-xl text-xs font-extrabold flex flex-col items-center gap-1 border transition-all cursor-pointer ${
                           formRoomType === 'atolye'
-                            ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
+                            ? 'bg-[#4B075F] text-white border-[#4B075F] shadow-sm shadow-purple-950/20'
                             : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'
                         }`}
                       >
@@ -3687,7 +3687,7 @@ export default function MAdminCurriculumClient({
                         }}
                         className={`py-2 px-2 rounded-xl text-xs font-extrabold flex flex-col items-center gap-1 border transition-all cursor-pointer ${
                           formRoomType === 'laboratuvar'
-                            ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
+                            ? 'bg-[#4B075F] text-white border-[#4B075F] shadow-sm shadow-purple-950/20'
                             : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'
                         }`}
                       >
@@ -3727,7 +3727,7 @@ export default function MAdminCurriculumClient({
                           onClick={() => setFormColor(cKey)}
                           className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                             cStyle.dot
-                          } ${formColor === cKey ? 'ring-2 ring-offset-2 ring-emerald-500 scale-110' : 'opacity-80'}`}
+                          } ${formColor === cKey ? 'ring-2 ring-offset-2 ring-[#4B075F] scale-110' : 'opacity-80'}`}
                         >
                           {formColor === cKey && <Check size={12} className="text-white" />}
                         </button>
@@ -3740,7 +3740,7 @@ export default function MAdminCurriculumClient({
                 <div className="pt-2">
                   <button
                     type="submit"
-                    className="w-full h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full h-12 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs shadow-md shadow-purple-950/20 transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Plus size={16} strokeWidth={2.5} />
                     <span>Dersi Oluştur ve Kataloğa Kaydet</span>
@@ -3890,7 +3890,7 @@ export default function MAdminCurriculumClient({
                 <div className="pt-2">
                   <button
                     type="submit"
-                    className="w-full h-12 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full h-12 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs shadow-md shadow-purple-950/20 transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Check size={16} />
                     <span>Değişiklikleri Kaydet</span>
@@ -4008,7 +4008,7 @@ export default function MAdminCurriculumClient({
                       setIsEditPeriodsModalOpen(false)
                       toast.success('Ders saatleri çizelgesi başarıyla kaydedildi!')
                     }}
-                    className="w-full h-11 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition-all cursor-pointer"
+                    className="w-full h-11 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs shadow-md shadow-purple-950/20 transition-all cursor-pointer"
                   >
                     Kaydet ve Uygula
                   </button>
@@ -4094,7 +4094,7 @@ export default function MAdminCurriculumClient({
                   onClick={() => handleToggleTeacherLeave(selectedSlotForAction.entry!)}
                   className={`w-full h-11 rounded-2xl font-black text-xs flex items-center justify-center gap-2 cursor-pointer transition-all ${
                     selectedSlotForAction.entry.isTeacherOnLeave
-                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                      ? 'bg-[#16805D] hover:bg-[#16805D]/90 text-white'
                       : 'bg-amber-600 hover:bg-amber-500 text-white'
                   }`}
                 >
@@ -4210,7 +4210,7 @@ export default function MAdminCurriculumClient({
                           onClick={() => setCopyTargetClass(preset)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                             copyTargetClass === preset
-                              ? 'bg-emerald-600 text-white shadow-xs'
+                              ? 'bg-[#4B075F] text-white shadow-xs'
                               : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                           }`}
                         >
@@ -4224,17 +4224,17 @@ export default function MAdminCurriculumClient({
                     value={copyTargetClass}
                     onChange={(e) => setCopyTargetClass(e.target.value.toUpperCase())}
                     placeholder="Örn: 9/B veya 10/A"
-                    className="w-full h-11 px-3.5 rounded-2xl text-xs font-bold bg-white dark:bg-[#121826] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/40 uppercase"
+                    className="w-full h-11 px-3.5 rounded-2xl text-xs font-bold bg-white dark:bg-[#121826] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-[#4B075F]/40 uppercase"
                   />
                 </div>
 
                 {/* Bilgilendirme Notu */}
-                <div className="p-3 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 text-[11px] text-blue-800 dark:text-blue-300 space-y-1">
+                <div className="p-3 rounded-2xl bg-[#F0D8FA]/40 dark:bg-[#4B075F]/20 border border-[#E8DFEB] dark:border-[#49364F] text-[11px] text-[#4B075F] dark:text-[#D2C5D8] space-y-1">
                   <div className="font-bold flex items-center gap-1.5">
-                    <Sparkles size={13} className="text-blue-500" />
+                    <Sparkles size={13} className="text-[#8D49A6]" />
                     <span>Otomatik Uyarlama:</span>
                   </div>
-                  <p className="text-blue-700/90 dark:text-blue-400/90 leading-relaxed">
+                  <p className="text-[#514458] dark:text-[#B5A5BD] leading-relaxed">
                     Kopyalama yapıldığında <strong>{selectedClass}</strong> şubesinin tüm ders havuzu ve haftalık tablosu hedef şubeye aktarılır. Derslik adları ve şube kodları hedef şubeye göre otomatik güncellenir.
                   </p>
                 </div>
@@ -4253,7 +4253,7 @@ export default function MAdminCurriculumClient({
                     type="button"
                     onClick={handleCopySchedule}
                     disabled={!copyTargetClass.trim()}
-                    className="flex-1 h-11 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20 transition-all active:scale-98"
+                    className="flex-1 h-11 rounded-2xl bg-brand-gradient hover:opacity-95 disabled:opacity-50 text-white font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-950/20 transition-all active:scale-98"
                   >
                     <Copy size={14} />
                     <span>Programı Kopyala ve Uygula</span>

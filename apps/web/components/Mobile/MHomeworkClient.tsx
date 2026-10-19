@@ -1434,12 +1434,12 @@ export default function MHomeworkClient({
             <div className="mx-4 mt-3 bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4.5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
               {/* Sol: Başlık ve Bilgi */}
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-blue-500/15 border border-blue-500/30 text-[#1D77FF] dark:text-blue-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#F0D8FA] border border-[#8D49A6]/30 text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
                   <BookOpenCheck size={22} strokeWidth={2.2} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-black uppercase tracking-wider text-[#1D77FF] dark:text-blue-400">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-[#4B075F] dark:text-[#C58ADB]">
                       Ödev & Değerlendirme Portalı
                     </span>
                     <span className="text-gray-300 dark:text-gray-700">•</span>
@@ -1462,7 +1462,7 @@ export default function MHomeworkClient({
                   className="flex-1 sm:flex-none h-11 px-3.5 sm:px-4 rounded-xl bg-gray-100 hover:bg-gray-200/80 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 group shrink-0"
                   title="Sınıf / Şube Değiştir"
                 >
-                  <Users size={16} className="text-[#1D77FF] dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                  <Users size={16} className="text-[#4B075F] dark:text-[#C58ADB] group-hover:scale-110 transition-transform" />
                   <span>{selectedBranch}</span>
                   <ChevronDown size={14} className="text-gray-400 group-hover:text-gray-700 dark:group-hover:text-white transition-colors" />
                 </button>
@@ -1471,18 +1471,18 @@ export default function MHomeworkClient({
                 <button
                   type="button"
                   onClick={() => setIsHomeworkModalOpen(true)}
-                  className="flex-1 sm:flex-none h-11 px-3.5 sm:px-4 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 group shrink-0"
+                  className="flex-1 sm:flex-none h-11 px-3.5 sm:px-4 rounded-xl bg-[#F0D8FA]/70 hover:bg-[#F0D8FA] dark:bg-[#2D2035] dark:hover:bg-[#350444]/60 border border-[#8D49A6]/30 text-[#4B075F] dark:text-[#C58ADB] text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 group shrink-0"
                   title="Bu sınıfa ait ödevleri seç ve tarihsel filtrele"
                 >
-                  <BookOpenCheck size={16} className="text-[#1D77FF] dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                  <BookOpenCheck size={16} className="text-[#4B075F] dark:text-[#C58ADB] group-hover:scale-110 transition-transform" />
                   <span>Ödev Seç</span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-blue-200/70 dark:bg-blue-900/80 text-[10px] font-black text-blue-800 dark:text-blue-200">
+                  <span className="px-1.5 py-0.5 rounded-full bg-[#4B075F] text-[10px] font-black text-white">
                     {classHomeworks.length}
                   </span>
-                  <ChevronDown size={14} className="text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-200 transition-colors" />
+                  <ChevronDown size={14} className="text-[#8D49A6] group-hover:text-[#4B075F] dark:group-hover:text-[#C58ADB] transition-colors" />
                 </button>
 
-                {/* 3. Yeni Ödev Ver Butonu (Geniş, Yüksek Görünürlüklü Mavi Buton) */}
+                {/* 3. Yeni Ödev Ver Butonu (Geniş, Yüksek Görünürlüklü Mor Buton) */}
                 <button
                   type="button"
                   onClick={() => {
@@ -1491,7 +1491,7 @@ export default function MHomeworkClient({
                     }
                     setIsCreateModalOpen(true)
                   }}
-                  className="w-full sm:w-auto h-11 px-4 sm:px-5 rounded-xl bg-[#1D77FF] hover:bg-blue-600 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-95 transition-all cursor-pointer border border-blue-400 group shrink-0 whitespace-nowrap"
+                  className="w-full sm:w-auto h-11 px-4 sm:px-5 rounded-xl bg-brand-gradient hover:opacity-95 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 active:scale-95 transition-all cursor-pointer border border-white/20 group shrink-0 whitespace-nowrap"
                   title={`${selectedBranch} İçin Yeni Ödev Tanımla`}
                 >
                   <Plus size={16} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-200" />
@@ -1500,13 +1500,13 @@ export default function MHomeworkClient({
               </div>
             </div>
 
-            {/* ── HERO / AKTİF ÖDEV KARTI (Vibrant Blue Gradient) ── */}
+            {/* ── HERO / AKTİF ÖDEV KARTI (Oxonom Edu Brand Gradient Dark) ── */}
             <motion.section
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               style={{ contain: 'paint' }}
-              className="mx-4 mt-3 bg-gradient-to-br from-[#1E4FD8] via-[#1D77FF] to-[#0A58D0] dark:from-[#0E1A38] dark:via-[#162D63] dark:to-[#0F224D] text-white rounded-[26px] sm:rounded-[30px] p-5 sm:p-6 flex flex-col gap-4.5 shadow-[0_16px_45px_rgba(29,119,255,0.18)] border border-blue-400/30 dark:border-blue-800/40 relative overflow-hidden"
+              className="mx-4 mt-3 bg-brand-gradient-dark text-white rounded-[26px] sm:rounded-[30px] p-5 sm:p-6 flex flex-col gap-4.5 shadow-[0_16px_45px_rgba(75,7,95,0.25)] border border-[#8D49A6]/30 dark:border-[#8D49A6]/20 relative overflow-hidden"
             >
               {/* Animated Background Subtle Concentric Circles */}
               <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-25 overflow-hidden">
@@ -1938,11 +1938,11 @@ export default function MHomeworkClient({
           <section className="bg-white dark:bg-[#111624] border border-[#E7EBF2] dark:border-white/10 rounded-[22px] p-4 shadow-sm flex flex-col gap-3.5">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-[12px] font-extrabold tracking-wider text-[#0F172A] dark:text-white">
-                <FileText size={18} className="text-[#1D77FF] dark:text-blue-400" />
+                <FileText size={18} className="text-[#4B075F] dark:text-[#C58ADB]" />
                 <span>ÖĞRENCİ YANITI & ÇÖZÜM DETAYI</span>
               </div>
 
-              <span className="h-[26px] inline-flex items-center px-2.5 rounded-[13px] bg-blue-50 dark:bg-blue-950/60 text-[#1D77FF] dark:text-blue-300 text-[10px] font-extrabold whitespace-nowrap border border-blue-200/50 dark:border-blue-800/50">
+              <span className="h-[26px] inline-flex items-center px-2.5 rounded-[13px] bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] text-[10px] font-extrabold whitespace-nowrap border border-[#8D49A6]/20">
                 {currentHomework.tool_type || currentHomework.category}
               </span>
             </div>
@@ -1962,9 +1962,9 @@ export default function MHomeworkClient({
 
                 {/* Ekli Dosya Varsa */}
                 {currentSubmissions[selectedStudent?.id]?.fileName && (
-                  <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-[#F0D8FA]/40 dark:bg-[#2D2035] border border-[#8D49A6]/30">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-[#1D77FF] flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] text-[#4B075F] flex items-center justify-center shrink-0">
                         <FileText size={16} />
                       </div>
                       <div className="min-w-0">
@@ -1976,7 +1976,7 @@ export default function MHomeworkClient({
                         </span>
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-lg bg-blue-500 text-white text-[10.5px] font-bold shrink-0">
+                    <span className="px-2.5 py-1 rounded-lg bg-[#4B075F] text-white text-[10.5px] font-bold shrink-0">
                       Ekli Dosya
                     </span>
                   </div>
@@ -2012,7 +2012,7 @@ export default function MHomeworkClient({
                           {keys.map((k, idx) => (
                             <div key={k} className="p-2 rounded-xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 flex items-center justify-between">
                               <span className="font-bold text-gray-600 dark:text-gray-400">Soru {idx + 1}:</span>
-                              <span className="font-black text-[#1D77FF] dark:text-cyan-300">
+                              <span className="font-black text-[#4B075F] dark:text-[#C58ADB]">
                                 {typeof parsedQuiz![k] === 'boolean'
                                   ? parsedQuiz![k] ? 'Doğru' : 'Yanlış'
                                   : typeof parsedQuiz![k] === 'object'
@@ -2235,7 +2235,7 @@ export default function MHomeworkClient({
                 {/* Modal Header */}
                 <div className="flex items-start justify-between gap-3 shrink-0 mb-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-[14px] bg-blue-500/15 border border-blue-500/30 text-[#1D77FF] dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-[14px] bg-[#F0D8FA] border border-[#8D49A6]/30 text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
                       <BookOpenCheck size={20} strokeWidth={2.2} />
                     </div>
                     <div>
@@ -2268,7 +2268,7 @@ export default function MHomeworkClient({
                       }
                       setIsCreateModalOpen(true)
                     }}
-                    className="w-full py-2.5 px-3 rounded-2xl bg-[#1D77FF] hover:bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 transition-all cursor-pointer"
+                    className="w-full py-2.5 px-3 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 transition-all cursor-pointer"
                   >
                     <Plus size={15} strokeWidth={2.5} />
                     <span>+ Yeni Ödev Oluştur ({selectedBranch})</span>
@@ -2391,7 +2391,7 @@ export default function MHomeworkClient({
                           onClick={() => handleSelectHomework(hw)}
                           className={`p-3.5 rounded-[18px] flex flex-col gap-2.5 cursor-pointer transition-all ${
                             isSelected
-                              ? 'border-[1.5px] border-[#1D77FF] bg-blue-50/60 dark:bg-blue-950/40 shadow-xs'
+                              ? 'border-[1.5px] border-[#4B075F] bg-[#F0D8FA]/50 dark:bg-[#2D2035] shadow-xs'
                               : 'border border-gray-200 dark:border-white/10 bg-white dark:bg-[#161c2d] hover:border-gray-300'
                           }`}
                         >
@@ -2418,7 +2418,7 @@ export default function MHomeworkClient({
                             </div>
 
                             {isSelected ? (
-                              <span className="h-[22px] inline-flex items-center gap-1 px-2 rounded-full bg-[#1D77FF] text-white text-[10.5px] font-extrabold shadow-xs">
+                              <span className="h-[22px] inline-flex items-center gap-1 px-2 rounded-full bg-[#4B075F] text-white text-[10.5px] font-extrabold shadow-xs">
                                 <Check size={11} strokeWidth={2.5} />
                                 <span>Aktif</span>
                               </span>

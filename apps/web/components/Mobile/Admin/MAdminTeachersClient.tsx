@@ -966,15 +966,15 @@ export default function MAdminTeachersClient({
 
         {/* ── 2. KURUM VERİTABANI VE İZOLASYON ALANI ── */}
         <section className="px-4 mt-3">
-          <div className="flex items-center justify-between p-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent border border-emerald-500/20 dark:border-emerald-500/30">
+          <div className="flex items-center justify-between p-2.5 px-3.5 rounded-2xl bg-[#F0D8FA]/40 dark:bg-[#4B075F]/20 border border-[#E8DFEB] dark:border-[#49364F]">
             <div className="flex items-center gap-2.5">
-              <span className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-xs">
+              <span className="w-8 h-8 rounded-xl bg-brand-gradient flex items-center justify-center text-white shadow-xs">
                 <School size={16} />
               </span>
               <div>
                 <div className="text-xs font-black text-gray-900 dark:text-white flex items-center gap-1.5">
                   <span>Oxonom Okulları</span>
-                  <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black">Aktif Kurum</span>
+                  <span className="px-1.5 py-0.5 rounded-md bg-[#4B075F]/10 text-[#4B075F] dark:text-[#C58ADB] text-[10px] font-black">Aktif Kurum</span>
                 </div>
                 <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">
                   1 Sınıf
@@ -999,8 +999,8 @@ export default function MAdminTeachersClient({
                 placeholder="Öğretmen adı, branş veya e-posta ara..."
                 className={`w-full h-11 pl-9 pr-3.5 rounded-2xl text-xs font-medium outline-hidden transition-all ${
                   theme === 'dark'
-                    ? 'bg-[#121826] text-white placeholder-gray-500 border border-gray-800 focus:border-[#34D399]/60'
-                    : 'bg-white text-gray-900 placeholder-gray-400 border border-gray-200/90 focus:border-[#10B981] shadow-xs'
+                    ? 'bg-[#121826] text-white placeholder-gray-500 border border-gray-800 focus:border-[#C58ADB]/60'
+                    : 'bg-white text-gray-900 placeholder-gray-400 border border-gray-200/90 focus:border-[#4B075F] shadow-xs'
                 }`}
               />
             </div>
@@ -1010,7 +1010,7 @@ export default function MAdminTeachersClient({
                 resetNewTeacherForm()
                 setIsNewTeacherModalOpen(true)
               }}
-              className="h-11 px-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all shrink-0 cursor-pointer"
+              className="h-11 px-3.5 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-purple-950/20 active:scale-95 transition-all shrink-0 cursor-pointer"
             >
               <Plus size={16} strokeWidth={2.5} />
               <span>Yeni Ekle</span>
@@ -1218,7 +1218,7 @@ export default function MAdminTeachersClient({
                         const t = selectedTeacherForDetail
                         handleOpenEdit(t)
                       }}
-                      className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                      className="px-2.5 py-1.5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-extrabold text-[11px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs shadow-purple-950/20"
                       title="Öğretmen Bilgilerini Düzenle"
                     >
                       <Edit3 size={13} />
@@ -1254,7 +1254,7 @@ export default function MAdminTeachersClient({
                         onClick={() => setActiveDetailTab(tab.id as DetailTabKey)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 flex items-center gap-1.5 transition-all cursor-pointer ${
                           isActive
-                            ? 'bg-[#10B981] text-white shadow-sm shadow-emerald-500/20'
+                            ? 'bg-[#4B075F] text-white shadow-sm shadow-purple-950/20'
                             : 'bg-gray-100 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                       >
@@ -1485,7 +1485,7 @@ export default function MAdminTeachersClient({
                             onClick={() => handleApplyRoleTemplate(rt.id)}
                             className={`p-2 rounded-xl text-[11px] font-bold border transition-all cursor-pointer text-center ${
                               selectedRoleTemplate === rt.id
-                                ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
+                                ? 'bg-[#4B075F] text-white border-[#4B075F] shadow-xs shadow-purple-950/20'
                                 : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100'
                             }`}
                           >
@@ -1503,7 +1503,7 @@ export default function MAdminTeachersClient({
                           <button
                             type="button"
                             onClick={() => setCustomPermissions(SYSTEM_SCREEN_PERMISSIONS.map((p) => p.id))}
-                            className="text-purple-600 dark:text-purple-400 hover:underline cursor-pointer text-xs"
+                            className="text-[#4B075F] dark:text-[#C58ADB] hover:underline cursor-pointer text-xs font-semibold"
                           >
                             Tümünü Aç
                           </button>
@@ -1593,7 +1593,7 @@ export default function MAdminTeachersClient({
                       <button
                         type="button"
                         onClick={handleSavePermissions}
-                        className="w-full h-11 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                        className="w-full h-11 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-purple-950/20"
                       >
                         <Save size={15} />
                         <span>Yetki Matrisini Kaydet ve Uygula</span>
@@ -1646,7 +1646,7 @@ export default function MAdminTeachersClient({
                         <button
                           type="button"
                           onClick={() => setIsAddingLeave(!isAddingLeave)}
-                          className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                          className="px-2 py-1 rounded-lg bg-[#4B075F] hover:bg-[#620B79] text-white font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <Plus size={12} />
                           <span>{isAddingLeave ? 'Vazgeç' : 'Yeni İzin Ekle'}</span>
@@ -1706,7 +1706,7 @@ export default function MAdminTeachersClient({
                           </div>
                           <button
                             type="submit"
-                            className="w-full h-9 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white font-black text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            className="w-full h-9 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-black text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                           >
                             <Check size={13} />
                             <span>İzni Kaydet ve Onayla</span>
@@ -1860,7 +1860,7 @@ export default function MAdminTeachersClient({
                         <button
                           type="button"
                           onClick={() => setIsAddingAdvance(!isAddingAdvance)}
-                          className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                          className="px-2 py-1 rounded-lg bg-[#4B075F] hover:bg-[#620B79] text-white font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <Plus size={11} />
                           <span>{isAddingAdvance ? 'Kapat' : 'Yeni Avans Tanımla'}</span>
@@ -1868,8 +1868,8 @@ export default function MAdminTeachersClient({
                       </div>
 
                       {isAddingAdvance && (
-                        <form onSubmit={handleCreateAdvance} className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2.5">
-                          <div className="text-xs font-black text-emerald-800 dark:text-emerald-300">
+                        <form onSubmit={handleCreateAdvance} className="p-3 rounded-2xl bg-[#F0D8FA]/40 dark:bg-[#4B075F]/20 border border-[#E8DFEB] dark:border-[#49364F] space-y-2.5">
+                          <div className="text-xs font-black text-[#4B075F] dark:text-[#C58ADB]">
                             Yeni Avans Kaydı Oluştur
                           </div>
                           <div className="grid grid-cols-2 gap-2">
@@ -1899,7 +1899,7 @@ export default function MAdminTeachersClient({
                           </div>
                           <button
                             type="submit"
-                            className="w-full h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors cursor-pointer"
+                            className="w-full h-8 rounded-lg bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs transition-colors cursor-pointer"
                           >
                             Avansı Onayla ve Kaydet
                           </button>
@@ -2059,7 +2059,7 @@ export default function MAdminTeachersClient({
 
                       <button
                         type="submit"
-                        className="w-full h-11 rounded-2xl bg-[#10B981] hover:bg-[#059669] text-white font-black text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                        className="w-full h-11 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs shadow-md shadow-purple-950/20 transition-all cursor-pointer flex items-center justify-center gap-2"
                       >
                         <Send size={14} />
                         <span>Öğretmene Anlık Bildirim Gönder</span>
@@ -2078,7 +2078,7 @@ export default function MAdminTeachersClient({
                               className="p-2.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-[#121826] flex items-center justify-between text-xs"
                             >
                               <div className="flex items-center gap-2 min-w-0 flex-1">
-                                <Bell size={13} className="text-emerald-500 shrink-0" />
+                                <Bell size={13} className="text-[#8D49A6] shrink-0" />
                                 <div className="min-w-0 flex-1">
                                   <div className="font-bold text-gray-900 dark:text-white truncate">
                                     {sn.title}
@@ -2088,7 +2088,7 @@ export default function MAdminTeachersClient({
                                   </div>
                                 </div>
                               </div>
-                              <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">
+                              <span className="text-[10px] font-extrabold text-[#4B075F] dark:text-[#C58ADB] bg-[#F0D8FA]/60 dark:bg-[#4B075F]/30 px-2 py-0.5 rounded-md">
                                 İletildi
                               </span>
                             </div>
@@ -2109,7 +2109,7 @@ export default function MAdminTeachersClient({
                       <button
                         type="button"
                         onClick={handleUploadDocument}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-[#4B075F] hover:bg-[#620B79] text-white font-extrabold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         <Plus size={11} />
                         <span>Yeni Belge Yükle</span>
@@ -2248,7 +2248,7 @@ export default function MAdminTeachersClient({
                       onClick={() => setEditTeacherSection(tb.key as any)}
                       className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                         isActive
-                          ? 'bg-[#10B981] text-white shadow-sm'
+                          ? 'bg-[#4B075F] text-white shadow-sm shadow-purple-950/20'
                           : 'bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
@@ -2686,7 +2686,7 @@ export default function MAdminTeachersClient({
                 <div className="pt-2">
                   <button
                     type="submit"
-                    className="w-full h-12 rounded-2xl bg-[#10B981] hover:bg-[#059669] text-white font-black text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full h-12 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs shadow-md shadow-purple-950/20 transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Save size={16} />
                     <span>Öğretmen Bilgilerini Güncelle</span>
@@ -2712,7 +2712,7 @@ export default function MAdminTeachersClient({
               {/* Header */}
               <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shrink-0">
+                  <div className="w-10 h-10 rounded-2xl bg-brand-gradient text-white flex items-center justify-center shadow-md shadow-purple-950/20 shrink-0">
                     <User size={20} />
                   </div>
                   <div>
@@ -2744,7 +2744,7 @@ export default function MAdminTeachersClient({
                     onClick={() => setNewTeacherTab('temel')}
                     className={`py-2 rounded-xl transition-all cursor-pointer ${
                       newTeacherTab === 'temel'
-                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        ? 'bg-white dark:bg-[#1E293B] text-[#4B075F] dark:text-[#C58ADB] shadow-sm font-black'
                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -2755,7 +2755,7 @@ export default function MAdminTeachersClient({
                     onClick={() => setNewTeacherTab('gorev')}
                     className={`py-2 rounded-xl transition-all cursor-pointer ${
                       newTeacherTab === 'gorev'
-                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        ? 'bg-white dark:bg-[#1E293B] text-[#4B075F] dark:text-[#C58ADB] shadow-sm font-black'
                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -2766,7 +2766,7 @@ export default function MAdminTeachersClient({
                     onClick={() => setNewTeacherTab('ozluk')}
                     className={`py-2 rounded-xl transition-all cursor-pointer ${
                       newTeacherTab === 'ozluk'
-                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        ? 'bg-white dark:bg-[#1E293B] text-[#4B075F] dark:text-[#C58ADB] shadow-sm font-black'
                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -2777,7 +2777,7 @@ export default function MAdminTeachersClient({
                     onClick={() => setNewTeacherTab('finans')}
                     className={`py-2 rounded-xl transition-all cursor-pointer ${
                       newTeacherTab === 'finans'
-                        ? 'bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 shadow-sm font-black'
+                        ? 'bg-white dark:bg-[#1E293B] text-[#4B075F] dark:text-[#C58ADB] shadow-sm font-black'
                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
@@ -3195,7 +3195,7 @@ export default function MAdminTeachersClient({
                   </button>
                   <button
                     type="submit"
-                    className="flex-[2] h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer"
+                    className="flex-[2] h-12 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-950/20 active:scale-98 transition-all cursor-pointer"
                   >
                     <CheckCircle2 size={16} />
                     <span>Öğretmeni Sisteme Kaydet</span>
@@ -3206,7 +3206,7 @@ export default function MAdminTeachersClient({
               {/* ── SUCCESS CREDENTIALS POPUP (Müdürün Öğretmene İleteceği Bilgiler) ── */}
               {newCreatedCredentials && (
                 <div className="absolute inset-0 z-30 bg-white/95 dark:bg-[#121826]/95 backdrop-blur-md p-6 flex flex-col justify-center items-center text-center space-y-4">
-                  <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center shadow-lg border border-emerald-500/30">
+                  <div className="w-16 h-16 rounded-3xl bg-[#4B075F]/10 text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shadow-lg border border-[#E8DFEB] dark:border-[#49364F]">
                     <CheckCircle2 size={36} />
                   </div>
 
@@ -3222,7 +3222,7 @@ export default function MAdminTeachersClient({
                   <div className="w-full max-w-sm p-4 rounded-2xl bg-gray-50 dark:bg-[#0A0D15] border border-gray-200 dark:border-gray-800 text-left space-y-2.5 text-xs font-mono">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-gray-400 block">Giriş E-Postası:</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400 select-all">{newCreatedCredentials.email}</span>
+                      <span className="font-bold text-[#4B075F] dark:text-[#C58ADB] select-all">{newCreatedCredentials.email}</span>
                     </div>
                     <div>
                       <span className="text-[10px] uppercase font-bold text-gray-400 block">Geçici Şifre:</span>
@@ -3238,7 +3238,7 @@ export default function MAdminTeachersClient({
                     <button
                       type="button"
                       onClick={() => {
-                        const text = `Oxonom Okulları Öğretmen Giriş Bilgileri:\nE-Posta: ${newCreatedCredentials.email}\nGeçici Şifre: ${newCreatedCredentials.pass}\nGiriş: https://agenapos.vercel.app/m-login`
+                        const text = `Oxonom Okulları Öğretmen Giriş Bilgileri:\nE-Posta: ${newCreatedCredentials.email}\nGeçici Şifre: ${newCreatedCredentials.pass}\nGiriş: https://oxonomeduv2.vercel.app/loginv2`
                         navigator.clipboard.writeText(text)
                         toast.success('Giriş bilgileri panoya kopyalandı!')
                       }}
@@ -3253,7 +3253,7 @@ export default function MAdminTeachersClient({
                         setIsNewTeacherModalOpen(false)
                         setNewCreatedCredentials(null)
                       }}
-                      className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-md"
+                      className="flex-1 h-11 rounded-xl bg-brand-gradient hover:opacity-95 text-white text-xs font-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-md shadow-purple-950/20"
                     >
                       <span>Tamam & Kapat</span>
                     </button>

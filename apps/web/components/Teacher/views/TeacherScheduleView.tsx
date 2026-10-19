@@ -307,7 +307,7 @@ export default function TeacherScheduleView() {
               onClick={() => setScopeFilter('my_lessons')}
               className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                 scopeFilter === 'my_lessons'
-                  ? 'bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-[#4B075F] text-white shadow-xs shadow-purple-950/20'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -319,7 +319,7 @@ export default function TeacherScheduleView() {
               onClick={() => setScopeFilter('all_school')}
               className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                 scopeFilter === 'all_school'
-                  ? 'bg-indigo-600 text-white shadow-xs'
+                  ? 'bg-[#4B075F] text-white shadow-xs shadow-purple-950/20'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -412,8 +412,8 @@ export default function TeacherScheduleView() {
                 onClick={() => setSelectedDayKey(day.key)}
                 className={`px-4 py-2.5 rounded-2xl text-xs font-extrabold flex items-center gap-2 shrink-0 transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
-                    : 'bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 text-gray-700 dark:text-gray-300 hover:border-emerald-400'
+                    ? 'bg-[#4B075F] text-white shadow-sm shadow-purple-950/20'
+                    : 'bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 text-gray-700 dark:text-gray-300 hover:border-[#4B075F]'
                 }`}
               >
                 <span>{day.label}</span>
@@ -478,7 +478,7 @@ export default function TeacherScheduleView() {
                       <div
                         className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center shrink-0 font-black ${
                           isCurrent
-                            ? 'bg-emerald-600 text-white shadow-sm'
+                            ? 'bg-[#4B075F] text-white shadow-sm shadow-purple-950/20'
                             : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                         }`}
                       >
@@ -765,7 +765,7 @@ export default function TeacherScheduleView() {
                 <button
                   type="button"
                   onClick={() => setSelectedLessonModal(null)}
-                  className="h-9 px-4 rounded-xl bg-indigo-600 text-white font-bold text-xs cursor-pointer"
+                  className="h-9 px-4 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs cursor-pointer transition-colors shadow-xs shadow-purple-950/20"
                 >
                   Kapat
                 </button>

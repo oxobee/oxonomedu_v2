@@ -206,16 +206,16 @@ export default function TeacherProgressView() {
             <div
               key={st.id}
               onClick={() => setSelectedStudent(st)}
-              className="bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-3xl p-5 shadow-xs hover:border-indigo-400 dark:hover:border-indigo-600 transition-all cursor-pointer flex flex-col justify-between space-y-4 group"
+              className="bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-3xl p-5 shadow-xs hover:border-[#4B075F] dark:hover:border-[#C58ADB] transition-all cursor-pointer flex flex-col justify-between space-y-4 group"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-sm">
+                    <div className="w-11 h-11 rounded-2xl bg-brand-gradient text-white font-black text-sm flex items-center justify-center shadow-sm shadow-purple-950/20">
                       {st.name.slice(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="text-sm font-extrabold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      <h3 className="text-sm font-extrabold text-gray-900 dark:text-white group-hover:text-[#4B075F] dark:group-hover:text-[#C58ADB] transition-colors">
                         {st.name}
                       </h3>
                       <p className="text-[11px] text-gray-400 font-mono mt-0.5">
@@ -282,7 +282,7 @@ export default function TeacherProgressView() {
               {/* Header */}
               <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white font-black text-base flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-gradient text-white font-black text-base flex items-center justify-center shadow-md shadow-purple-950/20">
                     {selectedStudent.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
@@ -445,7 +445,7 @@ export default function TeacherProgressView() {
                         type="button"
                         onClick={handleAddGuidanceNote}
                         disabled={!newGuidanceNote.trim()}
-                        className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-brand-gradient hover:opacity-95 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-purple-950/20 transition-all cursor-pointer"
                       >
                         <Send size={12} />
                         <span>Rehberlik Notunu Kaydet</span>
