@@ -30,8 +30,13 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { ALL_INITIAL_STUDENTS, MStudentItem, MStudentCourseGrade } from '@components/Mobile/MStudentClient'
+import { MStudentItem, MStudentCourseGrade } from '@components/Mobile/MStudentClient'
 import MockBadge from '@components/Common/MockBadge'
+import {
+  ALL_CLASSROOMS,
+  normalizeClassCode,
+  getSingleSourceOfTruthStudents,
+} from '@services/demo/schoolDirectory'
 
 interface ClassOption {
   code: string
@@ -42,49 +47,19 @@ interface ClassOption {
   avgGpa: number
 }
 
-const BASE_CLASSES: Omit<ClassOption, 'studentCount' | 'avgGpa'>[] = [
-  {
-    code: '9-A',
-    name: '9-A Şubesi',
-    branch: 'Türk Dili ve Edebiyatı · Rehberlik',
-    teacher: 'Ebru TEKNECİ',
-  },
-  {
-    code: '9-B',
-    name: '9-B Şubesi',
-    branch: 'Türk Dili ve Edebiyatı',
-    teacher: 'Ebru TEKNECİ',
-  },
-  {
-    code: '1-A',
-    name: '1-A Şubesi',
-    branch: 'Temel Eğitim & Sınıf Öğretmenliği',
-    teacher: 'Ebru TEKNECİ',
-  },
-]
-
 export default function TeacherClassesView() {
   const searchParams = useSearchParams()
   const classFromQuery = searchParams.get('class')
 
-  // Reactive students list from persistent storage
+  // Reactive students list from single source of truth
   const [students, setStudents] = useState<MStudentItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('oxonom_m_students_v3')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed
-        }
-      } catch (_) {}
-    }
-    return ALL_INITIAL_STUDENTS
+    return getSingleSourceOfTruthStudents(30)
   })
 
   // Selected Class State (null = prompt teacher to select class)
   const [selectedClass, setSelectedClass] = useState<string | null>(() => {
     if (classFromQuery) {
-      const match = BASE_CLASSES.find(
+      const match = ALL_CLASSROOMS.find(
         (c) => c.code.toLowerCase() === classFromQuery.toLowerCase() || c.name.toLowerCase() === classFromQuery.toLowerCase()
       )
       if (match) return match.name
@@ -107,27 +82,20 @@ export default function TeacherClassesView() {
   // Keep students reactive with storage events
   useEffect(() => {
     const handleUpdate = () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const saved = localStorage.getItem('oxonom_m_students_v3')
-          if (saved) {
-            const parsed = JSON.parse(saved)
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setStudents(parsed)
-              setSelectedStudent((prev) => {
-                if (!prev) return null
-                return parsed.find((s: MStudentItem) => s.id === prev.id) || prev
-              })
-            }
-          }
-        } catch (_) {}
-      }
+      const fresh = getSingleSourceOfTruthStudents(30)
+      setStudents(fresh)
+      setSelectedStudent((prev) => {
+        if (!prev) return null
+        return fresh.find((s: any) => s.id === prev.id) || prev
+      })
     }
 
     window.addEventListener('oxonom_student_updated', handleUpdate)
+    window.addEventListener('oxonom_admin_students_updated', handleUpdate)
     window.addEventListener('storage', handleUpdate)
     return () => {
       window.removeEventListener('oxonom_student_updated', handleUpdate)
+      window.removeEventListener('oxonom_admin_students_updated', handleUpdate)
       window.removeEventListener('storage', handleUpdate)
     }
   }, [])
@@ -135,7 +103,7 @@ export default function TeacherClassesView() {
   // Sync with searchParams if it changes
   useEffect(() => {
     if (classFromQuery) {
-      const match = BASE_CLASSES.find(
+      const match = ALL_CLASSROOMS.find(
         (c) => c.code.toLowerCase() === classFromQuery.toLowerCase() || c.name.toLowerCase() === classFromQuery.toLowerCase()
       )
       if (match) {
@@ -146,12 +114,11 @@ export default function TeacherClassesView() {
 
   // Dynamic Class Options with live student counts and computed average GPAs
   const availableClasses = useMemo(() => {
-    return BASE_CLASSES.map((cls) => {
+    return ALL_CLASSROOMS.map((cls) => {
       const clsStudents = students.filter((st) => {
-        if (cls.code === '9-A' || cls.name === '9-A Şubesi') {
-          return st.className === '9-A Şubesi' || st.className.startsWith('9-A')
-        }
-        return st.className === cls.name || st.className === cls.code
+        const sCode = normalizeClassCode(st.className)
+        const cCode = normalizeClassCode(cls.code)
+        return sCode === cCode || sCode.replace('-', '/') === cCode.replace('-', '/')
       })
       const count = clsStudents.length
       let avgGpa = 0
@@ -167,7 +134,10 @@ export default function TeacherClassesView() {
         avgGpa = Number((total / count).toFixed(1))
       }
       return {
-        ...cls,
+        code: cls.code,
+        name: cls.name,
+        branch: `${cls.grade_level} · Sınıf Rehberliği`,
+        teacher: cls.teacher_name,
         studentCount: count,
         avgGpa,
       }
@@ -177,11 +147,10 @@ export default function TeacherClassesView() {
   // Students for the active selected class
   const classStudents = useMemo(() => {
     if (!selectedClass) return []
+    const norm = normalizeClassCode(selectedClass)
     return students.filter((st) => {
-      if (selectedClass === '9-A Şubesi' || selectedClass === '9-A') {
-        return st.className === '9-A Şubesi' || st.className.startsWith('9-A')
-      }
-      return st.className === selectedClass
+      const sNorm = normalizeClassCode(st.className || '')
+      return sNorm === norm || sNorm.replace('-', '/') === norm.replace('-', '/')
     })
   }, [students, selectedClass])
 

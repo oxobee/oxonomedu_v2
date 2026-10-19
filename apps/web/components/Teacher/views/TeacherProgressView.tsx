@@ -26,6 +26,7 @@ import { ALL_INITIAL_STUDENTS, MStudentItem } from '@components/Mobile/MStudentC
 import {
   ALL_CLASSROOMS,
   normalizeClassCode,
+  getSingleSourceOfTruthStudents,
 } from '@services/demo/schoolDirectory'
 
 export default function TeacherProgressView() {
@@ -49,7 +50,7 @@ export default function TeacherProgressView() {
         }
       } catch (_) {}
     }
-    return '9-A Şubesi'
+    return ALL_CLASSROOMS[0]?.name || '1/A Şubesi'
   })
   const [search, setSearch] = useState('')
 
@@ -96,43 +97,27 @@ export default function TeacherProgressView() {
     }
   }, [])
 
-  // Student state with persistence
+  // Student state with persistence (Single Source of Truth)
   const [students, setStudents] = useState<MStudentItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('oxonom_m_students_v3')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed
-        }
-      } catch (_) {}
-    }
-    return ALL_INITIAL_STUDENTS
+    return getSingleSourceOfTruthStudents(30)
   })
 
   // Keep students reactive with storage and update events
   useEffect(() => {
     const handleSync = () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const saved = localStorage.getItem('oxonom_m_students_v3')
-          if (saved) {
-            const parsed = JSON.parse(saved)
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setStudents(parsed)
-              setSelectedStudent((prev) => {
-                if (!prev) return null
-                return parsed.find((s: MStudentItem) => s.id === prev.id) || prev
-              })
-            }
-          }
-        } catch (_) {}
-      }
+      const fresh = getSingleSourceOfTruthStudents(30)
+      setStudents(fresh)
+      setSelectedStudent((prev) => {
+        if (!prev) return null
+        return fresh.find((s: any) => s.id === prev.id) || prev
+      })
     }
     window.addEventListener('oxonom_student_updated', handleSync)
+    window.addEventListener('oxonom_admin_students_updated', handleSync)
     window.addEventListener('storage', handleSync)
     return () => {
       window.removeEventListener('oxonom_student_updated', handleSync)
+      window.removeEventListener('oxonom_admin_students_updated', handleSync)
       window.removeEventListener('storage', handleSync)
     }
   }, [])
@@ -144,11 +129,10 @@ export default function TeacherProgressView() {
   // Filter students by selected class
   const classStudents = useMemo(() => {
     const norm = normalizeClassCode(selectedClass)
-    const filtered = students.filter((s) => {
+    return students.filter((s) => {
       const sNorm = normalizeClassCode(s.className || '')
-      return sNorm === norm || s.className === selectedClass || s.className?.includes(selectedClass) || selectedClass.includes(s.className)
+      return sNorm === norm || sNorm.replace('-', '/') === norm.replace('-', '/')
     })
-    return filtered.length > 0 ? filtered : students
   }, [students, selectedClass])
 
   const filteredStudents = useMemo(() => {

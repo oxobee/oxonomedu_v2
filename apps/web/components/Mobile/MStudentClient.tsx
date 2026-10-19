@@ -41,6 +41,12 @@ import {
   saveAttendanceForClass,
   AttendanceRecord,
 } from '@services/demo/attendanceService'
+import {
+  ALL_CLASSROOMS,
+  getSingleSourceOfTruthStudents,
+  saveSingleSourceOfTruthStudents,
+  normalizeClassCode,
+} from '@services/demo/schoolDirectory'
 
 export interface MStudentCourseGrade {
   courseName: string
@@ -146,12 +152,6 @@ const INITIAL_STUDENTS: MStudentItem[] = [
 
 export const ALL_INITIAL_STUDENTS: MStudentItem[] = [...INITIAL_STUDENTS]
 
-const CLASS_OPTIONS = [
-  { label: 'Tüm Sınıflar (1)', value: 'all' },
-  { label: '1/A Şubesi (1)', value: '1/A Şubesi' },
-  { label: '9-A Şubesi (0)', value: '9-A Şubesi' },
-]
-
 export interface MStudentClientProps {
   hideDock?: boolean
   hideHeader?: boolean
@@ -193,15 +193,11 @@ export default function MStudentClient({
 
   const searchParams = useSearchParams()
 
-  // Students state with LocalStorage persistence
+  // Students state synchronized strictly with Single Source of Truth
   const [students, setStudents] = useState<MStudentItem[]>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem('oxonom_m_students_v3')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed
-        }
+        return getSingleSourceOfTruthStudents(30)
       } catch (_) {}
     }
     return ALL_INITIAL_STUDENTS
@@ -212,24 +208,21 @@ export default function MStudentClient({
     const handleUpdate = () => {
       if (typeof window !== 'undefined') {
         try {
-          const saved = localStorage.getItem('oxonom_m_students_v3')
-          if (saved) {
-            const parsed = JSON.parse(saved)
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setStudents(parsed)
-              setSelectedStudentForProfile((prev) => {
-                if (!prev) return null
-                return parsed.find((s: MStudentItem) => s.id === prev.id) || prev
-              })
-            }
-          }
+          const fresh = getSingleSourceOfTruthStudents(30)
+          setStudents(fresh)
+          setSelectedStudentForProfile((prev) => {
+            if (!prev) return null
+            return fresh.find((s: MStudentItem) => s.id === prev.id) || prev
+          })
         } catch (_) {}
       }
     }
     window.addEventListener('oxonom_student_updated', handleUpdate)
+    window.addEventListener('oxonom_admin_students_updated', handleUpdate)
     window.addEventListener('storage', handleUpdate)
     return () => {
       window.removeEventListener('oxonom_student_updated', handleUpdate)
+      window.removeEventListener('oxonom_admin_students_updated', handleUpdate)
       window.removeEventListener('storage', handleUpdate)
     }
   }, [])
@@ -238,8 +231,7 @@ export default function MStudentClient({
     setStudents(newStudents)
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('oxonom_m_students_v3', JSON.stringify(newStudents))
-        window.dispatchEvent(new CustomEvent('oxonom_student_updated'))
+        saveSingleSourceOfTruthStudents(newStudents, 30)
       } catch (_) {}
     }
   }
@@ -254,9 +246,32 @@ export default function MStudentClient({
       if (classParam) {
         return classParam.includes('Şubesi') ? classParam : `${classParam} Şubesi`
       }
+      const savedGlobal = localStorage.getItem('oxonom_selected_class')
+      if (savedGlobal) {
+        try {
+          const parsed = JSON.parse(savedGlobal)
+          if (parsed.name) return parsed.name
+          if (parsed.code) return `${normalizeClassCode(parsed.code)} Şubesi`
+        } catch (_) {}
+      }
     }
-    return '9-A Şubesi'
+    return ALL_CLASSROOMS[0]?.name || '1/A Şubesi'
   })
+
+  // Dynamic class options derived from school directory and enrolled students
+  const classOptions = useMemo(() => {
+    const list = [{ label: `Tüm Sınıflar (${students.length})`, value: 'all' }]
+    ALL_CLASSROOMS.forEach((c) => {
+      const count = students.filter(
+        (s) => normalizeClassCode(s.className || '') === normalizeClassCode(c.code)
+      ).length
+      list.push({
+        label: `${c.name} (${count})`,
+        value: c.name,
+      })
+    })
+    return list
+  }, [students])
 
   // Modals state
   const [isNewStudentModalOpen, setIsNewStudentModalOpen] = useState(false)
@@ -268,7 +283,11 @@ export default function MStudentClient({
   const filteredStudents = useMemo(() => {
     return students.filter((s) => {
       if (statusFilter !== 'all' && s.status !== statusFilter) return false
-      if (selectedClassFilter !== 'all' && s.className !== selectedClassFilter) return false
+      if (selectedClassFilter !== 'all') {
+        const normSelected = normalizeClassCode(selectedClassFilter)
+        const normStudentClass = normalizeClassCode(s.className || '')
+        if (normSelected !== normStudentClass) return false
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim()
         const matchName = s.name.toLowerCase().includes(q)
@@ -541,7 +560,7 @@ export default function MStudentClient({
 
                   {/* Class Tabs Scroll */}
                   <div className="flex gap-2 overflow-x-auto py-1 scrollbar-hide">
-                    {CLASS_OPTIONS.map((cls) => {
+                    {classOptions.map((cls) => {
                       const isActive = selectedClassFilter === cls.value
                       return (
                         <motion.button
@@ -1227,7 +1246,8 @@ export default function MStudentClient({
                       {
                         students.filter(
                           (s) =>
-                            (selectedClassFilter === 'all' || s.className === selectedClassFilter) &&
+                            (selectedClassFilter === 'all' ||
+                              normalizeClassCode(s.className || '') === normalizeClassCode(selectedClassFilter)) &&
                             s.status === 'active' &&
                             attendanceRecords[s.id] !== 'absent'
                         ).length
@@ -1238,7 +1258,8 @@ export default function MStudentClient({
                       {
                         students.filter(
                           (s) =>
-                            (selectedClassFilter === 'all' || s.className === selectedClassFilter) &&
+                            (selectedClassFilter === 'all' ||
+                              normalizeClassCode(s.className || '') === normalizeClassCode(selectedClassFilter)) &&
                             s.status === 'active' &&
                             attendanceRecords[s.id] === 'absent'
                         ).length
@@ -1269,7 +1290,8 @@ export default function MStudentClient({
                 {students
                   .filter(
                     (s) =>
-                      (selectedClassFilter === 'all' || s.className === selectedClassFilter) &&
+                      (selectedClassFilter === 'all' ||
+                        normalizeClassCode(s.className || '') === normalizeClassCode(selectedClassFilter)) &&
                       s.status === 'active'
                   )
                   .map((st) => {

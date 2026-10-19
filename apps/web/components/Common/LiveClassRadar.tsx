@@ -33,6 +33,7 @@ import {
 } from 'lucide-react'
 import { CANONICAL_9A_SCHEDULE_30, getSynchronizedClassWeeklySchedule } from '@/lib/student/studentData'
 import { ScheduleEntry, DayKey } from '@components/Mobile/Admin/MAdminScheduleClient'
+import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
 // MEB Standard 6-period daily schedule with bell times
 export interface PeriodTimeConfig {
@@ -64,8 +65,6 @@ export interface LiveClassRadarProps {
   titleOverride?: string
   initialExpanded?: boolean
 }
-
-const CLASS_LIST = ['9-A', '9-B', '10-A', '11-A', '12-A']
 
 // Subject color mapping with vibrant, modern palettes
 export function getSubjectColorTheme(subject: string) {
@@ -182,7 +181,7 @@ export function getSubjectColorTheme(subject: string) {
 
 export default function LiveClassRadar({
   role = 'student',
-  initialClassCode = '9-A',
+  initialClassCode = '1/A',
   compact = false,
   showClassSelector = false,
   className = '',
@@ -193,6 +192,38 @@ export default function LiveClassRadar({
   const [scheduleData, setScheduleData] = useState<ScheduleEntry[]>([])
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const [isExpanded, setIsExpanded] = useState<boolean>(initialExpanded)
+
+  // Dynamic available classes from school directory / local storage
+  const availableClasses = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('oxonom_admin_classes_30')
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const codes = parsed.map((c: any) => c.code || c.name?.split(' ')[0] || c)
+            return Array.from(new Set(codes))
+          }
+        }
+      } catch (_) {}
+    }
+    return ALL_CLASSROOMS.map((c) => c.code)
+  }, [])
+
+  // Grade branches for the active selection
+  const currentGradeNum = useMemo(() => {
+    const match = selectedClass.match(/\d+/)
+    return match ? match[0] : '1'
+  }, [selectedClass])
+
+  const gradeBranches = useMemo(() => {
+    const prefix = `${currentGradeNum}/`
+    const dashPrefix = `${currentGradeNum}-`
+    const list = availableClasses.filter(
+      (c) => c.startsWith(prefix) || c.startsWith(dashPrefix)
+    )
+    return list.length > 0 ? list : [`${currentGradeNum}/A`, `${currentGradeNum}/B`, `${currentGradeNum}/C`, `${currentGradeNum}/D`]
+  }, [availableClasses, currentGradeNum])
 
   // Simulation mode allows testing live animations regardless of current computer clock (e.g. night time)
   // Default is 'realtime' (100% authentic clock)
@@ -286,9 +317,20 @@ export default function LiveClassRadar({
 
   // 4. Filter today's periods for selected class
   const todayLessons = useMemo(() => {
+    const normSelected = selectedClass.replace(/[\/\-\s]/g, '').toLowerCase()
     const base = scheduleData.length > 0 ? scheduleData : CANONICAL_9A_SCHEDULE_30
     return base
-      .filter((s) => s.day === effectiveDayKey && (s.classCode === selectedClass || !s.classCode))
+      .filter((s) => {
+        if (s.day !== effectiveDayKey) return false
+        if (!s.classCode) return true
+        const normEntry = s.classCode.replace(/[\/\-\s]/g, '').toLowerCase()
+        return (
+          normEntry === normSelected ||
+          normEntry.includes(normSelected) ||
+          normSelected.includes(normEntry) ||
+          (normSelected.startsWith('1') && normEntry.startsWith('1'))
+        )
+      })
       .sort((a, b) => a.period - b.period)
   }, [scheduleData, effectiveDayKey, selectedClass])
 
@@ -507,7 +549,7 @@ export default function LiveClassRadar({
                   {titleOverride || 'Canlı Ders Takibi'}
                 </span>
                 <span className="px-2 py-0.5 rounded-lg text-[10.5px] font-black bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] border border-[#8D49A6]/20">
-                  {selectedClass} Şubesi
+                  {selectedClass.replace('-', '/')} Şubesi
                 </span>
 
                 {/* Status badge */}
@@ -605,25 +647,45 @@ export default function LiveClassRadar({
             {(showClassSelector || role === 'principal') && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-[#211729] p-0.5 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-0.5 shadow-xs"
+                className="flex items-center gap-1.5"
               >
-                {CLASS_LIST.map((cls) => (
-                  <button
-                    key={cls}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedClass(cls)
-                    }}
-                    className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all ${
-                      selectedClass === cls
-                        ? 'bg-[#4B075F] text-white shadow-xs'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    {cls}
-                  </button>
-                ))}
+                {/* Full School Class Selector Dropdown */}
+                <select
+                  value={selectedClass}
+                  onChange={(e) => {
+                    e.stopPropagation()
+                    setSelectedClass(e.target.value)
+                  }}
+                  aria-label="Sınıf Seçimi"
+                  className="h-8 px-2.5 rounded-xl text-xs font-black bg-white dark:bg-[#211729] text-[#4B075F] dark:text-[#E7C4F3] border border-[#E8DFEB] dark:border-[#49364F] shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#8D49A6]"
+                >
+                  {availableClasses.map((cls) => (
+                    <option key={cls} value={cls}>
+                      {cls} Şubesi
+                    </option>
+                  ))}
+                </select>
+
+                {/* Quick Branch Switcher Buttons */}
+                <div className="hidden sm:flex items-center gap-0.5 bg-white dark:bg-[#211729] p-0.5 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-xs">
+                  {gradeBranches.map((bCls) => (
+                    <button
+                      key={bCls}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedClass(bCls)
+                      }}
+                      className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                        selectedClass === bCls
+                          ? 'bg-[#4B075F] text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      {bCls}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 

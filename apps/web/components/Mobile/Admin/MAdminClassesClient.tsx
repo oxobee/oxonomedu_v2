@@ -3360,7 +3360,7 @@ export default function MAdminClassesClient({
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-500/20 to-indigo-500/20 text-purple-700 dark:text-purple-300 font-black text-[11px] flex items-center justify-center shrink-0">
                               {std.name
                                 .split(' ')
-                                .map((p) => p[0])
+                                .map((p: string) => p[0])
                                 .join('')
                                 .slice(0, 2)}
                             </div>

@@ -26,6 +26,7 @@ import {
   ALL_CLASSROOMS,
   normalizeClassCode,
   ClassroomItem,
+  getSingleSourceOfTruthStudents,
 } from '@services/demo/schoolDirectory'
 import {
   saveAttendanceForClass,
@@ -50,7 +51,7 @@ export default function TeacherAttendanceView() {
         }
       } catch (_) {}
     }
-    return '9/A'
+    return ALL_CLASSROOMS[0]?.code || '1/A'
   })
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString())
   const [activeTab, setActiveTab] = useState<'take' | 'history'>('take')
@@ -85,13 +86,14 @@ export default function TeacherAttendanceView() {
     }
   }
 
-  // Students for the selected class
+  // Students for the selected class (Single Source of Truth)
   const classStudents = useMemo(() => {
-    const filtered = ALL_INITIAL_STUDENTS.filter((s) => {
+    const allStudents = getSingleSourceOfTruthStudents(30)
+    const normTarget = normalizeClassCode(selectedClass)
+    return allStudents.filter((s: any) => {
       const normClass = normalizeClassCode(s.className || '')
-      return normClass === selectedClass || s.className?.includes(selectedClass)
+      return normClass === normTarget || normClass.replace('-', '/') === normTarget.replace('-', '/')
     })
-    return filtered.length > 0 ? filtered : ALL_INITIAL_STUDENTS
   }, [selectedClass])
 
   // Records state: studentId -> 'present' | 'absent'

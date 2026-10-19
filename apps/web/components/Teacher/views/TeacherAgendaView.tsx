@@ -48,6 +48,7 @@ import {
   pushExamToServer,
   deleteExamFromServer,
 } from '@/lib/teacher/teacherAgendaStorage'
+import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
 export default function TeacherAgendaView() {
   const [activeTab, setActiveTab] = useState<'all' | 'notes' | 'exams'>('all')
@@ -65,20 +66,20 @@ export default function TeacherAgendaView() {
   const [noteFormCategory, setNoteFormCategory] = useState<TeacherNote['category']>('lesson_plan')
   const [noteFormContent, setNoteFormContent] = useState('')
   const [noteFormColor, setNoteFormColor] = useState<TeacherNote['color']>('blue')
-  const [noteFormClass, setNoteFormClass] = useState('9-A')
+  const [noteFormClass, setNoteFormClass] = useState(() => ALL_CLASSROOMS[0]?.code || '1/A')
   const [noteFormTags, setNoteFormTags] = useState('')
   const [noteFormPinned, setNoteFormPinned] = useState(false)
 
   // ── Exams State ──
   const [exams, setExams] = useState<SchoolExamItem[]>([])
-  const [examClassFilter, setExamClassFilter] = useState('9-A')
+  const [examClassFilter, setExamClassFilter] = useState(() => ALL_CLASSROOMS[0]?.code || '1/A')
   const [examTypeFilter, setExamTypeFilter] = useState('all')
   const [examSearchQuery, setExamSearchQuery] = useState('')
   const [isExamModalOpen, setIsExamModalOpen] = useState(false)
   const [examViewMode, setExamViewMode] = useState<'timeline' | 'grid'>('timeline')
 
   // Form State for Exam
-  const [examFormClass, setExamFormClass] = useState('9-A')
+  const [examFormClass, setExamFormClass] = useState(() => ALL_CLASSROOMS[0]?.code || '1/A')
   const [examFormCourse, setExamFormCourse] = useState('Türk Dili ve Edebiyatı')
   const [examFormTitle, setExamFormTitle] = useState('')
   const [examFormType, setExamFormType] = useState<SchoolExamItem['type']>('exam')
@@ -86,7 +87,7 @@ export default function TeacherAgendaView() {
   const [examFormPeriod, setExamFormPeriod] = useState(3)
   const [examFormTime, setExamFormTime] = useState('10:20 - 11:00')
   const [examFormDuration, setExamFormDuration] = useState(40)
-  const [examFormLocation, setExamFormLocation] = useState('Derslik 101 (9-A)')
+  const [examFormLocation, setExamFormLocation] = useState(() => `Derslik (${ALL_CLASSROOMS[0]?.code || '1/A'})`)
   const [examFormScope, setExamFormScope] = useState('')
   const [isSubmittingExam, setIsSubmittingExam] = useState(false)
 
@@ -137,7 +138,7 @@ export default function TeacherAgendaView() {
     setNoteFormCategory('lesson_plan')
     setNoteFormContent('')
     setNoteFormColor('blue')
-    setNoteFormClass('9-A')
+    setNoteFormClass(ALL_CLASSROOMS[0]?.code || '1/A')
     setNoteFormTags('')
     setNoteFormPinned(false)
     setIsNoteModalOpen(true)
@@ -149,7 +150,7 @@ export default function TeacherAgendaView() {
     setNoteFormCategory(note.category)
     setNoteFormContent(note.content)
     setNoteFormColor(note.color)
-    setNoteFormClass(note.className || '9-A')
+    setNoteFormClass(note.className || ALL_CLASSROOMS[0]?.code || '1/A')
     setNoteFormTags(note.tags ? note.tags.join(', ') : '')
     setNoteFormPinned(note.isPinned)
     setIsNoteModalOpen(true)
@@ -240,7 +241,8 @@ export default function TeacherAgendaView() {
 
   // ── Exam CRUD & Sync Handlers ──
   const openNewExamModal = () => {
-    setExamFormClass(examClassFilter === 'all' ? '9-A' : examClassFilter)
+    const targetClass = examClassFilter === 'all' ? (ALL_CLASSROOMS[0]?.code || '1/A') : examClassFilter
+    setExamFormClass(targetClass)
     setExamFormCourse('Türk Dili ve Edebiyatı')
     setExamFormTitle('1. Dönem 2. Yazılı Sınavı')
     setExamFormType('exam')
@@ -248,7 +250,7 @@ export default function TeacherAgendaView() {
     setExamFormPeriod(3)
     setExamFormTime('10:20 - 11:00')
     setExamFormDuration(40)
-    setExamFormLocation('Derslik 101 (9-A)')
+    setExamFormLocation(`Derslik (${targetClass})`)
     setExamFormScope('Şiir bilgisi, aruz vezni, hikaye tahlilleri ve imla kuralları.')
     setIsExamModalOpen(true)
   }
@@ -861,7 +863,7 @@ export default function TeacherAgendaView() {
                   <Filter size={13} />
                   <span>Şube:</span>
                 </span>
-                {['9-A', '9-B', '10-A', '10-B', '11-A', 'all'].map((cls) => (
+                {[...ALL_CLASSROOMS.map((c) => c.code), 'all'].map((cls) => (
                   <button
                     key={cls}
                     type="button"
@@ -1158,9 +1160,11 @@ export default function TeacherAgendaView() {
                       onChange={(e) => setNoteFormClass(e.target.value)}
                       className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-[#131C31] border border-gray-200 dark:border-gray-800 text-xs text-gray-900 dark:text-white focus:outline-hidden"
                     >
-                      <option value="9-A">9-A Şubesi</option>
-                      <option value="9-B">9-B Şubesi</option>
-                      <option value="10-A">10-A Şubesi</option>
+                      {ALL_CLASSROOMS.map((cls) => (
+                        <option key={cls.id} value={cls.code}>
+                          {cls.name}
+                        </option>
+                      ))}
                       <option value="Tüm Sınıflar">Tüm Sınıflar</option>
                       <option value="Genel">Genel</option>
                     </select>
@@ -1311,11 +1315,11 @@ export default function TeacherAgendaView() {
                       onChange={(e) => setExamFormClass(e.target.value)}
                       className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-[#131C31] border border-gray-200 dark:border-gray-800 text-xs text-gray-900 dark:text-white font-bold focus:outline-hidden"
                     >
-                      <option value="9-A">9-A Şubesi</option>
-                      <option value="9-B">9-B Şubesi</option>
-                      <option value="10-A">10-A Şubesi</option>
-                      <option value="10-B">10-B Şubesi</option>
-                      <option value="11-A">11-A Şubesi</option>
+                      {ALL_CLASSROOMS.map((cls) => (
+                        <option key={cls.id} value={cls.code}>
+                          {cls.name}
+                        </option>
+                      ))}
                       <option value="Tüm Sınıflar">Tüm Şubeler (Ortak)</option>
                     </select>
                   </div>

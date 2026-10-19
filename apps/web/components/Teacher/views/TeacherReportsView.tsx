@@ -25,6 +25,7 @@ import { ALL_INITIAL_STUDENTS, type MStudentItem } from '@components/Mobile/MStu
 import {
   ALL_CLASSROOMS,
   normalizeClassCode,
+  getSingleSourceOfTruthStudents,
 } from '@services/demo/schoolDirectory'
 
 export default function TeacherReportsView() {
@@ -41,7 +42,7 @@ export default function TeacherReportsView() {
         }
       } catch (_) {}
     }
-    return '9/A'
+    return ALL_CLASSROOMS[0]?.code || '1/A'
   })
   const [categoryTab, setCategoryTab] = useState<'academic' | 'attendance' | 'homework'>('academic')
   const [searchStudent, setSearchStudent] = useState<string>('')
@@ -71,43 +72,29 @@ export default function TeacherReportsView() {
   }
 
   const [students, setStudents] = useState<MStudentItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem('oxonom_m_students_v3')
-        if (raw) {
-          const parsed = JSON.parse(raw)
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed
-        }
-      } catch (_) {}
-    }
-    return ALL_INITIAL_STUDENTS
+    return getSingleSourceOfTruthStudents(30)
   })
 
   useEffect(() => {
     const handleSync = () => {
-      try {
-        const raw = localStorage.getItem('oxonom_m_students_v3')
-        if (raw) {
-          const parsed = JSON.parse(raw)
-          if (Array.isArray(parsed) && parsed.length > 0) setStudents(parsed)
-        }
-      } catch (_) {}
+      setStudents(getSingleSourceOfTruthStudents(30))
     }
     window.addEventListener('oxonom_student_updated', handleSync)
+    window.addEventListener('oxonom_admin_students_updated', handleSync)
     window.addEventListener('storage', handleSync)
     return () => {
       window.removeEventListener('oxonom_student_updated', handleSync)
+      window.removeEventListener('oxonom_admin_students_updated', handleSync)
       window.removeEventListener('storage', handleSync)
     }
   }, [])
 
   const classStudents = useMemo(() => {
     const norm = normalizeClassCode(selectedClassId)
-    const filtered = students.filter((s) => {
+    return students.filter((s) => {
       const sNorm = normalizeClassCode(s.className || '')
-      return sNorm === norm || s.className?.includes(selectedClassId) || selectedClassId.includes(s.className)
+      return sNorm === norm || sNorm.replace('-', '/') === norm.replace('-', '/')
     })
-    return filtered.length > 0 ? filtered : students
   }, [students, selectedClassId])
 
   const targetStudent = classStudents[0] || students[0]

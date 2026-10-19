@@ -118,7 +118,7 @@ export default function DashV2Client({
     }
   }, [])
 
-  // Active Classroom State (Default to 1-A matching the exact screenshot)
+  // Active Classroom State (Default to 1/A matching the authentic school structure)
   const [selectedClass, setSelectedClass] = useState<ClassroomItem>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -130,8 +130,7 @@ export default function DashV2Client({
         }
       } catch (_) {}
     }
-    // Default to authentic single class 9/A (Ebru TEKNECİ)
-    return ALL_CLASSROOMS.find((c) => c.code === '9/A' || c.code === '9-A') || ALL_CLASSROOMS[0]
+    return ALL_CLASSROOMS[0] || { id: 1, name: '1/A Şubesi', code: '1/A', grade_level: 1, branch: 'A', student_count: 1 }
   })
 
   // Modal Dialog States
@@ -165,12 +164,12 @@ export default function DashV2Client({
 
   // Real Classroom Daily Attendance Synchronization
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord | null>(() => {
-    return getAttendanceForClass(normalizeClassCode(selectedClass?.code || '9/A'))
+    return getAttendanceForClass(normalizeClassCode(selectedClass?.code || '1/A'))
   })
 
   useEffect(() => {
     const refreshAttendance = () => {
-      const data = getAttendanceForClass(normalizeClassCode(selectedClass?.code || '9/A'))
+      const data = getAttendanceForClass(normalizeClassCode(selectedClass?.code || '1/A'))
       setAttendanceData(data)
     }
 
@@ -178,7 +177,7 @@ export default function DashV2Client({
 
     const handleAttendanceUpdated = (e: any) => {
       const updatedCode = normalizeClassCode(e?.detail?.classCode)
-      const currentCode = normalizeClassCode(selectedClass?.code || '9/A')
+      const currentCode = normalizeClassCode(selectedClass?.code || '1/A')
       if (!e?.detail?.classCode || updatedCode === currentCode) {
         if (e?.detail?.record) {
           setAttendanceData(e.detail.record)
@@ -865,7 +864,7 @@ export default function DashV2Client({
           <motion.div variants={itemVariants}>
             <LiveClassRadar
               role="teacher"
-              initialClassCode={selectedClass.code === '9/A' ? '9-A' : selectedClass.code}
+              initialClassCode={selectedClass.code || '1/A'}
             />
           </motion.div>
 

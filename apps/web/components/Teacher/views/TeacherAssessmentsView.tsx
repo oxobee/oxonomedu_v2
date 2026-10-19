@@ -48,7 +48,11 @@ const COURSES = [
   'Tüm Dersler',
 ]
 
-import { ALL_CLASSROOMS, normalizeClassCode } from '@services/demo/schoolDirectory'
+import {
+  ALL_CLASSROOMS,
+  normalizeClassCode,
+  getSingleSourceOfTruthStudents,
+} from '@services/demo/schoolDirectory'
 
 const EXAM_TYPE_OPTIONS = [
   { id: 'exam', label: 'Yazılı Sınav', badgeBg: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30', dot: 'bg-indigo-500' },
@@ -79,7 +83,7 @@ export default function TeacherAssessmentsView() {
         }
       } catch (_) {}
     }
-    return '9-A Şubesi'
+    return ALL_CLASSROOMS[0]?.name || '1/A Şubesi'
   })
   const [filterType, setFilterType] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -113,18 +117,9 @@ export default function TeacherAssessmentsView() {
   // Exams State
   const [exams, setExams] = useState<SchoolExamItem[]>([])
 
-  // Students State
+  // Students State (Single Source of Truth)
   const [students, setStudents] = useState<MStudentItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('oxonom_m_students_v3')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed
-        }
-      } catch (_) {}
-    }
-    return ALL_INITIAL_STUDENTS
+    return getSingleSourceOfTruthStudents(30)
   })
 
   // Modals State
@@ -135,7 +130,7 @@ export default function TeacherAssessmentsView() {
   // Form State for New Exam
   const [newTitle, setNewTitle] = useState('')
   const [newCourse, setNewCourse] = useState('Türk Dili ve Edebiyatı')
-  const [newClass, setNewClass] = useState('9-A Şubesi')
+  const [newClass, setNewClass] = useState(ALL_CLASSROOMS[0]?.name || '1/A Şubesi')
   const [newType, setNewType] = useState<'exam' | 'oral' | 'quiz' | 'performance' | 'mock'>('exam')
   const [newDate, setNewDate] = useState('2026-10-30')
   const [newTime, setNewTime] = useState('10:20 - 11:00')
@@ -172,17 +167,16 @@ export default function TeacherAssessmentsView() {
       }
     })
     window.addEventListener('oxonom_exam_calendar_updated', syncExams)
-    window.addEventListener('oxonom_student_updated', () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const saved = localStorage.getItem('oxonom_m_students_v3')
-          if (saved) setStudents(JSON.parse(saved))
-        } catch (_) {}
-      }
-    })
+    const handleStudentSync = () => {
+      setStudents(getSingleSourceOfTruthStudents(30))
+    }
+    window.addEventListener('oxonom_student_updated', handleStudentSync)
+    window.addEventListener('oxonom_admin_students_updated', handleStudentSync)
     window.addEventListener('storage', syncExams)
     return () => {
       window.removeEventListener('oxonom_exam_calendar_updated', syncExams)
+      window.removeEventListener('oxonom_student_updated', handleStudentSync)
+      window.removeEventListener('oxonom_admin_students_updated', handleStudentSync)
       window.removeEventListener('storage', syncExams)
     }
   }, [])
@@ -191,10 +185,9 @@ export default function TeacherAssessmentsView() {
   const classStudents = useMemo(() => {
     return students.filter((s) => {
       if (selectedClass === 'all') return true
-      if (selectedClass === '9-A Şubesi' || selectedClass === '9-A') {
-        return s.className === '9-A Şubesi' || s.className.startsWith('9-A')
-      }
-      return s.className === selectedClass
+      const norm = normalizeClassCode(selectedClass)
+      const sNorm = normalizeClassCode(s.className || '')
+      return sNorm === norm || sNorm.replace('-', '/') === norm.replace('-', '/')
     })
   }, [students, selectedClass])
 

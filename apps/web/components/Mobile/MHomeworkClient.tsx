@@ -66,7 +66,7 @@ import {
 } from '@services/school_assignments/school_assignments'
 import QuizQuestionBuilder, { DEFAULT_TEMPLATE_QUESTIONS } from './QuizQuestionBuilder'
 import { normalizeClassCode } from '@services/demo/attendanceService'
-import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
+import { ALL_CLASSROOMS, getSingleSourceOfTruthStudents } from '@services/demo/schoolDirectory'
 
 export interface HomeworkItem {
   id: string
@@ -631,7 +631,7 @@ export default function MHomeworkClient({
         if (saved) return saved
       } catch (_) {}
     }
-    return '9-A Şubesi'
+    return ALL_CLASSROOMS[0]?.name || '1/A Şubesi'
   })
   const [selectedGradeCategory, setSelectedGradeCategory] = useState<string>('ALL')
   const [createTargetClass, setCreateTargetClass] = useState<string>(() => {
@@ -647,7 +647,7 @@ export default function MHomeworkClient({
         if (saved && saved !== 'Tüm Şubeler') return saved
       } catch (_) {}
     }
-    return '9-A Şubesi'
+    return ALL_CLASSROOMS[0]?.name || '1/A Şubesi'
   })
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false)
   const [branchSearch, setBranchSearch] = useState('')
@@ -665,6 +665,35 @@ export default function MHomeworkClient({
     }
     window.addEventListener('oxonom_class_changed', handleClassChanged)
     return () => window.removeEventListener('oxonom_class_changed', handleClassChanged)
+  }, [])
+
+  // Single Source of Truth Students Roster
+  const [allStudentsList, setAllStudentsList] = useState<MStudentItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return getSingleSourceOfTruthStudents(30)
+      } catch (_) {}
+    }
+    return ALL_INITIAL_STUDENTS
+  })
+
+  useEffect(() => {
+    const handleStudentUpdates = () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const fresh = getSingleSourceOfTruthStudents(30)
+          setAllStudentsList(fresh)
+        } catch (_) {}
+      }
+    }
+    window.addEventListener('oxonom_student_updated', handleStudentUpdates)
+    window.addEventListener('oxonom_admin_students_updated', handleStudentUpdates)
+    window.addEventListener('storage', handleStudentUpdates)
+    return () => {
+      window.removeEventListener('oxonom_student_updated', handleStudentUpdates)
+      window.removeEventListener('oxonom_admin_students_updated', handleStudentUpdates)
+      window.removeEventListener('storage', handleStudentUpdates)
+    }
   }, [])
 
   // Homework Selector Modal state
@@ -753,7 +782,7 @@ export default function MHomeworkClient({
       return
     }
 
-    const targetStudent = ALL_INITIAL_STUDENTS.find((s) => s.id === createTargetStudentId) || ALL_INITIAL_STUDENTS[0]
+    const targetStudent = allStudentsList.find((s) => s.id === createTargetStudentId) || allStudentsList[0]
     const isIndividual = createTargetType === 'INDIVIDUAL'
 
     let detailedDesc = createDescription.trim()
@@ -920,11 +949,12 @@ export default function MHomeworkClient({
   // Branch-specific students roster
   const students = useMemo(() => {
     if (selectedBranch === 'all' || selectedBranch === 'Tüm Şubeler' || selectedBranch === 'Tüm Sınıflar ve Şubeler') {
-      return ALL_INITIAL_STUDENTS
+      return allStudentsList
     }
-    const filtered = ALL_INITIAL_STUDENTS.filter((s) => s.className === selectedBranch || s.className?.includes('9-A'))
-    return filtered.length > 0 ? filtered : ALL_INITIAL_STUDENTS
-  }, [selectedBranch])
+    const norm = normalizeClassCode(selectedBranch)
+    const filtered = allStudentsList.filter((s) => normalizeClassCode(s.className || '') === norm)
+    return filtered.length > 0 ? filtered : allStudentsList
+  }, [selectedBranch, allStudentsList])
 
   const [selectedStudentId, setSelectedStudentId] = useState<string>('s-1')
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
@@ -1308,7 +1338,7 @@ export default function MHomeworkClient({
     e.preventDefault()
     if (!permissionHomework) return
 
-    const targetStudent = ALL_INITIAL_STUDENTS.find((s) => s.id === permStudentId) || ALL_INITIAL_STUDENTS[0]
+    const targetStudent = allStudentsList.find((s) => s.id === permStudentId) || allStudentsList[0]
     const permissionsObj = {
       allowLateSubmission: permAllowLate,
       allowResubmission: permAllowResubmit,
@@ -2734,12 +2764,12 @@ export default function MHomeworkClient({
                           value={editTargetStudentId}
                           onChange={(e) => {
                             setEditTargetStudentId(e.target.value)
-                            const sObj = ALL_INITIAL_STUDENTS.find((s) => s.id === e.target.value)
+                            const sObj = allStudentsList.find((s) => s.id === e.target.value)
                             if (sObj) setEditTargetStudentName(sObj.name)
                           }}
                           className="w-full h-11 px-3 text-xs bg-gray-50 dark:bg-[#182033] border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
                         >
-                          {ALL_INITIAL_STUDENTS.map((s) => (
+                          {allStudentsList.map((s) => (
                             <option key={s.id} value={s.id}>
                               {s.name} ({s.studentNo || s.id})
                             </option>
@@ -2867,7 +2897,7 @@ export default function MHomeworkClient({
                             onChange={(e) => setPermStudentId(e.target.value)}
                             className="w-full h-10 px-3 text-xs bg-gray-50 dark:bg-[#182033] border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
                           >
-                            {ALL_INITIAL_STUDENTS.map((s) => (
+                            {allStudentsList.map((s) => (
                               <option key={s.id} value={s.id}>
                                 {s.name} ({s.studentNo || s.id})
                               </option>
@@ -3225,7 +3255,7 @@ export default function MHomeworkClient({
                           onChange={(e) => setCreateTargetStudentId(e.target.value)}
                           className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                         >
-                          {ALL_INITIAL_STUDENTS.map((st) => (
+                          {allStudentsList.map((st) => (
                             <option key={st.id} value={st.id}>
                               {st.name} (No: {st.studentNo}) — {st.className || '1/A Şubesi'}
                             </option>
@@ -3530,7 +3560,7 @@ export default function MHomeworkClient({
                       <span>
                         {createTargetType === 'INDIVIDUAL'
                           ? `Ödevi Oluştur ve ${
-                              ALL_INITIAL_STUDENTS.find((s) => s.id === createTargetStudentId)?.name || 'Öğrenciye'
+                              allStudentsList.find((s) => s.id === createTargetStudentId)?.name || 'Öğrenciye'
                             }'ya Ata`
                           : `Ödevi Oluştur ve ${createTargetClass} Şubesine Ata`}
                       </span>

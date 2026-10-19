@@ -231,28 +231,114 @@ export const REAL_STUDENT = {
 // Backwards-compatible alias for existing imports
 export const DEMO_STUDENT = REAL_STUDENT
 
-// Return strictly authentic students: Erçil UĞURLU is strictly in 1/A; all other classes have 0 students
-export function generateClassStudents(classItem?: ClassroomItem) {
-  const cls = classItem || ALL_CLASSROOMS[0]
-  const rawCode = (cls.code || '').replace('-', '/').trim().toUpperCase()
-  const rawName = (cls.name || '').replace('-', '/').trim().toUpperCase()
-
-  const is1A = rawCode === '1/A' || rawName.startsWith('1/A') || !classItem
-  if (!is1A) {
-    return []
+// ── SINGLE SOURCE OF TRUTH FOR ALL STUDENTS ──
+export function getSingleSourceOfTruthStudents(orgId: number = 30): any[] {
+  let list: any[] = []
+  if (typeof window !== 'undefined') {
+    try {
+      const raw =
+        localStorage.getItem(`oxonom_admin_students_list_${orgId}`) ||
+        localStorage.getItem('oxonom_admin_students_list_30') ||
+        localStorage.getItem('oxonom_m_students_v3')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          list = parsed
+        }
+      }
+    } catch (_) {}
   }
 
-  return [
-    {
-      ...REAL_STUDENT,
-      classroomId: cls.id,
-      classroomName: cls.name,
-      className: '1/A',
-      mentorTeacher: 'Özlem ZOR (Sınıf Öğretmeni)',
-      schoolName: cls.school_name || 'Oxonom Okulları',
-      is_demo: false,
-    },
-  ]
+  // If empty, initialize with canonical REAL_STUDENT
+  if (list.length === 0) {
+    list = [{ ...REAL_STUDENT }]
+  }
+
+  // Strict Single-Source-of-Truth Reconciliation:
+  let needsSave = false
+  list = list.map((st: any) => {
+    let cleanCode = (st.className || '').replace('-', '/').trim().toUpperCase()
+    const isErcil = st.studentNo === '101' || (st.name && st.name.toLowerCase().includes('erçil'))
+
+    // Normalize any legacy 9-A/9/A remnants to 1/A
+    if (!cleanCode || (isErcil && (cleanCode === '9/A' || cleanCode.includes('9')))) {
+      cleanCode = '1/A'
+      needsSave = true
+    }
+
+    const matchedCls = ALL_CLASSROOMS.find((c) => c.code === cleanCode) || ALL_CLASSROOMS[0]
+    const updated = {
+      ...st,
+      className: matchedCls.code,
+      classroomName: matchedCls.name,
+      classroomId: matchedCls.id,
+      gradeLevel: matchedCls.grade_level,
+      mentorTeacher: matchedCls.teacher_name ? `${matchedCls.teacher_name} (Sınıf Öğretmeni)` : 'Özlem ZOR (Sınıf Öğretmeni)',
+      schoolName: matchedCls.school_name || 'Oxonom Okulları',
+    }
+
+    if (st.className !== matchedCls.code || st.mentorTeacher !== updated.mentorTeacher) {
+      needsSave = true
+    }
+    return updated
+  })
+
+  // Ensure Erçil exists in the list
+  const hasErcil = list.some((s) => s.studentNo === '101' || (s.name && s.name.toLowerCase().includes('erçil')))
+  if (!hasErcil) {
+    list.unshift({ ...REAL_STUDENT })
+    needsSave = true
+  }
+
+  if (needsSave && typeof window !== 'undefined') {
+    try {
+      const json = JSON.stringify(list)
+      localStorage.setItem(`oxonom_admin_students_list_${orgId}`, json)
+      localStorage.setItem('oxonom_admin_students_list_30', json)
+      localStorage.setItem('oxonom_m_students_v3', json)
+    } catch (_) {}
+  }
+
+  return list
+}
+
+export function saveSingleSourceOfTruthStudents(updatedList: any[], orgId: number = 30): void {
+  const reconciled = updatedList.map((st: any) => {
+    const cleanCode = (st.className || '1/A').replace('-', '/').trim().toUpperCase()
+    const matchedCls = ALL_CLASSROOMS.find((c) => c.code === cleanCode) || ALL_CLASSROOMS[0]
+    return {
+      ...st,
+      className: matchedCls.code,
+      classroomName: matchedCls.name,
+      classroomId: matchedCls.id,
+      gradeLevel: matchedCls.grade_level,
+      mentorTeacher: matchedCls.teacher_name ? `${matchedCls.teacher_name} (Sınıf Öğretmeni)` : (st.mentorTeacher || 'Özlem ZOR (Sınıf Öğretmeni)'),
+      schoolName: matchedCls.school_name || 'Oxonom Okulları',
+    }
+  })
+
+  if (typeof window !== 'undefined') {
+    try {
+      const json = JSON.stringify(reconciled)
+      localStorage.setItem(`oxonom_admin_students_list_${orgId}`, json)
+      localStorage.setItem('oxonom_admin_students_list_30', json)
+      localStorage.setItem('oxonom_m_students_v3', json)
+      window.dispatchEvent(new CustomEvent('oxonom_student_updated'))
+      window.dispatchEvent(new CustomEvent('oxonom_admin_students_updated'))
+    } catch (_) {}
+  }
+}
+
+// Return strictly authentic students from the single source of truth for the target classroom
+export function generateClassStudents(classItem?: ClassroomItem) {
+  const cls = classItem || ALL_CLASSROOMS[0]
+  const targetCode = (cls.code || '').replace('-', '/').trim().toUpperCase()
+
+  const allStudents = getSingleSourceOfTruthStudents(30)
+  return allStudents.filter((st: any) => {
+    const stCode = (st.className || '').replace('-', '/').trim().toUpperCase()
+    return stCode === targetCode
+  })
 }
 
 export function generateAssignmentSubmissionsData(
@@ -394,7 +480,7 @@ export function getOrgTeachers(orgId?: number) {
 }
 
 export function getOrgStudents(orgId?: number) {
-  return generateClassStudents(ALL_CLASSROOMS[0])
+  return getSingleSourceOfTruthStudents(orgId || 30)
 }
 
 export function getOrgClassrooms(orgId?: number): ClassroomItem[] {

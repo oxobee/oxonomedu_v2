@@ -77,7 +77,7 @@ export default function TeacherFilesView() {
         }
       } catch (_) {}
     }
-    return ALL_CLASSROOMS[0]?.code || '9/A'
+    return ALL_CLASSROOMS[0]?.code || '1/A'
   })
   const [fileDataUrl, setFileDataUrl] = useState<string>('')
 
@@ -88,7 +88,9 @@ export default function TeacherFilesView() {
 
   // Smartboard Send Modal State
   const [smartboardModalFile, setSmartboardModalFile] = useState<TeacherFileItem | null>(null)
-  const [targetBoardId, setTargetBoardId] = useState<string>('PANO-9A')
+  const [targetBoardId, setTargetBoardId] = useState<string>(() =>
+    ALL_CLASSROOMS[0] ? `PANO-${ALL_CLASSROOMS[0].code.replace(/[\/\s]/g, '')}` : 'PANO-1A'
+  )
   const [boardProjectionMode, setBoardProjectionMode] = useState<'card' | 'fullscreen'>('card')
 
   // Load folders on mount and listen to changes
@@ -211,7 +213,9 @@ export default function TeacherFilesView() {
   // ── Share Modal Actions ──
   const handleOpenShareModal = (file: TeacherFileItem) => {
     setShareModalFile(file)
-    const existing = file.sharedWithClass ? file.sharedWithClass.split(',').map((s) => s.trim()) : ['9-A']
+    const existing = file.sharedWithClass
+      ? file.sharedWithClass.split(',').map((s) => s.trim())
+      : [ALL_CLASSROOMS[0]?.code || '1/A']
     setShareSelectedClasses(existing)
     setCopiedShareLink(false)
   }
