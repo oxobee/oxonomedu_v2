@@ -1840,10 +1840,10 @@ export default function PanoClient() {
       type: 'app',
       title: 'Akıllı Tahta',
       icon: 'Board',
-      color: 'bg-blue-600',
+      color: 'bg-brand-gradient',
       iconColor: 'text-white',
-      badge: selectedClass ? `${liveBoardCount} Tahta` : undefined,
-      path: selectedClass ? `/dash/boards?usergroupId=${selectedClass.id}` : `/dash/boards`
+      badge: 'Çizim',
+      path: '/pano/tahta'
     },
     {
       id: 'homework',
@@ -2791,11 +2791,29 @@ export default function PanoClient() {
             </div>
 
             {/* ======================================================== */}
-            {/* HERO ALTINDAKİ BUTONLAR (GENİŞ 2'Lİ GRID: TAHTALAR & ÖDEVLER) */}
+            {/* HERO ALTINDAKİ BUTONLAR (GENİŞ 3'LÜ GRID: AKILLI TAHTA, TAHTALAR & ÖDEVLER) */}
             {/* ======================================================== */}
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 relative z-10">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
-                {/* 1. Tahtalar Butonu */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+                {/* 1. Akıllı Tahta (Hızlı Çizim) Butonu */}
+                <Link
+                  href="/pano/tahta"
+                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-brand-gradient text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
+                  title="Yeni İnteraktif Akıllı Tahtayı Aç"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <Presentation className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm sm:text-base font-black truncate">Akıllı Tahta</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-white/25 text-white font-black shrink-0 flex items-center gap-1">
+                    <Sparkles size={11} />
+                    <span>Çizim</span>
+                  </span>
+                </Link>
+
+                {/* 2. Kayıtlı Tahtalar Butonu */}
                 <button
                   type="button"
                   onClick={() => {
@@ -2810,35 +2828,35 @@ export default function PanoClient() {
                       path: `/dash/boards?usergroupId=${selectedClass.id}`
                     })
                   }}
-                  className="w-full px-5 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-indigo-50/90 to-blue-50/80 dark:from-indigo-950/40 dark:to-blue-950/30 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200/80 dark:border-indigo-800/80 hover:bg-indigo-100/90 dark:hover:bg-indigo-900/60 transition-all flex items-center justify-between cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
+                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-indigo-50/90 to-blue-50/80 dark:from-indigo-950/40 dark:to-blue-950/30 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200/80 dark:border-indigo-800/80 hover:bg-indigo-100/90 dark:hover:bg-indigo-900/60 transition-all flex items-center justify-between cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Presentation className="w-4 h-4" />
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <FileText className="w-4 h-4" />
                     </div>
-                    <span className="text-sm sm:text-base font-black">Tahtalar</span>
+                    <span className="text-sm sm:text-base font-black truncate">Tahtalar</span>
                   </div>
-                  <span className="px-2.5 py-1 rounded-xl text-xs bg-indigo-200/80 dark:bg-indigo-900/80 text-indigo-900 dark:text-indigo-200 font-black">
-                    {liveBoardCount} Tahta
+                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-indigo-200/80 dark:bg-indigo-900/80 text-indigo-900 dark:text-indigo-200 font-black shrink-0">
+                    {liveBoardCount} Kayıt
                   </span>
                 </button>
 
-                {/* 2. Ödevler Butonu */}
+                {/* 3. Ödevler Butonu */}
                 <button
                   type="button"
                   onClick={() => {
                     const hwApp = apps.find(a => a.id === 'homework')
                     if (hwApp) openAppInWindow(hwApp)
                   }}
-                  className="w-full px-5 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-emerald-50/90 to-teal-50/80 dark:from-emerald-950/40 dark:to-teal-950/30 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200/80 dark:border-emerald-800/80 hover:bg-emerald-100/90 dark:hover:bg-emerald-900/60 transition-all flex items-center justify-between cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
+                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-emerald-50/90 to-teal-50/80 dark:from-emerald-950/40 dark:to-teal-950/30 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200/80 dark:border-emerald-800/80 hover:bg-emerald-100/90 dark:hover:bg-emerald-900/60 transition-all flex items-center justify-between cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5 group"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <FileText className="w-4 h-4" />
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <CheckCircle2 className="w-4 h-4" />
                     </div>
-                    <span className="text-sm sm:text-base font-black">Ödevler</span>
+                    <span className="text-sm sm:text-base font-black truncate">Ödevler</span>
                   </div>
-                  <span className="px-2.5 py-1 rounded-xl text-xs bg-emerald-200/80 dark:bg-emerald-900/80 text-emerald-900 dark:text-emerald-200 font-black">
+                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-emerald-200/80 dark:bg-emerald-900/80 text-emerald-900 dark:text-emerald-200 font-black shrink-0">
                     {liveAssignmentCount} Aktif
                   </span>
                 </button>
@@ -2861,7 +2879,7 @@ export default function PanoClient() {
                   item={item}
                   onAction={(app) => {
                     if (app.id === 'board') {
-                      dispatch({ type: 'OPEN_MODAL', modalId: 'new_board' })
+                      router.push('/pano/tahta')
                     } else {
                       openAppInWindow(app)
                     }
