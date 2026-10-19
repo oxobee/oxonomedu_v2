@@ -238,27 +238,27 @@ export default function PanoLockScreen({
         style={{
           backgroundImage: `
             radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.15) 1.2px, transparent 0),
-            radial-gradient(circle at 19px 19px, rgba(244, 63, 94, 0.15) 1.2px, transparent 0)
+            radial-gradient(circle at 19px 19px, rgba(217, 20, 200, 0.15) 1.2px, transparent 0)
           `,
           backgroundSize: '36px 36px',
         }}
       />
 
       {/* Ambient Glows */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[350px] bg-rose-600/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[300px] bg-emerald-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[350px] bg-[#8D49A6]/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[300px] bg-[#D914C8]/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Top Navigation Bar */}
       <header className="relative z-20 flex items-center justify-between w-full shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-lg">
-            <School className="w-5 h-5 text-rose-400" />
+            <School className="w-5 h-5 text-[#E9D5FF]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-black text-white tracking-tight">{org?.name || 'Oxonom Okulları'}</span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#8D49A6]/20 text-[#E9D5FF] border border-[#8D49A6]/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D914C8] animate-pulse" />
                 Kilitli
               </span>
             </div>
@@ -270,10 +270,10 @@ export default function PanoLockScreen({
           <button
             type="button"
             onClick={onLogout}
-            className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-rose-500/25 active:bg-rose-500/35 border border-white/15 hover:border-rose-400/40 text-slate-200 hover:text-white text-xs font-bold flex items-center gap-2 backdrop-blur-md transition-all cursor-pointer shadow-lg active:scale-95"
+            className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-[#8D49A6]/30 active:bg-[#4B075F]/40 border border-white/15 hover:border-[#8D49A6]/40 text-slate-200 hover:text-white text-xs font-bold flex items-center gap-2 backdrop-blur-md transition-all cursor-pointer shadow-lg active:scale-95"
             title="Cihazdan Tamamen Çıkış Yap"
           >
-            <LogOut className="w-4 h-4 text-rose-400" />
+            <LogOut className="w-4 h-4 text-[#E9D5FF]" />
             <span>Cihazdan Çıkış Yap</span>
           </button>
         )}
@@ -289,7 +289,7 @@ export default function PanoLockScreen({
               <span className="text-7xl sm:text-8xl lg:text-[7.5rem] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400 drop-shadow-[0_4px_30px_rgba(0,0,0,0.8)] leading-none">
                 {hours}
               </span>
-              <span className="text-6xl sm:text-7xl lg:text-8xl font-thin text-rose-400 mx-2 sm:mx-4 animate-pulse drop-shadow-[0_0_20px_rgba(244,63,94,0.8)]">
+              <span className="text-6xl sm:text-7xl lg:text-8xl font-thin text-[#D914C8] mx-2 sm:mx-4 animate-pulse drop-shadow-[0_0_20px_rgba(217,20,200,0.8)]">
                 :
               </span>
               <span className="text-7xl sm:text-8xl lg:text-[7.5rem] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400 drop-shadow-[0_4px_30px_rgba(0,0,0,0.8)] leading-none">
@@ -298,20 +298,20 @@ export default function PanoLockScreen({
             </div>
 
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-xl text-slate-200 text-xs sm:text-sm font-semibold shadow-inner">
-              <Calendar className="w-4 h-4 text-rose-400" />
+              <Calendar className="w-4 h-4 text-[#E9D5FF]" />
               <span>{dateFormatted}</span>
               <span className="text-slate-500">•</span>
-              <span className="text-rose-300 font-bold capitalize">{weekdayFormatted}</span>
+              <span className="text-[#E9D5FF] font-bold capitalize">{weekdayFormatted}</span>
             </div>
           </div>
 
           {/* Teacher Profile Card */}
           <div className="p-4 sm:p-5 rounded-3xl bg-slate-900/75 border border-white/10 backdrop-blur-xl shadow-xl flex items-center gap-4 max-w-md w-full text-left">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-600 to-red-500 text-white font-black text-2xl flex items-center justify-center shadow-lg shadow-rose-900/40 shrink-0 border border-white/20">
+            <div className="w-14 h-14 rounded-2xl bg-brand-gradient text-white font-black text-2xl flex items-center justify-center shadow-lg shadow-purple-950/40 shrink-0 border border-white/20">
               {userInitial}
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400 block">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#E9D5FF] block">
                 Aktif Öğretmen Oturumu
               </span>
               <h3 className="text-base sm:text-lg font-black text-white truncate">
@@ -338,7 +338,7 @@ export default function PanoLockScreen({
                   "{activeQuote.text}"
                 </p>
                 {activeQuote.author && (
-                  <span className="text-xs font-bold text-rose-300/80 block">
+                  <span className="text-xs font-bold text-[#E9D5FF] block">
                     — {activeQuote.author}
                   </span>
                 )}
@@ -360,7 +360,7 @@ export default function PanoLockScreen({
             className={`w-full max-w-sm sm:max-w-[380px] p-6 sm:p-8 rounded-[32px] bg-slate-900/85 backdrop-blur-2xl ring-1 ring-white/10 transition-all duration-300 shadow-2xl ${
               isSuccess
                 ? 'border-2 border-emerald-500 shadow-[0_0_60px_rgba(16,185,129,0.5)]'
-                : 'border border-rose-500/25 shadow-[0_20px_50px_rgba(0,0,0,0.7)]'
+                : 'border border-[#8D49A6]/30 shadow-[0_20px_50px_rgba(0,0,0,0.7)]'
             }`}
           >
             {/* Header with Lock Icon */}
@@ -369,7 +369,7 @@ export default function PanoLockScreen({
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg transition-colors ${
                   isSuccess
                     ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-400'
-                    : 'bg-rose-500/20 border border-rose-500/30 text-rose-400'
+                    : 'bg-[#8D49A6]/20 border border-[#8D49A6]/30 text-[#E9D5FF]'
                 }`}
               >
                 {isSuccess ? <Unlock className="w-7 h-7 animate-pulse text-emerald-400" /> : <Lock className="w-6 h-6" />}
@@ -410,7 +410,7 @@ export default function PanoLockScreen({
                           isFilled
                             ? isSuccess
                               ? 'bg-gradient-to-tr from-[#8D49A6] to-[#D914C8] scale-125 border border-purple-200 shadow-[0_0_15px_rgba(217,20,200,0.9)]'
-                              : 'bg-gradient-to-tr from-rose-500 to-red-400 scale-125 border border-rose-200 shadow-[0_0_15px_rgba(244,63,94,0.8)]'
+                              : 'bg-gradient-to-tr from-[#4B075F] via-[#8D49A6] to-[#D914C8] scale-125 border border-purple-200 shadow-[0_0_15px_rgba(141,73,166,0.8)]'
                             : 'border border-white/30 bg-white/5'
                         } ${hasError ? '!border-red-500 !bg-red-500 animate-bounce' : ''}`}
                       />
@@ -444,13 +444,13 @@ export default function PanoLockScreen({
                       whileTap={{ scale: 0.92 }}
                       aria-label={`Rakam ${num}`}
                       onClick={() => handleKeyClick(num)}
-                      className="h-14 sm:h-16 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] active:bg-rose-500/30 border border-white/10 hover:border-white/20 text-white flex flex-col items-center justify-center cursor-pointer transition-all active:scale-95 group shadow-sm"
+                      className="h-14 sm:h-16 rounded-2xl bg-white/[0.08] hover:bg-[#8D49A6]/20 active:bg-[#4B075F]/40 border border-white/10 hover:border-[#8D49A6]/30 text-white flex flex-col items-center justify-center cursor-pointer transition-all active:scale-95 group shadow-sm"
                     >
-                      <span className="font-mono text-xl sm:text-2xl font-black group-hover:text-rose-300 transition-colors leading-none">
+                      <span className="font-mono text-xl sm:text-2xl font-black group-hover:text-[#E9D5FF] transition-colors leading-none">
                         {num}
                       </span>
                       {sub && (
-                        <span className="text-[8px] font-bold text-slate-400 tracking-wider uppercase mt-0.5 group-hover:text-rose-200">
+                        <span className="text-[8px] font-bold text-slate-400 tracking-wider uppercase mt-0.5 group-hover:text-[#E9D5FF]">
                           {sub}
                         </span>
                       )}
@@ -476,9 +476,9 @@ export default function PanoLockScreen({
                     whileTap={{ scale: 0.92 }}
                     aria-label="Rakam 0"
                     onClick={() => handleKeyClick('0')}
-                    className="h-14 sm:h-16 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] active:bg-rose-500/30 border border-white/10 hover:border-white/20 text-white flex flex-col items-center justify-center cursor-pointer transition-all active:scale-95 group shadow-sm"
+                    className="h-14 sm:h-16 rounded-2xl bg-white/[0.08] hover:bg-[#8D49A6]/20 active:bg-[#4B075F]/40 border border-white/10 hover:border-[#8D49A6]/30 text-white flex flex-col items-center justify-center cursor-pointer transition-all active:scale-95 group shadow-sm"
                   >
-                    <span className="font-mono text-xl sm:text-2xl font-black group-hover:text-rose-300 transition-colors leading-none">
+                    <span className="font-mono text-xl sm:text-2xl font-black group-hover:text-[#E9D5FF] transition-colors leading-none">
                       0
                     </span>
                     <span className="text-[8px] font-bold text-slate-400 tracking-wider uppercase mt-0.5">
@@ -492,10 +492,10 @@ export default function PanoLockScreen({
                     whileTap={{ scale: 0.92 }}
                     aria-label="Sil"
                     onClick={handleDelete}
-                    className="h-14 sm:h-16 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] active:bg-rose-500/30 border border-white/10 hover:border-white/20 text-slate-300 hover:text-rose-400 flex items-center justify-center cursor-pointer transition-all active:scale-95"
+                    className="h-14 sm:h-16 rounded-2xl bg-white/[0.08] hover:bg-[#8D49A6]/20 active:bg-[#4B075F]/40 border border-white/10 hover:border-[#8D49A6]/30 text-slate-300 hover:text-[#E9D5FF] flex items-center justify-center cursor-pointer transition-all active:scale-95"
                     title="Sil"
                   >
-                    <Delete className="w-5 h-5 text-slate-400 group-hover:text-rose-300" />
+                    <Delete className="w-5 h-5 text-slate-400 group-hover:text-[#E9D5FF]" />
                   </motion.button>
                 </div>
               </>
@@ -507,7 +507,7 @@ export default function PanoLockScreen({
       {/* Footer Branding with Soft Sweeping Glow */}
       <footer className="relative z-20 flex items-center justify-center w-full py-2 shrink-0">
         <div className="relative overflow-hidden py-1 px-6 flex items-center justify-center">
-          <span className="font-mono text-[10px] sm:text-xs font-black text-rose-200/70 uppercase tracking-[0.45em] sm:tracking-[0.6em] relative z-10">
+          <span className="font-mono text-[10px] sm:text-xs font-black text-[#E9D5FF]/70 uppercase tracking-[0.45em] sm:tracking-[0.6em] relative z-10">
             O X O N O M &nbsp; T E C H N O L O G Y
           </span>
           <motion.div
@@ -519,7 +519,7 @@ export default function PanoLockScreen({
               ease: "easeInOut",
               repeatDelay: 2
             }}
-            className="absolute inset-y-0 w-24 bg-gradient-to-r from-transparent via-rose-300/60 to-transparent blur-xs pointer-events-none mix-blend-screen z-20"
+            className="absolute inset-y-0 w-24 bg-gradient-to-r from-transparent via-[#D914C8]/50 to-transparent blur-xs pointer-events-none mix-blend-screen z-20"
           />
         </div>
       </footer>

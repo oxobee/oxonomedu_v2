@@ -44,7 +44,15 @@ import {
   Tv,
   QrCode,
   Radio,
-  Wifi
+  Wifi,
+  Timer,
+  Play,
+  Pause,
+  RotateCcw,
+  Volume2,
+  Dice5,
+  Award,
+  Zap,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import {
@@ -52,6 +60,8 @@ import {
   ALL_CLASSROOM_BOARDS,
   generateClassroomBoards,
   generateClassroomAssignments,
+  getSingleSourceOfTruthStudents,
+  normalizeClassCode,
 } from '@services/demo/schoolDirectory'
 import { createBoard } from '@services/boards/boards'
 import toast from 'react-hot-toast'
@@ -293,48 +303,48 @@ const Clock = ({ detailed = false, className = "" }: { detailed?: boolean; class
     return (
       <div className={`flex flex-col items-center select-none ${className}`}>
         <div className="flex items-center justify-center font-mono tabular-nums tracking-wider drop-shadow-[0_15px_45px_rgba(0,0,0,0.9)]">
-          <span className="text-8xl sm:text-9xl md:text-[10.5rem] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-rose-50 to-slate-400 drop-shadow-[0_0_35px_rgba(244,63,94,0.4)]">
+          <span className="text-8xl sm:text-9xl md:text-[10.5rem] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-purple-50 to-slate-400 drop-shadow-[0_0_35px_rgba(141,73,166,0.4)]">
             {hours}
           </span>
-          <span className="text-7xl sm:text-8xl md:text-9xl font-extralight text-rose-500 mx-3 sm:mx-6 animate-pulse drop-shadow-[0_0_25px_rgba(244,63,94,0.9)]">
+          <span className="text-7xl sm:text-8xl md:text-9xl font-extralight text-[#D914C8] mx-3 sm:mx-6 animate-pulse drop-shadow-[0_0_25px_rgba(217,20,200,0.9)]">
             :
           </span>
-          <span className="text-8xl sm:text-9xl md:text-[10.5rem] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-rose-50 to-slate-400 drop-shadow-[0_0_35px_rgba(244,63,94,0.4)]">
+          <span className="text-8xl sm:text-9xl md:text-[10.5rem] font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-purple-50 to-slate-400 drop-shadow-[0_0_35px_rgba(141,73,166,0.4)]">
             {minutes}
           </span>
         </div>
 
-        <div className="mt-4 px-6 py-2 rounded-full bg-slate-900/70 border border-rose-500/20 backdrop-blur-2xl text-slate-200 text-sm sm:text-base md:text-lg font-medium tracking-wide shadow-2xl flex items-center gap-2.5 ring-1 ring-white/10">
-          <Calendar className="w-4 h-4 text-rose-500" />
+        <div className="mt-4 px-6 py-2 rounded-full bg-slate-900/70 border border-[#8D49A6]/30 backdrop-blur-2xl text-slate-200 text-sm sm:text-base md:text-lg font-medium tracking-wide shadow-2xl flex items-center gap-2.5 ring-1 ring-white/10">
+          <Calendar className="w-4 h-4 text-[#E9D5FF]" />
           <span>{dateFormatted}</span>
           <span className="text-slate-500">•</span>
-          <span className="text-rose-300 font-bold capitalize">{weekday}</span>
+          <span className="text-[#E9D5FF] font-bold capitalize">{weekday}</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className={`text-slate-700 dark:text-slate-200 font-semibold text-xs sm:text-sm md:text-base hidden sm:flex items-center gap-2 ${className}`}>
+    <div className={`px-4 py-1.5 rounded-full bg-white/80 dark:bg-[#241329]/80 border border-[#E8DFEB] dark:border-[#49364F] shadow-2xs text-[#514458] dark:text-slate-200 font-semibold text-xs sm:text-sm hidden sm:flex items-center gap-2 ${className}`}>
       <span>{time.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-      <span className="text-slate-400">•</span>
-      <span className="font-bold text-slate-900 dark:text-white font-mono">{time.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>
+      <span className="text-[#8D49A6]">•</span>
+      <span className="font-bold text-[#4B075F] dark:text-white font-mono">{time.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>
     </div>
   )
 }
 
 // Compact Weather Card
 const CompactWeatherCard = () => (
-  <div className="flex items-center gap-3.5 px-4 py-2.5 bg-gradient-to-br from-white/90 to-sky-50/90 dark:from-slate-800/90 dark:to-slate-900/90 backdrop-blur-xl rounded-2xl border border-sky-100/90 dark:border-slate-700/60 shadow-md">
-    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-400 text-white flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0">
+  <div className="flex items-center gap-3.5 px-4 py-2.5 bg-white/90 dark:bg-[#211729]/90 backdrop-blur-xl rounded-2xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm">
+    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#F5C542] to-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0">
       <CloudSun className="w-6 h-6 drop-shadow-xs" />
     </div>
     <div className="min-w-0">
       <div className="flex items-center gap-1.5">
-        <span className="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">24°C</span>
-        <span className="text-[11px] font-bold text-sky-600 dark:text-sky-400">İstanbul</span>
+        <span className="font-black text-[#241329] dark:text-white text-base tracking-tight">24°C</span>
+        <span className="text-[11px] font-bold text-[#8D49A6] dark:text-[#E9D5FF]">İstanbul</span>
       </div>
-      <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">
+      <p className="text-[11px] font-medium text-[#514458] dark:text-slate-400 truncate">
         Açık & Güneşli • Nem %45
       </p>
     </div>
@@ -361,7 +371,7 @@ const GridItem = ({ item, onAction }: { item: AppItem; onAction: (app: AppItem) 
         }
       }}
       onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
-      className="flex flex-col items-center gap-2.5 sm:gap-3 w-full cursor-pointer group relative select-none rounded-3xl p-1 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 transition-all"
+      className="flex flex-col items-center gap-2.5 sm:gap-3 w-full cursor-pointer group relative select-none rounded-3xl p-1 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-[#8D49A6] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 transition-all"
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
       <motion.div
@@ -385,9 +395,284 @@ const GridItem = ({ item, onAction }: { item: AppItem; onAction: (app: AppItem) 
           </span>
         )}
       </motion.div>
-      <span className="font-extrabold text-slate-800 dark:text-slate-100 text-xs sm:text-sm md:text-base tracking-tight drop-shadow-xs truncate block px-1 w-full text-center pointer-events-none">
+      <span className="font-black text-[#241329] dark:text-white text-xs sm:text-sm md:text-base tracking-tight drop-shadow-xs truncate block px-1 w-full text-center pointer-events-none">
         {item.title}
       </span>
+    </div>
+  )
+}
+
+// Smartboard Classroom Interactive Tools (Timer, Random Student Picker, Attention Chime)
+function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomItem | null }) {
+  // 1. Timer State
+  const [timerSeconds, setTimerSeconds] = useState(300) // 5 minutes default
+  const [timerInitial, setTimerInitial] = useState(300)
+  const [isTimerRunning, setIsTimerRunning] = useState(false)
+
+  // 2. Student Picker State
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null)
+  const [isPickingStudent, setIsPickingStudent] = useState(false)
+
+  // Audio helper for timer alarm & attention chime using Web Audio API
+  const playChimeSound = useCallback((frequency1 = 880, frequency2 = 1174.66) => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+      if (!AudioCtx) return
+      const ctx = new AudioCtx()
+      const now = ctx.currentTime
+
+      const osc1 = ctx.createOscillator()
+      const gain1 = ctx.createGain()
+      osc1.type = 'sine'
+      osc1.frequency.setValueAtTime(frequency1, now)
+      gain1.gain.setValueAtTime(0.25, now)
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.7)
+      osc1.connect(gain1)
+      gain1.connect(ctx.destination)
+      osc1.start(now)
+      osc1.stop(now + 0.7)
+
+      const osc2 = ctx.createOscillator()
+      const gain2 = ctx.createGain()
+      osc2.type = 'sine'
+      osc2.frequency.setValueAtTime(frequency2, now + 0.14)
+      gain2.gain.setValueAtTime(0.3, now + 0.14)
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2)
+      osc2.connect(gain2)
+      gain2.connect(ctx.destination)
+      osc2.start(now + 0.14)
+      osc2.stop(now + 1.2)
+    } catch (_) {}
+  }, [])
+
+  // Timer Tick
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+    if (isTimerRunning && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds((prev) => {
+          if (prev <= 1) {
+            setIsTimerRunning(false)
+            playChimeSound(660, 880)
+            toast.success('Süre Doldu!', { icon: '⏰' })
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [isTimerRunning, timerSeconds, playChimeSound])
+
+  const setTimerPreset = (secs: number) => {
+    setIsTimerRunning(false)
+    setTimerInitial(secs)
+    setTimerSeconds(secs)
+  }
+
+  const formatTimer = (totalSecs: number) => {
+    const mins = Math.floor(totalSecs / 60)
+    const secs = totalSecs % 60
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  }
+
+  // Student Picker from Single Source of Truth
+  const handlePickStudent = () => {
+    setIsPickingStudent(true)
+    const allStudents = getSingleSourceOfTruthStudents(30)
+    const classCode = selectedClass ? normalizeClassCode(selectedClass.name.replace('Şubesi', '').trim()) : ''
+    const pool = allStudents.filter(s => {
+      if (!classCode) return true
+      return normalizeClassCode(s.className) === classCode
+    })
+    const candidateList = pool.length > 0 ? pool : allStudents
+
+    let spinCount = 0
+    const maxSpins = 12
+    const interval = setInterval(() => {
+      const randIdx = Math.floor(Math.random() * candidateList.length)
+      setSelectedStudent(candidateList[randIdx])
+      spinCount++
+      if (spinCount >= maxSpins) {
+        clearInterval(interval)
+        setIsPickingStudent(false)
+        playChimeSound(523.25, 659.25)
+      }
+    }, 100)
+  }
+
+  return (
+    <div className="pt-2">
+      <h2 className="text-xs sm:text-sm font-black text-[#514458] dark:text-slate-400 uppercase tracking-wider mb-4 pl-1">
+        İnteraktif Sınıf Araçları
+      </h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 1. Classroom Timer */}
+        <div className="p-5 rounded-2xl bg-white/90 dark:bg-[#1E1124]/90 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
+                <Timer className="w-4 h-4" />
+              </div>
+              <span className="font-black text-sm text-[#241329] dark:text-white">Ders Kronometresi</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {[
+                { label: '3 Dk', sec: 180 },
+                { label: '5 Dk', sec: 300 },
+                { label: '10 Dk', sec: 600 },
+                { label: '15 Dk', sec: 900 },
+              ].map(p => (
+                <button
+                  key={p.sec}
+                  type="button"
+                  onClick={() => setTimerPreset(p.sec)}
+                  className={`px-2 py-0.5 rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
+                    timerInitial === p.sec && !isTimerRunning
+                      ? 'bg-[#4B075F] text-white shadow-xs'
+                      : 'bg-[#FAF5FC] dark:bg-[#2A1833] text-[#514458] dark:text-slate-300 hover:bg-[#F0D8FA]'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Big Digital Display */}
+          <div className="text-center py-2">
+            <span className={`font-mono text-4xl sm:text-5xl font-black tracking-widest drop-shadow-xs ${
+              timerSeconds === 0
+                ? 'text-rose-600 animate-bounce'
+                : isTimerRunning
+                ? 'text-[#4B075F] dark:text-white'
+                : 'text-[#514458] dark:text-slate-300'
+            }`}>
+              {formatTimer(timerSeconds)}
+            </span>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
+            <button
+              type="button"
+              onClick={() => setIsTimerRunning(!isTimerRunning)}
+              className="flex-1 py-2.5 rounded-xl bg-brand-gradient text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer"
+            >
+              {isTimerRunning ? (
+                <>
+                  <Pause className="w-3.5 h-3.5 text-white" />
+                  <span className="text-white">Durdur</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 text-white" />
+                  <span className="text-white">Başlat</span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsTimerRunning(false)
+                setTimerSeconds(timerInitial)
+              }}
+              className="px-3 py-2.5 rounded-xl bg-[#FAF5FC] dark:bg-[#2A1833] text-[#4B075F] dark:text-[#E9D5FF] border border-[#E8DFEB] dark:border-[#49364F] hover:bg-[#F0D8FA] transition-all cursor-pointer"
+              title="Sıfırla"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* 2. Random Student Picker */}
+        <div className="p-5 rounded-2xl bg-white/90 dark:bg-[#1E1124]/90 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
+                <Dice5 className="w-4 h-4" />
+              </div>
+              <span className="font-black text-sm text-[#241329] dark:text-white">Soru & Söz Hakkı</span>
+            </div>
+            <span className="text-[10.5px] font-bold text-[#8D49A6] bg-[#FAF5FC] dark:bg-[#2A1833] px-2 py-0.5 rounded-lg border border-[#E8DFEB] dark:border-[#49364F]">
+              Çark
+            </span>
+          </div>
+
+          {/* Selected Student Display */}
+          <div className="min-h-[58px] flex items-center justify-center text-center py-1">
+            {selectedStudent ? (
+              <div className={`transition-all ${isPickingStudent ? 'scale-95 opacity-70' : 'scale-100 opacity-100'}`}>
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="font-black text-lg text-[#4B075F] dark:text-white truncate max-w-[200px]">
+                    {selectedStudent.name}
+                  </span>
+                  <Award className="w-4 h-4 text-[#D914C8] shrink-0" />
+                </div>
+                <p className="text-[11px] font-bold text-[#514458] dark:text-slate-400 mt-0.5">
+                  No: {selectedStudent.studentNo || '101'} • {selectedStudent.className || '1/A'}
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400 font-medium">
+                Soru sormak veya tahtaya kaldırmak için öğrenci seçin.
+              </p>
+            )}
+          </div>
+
+          {/* Action Button */}
+          <div className="mt-3 pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
+            <button
+              type="button"
+              disabled={isPickingStudent}
+              onClick={handlePickStudent}
+              className="w-full py-2.5 rounded-xl bg-brand-gradient text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <Dice5 className="w-3.5 h-3.5 text-white animate-spin-reverse" />
+              <span className="text-white">
+                {isPickingStudent ? 'Seçiliyor...' : '🎲 Rastgele Öğrenci Seç'}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* 3. Attention Chime / Bell */}
+        <div className="p-5 rounded-2xl bg-white/90 dark:bg-[#1E1124]/90 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#D914C8] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
+                <Volume2 className="w-4 h-4" />
+              </div>
+              <span className="font-black text-sm text-[#241329] dark:text-white">Ders & Dikkat Zili</span>
+            </div>
+            <span className="text-[10.5px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-800">
+              Canlı Akustik
+            </span>
+          </div>
+
+          <p className="text-xs text-[#514458] dark:text-slate-300 leading-relaxed py-1">
+            Sınıfta sessizliği sağlamak veya dikkati tahtaya toplamak için tek dokunuşla kibar sınıf zili çalın.
+          </p>
+
+          {/* Action Button */}
+          <div className="mt-3 pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
+            <button
+              type="button"
+              onClick={() => {
+                playChimeSound(880, 1174.66)
+                toast.success('Dikkat zili çalındı 🔔', { duration: 1500 })
+              }}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#8D49A6] via-[#B90FAB] to-[#D914C8] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer"
+            >
+              <Volume2 className="w-3.5 h-3.5 text-white" />
+              <span className="text-white">🔔 Dikkat Zili Çal</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -2364,12 +2649,13 @@ export default function PanoClient() {
     <div
       onPointerDownCapture={recordActivity}
       onTouchStartCapture={recordActivity}
-      className={`fixed inset-0 w-screen h-screen flex flex-col relative overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans select-none m-0 p-0 z-10 touch-manipulation overscroll-none ${isPhone ? 'pb-24' : ''}`}
+      className={`fixed inset-0 w-screen h-screen flex flex-col relative overflow-hidden bg-[#FCF9FD] dark:bg-[#150B1B] font-sans select-none m-0 p-0 z-10 touch-manipulation overscroll-none ${isPhone ? 'pb-24' : ''}`}
       style={{
         backgroundImage: `
-          radial-gradient(at 35% 15%, hsla(228,100%,74%,0.16) 0px, transparent 50%),
-          radial-gradient(at 80% 5%, hsla(189,100%,56%,0.16) 0px, transparent 50%),
-          radial-gradient(at 10% 60%, hsla(355,100%,93%,0.22) 0px, transparent 50%)
+          radial-gradient(at 15% 10%, rgba(75, 7, 95, 0.08) 0px, transparent 45%),
+          radial-gradient(at 85% 15%, rgba(141, 73, 166, 0.08) 0px, transparent 45%),
+          radial-gradient(at 50% 85%, rgba(217, 20, 200, 0.05) 0px, transparent 50%),
+          radial-gradient(at 90% 85%, rgba(75, 7, 95, 0.06) 0px, transparent 45%)
         `,
         WebkitTapHighlightColor: 'transparent',
         touchAction: 'pan-x pan-y',
@@ -2407,7 +2693,7 @@ export default function PanoClient() {
       )}
 
       {/* 2. TOPBAR */}
-      <div className="w-full px-4 sm:px-6 py-2.5 sm:py-3 flex justify-between items-center z-40 relative border-b border-white/40 dark:border-slate-800/60 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shrink-0">
+      <div className="w-full px-4 sm:px-6 py-2.5 sm:py-3 flex justify-between items-center z-40 relative border-b border-[#E8DFEB] dark:border-[#49364F] bg-white/85 dark:bg-[#1A0E21]/85 backdrop-blur-xl shrink-0">
         {/* Left: Brand Logo */}
         <div className="flex items-center">
           <Link href={getUriWithOrg(orgslug, '/')} className="flex items-center group cursor-pointer" title="Ana Sayfaya Dön">
@@ -2424,46 +2710,31 @@ export default function PanoClient() {
         {/* Center: Live Clock */}
         <Clock />
 
-        {/* Right: Connection Status, Settings, Lock, Profile */}
-        <div className="flex items-center gap-2.5 relative" ref={popupRef}>
-          {/* Realtime Phone Remote Connection Status Pill (Interactive Modal Trigger) */}
-          {/* Mobil Uzaktan Kumanda Butonu (Kullanıcı İsteği ile Şimdilik Gizlendi) */}
-          {false && activeSessionId && (
-            <button
-              type="button"
-              onClick={() => setIsRemotePairModalOpen(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide border shadow-xs transition-all cursor-pointer select-none ${
-                isPhoneConnected
-                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25 ring-1 ring-emerald-500/20'
-                  : 'bg-indigo-50/80 dark:bg-slate-800/80 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
-              }`}
-              title="Mobil uzaktan kumanda bağlantı durumunu ve QR kodunu görüntüle"
-            >
-              <span
-                className={`w-2 h-2 rounded-full shrink-0 ${
-                  isPhoneConnected
-                    ? 'bg-emerald-500 animate-pulse'
-                    : 'bg-amber-400 animate-ping'
-                }`}
-              />
-              <span className="hidden sm:inline">
-                {isPhoneConnected ? '📱 Telefon Bağlı' : '📱 Kumanda Bağla'}
-              </span>
-            </button>
-          )}
+        {/* Right: Fast Whiteboard, Fullscreen, Lock, Profile */}
+        <div className="flex items-center gap-2 sm:gap-2.5 relative" ref={popupRef}>
+          {/* Quick Whiteboard Launcher Pill */}
+          <Link
+            href="/pano/tahta"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-gradient text-white font-bold text-xs shadow-xs hover:shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            title="Yeni İnteraktif Akıllı Tahta Çizim Alanını Aç"
+          >
+            <Presentation className="w-3.5 h-3.5 text-white" />
+            <span className="text-white">⚡ Hızlı Tahta</span>
+          </Link>
+
           {/* Fullscreen Toggle Button */}
           <button
             onClick={toggleFullscreen}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/80 dark:bg-slate-800/80 shadow-xs flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 transition-colors cursor-pointer border border-white/60 dark:border-slate-700"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/80 dark:bg-[#241329]/80 shadow-2xs flex items-center justify-center text-[#514458] dark:text-slate-300 hover:bg-[#FAF5FC] dark:hover:bg-[#350444]/50 hover:text-[#4B075F] dark:hover:text-[#E9D5FF] transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
             title={isFullscreen ? "Tam Ekrandan Çık" : "Tam Ekran Yap"}
           >
-            {isFullscreen ? <Minimize className="w-4 h-4 text-indigo-500" /> : <Maximize className="w-4 h-4 text-indigo-500" />}
+            {isFullscreen ? <Minimize className="w-4 h-4 text-[#8D49A6]" /> : <Maximize className="w-4 h-4 text-[#8D49A6]" />}
           </button>
 
           {/* Lock Screen Button */}
           <button
             onClick={lockPano}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/80 dark:bg-slate-800/80 shadow-xs flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 transition-colors cursor-pointer border border-white/60 dark:border-slate-700"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/80 dark:bg-[#241329]/80 shadow-2xs flex items-center justify-center text-[#514458] dark:text-slate-300 hover:bg-[#FAF5FC] dark:hover:bg-[#350444]/50 hover:text-[#4B075F] dark:hover:text-[#E9D5FF] transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
             title="Ekranı Kilitle"
           >
             <Lock className="w-4 h-4" />
@@ -2472,16 +2743,16 @@ export default function PanoClient() {
           {/* Profile Pill */}
           <div
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full shadow-xs cursor-pointer transition-all border ${
+            className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full shadow-2xs cursor-pointer transition-all border ${
               isProfileOpen
-                ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800 ring-2 ring-indigo-200'
-                : 'bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 border-white/60 dark:border-slate-700'
+                ? 'bg-[#F0D8FA] dark:bg-[#350444] border-[#8D49A6] ring-2 ring-[#8D49A6]/30'
+                : 'bg-white/80 dark:bg-[#241329]/80 hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] border-[#E8DFEB] dark:border-[#49364F]'
             }`}
           >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold text-xs flex items-center justify-center shadow-inner">
+            <div className="w-7 h-7 rounded-full bg-brand-gradient text-white font-bold text-xs flex items-center justify-center shadow-xs">
               {displayName.charAt(0).toUpperCase()}
             </div>
-            <span className="font-semibold text-slate-700 dark:text-slate-200 text-xs hidden sm:block truncate max-w-[120px]">
+            <span className="font-bold text-[#241329] dark:text-slate-200 text-xs hidden sm:block truncate max-w-[120px]">
               {displayName}
             </span>
           </div>
@@ -2494,15 +2765,15 @@ export default function PanoClient() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ type: "spring", duration: 0.25 }}
-                className="absolute right-0 top-12 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/60 dark:border-slate-800 overflow-hidden flex flex-col z-[100]"
+                className="absolute right-0 top-12 w-64 bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-[#E8DFEB] dark:border-[#49364F] overflow-hidden flex flex-col z-[100]"
               >
-                <div className="p-3.5 bg-slate-50/60 dark:bg-slate-800/50 border-b border-slate-200/50 dark:border-slate-800 flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-black text-sm flex items-center justify-center shadow-xs">
+                <div className="p-3.5 bg-brand-gradient-dark text-white border-b border-white/10 flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-white/20 text-white font-black text-sm flex items-center justify-center shadow-xs">
                     {displayName.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <h4 className="font-bold text-slate-800 dark:text-white text-xs leading-tight truncate">{displayName}</h4>
-                    <p className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">
+                    <h4 className="font-bold text-white text-xs leading-tight truncate">{displayName}</h4>
+                    <p className="text-[11px] font-semibold text-[#E9D5FF] mt-0.5">
                       {isAdmin ? 'Yönetici / İdare' : isStudent ? 'Öğrenci Profili' : isTeacher ? 'Sınıf Öğretmeni' : 'Akıllı Tahta / Pano'}
                     </p>
                   </div>
@@ -2510,21 +2781,21 @@ export default function PanoClient() {
                 <div className="p-1.5 space-y-0.5">
                   <button
                     onClick={() => { dispatch({ type: 'OPEN_MODAL', modalId: 'settings' }); setIsProfileOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
                   >
-                    <Sliders className="w-3.5 h-3.5 text-indigo-500" />
+                    <Sliders className="w-3.5 h-3.5 text-[#8D49A6]" />
                     <span>Pano Ayarları</span>
                   </button>
                   <button
                     onClick={() => { dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' }); setIsProfileOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
                   >
-                    <School className="w-3.5 h-3.5 text-indigo-500" />
+                    <School className="w-3.5 h-3.5 text-[#8D49A6]" />
                     <span>Şube / Sınıf Değiştir</span>
                   </button>
                   <button
                     onClick={() => { lockPano(); setIsProfileOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
                   >
                     <Lock className="w-3.5 h-3.5 opacity-70" />
                     <span>Ekranı Kilitle</span>
@@ -2532,7 +2803,7 @@ export default function PanoClient() {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-semibold transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs font-semibold transition-colors cursor-pointer text-left"
                   >
                     <div className="w-3.5 h-3.5 opacity-70"><Icons.LogOut /></div>
                     <span>Oturumu Kapat</span>
@@ -2660,140 +2931,90 @@ export default function PanoClient() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex flex-col">
               <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-                <span className="text-xl sm:text-2xl font-bold text-slate-700 dark:text-slate-300 tracking-tight">
+                <span className="text-xl sm:text-2xl font-bold text-[#241329] dark:text-slate-200 tracking-tight">
                   Merhaba,
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-2xl bg-gradient-to-r from-indigo-500/15 via-purple-500/15 to-pink-500/15 border border-indigo-500/25 shadow-xs backdrop-blur-md">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 dark:from-indigo-400 dark:via-purple-300 dark:to-indigo-300 bg-clip-text text-transparent tracking-tight">
+                <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-brand-gradient text-white shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
                     {displayName}
                   </span>
                 </span>
               </div>
-              <p className="text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 italic mt-1.5">
-                “Yeni Nesil Sizin Eseriniz Olacaktır!”
+              <p className="text-xs sm:text-sm font-bold text-[#8D49A6] dark:text-[#E9D5FF] italic mt-1.5">
+                “Yeni Nesil Sizin Eseriniz Olacaktır!” — Gazi Mustafa Kemal Atatürk
               </p>
             </div>
             <CompactWeatherCard />
           </div>
 
           {/* ======================================================== */}
-          {/* HERO ALANI (MODERN, GLASSMORPHIC & EXPANDED)            */}
+          {/* HERO ALANI (MODERN, GLASSMORPHIC & CORPORATE PALETTE)    */}
           {/* ======================================================== */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/60 dark:border-slate-800 shadow-[0_12px_40px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.4)] p-6 sm:p-8 space-y-6"
-          >
-            {/* Ambient decorative glow */}
-            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 rounded-full bg-gradient-to-br from-[#4B075F]/15 via-[#8D49A6]/10 to-transparent blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-72 h-72 rounded-full bg-gradient-to-tr from-[#8D49A6]/15 via-[#D914C8]/10 to-transparent blur-3xl pointer-events-none" />
+          <div className="p-[1.5px] rounded-[2.2rem] sm:rounded-[2.6rem] bg-gradient-to-r from-[#4B075F]/35 via-[#8D49A6]/30 to-[#D914C8]/30 shadow-xl shadow-purple-950/5">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="relative overflow-hidden rounded-[2.1rem] sm:rounded-[2.5rem] bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl p-6 sm:p-8 space-y-6"
+            >
+              {/* Ambient decorative glow */}
+              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 rounded-full bg-gradient-to-br from-[#4B075F]/15 via-[#8D49A6]/10 to-transparent blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-72 h-72 rounded-full bg-gradient-to-tr from-[#8D49A6]/15 via-[#D914C8]/10 to-transparent blur-3xl pointer-events-none" />
 
-            {/* Header: Class Name & Teacher Info */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-              <div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h2 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-                    {selectedClass.name}
-                  </h2>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-black shadow-2xs">
-                    <span className="w-2 h-2 rounded-full bg-[#D914C8] animate-pulse" />
-                    Aktif Sınıf
-                  </span>
-                  <button
-                    onClick={() => dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' })}
-                    className="px-3 py-1.5 rounded-xl bg-[#F0D8FA]/70 dark:bg-[#350444]/60 text-[#4B075F] dark:text-[#F17AE6] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-bold hover:bg-[#F0D8FA] dark:hover:bg-[#350444] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs group"
-                  >
-                    <span>Şube Değiştir</span>
-                    <ChevronDown className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
-                  </button>
-                </div>
-                <div className="flex items-center gap-2 mt-2 text-xs text-slate-500 dark:text-slate-400 font-medium flex-wrap">
-                  <span>Kurum: <strong className="text-slate-800 dark:text-slate-200">{org?.name || 'Necla Görer İlkokulu'}</strong></span>
-                  <span className="text-slate-300 dark:text-slate-700">•</span>
-                  <span>Sınıf Öğretmeni: <strong className="text-[#4B075F] dark:text-[#F17AE6]">{selectedClass.teacherName || displayName} ({selectedClass.subject || 'Matematik'})</strong></span>
-                </div>
-              </div>
-            </div>
-
-            {/* 3 Stat Cards in Harmonious Brand Theme (Kademe, Öğrenci, Tahta) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 relative z-10">
-              {/* 1. KADEME */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#F7F0FA] dark:from-[#211729] dark:to-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-[#8D49A6]/50">
-                <div className="w-12 h-12 rounded-2xl bg-[#4B075F]/10 dark:bg-[#4B075F]/40 border border-[#4B075F]/20 flex items-center justify-center text-[#4B075F] dark:text-[#E9D5FF] shrink-0">
-                  <School className="w-6 h-6" />
-                </div>
+              {/* Header: Class Name & Teacher Info */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                 <div>
-                  <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">KADEME</span>
-                  <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">{selectedClass.gradeLevel}</span>
-                </div>
-              </div>
-
-              {/* 2. ÖĞRENCİ */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#F7F0FA] dark:from-[#211729] dark:to-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-[#8D49A6]/50">
-                <div className="w-12 h-12 rounded-2xl bg-[#8D49A6]/10 dark:bg-[#8D49A6]/40 border border-[#8D49A6]/20 flex items-center justify-center text-[#8D49A6] dark:text-[#F0D8FA] shrink-0">
-                  <Users className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">ÖĞRENCİ</span>
-                  <span className="text-base sm:text-lg font-black text-[#4B075F] dark:text-[#F0D8FA]">{selectedClass.studentCount} Kayıtlı</span>
-                </div>
-              </div>
-
-              {/* 3. TAHTA */}
-              <div
-                onClick={() => {
-                  openAppInWindow({
-                    id: 'past_boards',
-                    type: 'app',
-                    title: `${selectedClass.name} - Geçmiş Tahtalar`,
-                    icon: 'Board',
-                    color: 'bg-brand-gradient',
-                    iconColor: 'text-white',
-                    badge: `${liveBoardCount} Tahta`,
-                    path: `/dash/boards?usergroupId=${selectedClass.id}`
-                  })
-                }}
-                className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#F7F0FA] dark:from-[#211729] dark:to-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 cursor-pointer hover:border-[#D914C8]/50 transition-all hover:-translate-y-0.5"
-                title="Sınıfın geçmiş tahtalarını aç"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-[#D914C8]/10 dark:bg-[#D914C8]/40 border border-[#D914C8]/20 flex items-center justify-center text-[#D914C8] dark:text-[#FCF9FD] shrink-0">
-                  <Presentation className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">TAHTA</span>
-                  <span className="text-base sm:text-lg font-black text-[#8D49A6] dark:text-[#FCF9FD]">{liveBoardCount} Aktif</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* HERO ALTINDAKİ BUTONLAR (GENİŞ 3'LÜ GRID: AKILLI TAHTA, TAHTALAR & ÖDEVLER) */}
-            {/* ======================================================== */}
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 relative z-10">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
-                {/* 1. Akıllı Tahta (Hızlı Çizim) Butonu */}
-                <Link
-                  href="/pano/tahta"
-                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-brand-gradient text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
-                  title="Yeni İnteraktif Akıllı Tahtayı Aç"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <Presentation className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-sm sm:text-base font-black text-white truncate">Akıllı Tahta</span>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h2 className="text-3xl sm:text-4xl font-black text-[#241329] dark:text-white tracking-tight">
+                      {selectedClass.name}
+                    </h2>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-gradient text-white text-xs font-black shadow-xs">
+                      <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                      Aktif Sınıf
+                    </span>
+                    <button
+                      onClick={() => dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' })}
+                      className="px-3.5 py-1.5 rounded-xl bg-[#FAF5FC] hover:bg-[#F0D8FA] dark:bg-[#2A1833] dark:hover:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs group"
+                    >
+                      <span>Şube Değiştir</span>
+                      <ChevronDown className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
+                    </button>
                   </div>
-                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-white/25 text-white font-black shrink-0 flex items-center gap-1">
-                    <Sparkles size={11} className="text-white" />
-                    <span className="text-white">Çizim</span>
-                  </span>
-                </Link>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-[#514458] dark:text-slate-400 font-medium flex-wrap">
+                    <span>Kurum: <strong className="text-[#241329] dark:text-slate-200">{org?.name || 'Necla Görer İlkokulu'}</strong></span>
+                    <span className="text-[#8D49A6]">•</span>
+                    <span>Sınıf Öğretmeni: <strong className="text-[#4B075F] dark:text-[#E9D5FF]">{selectedClass.teacherName || displayName} ({selectedClass.subject || 'Matematik'})</strong></span>
+                  </div>
+                </div>
+              </div>
 
-                {/* 2. Kayıtlı Tahtalar Butonu */}
-                <button
-                  type="button"
+              {/* 4 Stat Cards in Harmonious Brand Theme (Kademe, Öğrenci, Tahta, Devam) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 relative z-10">
+                {/* 1. KADEME */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-[#8D49A6]/60 shadow-2xs">
+                  <div className="w-12 h-12 rounded-2xl bg-[#4B075F]/10 dark:bg-[#4B075F]/40 border border-[#4B075F]/20 flex items-center justify-center text-[#4B075F] dark:text-[#E9D5FF] shrink-0">
+                    <School className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">KADEME</span>
+                    <span className="text-base sm:text-lg font-black text-[#241329] dark:text-white">{selectedClass.gradeLevel}</span>
+                  </div>
+                </div>
+
+                {/* 2. ÖĞRENCİ */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-[#8D49A6]/60 shadow-2xs">
+                  <div className="w-12 h-12 rounded-2xl bg-[#8D49A6]/10 dark:bg-[#8D49A6]/40 border border-[#8D49A6]/20 flex items-center justify-center text-[#8D49A6] dark:text-[#F0D8FA] shrink-0">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">ÖĞRENCİ</span>
+                    <span className="text-base sm:text-lg font-black text-[#4B075F] dark:text-[#F0D8FA]">{selectedClass.studentCount} Kayıtlı</span>
+                  </div>
+                </div>
+
+                {/* 3. TAHTA */}
+                <div
                   onClick={() => {
                     openAppInWindow({
                       id: 'past_boards',
@@ -2806,47 +3027,110 @@ export default function PanoClient() {
                       path: `/dash/boards?usergroupId=${selectedClass.id}`
                     })
                   }}
-                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#4B075F] to-[#701A75] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
+                  className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 cursor-pointer hover:border-[#D914C8]/60 transition-all hover:-translate-y-0.5 shadow-2xs"
+                  title="Sınıfın geçmiş tahtalarını aç"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <FileText className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-sm sm:text-base font-black text-white truncate">Tahtalar</span>
+                  <div className="w-12 h-12 rounded-2xl bg-[#D914C8]/10 dark:bg-[#D914C8]/40 border border-[#D914C8]/20 flex items-center justify-center text-[#D914C8] dark:text-[#FCF9FD] shrink-0">
+                    <Presentation className="w-6 h-6" />
                   </div>
-                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-white/25 text-white font-black shrink-0">
-                    {liveBoardCount} Kayıt
-                  </span>
-                </button>
+                  <div>
+                    <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">TAHTA</span>
+                    <span className="text-base sm:text-lg font-black text-[#8D49A6] dark:text-[#FCF9FD]">{liveBoardCount} Aktif</span>
+                  </div>
+                </div>
 
-                {/* 3. Ödevler Butonu */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const hwApp = apps.find(a => a.id === 'homework')
-                    if (hwApp) openAppInWindow(hwApp)
-                  }}
-                  className="w-full px-4 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#8D49A6] to-[#D914C8] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <CheckCircle2 className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-sm sm:text-base font-black text-white truncate">Ödevler</span>
+                {/* 4. GÜNLÜK DEVAM */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-emerald-500/60 shadow-2xs">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/40 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shrink-0">
+                    <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <span className="px-2 py-0.5 rounded-lg text-[10.5px] bg-white/25 text-white font-black shrink-0">
-                    {liveAssignmentCount} Aktif
-                  </span>
-                </button>
+                  <div>
+                    <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">GÜNLÜK DEVAM</span>
+                    <span className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400">{liveAttendanceRate}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </motion.div>
+
+              {/* ======================================================== */}
+              {/* HERO ALTINDAKİ BUTONLAR (GENİŞ 3'LÜ GRID: AKILLI TAHTA, TAHTALAR & ÖDEVLER) */}
+              {/* ======================================================== */}
+              <div className="pt-4 border-t border-[#E8DFEB] dark:border-[#49364F] relative z-10">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full">
+                  {/* 1. Akıllı Tahta (Hızlı Çizim) Butonu */}
+                  <Link
+                    href="/pano/tahta"
+                    className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-[#4B075F] via-[#620B79] to-[#8D49A6] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
+                    title="Yeni İnteraktif Akıllı Tahtayı Aç"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <Presentation className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-base font-black text-white truncate">Akıllı Tahta</span>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg text-xs bg-white/25 text-white font-black shrink-0 flex items-center gap-1">
+                      <Sparkles size={11} className="text-white" />
+                      <span className="text-white">Çizim</span>
+                    </span>
+                  </Link>
+
+                  {/* 2. Kayıtlı Tahtalar Butonu */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openAppInWindow({
+                        id: 'past_boards',
+                        type: 'app',
+                        title: `${selectedClass.name} - Geçmiş Tahtalar`,
+                        icon: 'Board',
+                        color: 'bg-brand-gradient',
+                        iconColor: 'text-white',
+                        badge: `${liveBoardCount} Tahta`,
+                        path: `/dash/boards?usergroupId=${selectedClass.id}`
+                      })
+                    }}
+                    className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-[#350444] via-[#4B075F] to-[#620B79] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <FileText className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-base font-black text-white truncate">Tahtalar</span>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg text-xs bg-white/25 text-white font-black shrink-0">
+                      {liveBoardCount} Kayıt
+                    </span>
+                  </button>
+
+                  {/* 3. Ödevler Butonu */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const hwApp = apps.find(a => a.id === 'homework')
+                      if (hwApp) openAppInWindow(hwApp)
+                    }}
+                    className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-[#8D49A6] via-[#B90FAB] to-[#D914C8] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-base font-black text-white truncate">Ödevler</span>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg text-xs bg-white/25 text-white font-black shrink-0">
+                      {liveAssignmentCount} Aktif
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
 
           {/* ======================================================== */}
           {/* APPS & SHORTCUTS (TEK SIRA 5 İKON)                       */}
           {/* ======================================================== */}
           <div className="pt-2">
-            <h2 className="text-xs sm:text-sm font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 pl-1">
+            <h2 className="text-xs sm:text-sm font-black text-[#514458] dark:text-slate-400 uppercase tracking-wider mb-4 pl-1">
               Uygulamalar
             </h2>
 
@@ -2866,6 +3150,11 @@ export default function PanoClient() {
               ))}
             </div>
           </div>
+
+          {/* ======================================================== */}
+          {/* INTERAKTİF SINIF ARAÇLARI (KRONOMETRE, ÇARK, ZİL)        */}
+          {/* ======================================================== */}
+          <SmartboardClassroomTools selectedClass={selectedClass} />
 
         </div>
       </div>
