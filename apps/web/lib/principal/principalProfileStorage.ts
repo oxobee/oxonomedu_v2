@@ -15,6 +15,7 @@ export interface PrincipalProfile {
   last_name?: string
   loginTime?: string
   institutionCode?: string
+  is_customized?: boolean
 }
 
 export interface SchoolInfo {
@@ -191,6 +192,8 @@ export function savePrincipalProfile(updates: Partial<PrincipalProfile>): Princi
     const first_name = parts[0] || 'Dr. Uğur'
     const last_name = parts.slice(1).join(' ') || 'UĞURLU'
 
+    const isCustomized = updates.name !== undefined ? true : (current.is_customized ?? false)
+
     const merged: PrincipalProfile = {
       ...current,
       ...updates,
@@ -203,11 +206,17 @@ export function savePrincipalProfile(updates: Partial<PrincipalProfile>): Princi
       tcNo: (updates.tcNo ?? current.tcNo).trim(),
       schoolName: (updates.schoolName ?? current.schoolName).trim(),
       twoFactorActive: updates.twoFactorActive ?? current.twoFactorActive,
+      is_customized: isCustomized,
     }
 
     const serialized = JSON.stringify(merged)
     localStorage.setItem(PRINCIPAL_PROFILE_KEY, serialized)
     localStorage.setItem(ADMIN_SESSION_KEY, serialized)
+
+    try {
+      document.cookie = `oxonom_principal_name=${encodeURIComponent(merged.name)}; path=/; max-age=31536000; SameSite=Lax`
+      document.cookie = `oxonom_principal_profile=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`
+    } catch (_) {}
 
     // Synchronize to backend server so changes persist across all devices (Mobile & PC)
     if (typeof fetch !== 'undefined') {
@@ -237,14 +246,43 @@ export async function syncPrincipalProfileFromServer(): Promise<PrincipalProfile
   if (typeof window === 'undefined') return null
 
   try {
+    // Check if we have a locally customized profile in localStorage
+    const localRaw = localStorage.getItem(PRINCIPAL_PROFILE_KEY)
+    let localCustomized = false
+    let localProfile: PrincipalProfile | null = null
+    if (localRaw) {
+      try {
+        localProfile = JSON.parse(localRaw)
+        if (localProfile?.is_customized || (localProfile?.name && localProfile.name.trim() !== DEFAULT_PRINCIPAL_PROFILE.name.trim())) {
+          localCustomized = true
+        }
+      } catch (_) {}
+    }
+
     const res = await fetch('/api/principal/profile', { cache: 'no-store' })
     if (!res.ok) return null
     const data = await res.json()
     if (data && data.success && data.profile) {
       const serverProf = data.profile as PrincipalProfile
+
+      // If server profile is NOT customized, but client ALREADY IS customized, re-sync client to server!
+      if (!serverProf.is_customized && localCustomized && localProfile) {
+        fetch('/api/principal/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(localProfile),
+        }).catch(() => {})
+        return localProfile
+      }
+
       const serialized = JSON.stringify(serverProf)
       localStorage.setItem(PRINCIPAL_PROFILE_KEY, serialized)
       localStorage.setItem(ADMIN_SESSION_KEY, serialized)
+
+      try {
+        document.cookie = `oxonom_principal_name=${encodeURIComponent(serverProf.name)}; path=/; max-age=31536000; SameSite=Lax`
+        document.cookie = `oxonom_principal_profile=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`
+      } catch (_) {}
 
       window.dispatchEvent(new CustomEvent('oxonom_admin_updated', { detail: serverProf }))
       window.dispatchEvent(new CustomEvent('oxonom_principal_updated', { detail: serverProf }))

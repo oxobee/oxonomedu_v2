@@ -54,6 +54,7 @@ import {
   ChevronDown,
   Info,
   CheckSquare,
+  Trash2,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import MobileHeader from '@components/Mobile/MobileHeader'
@@ -474,6 +475,138 @@ export default function MAdminClient({
   const [isAssignTeacherModalOpen, setIsAssignTeacherModalOpen] = useState(false)
   const [isConflictReportModalOpen, setIsConflictReportModalOpen] = useState(false)
 
+  // ── MÜDÜR AKILLI TAHTA & PANO OS YÖNETİMİ ──
+  const DEFAULT_SCHOOL_PANOS = [
+    {
+      id: '1A-01',
+      panoId: '1A',
+      boardNo: '01',
+      name: '1-A Şubesi Akıllı Tahta',
+      location: '1. Kat Derslik 101',
+      status: 'active',
+      createdAt: '2026-09-01',
+    },
+    {
+      id: '1B-01',
+      panoId: '1B',
+      boardNo: '01',
+      name: '1-B Şubesi Akıllı Tahta',
+      location: '1. Kat Derslik 102',
+      status: 'active',
+      createdAt: '2026-09-01',
+    },
+    {
+      id: '2A-01',
+      panoId: '2A',
+      boardNo: '01',
+      name: '2-A Şubesi Akıllı Tahta',
+      location: '2. Kat Derslik 201',
+      status: 'active',
+      createdAt: '2026-09-01',
+    },
+    {
+      id: 'KORIDOR-01',
+      panoId: 'KORIDOR',
+      boardNo: '01',
+      name: 'Ana Giriş Koridor Panosu',
+      location: 'Zemin Kat Lobi',
+      status: 'active',
+      createdAt: '2026-09-01',
+    },
+  ]
+
+  const [schoolPanos, setSchoolPanos] = useState<any[]>(DEFAULT_SCHOOL_PANOS)
+  const [isNewPanoModalOpen, setIsNewPanoModalOpen] = useState(false)
+  const [newPanoCode, setNewPanoCode] = useState('')
+  const [newBoardNo, setNewBoardNo] = useState('01')
+  const [newPanoName, setNewPanoName] = useState('')
+  const [newPanoLocation, setNewPanoLocation] = useState('')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('oxonom_school_panos')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setSchoolPanos(parsed)
+          }
+        } else {
+          localStorage.setItem('oxonom_school_panos', JSON.stringify(DEFAULT_SCHOOL_PANOS))
+        }
+      } catch (_) {}
+    }
+  }, [])
+
+  const handleCreateNewPano = (e: React.FormEvent) => {
+    e.preventDefault()
+    const cleanPano = (newPanoCode || '').trim().toUpperCase()
+    const cleanBoard = (newBoardNo || '01').trim().toUpperCase()
+    if (!cleanPano) {
+      toast.error('Lütfen geçerli bir Pano ID girin (Örn: 3A, LAB)')
+      return
+    }
+
+    const fullId = `${cleanPano}-${cleanBoard}`
+    const existing = schoolPanos.find((p) => p.id === fullId)
+    if (existing) {
+      toast.error(`${fullId} kodlu pano zaten mevcut!`)
+      return
+    }
+
+    const newPanoItem = {
+      id: fullId,
+      panoId: cleanPano,
+      boardNo: cleanBoard,
+      name: newPanoName.trim() || `${cleanPano} Akıllı Tahtası`,
+      location: newPanoLocation.trim() || 'Derslik',
+      status: 'active',
+      createdAt: new Date().toISOString().split('T')[0],
+    }
+
+    const updated = [newPanoItem, ...schoolPanos]
+    setSchoolPanos(updated)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('oxonom_school_panos', JSON.stringify(updated))
+      window.dispatchEvent(new Event('oxonom_panos_updated'))
+    }
+
+    setIsNewPanoModalOpen(false)
+    setNewPanoCode('')
+    setNewBoardNo('01')
+    setNewPanoName('')
+    setNewPanoLocation('')
+
+    toast.success(`${fullId} nolu yeni Pano ekranı başarıyla oluşturuldu!`, {
+      icon: '📺',
+      duration: 4000,
+    })
+  }
+
+  const handleDeletePano = (id: string) => {
+    const updated = schoolPanos.filter((p) => p.id !== id)
+    setSchoolPanos(updated)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('oxonom_school_panos', JSON.stringify(updated))
+    }
+    toast.success(`${id} nolu pano listeden kaldırıldı.`)
+  }
+
+  const handleCopyPanoLink = (id: string) => {
+    if (typeof window !== 'undefined') {
+      const url = `${window.location.origin}/pano?id=${encodeURIComponent(id)}`
+      navigator.clipboard.writeText(url)
+      toast.success(`${id} canlı bağlantı linki kopyalandı!`, { icon: '📋' })
+    }
+  }
+
+  const handleLaunchPanoLive = (id: string) => {
+    if (typeof window !== 'undefined') {
+      window.open(`/pano?id=${encodeURIComponent(id)}`, '_blank')
+      toast.success(`${id} canlı pano ekranı yeni pencerede açıldı!`, { icon: '🚀' })
+    }
+  }
+
   // Report Modal State
   const [reportType, setReportType] = useState('attendance')
   const [reportPeriod, setReportPeriod] = useState('weekly')
@@ -838,11 +971,10 @@ export default function MAdminClient({
             </div>
           </Link>
 
-          {/* 4. Dijital Okul Panosu */}
-          <Link
-            href="/pano"
-            target="_blank"
-            className="bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] rounded-3xl p-4 shadow-sm hover:border-[#8D49A6]/60 dark:hover:border-[#8D49A6]/60 hover:shadow-md transition-all group"
+          {/* 4. Dijital Okul Panosu & Akıllı Tahtalar */}
+          <div
+            onClick={() => setIsNewPanoModalOpen(true)}
+            className="bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] rounded-3xl p-4 shadow-sm hover:border-[#8D49A6]/60 dark:hover:border-[#8D49A6]/60 hover:shadow-md transition-all group cursor-pointer"
           >
             <div className="flex items-center justify-between mb-2.5">
               <div className="w-10 h-10 rounded-2xl bg-[#FCE8FA] dark:bg-[#350444] text-[#D914C8] dark:text-[#F17AE6] border border-[#E8DFEB] dark:border-[#8D49A6]/40 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -854,36 +986,128 @@ export default function MAdminClient({
               </span>
             </div>
             <div className="text-2xl sm:text-3xl font-black text-[#241329] dark:text-white tracking-tight">
-              PANO-01
+              {schoolPanos.length} Tahta
             </div>
             <div className="text-xs font-bold text-[#514458] dark:text-[#D2C5D8] mt-1 flex items-center justify-between">
-              <span>Okul Panosu</span>
-              <ArrowUpRight size={13} className="text-[#716779] group-hover:text-[#D914C8] transition-colors" />
+              <span>Akıllı Tahta & Pano</span>
+              <Plus size={13} className="text-[#8D49A6] group-hover:scale-125 transition-transform" />
             </div>
             <div className="text-[10px] text-[#4B075F] dark:text-[#C58ADB] font-semibold mt-0.5 truncate">
-              Panoyu Görüntüle &gt;
+              + Yeni Pano Tanımla &gt;
             </div>
-          </Link>
+          </div>
         </div>
       </section>
 
-      {/* ── 3. YÖNETİCİ HIZLI ARAÇLAR PANELI (EXECUTIVE QUICK TOOLKIT - 8 1-CLICK ACTIONS) ── */}
+      {/* ── KATEGORİ 2: AKILLI TAHTA & DİJİTAL PANO YÖNETİM MERKEZİ ── */}
+      <section className="w-full">
+        <div className="bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] rounded-3xl p-4 sm:p-5 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8DFEB] dark:border-[#49364F]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#4B075F] via-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shadow-md shadow-[#4B075F]/20 shrink-0">
+                <Tv size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-black text-[#241329] dark:text-white">
+                    Akıllı Tahtalar & Okul Pano Yönetimi
+                  </h3>
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                    {schoolPanos.length} Pano Canlı
+                  </span>
+                </div>
+                <p className="text-xs text-[#716779] dark:text-[#B5A5BD] mt-0.5">
+                  Her tahta için özel kimlik (örn: 1A-01). Anlık canlı yayın ve yeni sekmede görüntüleme.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsNewPanoModalOpen(true)}
+              className="px-4 py-2.5 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-[#4B075F]/20 cursor-pointer active:scale-95 transition-all self-start sm:self-auto shrink-0"
+            >
+              <Plus size={15} />
+              <span>Yeni Pano Tanımla</span>
+            </button>
+          </div>
+
+          {/* Panos Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
+            {schoolPanos.map((pano) => (
+              <div
+                key={pano.id}
+                className="p-3.5 rounded-2xl bg-[#FCF9FD] dark:bg-[#1A1121] border border-[#E8DFEB] dark:border-[#49364F] flex flex-col justify-between gap-3 hover:border-[#8D49A6]/50 transition-all shadow-2xs group"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-mono text-xs font-black px-2.5 py-1 rounded-xl bg-purple-100 dark:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA] border border-[#8D49A6]/30">
+                      {pano.id}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Canlı
+                    </span>
+                  </div>
+                  <h4 className="text-xs font-bold text-[#241329] dark:text-white truncate">
+                    {pano.name}
+                  </h4>
+                  <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] mt-0.5 truncate">
+                    {pano.location}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#E8DFEB]/80 dark:border-[#49364F]/60 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleLaunchPanoLive(pano.id)}
+                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-[#4B075F] hover:bg-[#350444] text-white text-[11px] font-bold flex items-center justify-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
+                    title="Canlı olarak yeni sekmede aç"
+                  >
+                    <span>Canlı Aç</span>
+                    <ExternalLink size={12} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyPanoLink(pano.id)}
+                    className="py-1.5 px-2.5 rounded-xl bg-white dark:bg-[#261730] hover:bg-[#F0D8FA] dark:hover:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA] border border-[#E8DFEB] dark:border-[#49364F] text-[11px] font-bold flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-95"
+                    title="Panonun linkini kopyala"
+                  >
+                    <Share2 size={12} />
+                    <span className="hidden xs:inline">Link</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeletePano(pano.id)}
+                    className="p-1.5 rounded-xl text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                    title="Panoyu Sil"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── KATEGORİ 3: YÖNETİCİ HIZLI İDARİ İŞLEMLERİ ── */}
       <section className="w-full">
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-2">
             <h3 className="text-xs font-black uppercase tracking-wider text-[#716779] dark:text-[#B5A5BD]">
-              Yönetici Hızlı Araçları & Kısayollar
+              Yönetici Hızlı İdari İşlemleri
             </h3>
             <span className="text-[10px] font-extrabold text-[#4B075F] dark:text-[#F0D8FA] bg-[#F0D8FA] dark:bg-[#350444] border border-[#D5C5DC] dark:border-[#8D49A6]/40 px-2 py-0.5 rounded-full">
               Hızlı Aksiyon
             </span>
           </div>
           <span className="text-[11px] text-[#716779] dark:text-[#B5A5BD] font-medium">
-            8 İdari Modül
+            6 Temel İdari Modül
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-3.5">
           {/* Tool 1: Yeni Öğrenci & Nakil Kaydı */}
           <Link
             href={getUrl('/m-admin-students')}
@@ -918,7 +1142,7 @@ export default function MAdminClient({
             </div>
             <div>
               <div className="text-xs font-black text-[#241329] dark:text-white group-hover:text-[#4B075F] dark:group-hover:text-[#C58ADB] transition-colors">
-                Öğretmen Kadrosu
+                Öğretmen Kadrosu & Zümre
               </div>
               <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] mt-0.5 leading-snug">
                 Branş ataması ve zümre yönetimi
@@ -960,7 +1184,7 @@ export default function MAdminClient({
             </div>
             <div>
               <div className="text-xs font-black text-[#241329] dark:text-white group-hover:text-[#4B075F] dark:group-hover:text-[#C58ADB] transition-colors">
-                Yeni Sınıf / Şube
+                Sınıflar & Şubeler
               </div>
               <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] mt-0.5 leading-snug">
                 Derslik, rehber öğretmen ve kota
@@ -991,29 +1215,7 @@ export default function MAdminClient({
             </div>
           </div>
 
-          {/* Tool 6: Dijital Okul Panosu (Pano Ekranı) */}
-          <Link
-            href="/pano"
-            target="_blank"
-            className="p-3.5 rounded-2xl bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] hover:border-[#8D49A6]/60 hover:shadow-md transition-all group flex flex-col justify-between cursor-pointer"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-9 h-9 rounded-xl bg-[#FCE8FA] dark:bg-[#350444] text-[#D914C8] dark:text-[#F17AE6] flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Tv size={18} />
-              </div>
-              <span className="w-2 h-2 rounded-full bg-[#D914C8] animate-pulse" />
-            </div>
-            <div>
-              <div className="text-xs font-black text-[#241329] dark:text-white group-hover:text-[#4B075F] dark:group-hover:text-[#C58ADB] transition-colors">
-                Okul Panosunu Aç
-              </div>
-              <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] mt-0.5 leading-snug">
-                Derslik ve koridor canlı yayını
-              </div>
-            </div>
-          </Link>
-
-          {/* Tool 7: Toplu SMS & Duyuru (1-Click Modal) */}
+          {/* Tool 6: Toplu SMS & Duyuru (1-Click Modal) */}
           <div
             onClick={() => setIsSmsModalOpen(true)}
             className="p-3.5 rounded-2xl bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] hover:border-[#8D49A6]/60 hover:shadow-md transition-all group flex flex-col justify-between cursor-pointer"
@@ -1035,31 +1237,10 @@ export default function MAdminClient({
               </div>
             </div>
           </div>
-
-          {/* Tool 8: Sınıf Kütüğü & Terfi Yönetimi */}
-          <Link
-            href={getUrl('/m-admin-classes')}
-            className="p-3.5 rounded-2xl bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] hover:border-[#8D49A6]/60 hover:shadow-md transition-all group flex flex-col justify-between"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-9 h-9 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA] flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Layers size={18} />
-              </div>
-              <ArrowRight size={14} className="text-[#4B075F] dark:text-[#C58ADB]" />
-            </div>
-            <div>
-              <div className="text-xs font-black text-[#241329] dark:text-white group-hover:text-[#4B075F] dark:group-hover:text-[#C58ADB] transition-colors">
-                Kütük & Terfi Yönetimi
-              </div>
-              <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] mt-0.5 leading-snug">
-                Dönem sonu sınıf atlatma & arşiv
-              </div>
-            </div>
-          </Link>
         </div>
       </section>
 
-      {/* ── 4. İSTATİSTİKSEL GRAFİKLER & ANALİTİK MERKEZİ (SEKMELİ ETKİLEŞİMLİ GRAFİK ALANI) ── */}
+      {/* ── KATEGORİ 4: İSTATİSTİKSEL ANALİTİK & GRAFİK MERKEZİ ── */}
       <section className="w-full">
         <div className="bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] rounded-3xl p-4 sm:p-6 shadow-sm">
           {/* Header & Tabs */}
@@ -1447,7 +1628,7 @@ export default function MAdminClient({
         </div>
       </section>
 
-      {/* ── 5. CANLI DERS RADARI & DENETİM ALANI ── */}
+      {/* ── KATEGORİ 5: OKUL GENELİ CANLI DERS RADARI & DENETİM ── */}
       <div className="space-y-4 sm:space-y-5 w-full">
         {/* Okul Geneli Canlı Ders ve Zaman Radarı */}
         <LiveClassRadar
@@ -2274,6 +2455,135 @@ export default function MAdminClient({
                   </button>
                 </div>
               )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── MODAL: YENİ PANO & AKILLI TAHTA TANIMLAMA (MÜDÜR) ── */}
+      <AnimatePresence>
+        {isNewPanoModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 select-none">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsNewPanoModalOpen(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-xs"
+            />
+
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-md rounded-3xl bg-white dark:bg-[#211729] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] shadow-2xl p-5 z-10"
+            >
+              <div className="flex items-center justify-between pb-3.5 border-b border-[#E8DFEB] dark:border-[#49364F]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-brand-gradient text-white flex items-center justify-center shadow-sm">
+                    <Tv size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black">Yeni Pano & Akıllı Tahta</h3>
+                    <p className="text-[11px] text-[#716779] dark:text-[#B5A5BD]">
+                      Tahtaya ID verin, anında canlı linki oluşsun
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewPanoModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-[#F7F0FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA] flex items-center justify-center cursor-pointer"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateNewPano} className="pt-4 space-y-3.5 text-xs">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                      Pano ID (Örn: 1A, 3B, LAB)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newPanoCode}
+                      onChange={(e) => setNewPanoCode(e.target.value.toUpperCase())}
+                      placeholder="1A"
+                      className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono font-bold text-xs uppercase outline-hidden focus:border-[#8D49A6]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                      Tahta No (Örn: 01, 02)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newBoardNo}
+                      onChange={(e) => setNewBoardNo(e.target.value.toUpperCase())}
+                      placeholder="01"
+                      className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono font-bold text-xs uppercase outline-hidden focus:border-[#8D49A6]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                    Pano / Tahta Adı
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newPanoName}
+                    onChange={(e) => setNewPanoName(e.target.value)}
+                    placeholder="Örn: 1-A Şubesi Akıllı Tahtası"
+                    className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-semibold text-xs outline-hidden focus:border-[#8D49A6]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                    Konum / Derslik
+                  </label>
+                  <input
+                    type="text"
+                    value={newPanoLocation}
+                    onChange={(e) => setNewPanoLocation(e.target.value)}
+                    placeholder="Örn: 1. Kat Derslik 101"
+                    className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-semibold text-xs outline-hidden focus:border-[#8D49A6]"
+                  />
+                </div>
+
+                {/* Canlı Bağlantı Önizlemesi */}
+                <div className="p-3 rounded-xl bg-[#F0D8FA]/50 dark:bg-[#350444]/40 border border-[#8D49A6]/30 space-y-1">
+                  <span className="text-[10px] font-black uppercase text-[#4B075F] dark:text-[#F0D8FA]">
+                    Otomatik Oluşacak Canlı Pano Linki:
+                  </span>
+                  <div className="font-mono text-[11px] font-bold text-[#D914C8] break-all">
+                    /pano?id={(newPanoCode || '1A').trim().toUpperCase()}-{(newBoardNo || '01').trim().toUpperCase()}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsNewPanoModalOpen(false)}
+                    className="h-10 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] text-[#241329] dark:text-white font-bold text-xs cursor-pointer"
+                  >
+                    Vazgeç
+                  </button>
+                  <button
+                    type="submit"
+                    className="h-10 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs cursor-pointer shadow-md shadow-[#4B075F]/20 flex items-center justify-center gap-1.5"
+                  >
+                    <Plus size={14} />
+                    <span>Panoyu Oluştur</span>
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}

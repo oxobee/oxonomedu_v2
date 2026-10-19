@@ -21,6 +21,7 @@ export interface PrincipalProfileData {
   loginTime?: string
   institutionCode?: string
   updatedAt?: string
+  is_customized?: boolean
 }
 
 export const DEFAULT_CANONICAL_PRINCIPAL: PrincipalProfileData = {
@@ -67,8 +68,24 @@ function saveProfileToFile(data: PrincipalProfileData) {
 // Initial load
 loadProfileFromFile()
 
-export async function GET() {
-  const profile = loadProfileFromFile()
+export async function GET(request: Request) {
+  let profile = loadProfileFromFile()
+
+  // If memory/tmp was wiped on serverless cold start, check cookie fallback
+  if (!profile.is_customized) {
+    try {
+      const cookieHeader = request.headers.get('cookie') || ''
+      const match = cookieHeader.match(/oxonom_principal_profile=([^;]+)/)
+      if (match && match[1]) {
+        const decoded = JSON.parse(decodeURIComponent(match[1]))
+        if (decoded && decoded.name && decoded.name.trim().length > 0) {
+          profile = { ...DEFAULT_CANONICAL_PRINCIPAL, ...decoded, is_customized: true }
+          saveProfileToFile(profile)
+        }
+      }
+    } catch (_) {}
+  }
+
   return NextResponse.json(
     {
       success: true,
@@ -100,7 +117,7 @@ export async function POST(request: Request) {
     const first_name = updates.first_name || parts[0] || 'Dr. Uğur'
     const last_name = updates.last_name || parts.slice(1).join(' ') || 'UĞURLU'
 
-    const merged: PrincipalProfileData = {
+    const merged: any = {
       ...current,
       ...updates,
       name,
@@ -112,12 +129,13 @@ export async function POST(request: Request) {
       tcNo: (updates.tcNo ?? current.tcNo ?? '').trim(),
       schoolName: (updates.schoolName ?? current.schoolName ?? 'Oxonom Okulları').trim(),
       twoFactorActive: updates.twoFactorActive ?? current.twoFactorActive ?? true,
+      is_customized: true,
       updatedAt: new Date().toISOString(),
     }
 
     saveProfileToFile(merged)
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: 'Müdür profili başarıyla güncellendi ve tüm cihazlara eşitlendi.',
@@ -130,6 +148,13 @@ export async function POST(request: Request) {
         },
       }
     )
+
+    try {
+      response.cookies.set('oxonom_principal_name', encodeURIComponent(merged.name), { path: '/', maxAge: 31536000, sameSite: 'lax' })
+      response.cookies.set('oxonom_principal_profile', encodeURIComponent(JSON.stringify(merged)), { path: '/', maxAge: 31536000, sameSite: 'lax' })
+    } catch (_) {}
+
+    return response
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error?.message || 'Bilinmeyen sunucu hatası' },

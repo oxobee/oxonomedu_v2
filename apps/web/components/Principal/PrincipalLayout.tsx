@@ -212,58 +212,27 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           </button>
         </div>
 
-        {/* Principal Executive Pass / Identity Badge */}
-        <div className="p-3.5 border-b border-[#E8DFEB] dark:border-[#49364F]">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#241329] via-[#350444] to-[#4B075F] text-white p-3.5 shadow-md shadow-[#4B075F]/25 border border-[#8D49A6]/40">
-            {/* Ambient background glow */}
-            <div className="absolute -top-10 -right-10 w-24 h-24 rounded-full bg-[#D914C8]/15 blur-xl pointer-events-none" />
-            <div className="absolute -bottom-8 -left-8 w-20 h-20 rounded-full bg-[#8D49A6]/20 blur-lg pointer-events-none" />
-
-            {/* Top row: Authority badge & status */}
-            <div className="flex items-center justify-between gap-2 mb-2.5 relative z-10">
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#F0D8FA]/15 border border-[#8D49A6]/30 text-[9px] font-black uppercase tracking-wider text-[#F0D8FA]">
-                <ShieldCheck size={11} className="text-[#D914C8]" />
-                <span>MEB Kurum Yetkilisi</span>
+        {/* Principal Executive Pass / Identity Badge - Clean & Minimalist */}
+        <div className="p-3 border-b border-[#E8DFEB] dark:border-[#49364F]">
+          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-purple-50/70 dark:bg-[#231227] border border-[#8D49A6]/15 dark:border-[#8D49A6]/30">
+            <div className="relative shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#4B075F] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                {getPrincipalInitials(adminProfile.name)}
               </div>
-              <div className="flex items-center gap-1 text-[9px] font-bold text-[#F0D8FA]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#D914C8] animate-pulse" />
-                <span>Çevrimiçi</span>
-              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#231227]" />
             </div>
 
-            {/* Main identity row */}
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="relative shrink-0">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#8D49A6] via-[#D914C8] to-[#4B075F] p-[1.5px] shadow-sm">
-                  <div className="w-full h-full rounded-[10px] bg-[#241329] flex items-center justify-center font-black text-sm text-[#F0D8FA]">
-                    {getPrincipalInitials(adminProfile.name)}
-                  </div>
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#4B075F] border-2 border-[#241329] flex items-center justify-center">
-                  <Check size={8} className="text-white stroke-[3]" />
-                </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[13px] font-bold text-gray-900 dark:text-white truncate">
+                {adminProfile.name}
               </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="text-[13px] font-extrabold tracking-tight text-white truncate">
-                  {adminProfile.name}
-                </div>
-                <div className="text-[10px] font-bold text-[#F0D8FA] truncate flex items-center gap-1 mt-0.5">
-                  <span>{adminProfile.title}</span>
-                </div>
-                <div className="text-[9px] text-[#D2C5D8] truncate mt-1 flex items-center gap-1 font-medium">
-                  <Building2 size={10} className="text-[#D914C8] shrink-0" />
-                  <span className="truncate">{adminProfile.schoolName}</span>
-                </div>
+              <div className="text-[11px] font-medium text-[#8D49A6] dark:text-[#F0D8FA] truncate">
+                {adminProfile.title || 'Okul Müdürü'}
               </div>
-            </div>
-
-            {/* Bottom quick meta */}
-            <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] font-semibold text-[#D2C5D8] relative z-10">
-              <span className="flex items-center gap-1">
-                <span className="text-[#D914C8] font-bold">Yetki:</span> Tam Yönetici
-              </span>
-              <span className="text-[#F0D8FA]">34OXON01</span>
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate flex items-center gap-1 mt-0.5">
+                <Building2 size={11} className="shrink-0 text-gray-400 dark:text-gray-500" />
+                <span className="truncate">{adminProfile.schoolName}</span>
+              </div>
             </div>
           </div>
         </div>

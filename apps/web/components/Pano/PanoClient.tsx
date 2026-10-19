@@ -1352,6 +1352,31 @@ export default function PanoClient() {
   // Classrooms list
   const [classrooms, setClassrooms] = useState<ClassroomItem[]>(DEFAULT_CLASSROOMS)
 
+  // Hardware Board & Pano ID (e.g., "1A-01" -> Pano: 1A, Board: 01)
+  const rawIdParam = searchParams?.get('id') || searchParams?.get('boardId') || searchParams?.get('panoId') || ''
+  const [boardIdentity, setBoardIdentity] = useState<{ panoId: string; boardNo: string }>(() => {
+    if (typeof window !== 'undefined') {
+      const paramToUse = rawIdParam || localStorage.getItem('oxonom_active_board_id') || '1A-01'
+      const parts = paramToUse.split('-')
+      const panoId = (parts[0] || '1A').trim().toUpperCase()
+      const boardNo = (parts.slice(1).join('-') || '01').trim().toUpperCase()
+      return { panoId, boardNo }
+    }
+    return { panoId: '1A', boardNo: '01' }
+  })
+
+  useEffect(() => {
+    if (rawIdParam) {
+      const parts = rawIdParam.split('-')
+      const panoId = (parts[0] || '1A').trim().toUpperCase()
+      const boardNo = (parts.slice(1).join('-') || '01').trim().toUpperCase()
+      setBoardIdentity({ panoId, boardNo })
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('oxonom_active_board_id', `${panoId}-${boardNo}`)
+      }
+    }
+  }, [rawIdParam])
+
   // Handle remote session termination (logout on either device)
   const handleRemoteSessionClosed = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -1754,9 +1779,16 @@ export default function PanoClient() {
           }
         } catch (_) {}
       }
+      if (!foundClass && boardIdentity?.panoId) {
+        const normPano = boardIdentity.panoId.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+        foundClass = classrooms.find((c) => {
+          const normName = c.name.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+          return normName.includes(normPano) || normPano.includes(normName)
+        }) || null
+      }
       setSelectedClass(foundClass || classrooms[0] || null)
     }
-  }, [])
+  }, [boardIdentity?.panoId])
 
   const saveSettings = (newSettings: PanoSettings) => {
     setSettings(newSettings)
@@ -2740,78 +2772,78 @@ export default function PanoClient() {
             <Lock className="w-4 h-4" />
           </button>
 
-          {/* Profile Pill */}
-          <div
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full shadow-2xs cursor-pointer transition-all border ${
-              isProfileOpen
-                ? 'bg-[#F0D8FA] dark:bg-[#350444] border-[#8D49A6] ring-2 ring-[#8D49A6]/30'
-                : 'bg-white/80 dark:bg-[#241329]/80 hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] border-[#E8DFEB] dark:border-[#49364F]'
-            }`}
-          >
-            <div className="w-7 h-7 rounded-full bg-brand-gradient text-white font-bold text-xs flex items-center justify-center shadow-xs">
-              {displayName.charAt(0).toUpperCase()}
-            </div>
-            <span className="font-bold text-[#241329] dark:text-slate-200 text-xs hidden sm:block truncate max-w-[120px]">
-              {displayName}
-            </span>
-          </div>
+          {/* Smartboard Hardware Identity Capsule (Pano ID & Tahta No) */}
+          <div className="relative">
+            <button
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className={`flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full shadow-xs cursor-pointer transition-all border ${
+                isProfileOpen
+                  ? 'bg-[#F0D8FA] dark:bg-[#350444] border-[#8D49A6] ring-2 ring-[#8D49A6]/30'
+                  : 'bg-white/90 dark:bg-[#241329]/90 hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] border-[#8D49A6]/30 dark:border-[#8D49A6]/50'
+              }`}
+              title={`Akıllı Tahta Donanım ID: ${boardIdentity.panoId}-${boardIdentity.boardNo}`}
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs font-black tracking-tight">
+                <span className="text-[#8D49A6] dark:text-[#F0D8FA]">PANO:</span>
+                <span className="text-[#4B075F] dark:text-white">{boardIdentity.panoId}</span>
+                <span className="text-gray-300 dark:text-gray-600">|</span>
+                <span className="text-[#8D49A6] dark:text-[#F0D8FA]">TAHTA:</span>
+                <span className="text-[#D914C8]">{boardIdentity.boardNo}</span>
+              </div>
+            </button>
 
-          {/* Profile Dropdown */}
-          <AnimatePresence>
-            {isProfileOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                transition={{ type: "spring", duration: 0.25 }}
-                className="absolute right-0 top-12 w-64 bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-[#E8DFEB] dark:border-[#49364F] overflow-hidden flex flex-col z-[100]"
-              >
-                <div className="p-3.5 bg-brand-gradient-dark text-white border-b border-white/10 flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-white/20 text-white font-black text-sm flex items-center justify-center shadow-xs">
-                    {displayName.charAt(0).toUpperCase()}
+            {/* Smartboard Hardware Dropdown */}
+            <AnimatePresence>
+              {isProfileOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ type: "spring", duration: 0.2 }}
+                  className="absolute right-0 top-12 w-64 bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-[#E8DFEB] dark:border-[#49364F] overflow-hidden flex flex-col z-[100]"
+                >
+                  <div className="p-3 bg-brand-gradient text-white flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                        <Tv className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-white/80">Akıllı Tahta OS</div>
+                        <div className="text-xs font-black text-white">{boardIdentity.panoId}-{boardIdentity.boardNo}</div>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Canlı
+                    </span>
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="font-bold text-white text-xs leading-tight truncate">{displayName}</h4>
-                    <p className="text-[11px] font-semibold text-[#E9D5FF] mt-0.5">
-                      {isAdmin ? 'Yönetici / İdare' : isStudent ? 'Öğrenci Profili' : isTeacher ? 'Sınıf Öğretmeni' : 'Akıllı Tahta / Pano'}
-                    </p>
+                  <div className="p-1.5 space-y-0.5">
+                    <button
+                      onClick={() => { dispatch({ type: 'OPEN_MODAL', modalId: 'settings' }); setIsProfileOpen(false); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
+                    >
+                      <Sliders className="w-3.5 h-3.5 text-[#8D49A6]" />
+                      <span>Pano Donanım Ayarları</span>
+                    </button>
+                    <button
+                      onClick={() => { dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' }); setIsProfileOpen(false); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
+                    >
+                      <School className="w-3.5 h-3.5 text-[#8D49A6]" />
+                      <span>Şube / Sınıf Değiştir</span>
+                    </button>
+                    <button
+                      onClick={() => { lockPano(); setIsProfileOpen(false); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
+                    >
+                      <Lock className="w-3.5 h-3.5 text-[#8D49A6]" />
+                      <span>Ekranı Kilitle</span>
+                    </button>
                   </div>
-                </div>
-                <div className="p-1.5 space-y-0.5">
-                  <button
-                    onClick={() => { dispatch({ type: 'OPEN_MODAL', modalId: 'settings' }); setIsProfileOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
-                  >
-                    <Sliders className="w-3.5 h-3.5 text-[#8D49A6]" />
-                    <span>Pano Ayarları</span>
-                  </button>
-                  <button
-                    onClick={() => { dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' }); setIsProfileOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
-                  >
-                    <School className="w-3.5 h-3.5 text-[#8D49A6]" />
-                    <span>Şube / Sınıf Değiştir</span>
-                  </button>
-                  <button
-                    onClick={() => { lockPano(); setIsProfileOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
-                  >
-                    <Lock className="w-3.5 h-3.5 opacity-70" />
-                    <span>Ekranı Kilitle</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs font-semibold transition-colors cursor-pointer text-left"
-                  >
-                    <div className="w-3.5 h-3.5 opacity-70"><Icons.LogOut /></div>
-                    <span>Oturumu Kapat</span>
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
@@ -2838,7 +2870,7 @@ export default function PanoClient() {
 
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-black tracking-wide mb-2 shadow-2xs">
                   <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-                  {isPhone ? '📱 KUMANDA MODU • ZORUNLU SINIF SEÇİMİ' : '🖥️ AKILLI TAHTA • ZORUNLU SINIF SEÇİMİ'}
+                  <span>🖥️ AKILLI TAHTA OS • PANO: {boardIdentity.panoId} • TAHTA NO: {boardIdentity.boardNo}</span>
                 </div>
 
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
@@ -2932,12 +2964,12 @@ export default function PanoClient() {
             <div className="flex flex-col">
               <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
                 <span className="text-xl sm:text-2xl font-bold text-[#241329] dark:text-slate-200 tracking-tight">
-                  Merhaba,
+                  Akıllı Tahta OS
                 </span>
                 <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-brand-gradient text-white shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                   <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                    {displayName}
+                    {boardIdentity.panoId}-{boardIdentity.boardNo}
                   </span>
                 </span>
               </div>
@@ -2983,6 +3015,8 @@ export default function PanoClient() {
                   </div>
                   <div className="flex items-center gap-2 mt-2 text-xs text-[#514458] dark:text-slate-400 font-medium flex-wrap">
                     <span>Kurum: <strong className="text-[#241329] dark:text-slate-200">{org?.name || 'Necla Görer İlkokulu'}</strong></span>
+                    <span className="text-[#8D49A6]">•</span>
+                    <span>Donanım No: <strong className="text-[#D914C8]">{boardIdentity.panoId}-{boardIdentity.boardNo}</strong></span>
                     <span className="text-[#8D49A6]">•</span>
                     <span>Sınıf Öğretmeni: <strong className="text-[#4B075F] dark:text-[#E9D5FF]">{selectedClass.teacherName || displayName} ({selectedClass.subject || 'Matematik'})</strong></span>
                   </div>
@@ -3344,15 +3378,6 @@ export default function PanoClient() {
                 <span>Ekranı Kilitle</span>
               </>
             )}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex-1 max-w-[220px] py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white transition-all cursor-pointer shadow-lg shadow-rose-600/30 active:scale-95 border border-rose-500/30"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Oturumu Kapat</span>
           </button>
         </div>
       )}

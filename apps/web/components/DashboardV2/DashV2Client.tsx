@@ -43,6 +43,7 @@ import {
   X,
   BarChart3,
   BookOpen,
+  Check,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -314,6 +315,80 @@ export default function DashV2Client({
     saglik: false,
     ikametgah: false,
   })
+
+  // ── AKILLI TAHTAYA GÖNDER POPUP MODAL STATE (MOCK VERİ) ──
+  const [isSendToBoardModalOpen, setIsSendToBoardModalOpen] = useState(false)
+  const [sendBoardTargetId, setSendBoardTargetId] = useState('1A-01')
+  const [selectedSendContentId, setSelectedSendContentId] = useState<number>(1)
+  const [isSendingToBoard, setIsSendingToBoard] = useState(false)
+  const [sendNote, setSendNote] = useState('')
+
+  const mockBoardContents = [
+    {
+      id: 1,
+      title: 'Doğal Sayılarda Dört İşlem Alıştırmaları',
+      subject: 'Matematik',
+      type: 'Çalışma Kağıdı / PDF',
+      time: '1. Ders',
+      badge: 'PDF',
+      color: 'bg-blue-600',
+    },
+    {
+      id: 2,
+      title: 'Geometrik Şekiller ve İç Açılar İnteraktif Tuval',
+      subject: 'Geometri',
+      type: 'İnteraktif Çizim Tahtası',
+      time: '2. Ders',
+      badge: 'Tuval',
+      color: 'bg-purple-600',
+    },
+    {
+      id: 3,
+      title: '15 Dakikalık Soru Çözüm Zamanlayıcısı & Sayaç',
+      subject: 'Genel',
+      type: 'Canlı Ders Aracı & Timer',
+      time: 'Etkinlik',
+      badge: 'Widget',
+      color: 'bg-amber-600',
+    },
+    {
+      id: 4,
+      title: 'Haftalık Ödev ve Kazanım Değerlendirme Listesi',
+      subject: 'Türkçe',
+      type: 'Sınıf Sunumu & Duyuru',
+      time: '3. Ders',
+      badge: 'Duyuru',
+      color: 'bg-emerald-600',
+    },
+  ]
+
+  const handleSendToBoard = () => {
+    if (!sendBoardTargetId.trim()) {
+      toast.error('Lütfen geçerli bir Akıllı Tahta ID girin (Örn: 1A-01)')
+      return
+    }
+    setIsSendingToBoard(true)
+    setTimeout(() => {
+      setIsSendingToBoard(false)
+      setIsSendToBoardModalOpen(false)
+      toast.success(
+        `${sendBoardTargetId.toUpperCase()} nolu Akıllı Tahtaya içerik başarıyla aktarıldı ve ekrana yansıtıldı!`,
+        { icon: '📺', duration: 4500 }
+      )
+      try {
+        const historyItem = {
+          boardId: sendBoardTargetId.toUpperCase(),
+          contentId: selectedSendContentId,
+          contentTitle: mockBoardContents.find((c) => c.id === selectedSendContentId)?.title,
+          sentAt: new Date().toISOString(),
+          note: sendNote,
+        }
+        const existing = JSON.parse(localStorage.getItem('oxonom_board_sent_history') || '[]')
+        localStorage.setItem('oxonom_board_sent_history', JSON.stringify([historyItem, ...existing]))
+        window.dispatchEvent(new Event('oxonom_board_content_sent'))
+      } catch (_) {}
+    }, 800)
+  }
 
   // Check if profile completion is needed on mount
   useEffect(() => {
@@ -822,37 +897,52 @@ export default function DashV2Client({
               </div>
             )}
 
-            {/* Sınıf Dropdown & Notlar Butonu */}
-            <div className="flex items-center gap-3 pt-1 relative z-10">
+            {/* Sınıf Dropdown, Akıllı Tahtaya Gönder & Notlar Butonları */}
+            <div className="flex items-center gap-2 pt-1 relative z-10 flex-wrap sm:flex-nowrap">
               {/* Sınıf Dropdown Pill */}
               <button
                 type="button"
                 onClick={() => setIsClassSheetOpen(true)}
-                className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl py-2.5 px-3.5 flex items-center justify-between text-left cursor-pointer active:scale-[0.98] transition-all shadow-inner group h-[50px]"
+                className="flex-1 min-w-[120px] bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl py-2 px-3 flex items-center justify-between text-left cursor-pointer active:scale-[0.98] transition-all shadow-inner group h-[48px]"
               >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7.5 h-7.5 rounded-lg bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <GraduationCap size={17} />
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <GraduationCap size={16} />
                   </div>
                   <div className="min-w-0">
-                    <span className="text-[10px] text-[#F0D8FA] block leading-tight font-medium">
+                    <span className="text-[9px] text-[#F0D8FA] block leading-tight font-medium">
                       Sınıf
                     </span>
-                    <span className="text-sm font-bold text-white block leading-tight truncate">
+                    <span className="text-xs sm:text-sm font-bold text-white block leading-tight truncate">
                       {selectedClass.code}
                     </span>
                   </div>
                 </div>
-                <ChevronDown size={15} className="text-[#F0D8FA] shrink-0 group-hover:text-white transition-colors" />
+                <ChevronDown size={14} className="text-[#F0D8FA] shrink-0 group-hover:text-white transition-colors" />
+              </button>
+
+              {/* Akıllı Tahtaya Gönder Butonu */}
+              <button
+                type="button"
+                onClick={() => {
+                  const autoBoard = selectedClass.code ? `${selectedClass.code.replace(/[^A-Za-z0-9]/g, '')}-01` : '1A-01'
+                  setSendBoardTargetId(autoBoard)
+                  setIsSendToBoardModalOpen(true)
+                }}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs px-3.5 py-2 rounded-2xl flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-md shadow-emerald-950/20 shrink-0 h-[48px]"
+                title="Ders içeriğini doğrudan akıllı tahtaya gönder"
+              >
+                <Tv size={16} className="text-white shrink-0" />
+                <span className="whitespace-nowrap">Tahtaya Gönder</span>
               </button>
 
               {/* Notlar Butonu */}
               <button
                 type="button"
                 onClick={() => setIsNotesModalOpen(true)}
-                className="bg-white hover:bg-[#FCE8FA] text-[#4B075F] font-bold text-sm px-4.5 py-2.5 rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all shadow-md shrink-0 h-[50px]"
+                className="bg-white hover:bg-[#FCE8FA] text-[#4B075F] font-bold text-xs sm:text-sm px-3.5 py-2 rounded-2xl flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-md shrink-0 h-[48px]"
               >
-                <FileText size={16} strokeWidth={2.5} className="text-[#D914C8]" />
+                <FileText size={15} strokeWidth={2.5} className="text-[#D914C8]" />
                 <span>Notlar</span>
               </button>
             </div>
@@ -1084,244 +1174,12 @@ export default function DashV2Client({
           </motion.div>
 
           {/* ══════════════════════════════════════════════════════════════════════════
-              KATEGORİ 2: AKILLI TAHTA & İNTERAKTİF DERSLİK
-          ══════════════════════════════════════════════════════════════════════════ */}
-          <motion.div variants={itemVariants} className="space-y-3.5">
-            <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-0.5 rounded-md bg-teal-500/10 text-teal-600 dark:text-teal-400 font-black text-[11px] tracking-wider uppercase border border-teal-500/20">
-                KATEGORİ 2
-              </span>
-              <h2 className="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white tracking-tight">
-                Akıllı Tahta & İnteraktif Derslik
-              </h2>
-              <div className="flex-1 h-[1px] bg-gray-200/80 dark:bg-gray-800" />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Kart 2A: Ders Tahtaları Tuvali */}
-              <div className="bg-white dark:bg-[#121826] rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-xs flex flex-col justify-between gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
-                        <Tv size={19} />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-                          Ders Tahtaları
-                        </h3>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {selectedClass.code} Sınıfı için interaktif ders panoları
-                        </p>
-                      </div>
-                    </div>
-                    <span className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs px-2.5 py-1 rounded-full">
-                      {classBoards.length} tahta
-                    </span>
-                  </div>
-
-                  {latestClassBoard ? (
-                    <div className="bg-gray-50 dark:bg-[#0A0D15] p-4 rounded-xl border border-gray-200/60 dark:border-gray-800/80 space-y-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-                          <span className="truncate">{latestClassBoard.title}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="inline-flex items-center gap-1 font-bold text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/60">
-                            <Clock size={10} />
-                            <span>{latestClassBoard.time}</span>
-                          </span>
-                          <span className="inline-flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-                            <Calendar size={10} />
-                            <span>{latestClassBoard.date}</span>
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-                        {latestClassBoard.description || 'İnteraktif çizim ve ders sunumu için hazır tahta.'}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const url = latestClassBoard.url || `/board/${latestClassBoard.id}`
-                          window.open(url, '_blank')
-                        }}
-                        className="w-full py-2.5 px-4 bg-gray-900 hover:bg-black dark:bg-[#1E293B] dark:hover:bg-gray-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98 transition-all"
-                      >
-                        <span>Tahtayı Aç</span>
-                        <ArrowUpRight size={14} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 dark:bg-[#0A0D15] p-6 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 text-center flex flex-col items-center justify-center gap-2">
-                      <Tv size={24} className="text-teal-500/70" />
-                      <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
-                        Henüz Ders Tahtası Oluşturulmadı
-                      </p>
-                      <p className="text-[11px] text-gray-400 max-w-xs">
-                        Sınıfınız için ilk ders tahtasını oluşturup çizim yapmaya hemen başlayabilirsiniz.
-                      </p>
-                      <Link
-                        href="/teacher/smartboard"
-                        className="mt-1 px-3.5 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95 transition-all cursor-pointer"
-                      >
-                        <Plus size={13} />
-                        <span>İlk Tahtayı Oluştur</span>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-gray-800 text-xs">
-                  <Link
-                    href="/teacher/smartboard"
-                    className="text-teal-600 dark:text-teal-400 font-bold hover:underline"
-                  >
-                    + Yeni Tahta Oluştur
-                  </Link>
-                  <Link
-                    href="/teacher/smartboard"
-                    className="text-gray-500 dark:text-gray-400 font-semibold hover:underline flex items-center gap-1"
-                  >
-                    <span>Tüm Tahtalar</span>
-                    <ChevronRight size={13} />
-                  </Link>
-                </div>
-              </div>
-
-              {/* Kart 2B: Açık Akıllı Tahtalarım & QR Oturum Merkezi */}
-              <div className="bg-white dark:bg-[#121826] rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-xs flex flex-col justify-between gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#4B075F]/10 dark:bg-[#4B075F]/30 text-[#8D49A6] dark:text-[#D914C8] flex items-center justify-center shrink-0">
-                        <QrCode size={19} />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-                          Açık Akıllı Tahtalarım
-                        </h3>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          QR kod ile bağlanılan aktif tahta oturumları
-                        </p>
-                      </div>
-                    </div>
-                    {activeQrBoards.length > 0 ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        {activeQrBoards.length} Aktif
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                        0 Oturum
-                      </span>
-                    )}
-                  </div>
-
-                  {activeQrBoards.length > 0 ? (
-                    <div className="space-y-2.5 max-h-56 overflow-y-auto">
-                      {activeQrBoards.map((board) => {
-                        const isCurrentLocking = lockingSessionId === board.sessionId
-                        const isCurrentLoggingOut = loggingOutSessionId === board.sessionId
-                        const remoteUrl = `/remote?session=${encodeURIComponent(board.sessionId)}`
-
-                        return (
-                          <div
-                            key={board.sessionId}
-                            className="p-3 rounded-xl bg-gray-50 dark:bg-[#0A0D15] border border-[#8D49A6]/30 dark:border-[#8D49A6]/20 space-y-2.5"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="min-w-0">
-                                <h4 className="text-xs font-bold text-gray-900 dark:text-white truncate">
-                                  {board.boardName || 'Oxonom Akıllı Tahta'}
-                                </h4>
-                                <span className="font-mono text-[10px] text-gray-500 dark:text-gray-400">
-                                  Kod: {board.code} · {board.className || selectedClass.code}
-                                </span>
-                              </div>
-                              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
-                                Oturum Aktif
-                              </span>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-2">
-                              <a
-                                href={remoteUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="py-1.5 px-2 rounded-lg bg-brand-gradient hover:opacity-95 text-white text-[11px] font-bold flex items-center justify-center gap-1 transition-all"
-                              >
-                                <Smartphone size={12} />
-                                <span>Kumanda</span>
-                              </a>
-                              <button
-                                type="button"
-                                onClick={() => handleLockBoard(board.sessionId)}
-                                disabled={isCurrentLocking}
-                                className="py-1.5 px-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 border border-amber-200/80 dark:border-amber-800/50 text-[11px] font-bold flex items-center justify-center gap-1 transition-all cursor-pointer disabled:opacity-50"
-                              >
-                                {isCurrentLocking ? (
-                                   <RotateCw size={12} className="animate-spin text-amber-600" />
-                                ) : (
-                                  <Lock size={12} />
-                                )}
-                                <span>Kilitle</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleLogoutBoard(board.sessionId)}
-                                disabled={isCurrentLoggingOut}
-                                className="py-1.5 px-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/50 text-[11px] font-bold flex items-center justify-center gap-1 transition-all cursor-pointer disabled:opacity-50"
-                              >
-                                {isCurrentLoggingOut ? (
-                                   <RotateCw size={12} className="animate-spin text-rose-600" />
-                                ) : (
-                                  <LogOut size={12} />
-                                )}
-                                <span>Çıkış</span>
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ) : (
-                    <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#0A0D15] border border-dashed border-gray-200 dark:border-gray-800 text-center flex flex-col items-center justify-center gap-2">
-                      <QrCode size={24} className="text-[#8D49A6]/70" />
-                      <p className="text-xs font-bold text-gray-800 dark:text-gray-200">
-                        Açık QR Oturumu Bulunmuyor
-                      </p>
-                      <p className="text-[11px] text-gray-400 max-w-xs">
-                        Tahtadaki QR kodu okutarak veya PIN kodunu girerek cep telefonunuzdan kumanda edebilirsiniz.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 pt-1 border-t border-gray-100 dark:border-gray-800">
-                  <a
-                    href="/pano"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 px-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
-                  >
-                    <Tv size={14} />
-                    <span>Dijital Okul Panosunu Görüntüle</span>
-                    <ArrowUpRight size={13} />
-                  </a>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* ══════════════════════════════════════════════════════════════════════════
-              KATEGORİ 3: ÖDEVLER, DOSYALAR VE HIZLI ARAÇLAR
+              KATEGORİ 2: ÖDEVLER, DOSYALAR VE HIZLI ARAÇLAR
           ══════════════════════════════════════════════════════════════════════════ */}
           <motion.div variants={itemVariants} className="space-y-3.5">
             <div className="flex items-center gap-2.5">
               <span className="px-2.5 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 font-black text-[11px] tracking-wider uppercase border border-purple-500/20">
-                KATEGORİ 3
+                KATEGORİ 2
               </span>
               <h2 className="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white tracking-tight">
                 Ödevler, Dosyalar ve Hızlı Araçlar
@@ -1514,6 +1372,185 @@ export default function DashV2Client({
         classNameCode={selectedClass.code}
         theme={theme}
       />
+
+      {/* ── POPUP: AKILLI TAHTAYA İÇERİK GÖNDERME MODALI (%100 MOBİL UYUMLU) ── */}
+      <AnimatePresence>
+        {isSendToBoardModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ duration: 0.25 }}
+              className="w-full sm:max-w-lg bg-white dark:bg-[#121826] rounded-t-[32px] sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative"
+            >
+              {/* Header */}
+              <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0 bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-transparent">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md shrink-0">
+                    <Tv size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white flex items-center gap-2">
+                      <span>Akıllı Tahtaya Gönder</span>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                        Canlı Yansıtma
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Ders materyali veya çalışma aracını tahtaya anında aktarın
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSendToBoardModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-4 sm:p-5 overflow-y-auto space-y-4">
+                {/* Tahta ID Input & Quick Chips */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                    Akıllı Tahta ID (Örn: 1A-01)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={sendBoardTargetId}
+                      onChange={(e) => setSendBoardTargetId(e.target.value.toUpperCase())}
+                      placeholder="Örn: 1A-01"
+                      className="w-full h-12 px-4 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-2 border-gray-200 dark:border-gray-700 font-mono font-bold text-sm text-gray-900 dark:text-white outline-hidden focus:border-emerald-500 transition-colors uppercase tracking-wider"
+                    />
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                      Donanım No
+                    </span>
+                  </div>
+
+                  {/* Quick Suggestions Chips */}
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                    <span className="text-[10px] font-bold text-gray-400">Hızlı Seçim:</span>
+                    {['1A-01', '1B-01', '2A-01', '3A-01', 'LAB-01'].map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => setSendBoardTargetId(chip)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-extrabold transition-all cursor-pointer ${
+                          sendBoardTargetId === chip
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
+                        }`}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Gönderilecek Ders İçeriği (Mock Veri) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                      Gönderilecek İçerik (Mock Veri)
+                    </label>
+                    <span className="text-[10px] text-gray-400 font-bold">1 İçerik Seçin</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {mockBoardContents.map((content) => {
+                      const isSelected = selectedSendContentId === content.id
+                      return (
+                        <div
+                          key={content.id}
+                          onClick={() => setSelectedSendContentId(content.id)}
+                          className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                            isSelected
+                              ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-500 shadow-sm ring-1 ring-emerald-500/30'
+                              : 'bg-gray-50/60 dark:bg-gray-800/40 border-gray-200 dark:border-gray-800 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`w-9 h-9 rounded-xl ${content.color} text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs`}>
+                              {content.badge}
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                                {content.title}
+                              </h4>
+                              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                                <span className="font-semibold text-emerald-600 dark:text-emerald-400">{content.subject}</span>
+                                <span>•</span>
+                                <span>{content.type}</span>
+                                <span>•</span>
+                                <span>{content.time}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                            isSelected
+                              ? 'border-emerald-600 bg-emerald-600 text-white'
+                              : 'border-gray-300 dark:border-gray-600'
+                          }`}>
+                            {isSelected && <Check size={12} strokeWidth={3} />}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Ek Not / Açıklama */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                    Öğretmen Notu (Opsiyonel)
+                  </label>
+                  <input
+                    type="text"
+                    value={sendNote}
+                    onChange={(e) => setSendNote(e.target.value)}
+                    placeholder="Örn: 15. sayfadaki 3. soruyu birlikte çözelim."
+                    className="w-full h-10 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 sm:p-5 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsSendToBoardModalOpen(false)}
+                  className="flex-1 h-11 rounded-xl bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-300 transition-colors cursor-pointer"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendToBoard}
+                  disabled={isSendingToBoard}
+                  className="flex-2 h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20 active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {isSendingToBoard ? (
+                    <>
+                      <RotateCw size={14} className="animate-spin text-white" />
+                      <span>Tahtaya Yansıtılıyor...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Tv size={15} />
+                      <span>Tahtaya Yansıt ({sendBoardTargetId})</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ── MODAL: İLK GİRİŞ PROFİL TAMAMLAMA & EVRAK YÜKLEME ── */}
       <AnimatePresence>
