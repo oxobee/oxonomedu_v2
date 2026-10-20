@@ -47,15 +47,15 @@ export default function SuperadminNavbar() {
             href="/superadmin"
             className="flex items-center gap-2.5 group cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] flex items-center justify-center text-white font-black text-sm shadow-lg shadow-[#D914C8]/25 group-hover:scale-105 transition-transform">
               SA
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-black text-sm tracking-tight text-white">
-                  OXONOM <span className="text-amber-400">SUPERADMIN</span>
+                  OXONOM <span className="text-[#D914C8]">SUPERADMIN</span>
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-widest">
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-[#D914C8]/20 text-[#F0D8FA] border border-[#D914C8]/40 uppercase tracking-widest">
                   Root
                 </span>
               </div>
@@ -78,7 +78,7 @@ export default function SuperadminNavbar() {
                 href={item.path}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
                   active
-                    ? 'bg-amber-500 text-black shadow-md font-black'
+                    ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white shadow-md font-black'
                     : 'text-gray-300 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -87,7 +87,7 @@ export default function SuperadminNavbar() {
                 {item.badge && (
                   <span
                     className={`text-[9px] px-1.5 py-0.2 rounded font-extrabold uppercase ${
-                      active ? 'bg-black/20 text-black' : 'bg-amber-500/20 text-amber-300'
+                      active ? 'bg-black/20 text-white' : 'bg-[#D914C8]/20 text-[#F0D8FA]'
                     }`}
                   >
                     {item.badge}
@@ -105,10 +105,10 @@ export default function SuperadminNavbar() {
             href="/teacher/desktop-os"
             target="_blank"
             rel="noopener noreferrer"
-            className="h-9 px-3.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-extrabold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-md shadow-emerald-950/20"
+            className="h-9 px-3.5 rounded-xl bg-gradient-to-r from-[#D914C8]/20 to-[#8D49A6]/20 hover:from-[#D914C8]/30 hover:to-[#8D49A6]/30 text-[#F0D8FA] border border-[#D914C8]/40 text-xs font-extrabold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-md"
             title="Öğretmen Masaüstü OS Arayüzünü Yeni Sekmede Canlı Aç"
           >
-            <Monitor size={14} className="text-emerald-400" />
+            <Monitor size={14} className="text-[#D914C8]" />
             <span className="hidden sm:inline">Öğretmen OS'i Aç</span>
             <ExternalLink size={11} className="opacity-75" />
           </Link>

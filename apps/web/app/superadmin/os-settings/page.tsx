@@ -183,9 +183,9 @@ export default function SuperadminOSSettingsPage() {
       <Toaster position="top-right" />
 
       {/* ── TOP HEADER & PUBLISH BAR ── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#141926] border border-white/10 shadow-xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#161224] border border-white/10 shadow-xl">
         <div>
-          <div className="flex items-center gap-2 text-xs font-black text-amber-400 uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-xs font-black text-[#D914C8] uppercase tracking-wider mb-1">
             <Sliders size={14} />
             <span>SUPERADMIN · OS SETTINGS</span>
           </div>
@@ -212,9 +212,9 @@ export default function SuperadminOSSettingsPage() {
             href="/teacher/desktop-os"
             target="_blank"
             rel="noopener noreferrer"
-            className="h-10 px-4 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-black flex items-center gap-2 transition-transform hover:scale-105"
+            className="h-10 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-[#F0D8FA] border border-white/15 text-xs font-black flex items-center gap-2 transition-transform hover:scale-105"
           >
-            <Monitor size={14} />
+            <Monitor size={14} className="text-[#D914C8]" />
             <span>Canlı OS'i Aç</span>
             <ExternalLink size={12} />
           </Link>
@@ -222,7 +222,7 @@ export default function SuperadminOSSettingsPage() {
           <button
             type="button"
             onClick={handleSave}
-            className="h-10 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-black flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-amber-500/20 cursor-pointer"
+            className="h-10 px-5 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white text-xs font-black flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-[#D914C8]/25 cursor-pointer"
           >
             <Check size={16} />
             <span>Kaydet & Yayınla</span>
@@ -231,9 +231,9 @@ export default function SuperadminOSSettingsPage() {
       </div>
 
       {/* ── CRITICAL DIMENSION GUIDE BANNER ── */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-blue-500/10 border-2 border-amber-500/30 space-y-4">
-        <div className="flex items-center gap-2 text-amber-400 font-black text-sm uppercase tracking-wider">
-          <Info size={18} />
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-[#D914C8]/15 via-purple-900/20 to-[#8D49A6]/15 border-2 border-[#D914C8]/30 space-y-4">
+        <div className="flex items-center gap-2 text-[#F0D8FA] font-black text-sm uppercase tracking-wider">
+          <Info size={18} className="text-[#D914C8]" />
           <span>ÖNERİLEN GÖRSEL BOYUTLARI VE FORMAT REHBERİ</span>
         </div>
         <p className="text-xs text-gray-300 leading-relaxed">
@@ -242,7 +242,7 @@ export default function SuperadminOSSettingsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
           <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-1">
-            <div className="text-amber-300 font-extrabold text-xs flex items-center gap-1.5">
+            <div className="text-[#F0D8FA] font-extrabold text-xs flex items-center gap-1.5">
               <span>🎬 Dikey Film Afişi</span>
             </div>
             <div className="text-lg font-black text-white font-mono">600 x 900 px</div>
@@ -252,7 +252,7 @@ export default function SuperadminOSSettingsPage() {
           </div>
 
           <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-1">
-            <div className="text-cyan-300 font-extrabold text-xs flex items-center gap-1.5">
+            <div className="text-[#C58ADB] font-extrabold text-xs flex items-center gap-1.5">
               <span>🖼️ Yatay Kart / Arşiv</span>
             </div>
             <div className="text-lg font-black text-white font-mono">1280 x 720 px</div>
@@ -262,7 +262,7 @@ export default function SuperadminOSSettingsPage() {
           </div>
 
           <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-1">
-            <div className="text-purple-300 font-extrabold text-xs flex items-center gap-1.5">
+            <div className="text-[#D914C8] font-extrabold text-xs flex items-center gap-1.5">
               <span>💻 Web Hero Slider</span>
             </div>
             <div className="text-lg font-black text-white font-mono">1920 x 800 px</div>
@@ -290,7 +290,7 @@ export default function SuperadminOSSettingsPage() {
           onClick={() => setActiveTab('shortcuts')}
           className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${
             activeTab === 'shortcuts'
-              ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+              ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white shadow-lg shadow-[#D914C8]/20'
               : 'bg-white/5 hover:bg-white/10 text-gray-300'
           }`}
         >
@@ -303,7 +303,7 @@ export default function SuperadminOSSettingsPage() {
           onClick={() => setActiveTab('slider')}
           className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${
             activeTab === 'slider'
-              ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+              ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white shadow-lg shadow-[#D914C8]/20'
               : 'bg-white/5 hover:bg-white/10 text-gray-300'
           }`}
         >
@@ -316,7 +316,7 @@ export default function SuperadminOSSettingsPage() {
           onClick={() => setActiveTab('preview')}
           className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${
             activeTab === 'preview'
-              ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+              ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white shadow-lg shadow-[#D914C8]/20'
               : 'bg-white/5 hover:bg-white/10 text-gray-300'
           }`}
         >
@@ -338,9 +338,9 @@ export default function SuperadminOSSettingsPage() {
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
                     selectedCategory === cat.id
-                      ? 'bg-amber-500 text-black font-black shadow-md'
+                      ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white font-black shadow-md shadow-[#D914C8]/25'
                       : 'bg-white/5 hover:bg-white/10 text-gray-300'
                   }`}
                 >
@@ -360,7 +360,7 @@ export default function SuperadminOSSettingsPage() {
                   posterImage: CURATED_POSTER_PRESETS[0].url,
                   format: 'portrait',
                   badge: 'YENİ',
-                  badgeColor: 'bg-emerald-500 text-white',
+                  badgeColor: 'bg-[#D914C8] text-white',
                   tagInfo: 'HD',
                   windowId: 'attendance',
                   order: config.shortcuts.length + 1,
@@ -368,7 +368,7 @@ export default function SuperadminOSSettingsPage() {
                 })
                 setIsShortcutModalOpen(true)
               }}
-              className="h-9 px-4 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black flex items-center gap-1.5 cursor-pointer"
+              className="h-9 px-4 rounded-xl bg-gradient-to-r from-[#D914C8]/20 to-[#8D49A6]/20 hover:from-[#D914C8]/30 hover:to-[#8D49A6]/30 text-[#F0D8FA] border border-[#D914C8]/40 text-xs font-black flex items-center gap-1.5 cursor-pointer"
             >
               <Plus size={14} />
               <span>Yeni Film Afişi Ekle</span>
@@ -383,7 +383,7 @@ export default function SuperadminOSSettingsPage() {
               return (
                 <div
                   key={item.id}
-                  className={`group relative rounded-2xl bg-[#141926] border border-white/10 hover:border-amber-400/60 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/10 ${
+                  className={`group relative rounded-2xl bg-[#161224] border border-white/10 hover:border-[#D914C8]/80 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-[#D914C8]/15 ${
                     isLandscape ? 'col-span-2' : ''
                   }`}
                 >
@@ -407,7 +407,7 @@ export default function SuperadminOSSettingsPage() {
                       {item.badge && (
                         <span
                           className={`text-[9px] font-black px-2 py-0.5 rounded shadow-md ${
-                            item.badgeColor || 'bg-emerald-500 text-white'
+                            item.badgeColor || 'bg-[#D914C8] text-white'
                           }`}
                         >
                           {item.badge}
@@ -422,21 +422,21 @@ export default function SuperadminOSSettingsPage() {
 
                     {/* Window Type Indicator */}
                     <div className="absolute bottom-2 left-2 right-2">
-                      <div className="text-[10px] font-mono text-amber-300 font-bold bg-black/60 px-2 py-0.5 rounded backdrop-blur-xs inline-block">
+                      <div className="text-[10px] font-mono text-[#F0D8FA] font-bold bg-black/60 px-2 py-0.5 rounded backdrop-blur-xs inline-block border border-white/10">
                         Pencere: {item.windowId}
                       </div>
                     </div>
                   </div>
 
                   {/* Info & Edit Actions */}
-                  <div className="p-3 bg-[#111520] space-y-2">
+                  <div className="p-3 bg-[#130E1F] space-y-2">
                     <div>
                       <h2 className="font-black text-xs text-white truncate">{item.title}</h2>
                       <p className="text-[10px] text-gray-400 truncate">{item.subtitle}</p>
                     </div>
 
                     <div className="flex items-center justify-between pt-1 border-t border-white/10">
-                      <span className="text-[9px] text-gray-400 font-bold uppercase">
+                      <span className="text-[9px] text-[#C58ADB] font-bold uppercase">
                         {item.category}
                       </span>
                       <div className="flex items-center gap-1">
@@ -446,7 +446,7 @@ export default function SuperadminOSSettingsPage() {
                             setEditingShortcut(item)
                             setIsShortcutModalOpen(true)
                           }}
-                          className="w-7 h-7 rounded-lg bg-white/10 hover:bg-amber-500 hover:text-black text-gray-200 flex items-center justify-center transition-colors cursor-pointer"
+                          className="w-7 h-7 rounded-lg bg-white/10 hover:bg-[#D914C8] hover:text-white text-gray-200 flex items-center justify-center transition-colors cursor-pointer"
                           title="Afişi ve Bilgileri Düzenle"
                         >
                           <Edit2 size={12} />
@@ -499,7 +499,7 @@ export default function SuperadminOSSettingsPage() {
                 })
                 setIsSlideModalOpen(true)
               }}
-              className="h-9 px-4 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black flex items-center gap-1.5 cursor-pointer"
+              className="h-9 px-4 rounded-xl bg-gradient-to-r from-[#D914C8]/20 to-[#8D49A6]/20 hover:from-[#D914C8]/30 hover:to-[#8D49A6]/30 text-[#F0D8FA] border border-[#D914C8]/40 text-xs font-black flex items-center gap-1.5 cursor-pointer"
             >
               <Plus size={14} />
               <span>Yeni Slayt Ekle</span>
@@ -510,10 +510,10 @@ export default function SuperadminOSSettingsPage() {
             {config.heroSlides.map((slide, idx) => (
               <div
                 key={slide.id}
-                className="p-5 rounded-3xl bg-[#141926] border border-white/10 hover:border-amber-400/40 transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
+                className="p-5 rounded-3xl bg-[#161224] border border-white/10 hover:border-[#D914C8]/50 transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
               >
                 {/* Left: Web & Mobile Previews */}
-                <div className="flex items-center gap-3 w-full lg:w-auto">
+                <div className="flex items-center gap-3.5 w-full lg:w-auto">
                   {/* Web Banner Preview (16:9 approx) */}
                   <div className="relative w-40 sm:w-48 aspect-[16/9] rounded-xl overflow-hidden bg-black/60 border border-white/20 shrink-0">
                     <img
@@ -521,7 +521,7 @@ export default function SuperadminOSSettingsPage() {
                       alt={slide.title}
                       className="w-full h-full object-cover"
                     />
-                    <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-black bg-black/75 text-amber-300">
+                    <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-black bg-black/75 text-[#F0D8FA]">
                       WEB 1920x800
                     </span>
                   </div>
@@ -533,14 +533,14 @@ export default function SuperadminOSSettingsPage() {
                       alt={slide.title}
                       className="w-full h-full object-cover"
                     />
-                    <span className="absolute top-1 left-1 px-1 py-0.5 rounded text-[7px] font-black bg-black/75 text-rose-300">
+                    <span className="absolute top-1 left-1 px-1 py-0.5 rounded text-[7px] font-black bg-black/75 text-[#D914C8]">
                       MOBİL
                     </span>
                   </div>
 
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      <span className="px-2.5 py-0.5 rounded text-[9px] font-black bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white shadow-xs">
                         {slide.badge || 'SLAYT'}
                       </span>
                       <span className="text-xs text-gray-400 font-mono">Sıra: {slide.order}</span>
@@ -558,8 +558,8 @@ export default function SuperadminOSSettingsPage() {
                       {slide.title}
                     </h3>
                     <p className="text-xs text-gray-400 truncate max-w-md">{slide.subtitle}</p>
-                    <div className="text-[11px] font-mono text-cyan-300 pt-0.5">
-                      Buton: &quot;{slide.actionText}&quot; ➔ Açılacak: <span className="font-bold underline">{slide.actionLink}</span>
+                    <div className="text-[11px] font-mono text-[#F0D8FA] pt-0.5">
+                      Buton: &quot;{slide.actionText}&quot; ➔ Açılacak: <span className="font-bold underline text-[#D914C8]">{slide.actionLink}</span>
                     </div>
                   </div>
                 </div>
@@ -572,7 +572,7 @@ export default function SuperadminOSSettingsPage() {
                       setEditingSlide(slide)
                       setIsSlideModalOpen(true)
                     }}
-                    className="h-9 px-3.5 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-black text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="h-9 px-3.5 rounded-xl bg-white/10 hover:bg-[#D914C8] hover:text-white text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Edit2 size={13} />
                     <span>Düzenle</span>
@@ -598,9 +598,9 @@ export default function SuperadminOSSettingsPage() {
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === 'preview' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-[#141926] border border-white/10">
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-[#161224] border border-white/10">
             <div className="flex items-center gap-2">
-              <Eye size={16} className="text-amber-400" />
+              <Eye size={16} className="text-[#D914C8]" />
               <span className="font-black text-sm text-white">Canlı Önizleme Cihazı:</span>
               <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl">
                 <button
@@ -608,7 +608,7 @@ export default function SuperadminOSSettingsPage() {
                   onClick={() => setPreviewDevice('web')}
                   className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                     previewDevice === 'web'
-                      ? 'bg-amber-500 text-black font-black'
+                      ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white font-black shadow-md'
                       : 'text-gray-400 hover:text-white'
                   }`}
                 >
@@ -620,7 +620,7 @@ export default function SuperadminOSSettingsPage() {
                   onClick={() => setPreviewDevice('mobile')}
                   className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                     previewDevice === 'mobile'
-                      ? 'bg-amber-500 text-black font-black'
+                      ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white font-black shadow-md'
                       : 'text-gray-400 hover:text-white'
                   }`}
                 >
@@ -634,7 +634,7 @@ export default function SuperadminOSSettingsPage() {
               href="/teacher/desktop-os"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-black text-emerald-400 hover:underline flex items-center gap-1"
+              className="text-xs font-black text-[#F0D8FA] hover:underline flex items-center gap-1"
             >
               <span>Yeni Sekmede Tam Ekran Aç</span>
               <ExternalLink size={12} />
@@ -655,7 +655,7 @@ export default function SuperadminOSSettingsPage() {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-6 flex flex-col justify-end">
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded bg-amber-500 text-black w-fit mb-2">
+                      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[#D914C8] text-white w-fit mb-2 shadow-sm">
                         {config.heroSlides[0].badge}
                       </span>
                       <h2 className="text-xl sm:text-2xl font-black text-white">
@@ -665,7 +665,7 @@ export default function SuperadminOSSettingsPage() {
                         {config.heroSlides[0].subtitle}
                       </p>
                       <div className="mt-3">
-                        <button className="h-8 px-4 rounded-xl bg-amber-500 text-black font-black text-xs">
+                        <button className="h-8 px-4 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white font-black text-xs shadow-md">
                           {config.heroSlides[0].actionText}
                         </button>
                       </div>
@@ -682,7 +682,7 @@ export default function SuperadminOSSettingsPage() {
                     {config.shortcuts.slice(0, 5).map((s) => (
                       <div
                         key={s.id}
-                        className="rounded-xl overflow-hidden bg-[#141926] border border-white/10"
+                        className="rounded-xl overflow-hidden bg-[#161224] border border-white/10"
                       >
                         <div className="aspect-[2/3] relative">
                           <img
@@ -720,13 +720,13 @@ export default function SuperadminOSSettingsPage() {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-4 flex flex-col justify-end">
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-black w-fit mb-1">
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#D914C8] text-white w-fit mb-1 shadow-sm">
                         {config.heroSlides[0].badge}
                       </span>
                       <h2 className="text-base font-black text-white leading-tight">
                         {config.heroSlides[0].title}
                       </h2>
-                      <button className="mt-2 h-7 w-full rounded-xl bg-amber-500 text-black font-black text-xs">
+                      <button className="mt-2 h-7 w-full rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white font-black text-xs shadow-md">
                         {config.heroSlides[0].actionText}
                       </button>
                     </div>
@@ -771,11 +771,11 @@ export default function SuperadminOSSettingsPage() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-xl rounded-3xl bg-[#141926] border border-white/20 p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-xl rounded-3xl bg-[#161224] border border-white/20 p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <ImageIcon size={18} className="text-amber-400" />
+                  <ImageIcon size={18} className="text-[#D914C8]" />
                   <h3 className="font-black text-base text-white">Film Afişi & Menü Düzenle</h3>
                 </div>
                 <button
@@ -792,7 +792,7 @@ export default function SuperadminOSSettingsPage() {
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-300 flex items-center justify-between">
                     <span>Afiş Görseli (Film Afişi Formatı)</span>
-                    <span className="text-[10px] text-amber-300 font-mono">
+                    <span className="text-[10px] text-[#F0D8FA] font-mono">
                       Önerilen: 600x900px (2:3)
                     </span>
                   </label>
@@ -821,7 +821,7 @@ export default function SuperadminOSSettingsPage() {
                           setEditingShortcut({ ...editingShortcut, posterImage: e.target.value })
                         }
                         placeholder="https://images.unsplash.com/..."
-                        className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-mono focus:border-amber-400 outline-hidden"
+                        className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-mono focus:border-[#D914C8] outline-hidden"
                       />
 
                       <div className="flex flex-wrap items-center gap-2">
@@ -848,7 +848,7 @@ export default function SuperadminOSSettingsPage() {
                             setTargetForPreset('shortcut')
                             setIsPresetModalOpen(true)
                           }}
-                          className="h-8 px-3 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                          className="h-8 px-3 rounded-lg bg-[#D914C8]/20 hover:bg-[#D914C8]/30 text-[#F0D8FA] border border-[#D914C8]/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                         >
                           <Palette size={13} />
                           <span>Hazır Afiş Galerisi</span>
@@ -871,7 +871,7 @@ export default function SuperadminOSSettingsPage() {
                       onChange={(e) =>
                         setEditingShortcut({ ...editingShortcut, title: e.target.value })
                       }
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold focus:border-amber-400 outline-hidden"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold focus:border-[#D914C8] outline-hidden"
                     />
                   </div>
 
@@ -885,7 +885,7 @@ export default function SuperadminOSSettingsPage() {
                       onChange={(e) =>
                         setEditingShortcut({ ...editingShortcut, subtitle: e.target.value })
                       }
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs focus:border-amber-400 outline-hidden"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs focus:border-[#D914C8] outline-hidden"
                     />
                   </div>
                 </div>
@@ -904,7 +904,7 @@ export default function SuperadminOSSettingsPage() {
                           category: e.target.value as ShortcutCategory,
                         })
                       }
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold focus:border-amber-400 outline-hidden"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold focus:border-[#D914C8] outline-hidden"
                     >
                       <option value="core">Hızlı İşlemler & Ders</option>
                       <option value="students">Sınıf & Öğrenci Yönetimi</option>
@@ -926,7 +926,7 @@ export default function SuperadminOSSettingsPage() {
                           format: e.target.value as 'portrait' | 'landscape',
                         })
                       }
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold focus:border-amber-400 outline-hidden"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold focus:border-[#D914C8] outline-hidden"
                     >
                       <option value="portrait">Dikey Film Afişi (2:3 — 600x900px)</option>
                       <option value="landscape">Yatay Kart / Arşiv (16:9 — 1280x720px)</option>
@@ -945,7 +945,7 @@ export default function SuperadminOSSettingsPage() {
                       onChange={(e) =>
                         setEditingShortcut({ ...editingShortcut, windowId: e.target.value })
                       }
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-mono font-bold focus:border-amber-400 outline-hidden"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-mono font-bold focus:border-[#D914C8] outline-hidden"
                     >
                       <option value="attendance">attendance (Yoklama Alma)</option>
                       <option value="smartboard">smartboard (Akıllı Tahta / Pano)</option>
@@ -974,7 +974,7 @@ export default function SuperadminOSSettingsPage() {
                       onChange={(e) =>
                         setEditingShortcut({ ...editingShortcut, badge: e.target.value })
                       }
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs focus:border-amber-400 outline-hidden"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs focus:border-[#D914C8] outline-hidden"
                     />
                   </div>
                 </div>
@@ -983,13 +983,13 @@ export default function SuperadminOSSettingsPage() {
                   <button
                     type="button"
                     onClick={() => setIsShortcutModalOpen(false)}
-                    className="h-10 px-4 rounded-xl bg-white/10 text-gray-300 text-xs font-bold"
+                    className="h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 text-xs font-bold"
                   >
                     İptal
                   </button>
                   <button
                     type="submit"
-                    className="h-10 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-black"
+                    className="h-10 px-6 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:from-[#c210b3] hover:to-[#7c3f92] text-white text-xs font-black shadow-lg shadow-[#D914C8]/20"
                   >
                     Kaydet
                   </button>
@@ -1010,11 +1010,11 @@ export default function SuperadminOSSettingsPage() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-2xl rounded-3xl bg-[#141926] border border-white/20 p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-2xl rounded-3xl bg-[#161224] border border-white/20 p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <Tv size={18} className="text-amber-400" />
+                  <Tv size={18} className="text-[#D914C8]" />
                   <h3 className="font-black text-base text-white">Hero Slider Slaytı Düzenle</h3>
                 </div>
                 <button
@@ -1029,7 +1029,7 @@ export default function SuperadminOSSettingsPage() {
               <form onSubmit={handleSaveSlide} className="space-y-4">
                 {/* 1. Web Banner Image (1920x800) */}
                 <div className="space-y-2 p-3 rounded-2xl bg-black/40 border border-white/10">
-                  <label className="text-xs font-bold text-amber-300 flex items-center justify-between">
+                  <label className="text-xs font-bold text-[#F0D8FA] flex items-center justify-between">
                     <span>1. Web Banner Görseli (Masaüstü Ekranlar)</span>
                     <span className="text-[10px] text-gray-400 font-mono">
                       Önerilen: 1920 x 800 px (16:9 / Geniş)
@@ -1074,7 +1074,7 @@ export default function SuperadminOSSettingsPage() {
                             setTargetForPreset('slide-web')
                             setIsPresetModalOpen(true)
                           }}
-                          className="h-7 px-2.5 rounded bg-amber-500/20 text-amber-300 text-[11px] font-bold"
+                          className="h-7 px-2.5 rounded bg-[#D914C8]/20 hover:bg-[#D914C8]/30 text-[#F0D8FA] text-[11px] font-bold"
                         >
                           Hazır Görsel
                         </button>
@@ -1152,7 +1152,7 @@ export default function SuperadminOSSettingsPage() {
                       onChange={(e) =>
                         setEditingSlide({ ...editingSlide, title: e.target.value })
                       }
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold focus:border-[#D914C8] outline-hidden"
                     />
                   </div>
 
@@ -1166,7 +1166,7 @@ export default function SuperadminOSSettingsPage() {
                       onChange={(e) =>
                         setEditingSlide({ ...editingSlide, subtitle: e.target.value })
                       }
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs focus:border-[#D914C8] outline-hidden"
                     />
                   </div>
                 </div>
@@ -1184,7 +1184,7 @@ export default function SuperadminOSSettingsPage() {
                         setEditingSlide({ ...editingSlide, actionText: e.target.value })
                       }
                       placeholder="Hemen Başlat, Tahtayı Aç vb."
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-bold focus:border-[#D914C8] outline-hidden"
                     />
                   </div>
 
@@ -1199,7 +1199,7 @@ export default function SuperadminOSSettingsPage() {
                         setEditingSlide({ ...editingSlide, actionLink: e.target.value })
                       }
                       placeholder="smartboard, attendance, schedule vb."
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-mono font-bold"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-mono font-bold focus:border-[#D914C8] outline-hidden"
                     />
                   </div>
                 </div>
@@ -1216,7 +1216,7 @@ export default function SuperadminOSSettingsPage() {
                         setEditingSlide({ ...editingSlide, badge: e.target.value })
                       }
                       placeholder="YENİ SEZON, CANLI vb."
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs focus:border-[#D914C8] outline-hidden"
                     />
                   </div>
 
@@ -1230,7 +1230,7 @@ export default function SuperadminOSSettingsPage() {
                       onChange={(e) =>
                         setEditingSlide({ ...editingSlide, order: parseInt(e.target.value) || 1 })
                       }
-                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-mono"
+                      className="w-full h-9 px-3 rounded-xl bg-black/40 border border-white/15 text-white text-xs font-mono focus:border-[#D914C8] outline-hidden"
                     />
                   </div>
 
@@ -1242,9 +1242,9 @@ export default function SuperadminOSSettingsPage() {
                       onChange={(e) =>
                         setEditingSlide({ ...editingSlide, isActive: e.target.checked })
                       }
-                      className="w-4 h-4 rounded text-amber-500"
+                      className="w-4 h-4 rounded accent-[#D914C8]"
                     />
-                    <label htmlFor="slideActive" className="text-xs font-bold text-gray-200">
+                    <label htmlFor="slideActive" className="text-xs font-bold text-gray-200 cursor-pointer">
                       Slayt Yayında Olsun
                     </label>
                   </div>
@@ -1254,13 +1254,13 @@ export default function SuperadminOSSettingsPage() {
                   <button
                     type="button"
                     onClick={() => setIsSlideModalOpen(false)}
-                    className="h-10 px-4 rounded-xl bg-white/10 text-gray-300 text-xs font-bold"
+                    className="h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 text-xs font-bold"
                   >
                     İptal
                   </button>
                   <button
                     type="submit"
-                    className="h-10 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-black"
+                    className="h-10 px-6 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:from-[#c210b3] hover:to-[#7c3f92] text-white text-xs font-black shadow-lg shadow-[#D914C8]/20"
                   >
                     Slaytı Kaydet
                   </button>
@@ -1281,11 +1281,11 @@ export default function SuperadminOSSettingsPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-3xl rounded-3xl bg-[#141926] border border-white/20 p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto"
+              className="w-full max-w-3xl rounded-3xl bg-[#161224] border border-white/20 p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <Palette size={18} className="text-amber-400" />
+                  <Palette size={18} className="text-[#D914C8]" />
                   <h3 className="font-black text-base text-white">
                     Önceden Seçilmiş Yüksek Çözünürlüklü Afiş Galerisi
                   </h3>
@@ -1318,7 +1318,7 @@ export default function SuperadminOSSettingsPage() {
                       setIsPresetModalOpen(false)
                       toast.success(`"${preset.name}" görseli seçildi!`)
                     }}
-                    className="group cursor-pointer rounded-2xl overflow-hidden bg-black/60 border border-white/10 hover:border-amber-400 transition-all p-1.5 space-y-1.5 hover:scale-102"
+                    className="group cursor-pointer rounded-2xl overflow-hidden bg-black/60 border border-white/10 hover:border-[#D914C8] transition-all p-1.5 space-y-1.5 hover:scale-102"
                   >
                     <div
                       className={`relative w-full rounded-xl overflow-hidden ${
@@ -1330,7 +1330,7 @@ export default function SuperadminOSSettingsPage() {
                         alt={preset.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
-                      <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-black bg-black/70 text-amber-300">
+                      <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-black bg-[#161224]/90 text-[#F0D8FA] border border-[#D914C8]/30">
                         {preset.type === 'landscape' ? '16:9 Yatay' : '2:3 Afiş'}
                       </span>
                     </div>

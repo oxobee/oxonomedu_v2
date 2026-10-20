@@ -20,9 +20,9 @@ export default function SuperadminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Hero Welcome */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-600/30 via-rose-600/20 to-purple-800/30 border border-white/10 p-6 sm:p-10 backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#D914C8]/25 via-purple-900/30 to-[#8D49A6]/25 border border-white/10 p-6 sm:p-10 backdrop-blur-xl">
         <div className="max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-black uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D914C8]/20 text-[#F0D8FA] border border-[#D914C8]/30 text-xs font-black uppercase tracking-wider">
             <Sparkles size={13} />
             <span>Süper Yönetici Paneli</span>
           </div>
@@ -30,7 +30,7 @@ export default function SuperadminDashboardPage() {
             Game Studio & Öğretmen OS Yönetimi
           </h1>
           <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
-            Bu alandan Game Studio eğitici oyun kataloğunu, kapak görsellerini, sınıf ve ders yetkilendirmelerini yönetebilir; Öğretmen OS masaüstü afişlerini ve Hero Slider bannerlarını düzenleyebilirsiniz.
+            Bu alandan Game Studio eğitici oyun kataloğunu ve Öğretmen Masaüstü İşletim Sistemi (<code className="text-[#F0D8FA] font-mono text-xs">/teacher/desktop-os</code>) için film afişi görsellerini, kategorileri ve hem Web hem Mobil Hero Slider bannerlarını yönetebilirsiniz.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -45,7 +45,7 @@ export default function SuperadminDashboardPage() {
 
             <Link
               href="/superadmin/os-settings"
-              className="h-11 px-6 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-xl shadow-amber-500/20"
+              className="h-11 px-6 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-black text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-xl shadow-[#D914C8]/25"
             >
               <Sliders size={16} />
               <span>OS Settings Menüsüne Git</span>
@@ -58,7 +58,7 @@ export default function SuperadminDashboardPage() {
               rel="noopener noreferrer"
               className="h-11 px-5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm flex items-center gap-2 transition-all border border-white/10"
             >
-              <Monitor size={16} className="text-emerald-400" />
+              <Monitor size={16} className="text-[#D914C8]" />
               <span>Canlı OS Ekranını Aç</span>
               <ExternalLink size={13} className="opacity-70" />
             </Link>

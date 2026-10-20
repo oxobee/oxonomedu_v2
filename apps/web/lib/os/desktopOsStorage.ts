@@ -5,7 +5,9 @@ export interface DesktopHeroSlide {
   id: string
   title: string
   subtitle: string
-  badge?: string // e.g. "Öne Çıkan", "Yeni", "Canlı Senkronizasyon"
+  badge?: string // e.g. "EDİTÖRÜN SEÇİMİ", "CANLI SENKRONİZASYON", "YENİ SEZON"
+  categoryTag?: string // e.g. "Matematik & Edebiyat", "Canlı Tahta", "Müfredat"
+  rating?: string // e.g. "⭐ 4.9"
   webImage: string // Recommended: 1920x800 px (16:9 or 2.4:1 cinematic)
   mobileImage: string // Recommended: 800x1200 px (2:3 or 3:4 portrait)
   actionText: string // e.g. "Hemen Başlat", "Tahtayı Aç", "Dersi Başlat"
@@ -25,9 +27,9 @@ export interface DesktopShortcutItem {
   category: ShortcutCategory
   posterImage: string // Film afişi görseli (Önerilen: 600x900 px 2:3)
   format?: 'portrait' | 'landscape' // portrait: 2:3 dikey afiş, landscape: 16:9 yatay kart
-  badge?: string // e.g. "Her Ders", "Canlı Pano", "MEB E-Kitap", "Yeni"
-  badgeColor?: string // Tailwind classes e.g. "bg-emerald-500 text-white"
-  tagInfo?: string // e.g. "HD · 2026", "Canlı", "Tam Ekran"
+  badge?: string // e.g. "HER DERS", "CANLI PANO", "MEB E-KİTAP", "YENİ"
+  badgeColor?: string // Tailwind classes e.g. "bg-[#D914C8] text-white"
+  tagInfo?: string // e.g. "HD · Canlı", "⭐ 4.9", "4K"
   windowId: string // Window identifier to open
   order: number
   isFeatured?: boolean
@@ -40,14 +42,14 @@ export interface DesktopOSConfig {
   updatedAt: string
 }
 
-// ── CATEGORY DEFINITIONS ──
+// ── CATEGORY DEFINITIONS (HARMONIZED WITH OXONOM EDU) ──
 export const SHORTCUT_CATEGORIES: { id: ShortcutCategory | 'all'; title: string; desc: string }[] = [
-  { id: 'all', title: 'Tümü', desc: 'Tüm öğretmen araçları ve menüler' },
-  { id: 'core', title: 'Hızlı İşlemler & Ders', desc: 'Günlük derste en sık kullanılan ana modüller' },
-  { id: 'students', title: 'Sınıf & Öğrenci Yönetimi', desc: 'Öğrenci listesi, gelişim takibi ve rehberlik' },
-  { id: 'materials', title: 'Eğitim & Dijital Materyaller', desc: 'MEB e-kitaplar, ders sunumları ve dosyalar' },
-  { id: 'assessments', title: 'Ölçme & Değerlendirme', desc: 'Sınavlar, quizler, yazılı takvimi ve ödevler' },
-  { id: 'planning', title: 'Planlama & Takvim', desc: 'Haftalık program, zümre ajandası ve resmi takvim' },
+  { id: 'all', title: '⭐ Tümü', desc: 'Tüm öğretmen araçları ve interaktif modüller' },
+  { id: 'core', title: 'Ders & Tahta', desc: 'Günlük derste en sık kullanılan ana modüller' },
+  { id: 'students', title: 'Sınıf & Öğrenci', desc: 'Öğrenci listesi, gelişim takibi ve rehberlik' },
+  { id: 'materials', title: 'Eğitim & Materyaller', desc: 'MEB e-kitaplar, ders sunumları ve PDF kütüphanesi' },
+  { id: 'assessments', title: 'Sınav & Ölçme', desc: 'İnteraktif sınavlar, quizler, yazılı takvimi ve ödevler' },
+  { id: 'planning', title: 'Planlama & Takvim', desc: 'Haftalık program, zümre ajandası ve MEB resmi takvim' },
 ]
 
 // ── CURATED POSTER PRESETS FOR SUPERADMIN ──
@@ -129,30 +131,34 @@ export const CURATED_POSTER_PRESETS = [
   },
 ]
 
-// ── DEFAULT INITIAL CONFIGURATION (STUNNING NETFLIX/STREAMING STYLE) ──
+// ── DEFAULT INITIAL CONFIGURATION (MATCHING OXONOM GAME STUDIO STYLE) ──
 export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
-  version: 2,
+  version: 3,
   updatedAt: new Date().toISOString(),
   heroSlides: [
     {
       id: 'slide-1',
-      title: 'Akıllı Tahta Canlı Senkronizasyon',
-      subtitle: 'Tek tıkla yoklama al, interaktif quiz ve ders materyallerini tahtaya yansıt.',
-      badge: 'CANLI ETKİLEŞİM',
+      title: 'Oxonom Akıllı Tahta: Canlı Sınıf Ekosistemi',
+      subtitle: 'Tek tıkla e-yoklama al, interaktif quiz hazırla ve ders materyallerini sınıfa anında yansıt.',
+      badge: 'EDİTÖRÜN SEÇİMİ',
+      categoryTag: 'Canlı Pano',
+      rating: '⭐ 4.9',
       webImage: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1920&auto=format&fit=crop&q=80',
       mobileImage: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
-      actionText: 'Tahtaya Gönder',
+      actionText: 'Hemen Başlat',
       actionLink: 'smartboard',
-      secondaryActionText: 'Yoklama Al',
+      secondaryActionText: 'Detayları İncele',
       secondaryActionLink: 'attendance',
       order: 1,
       isActive: true,
     },
     {
       id: 'slide-2',
-      title: '2026-2027 Eğitim Öğretim Yılı',
-      subtitle: 'Yeni nesil MEB müfredat kitapları, zümre planları ve dijital ders akışları hazır.',
+      title: '2026-2027 MEB Müfredat ve Zümre Planları',
+      subtitle: 'Yıllık ve haftalık kazanım haritaları, dijital ders kitapları ve akıllı içerikler devrede.',
       badge: 'YENİ SEZON',
+      categoryTag: 'Müfredat',
+      rating: '⭐ 4.95',
       webImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1920&auto=format&fit=crop&q=80',
       mobileImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
       actionText: 'Ders Programı',
@@ -164,9 +170,11 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
     },
     {
       id: 'slide-3',
-      title: 'İnteraktif Sınav & Soru Bankası',
-      subtitle: 'Boşluk doldurma, çoktan seçmeli ve eşleştirme sorularını anında sınıfa uygula.',
+      title: 'İnteraktif Sınav & Soru Bankası Modülü',
+      subtitle: 'Boşluk doldurma, çoktan seçmeli ve eşleştirme sorularını tahtaya canlı sınav olarak gönder.',
       badge: 'ÖLÇME & DEĞERLENDİRME',
+      categoryTag: 'Sınav Hazırla',
+      rating: '⭐ 4.88',
       webImage: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1920&auto=format&fit=crop&q=80',
       mobileImage: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&auto=format&fit=crop&q=80',
       actionText: 'Sınav Hazırla',
@@ -178,7 +186,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
     },
   ],
   shortcuts: [
-    // ── CORE (Hızlı İşlemler & Ders) ──
+    // ── CORE (Ders & Tahta) ──
     {
       id: 'attendance',
       title: 'Yoklama Al',
@@ -187,7 +195,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'HER DERS',
-      badgeColor: 'bg-emerald-500 text-white',
+      badgeColor: 'bg-[#D914C8] text-white',
       tagInfo: 'HD · Canlı',
       windowId: 'attendance',
       order: 1,
@@ -201,7 +209,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'CANLI PANO',
-      badgeColor: 'bg-cyan-500 text-white',
+      badgeColor: 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white',
       tagInfo: '4K · Senkron',
       windowId: 'smartboard',
       order: 2,
@@ -215,7 +223,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'BUGÜN 6 DERS',
-      badgeColor: 'bg-indigo-500 text-white',
+      badgeColor: 'bg-[#4B075F] text-[#FCF9FD]',
       tagInfo: 'Aktif',
       windowId: 'schedule',
       order: 3,
@@ -229,7 +237,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'ÖDEV VER',
-      badgeColor: 'bg-amber-500 text-white',
+      badgeColor: 'bg-[#D914C8] text-white',
       tagInfo: 'Online',
       windowId: 'assignments',
       order: 4,
@@ -245,7 +253,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'REHBERLİK',
-      badgeColor: 'bg-teal-500 text-white',
+      badgeColor: 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white',
       tagInfo: '32 Öğrenci',
       windowId: 'classes',
       order: 5,
@@ -258,7 +266,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'GELİŞİM',
-      badgeColor: 'bg-amber-600 text-white',
+      badgeColor: 'bg-[#8D49A6] text-white',
       tagInfo: 'Analitik',
       windowId: 'progress',
       order: 6,
@@ -271,7 +279,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'GRAFİK',
-      badgeColor: 'bg-violet-500 text-white',
+      badgeColor: 'bg-[#4B075F] text-[#FCF9FD]',
       tagInfo: 'Detaylı',
       windowId: 'reports',
       order: 7,
@@ -286,7 +294,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&auto=format&fit=crop&q=80',
       format: 'landscape',
       badge: 'MEB E-KİTAP',
-      badgeColor: 'bg-emerald-600 text-white',
+      badgeColor: 'bg-[#D914C8] text-white',
       tagInfo: 'Müfredat · 2026',
       windowId: 'courses',
       order: 8,
@@ -299,7 +307,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80',
       format: 'landscape',
       badge: 'KÜTÜPHANE',
-      badgeColor: 'bg-sky-500 text-white',
+      badgeColor: 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white',
       tagInfo: 'Depolama',
       windowId: 'files',
       order: 9,
@@ -314,7 +322,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'YAZILI TAKVİMİ',
-      badgeColor: 'bg-rose-500 text-white',
+      badgeColor: 'bg-[#D914C8] text-white',
       tagInfo: 'Pano Sınavı',
       windowId: 'assessments',
       order: 10,
@@ -329,7 +337,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'PLANLARIM',
-      badgeColor: 'bg-purple-500 text-white',
+      badgeColor: 'bg-[#8D49A6] text-white',
       tagInfo: 'Not Defteri',
       windowId: 'agenda',
       order: 11,
@@ -342,7 +350,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: '2026-2027',
-      badgeColor: 'bg-blue-600 text-white',
+      badgeColor: 'bg-[#4B075F] text-[#FCF9FD]',
       tagInfo: 'MEB Resmi',
       windowId: 'academicCalendar',
       order: 12,
@@ -355,7 +363,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
       posterImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
       format: 'portrait',
       badge: 'AYARLAR',
-      badgeColor: 'bg-gray-500 text-white',
+      badgeColor: 'bg-black/60 text-white',
       tagInfo: 'Sistem',
       windowId: 'settings',
       order: 13,
@@ -363,7 +371,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
   ],
 }
 
-const STORAGE_KEY = 'oxonom_desktop_os_config_v2'
+const STORAGE_KEY = 'oxonom_desktop_os_config_v3'
 
 // ── GET CONFIG ──
 export function getDesktopOSConfig(): DesktopOSConfig {
@@ -374,7 +382,6 @@ export function getDesktopOSConfig(): DesktopOSConfig {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return DEFAULT_DESKTOP_OS_CONFIG
     const parsed = JSON.parse(raw)
-    // Validate shape
     if (parsed && Array.isArray(parsed.shortcuts) && Array.isArray(parsed.heroSlides)) {
       return parsed
     }
@@ -393,7 +400,6 @@ export function saveDesktopOSConfig(config: DesktopOSConfig): void {
       updatedAt: new Date().toISOString(),
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-    // Trigger cross-component and cross-tab update event
     window.dispatchEvent(new CustomEvent('oxonom-os-config-updated', { detail: payload }))
   } catch (err) {
     console.error('Failed to save desktop OS config:', err)

@@ -20,37 +20,24 @@ import {
   X,
   Maximize2,
   Minimize2,
-  RotateCcw,
-  Sun,
-  Moon,
-  LogOut,
   Sparkles,
   Clock,
-  Pin,
-  Grid,
   ExternalLink,
   School,
-  FileQuestion,
   Upload,
-  ArrowRight,
-  ShieldCheck,
   Image as ImageIcon,
   Check,
-  Smartphone,
-  Eye,
-  Type,
-  Palette,
   ChevronLeft,
   ChevronRight,
   Play,
-  Plus,
   Sliders,
-  Layers,
+  Flame,
   ArrowLeft,
+  Star,
+  LogOut,
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
-import { signOut } from '@components/Contexts/AuthContext'
 import {
   DesktopOSConfig,
   DesktopHeroSlide,
@@ -61,7 +48,7 @@ import {
   DEFAULT_DESKTOP_OS_CONFIG,
 } from '@/lib/os/desktopOsStorage'
 
-// Lazy-loaded or directly embedded views
+// Embedded interactive views
 import TeacherAttendanceView from './views/TeacherAttendanceView'
 import TeacherScheduleView from './views/TeacherScheduleView'
 import TeacherClassesView from './views/TeacherClassesView'
@@ -106,7 +93,7 @@ export default function TeacherDesktopOSView() {
     }
   }, [])
 
-  // ── 2. REAL-TIME DIGITAL CLOCK ──
+  // ── 2. REAL-TIME DIGITAL CLOCK (Harmonized Pill from Screenshot) ──
   const [timeStr, setTimeStr] = useState<string>('')
   const [dateStr, setDateStr] = useState<string>('')
 
@@ -139,11 +126,9 @@ export default function TeacherDesktopOSView() {
   const [config, setConfig] = useState<DesktopOSConfig>(DEFAULT_DESKTOP_OS_CONFIG)
 
   useEffect(() => {
-    // Load config initially
     const loaded = getDesktopOSConfig()
     setConfig(loaded)
 
-    // Listen for custom events triggered by Superadmin
     const handleConfigUpdate = (e: any) => {
       if (e.detail) {
         setConfig(e.detail)
@@ -169,16 +154,16 @@ export default function TeacherDesktopOSView() {
     return valid.length > 0 ? valid : DEFAULT_DESKTOP_OS_CONFIG.heroSlides
   }, [config.heroSlides])
 
-  // Auto rotate hero slides every 6 seconds
+  // Auto rotate hero slides every 7 seconds
   useEffect(() => {
     if (isSliderHovered || activeSlides.length <= 1) return
     const interval = setInterval(() => {
       setActiveSlideIndex((prev) => (prev + 1) % activeSlides.length)
-    }, 6000)
+    }, 7000)
     return () => clearInterval(interval)
   }, [isSliderHovered, activeSlides.length])
 
-  // ── 5. CATEGORY FILTER STATE (Pill Navigation) ──
+  // ── 5. CATEGORY FILTER STATE ──
   const [selectedCategory, setSelectedCategory] = useState<ShortcutCategory | 'all'>('all')
 
   // Group shortcuts by category
@@ -191,18 +176,17 @@ export default function TeacherDesktopOSView() {
       return [
         {
           id: selectedCategory,
-          title: catInfo?.title || 'Filtrelenen Menüler',
+          title: catInfo?.title || 'Filtrelenen Modüller',
           desc: catInfo?.desc || '',
           items: filtered,
         },
       ]
     }
 
-    // Default view: Multiple categorized Netflix-style rows
     return [
       {
         id: 'core' as ShortcutCategory,
-        title: 'Öne Çıkan Hızlı İşlemler & Ders',
+        title: 'Ders & Tahta İşlemleri',
         desc: 'Günlük derste en sık kullanılan ana öğretmen modülleri',
         items: list.filter((i) => i.category === 'core'),
       },
@@ -237,7 +221,6 @@ export default function TeacherDesktopOSView() {
   const [activeWindowAppId, setActiveWindowAppId] = useState<string | null>(null)
   const [isWindowMaximized, setIsWindowMaximized] = useState<boolean>(false)
 
-  // Find active app item for window
   const activeApp = useMemo(() => {
     if (!activeWindowAppId) return null
     return (
@@ -326,7 +309,6 @@ export default function TeacherDesktopOSView() {
 
   // ── 9. EXIT OS HANDLER ──
   const handleExitOS = () => {
-    // If opened via target="_blank", attempt to close, or redirect to /teacher/dashboard
     if (typeof window !== 'undefined') {
       if (window.opener) {
         window.close()
@@ -336,75 +318,94 @@ export default function TeacherDesktopOSView() {
     }
   }
 
-  // Horizontal scroll refs
+  // Row scroll helper
   const rowRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const scrollRow = (secId: string, direction: 'left' | 'right') => {
     const el = rowRefs.current[secId]
     if (el) {
-      const scrollAmount = direction === 'left' ? -420 : 420
+      const scrollAmount = direction === 'left' ? -480 : 480
       el.scrollBy({ left: scrollAmount, behavior: 'smooth' })
     }
   }
 
+  // Top 3 Trend Items for the Trend Row (matching screenshot)
+  const trendItems = useMemo(() => {
+    const all = config.shortcuts || DEFAULT_DESKTOP_OS_CONFIG.shortcuts
+    return all.slice(0, 3)
+  }, [config.shortcuts])
+
   return (
-    <div className="min-h-screen w-full bg-[#0B0D13] text-white font-jakarta select-none relative flex flex-col justify-between overflow-x-hidden">
+    <div className="min-h-screen w-full bg-[#0E0917] text-white font-jakarta select-none relative flex flex-col justify-between overflow-x-hidden">
       <Toaster position="top-right" />
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 1. TOP CINEMATIC OS HEADER BAR                                */}
+      {/* 1. TOP HEADER BAR (Harmonized with Oxonom EDU)                */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 h-14 w-full px-4 sm:px-6 bg-[#0B0D13]/85 backdrop-blur-xl border-b border-white/10 flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-40 h-16 w-full px-4 sm:px-8 bg-[#0E0917]/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between gap-4">
         {/* Left: Brand, Teacher & Class Selector */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-3">
           <Link
             href="/teacher/dashboard"
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all cursor-pointer group"
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer group border border-white/10"
             title="Öğretmen Standart Paneline Dön"
           >
-            <span className="w-6 h-6 rounded-lg bg-gradient-to-tr from-amber-500 to-rose-600 text-white flex items-center justify-center font-black text-xs shadow-md">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] text-white flex items-center justify-center font-black text-xs shadow-md shadow-[#D914C8]/25">
               OX
-            </span>
-            <span className="font-black text-xs sm:text-sm tracking-tight text-white group-hover:text-amber-400 transition-colors">
-              Öğretmen OS
-            </span>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-sm tracking-tight text-white group-hover:text-[#F0D8FA] transition-colors">
+                  Oxonom <span className="text-[#D914C8]">OS</span>
+                </span>
+                <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-[#D914C8]/20 text-[#F0D8FA] border border-[#D914C8]/40 uppercase tracking-wider">
+                  Pro
+                </span>
+              </div>
+              <p className="text-[10px] text-gray-400 font-medium hidden sm:block">
+                Öğretmen Masaüstü İşletim Sistemi
+              </p>
+            </div>
           </Link>
 
           {/* Teacher Identity Badge */}
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-gray-200">
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#1C152B] border border-white/10 text-xs font-bold text-gray-200">
             <span>👩‍🏫</span>
-            <span className="truncate max-w-[130px]">{teacherName}</span>
+            <span className="truncate max-w-[140px] text-white">{teacherName}</span>
+            <span className="text-[10px] text-[#C58ADB]">• {teacherBranch}</span>
           </div>
 
           {/* Active Class Selector Button */}
           <button
             type="button"
             onClick={() => setIsClassPickerOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-300 font-extrabold text-xs cursor-pointer transition-all active:scale-95"
-            title="Sınıf Değiştir"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-[#D914C8]/15 hover:bg-[#D914C8]/25 border border-[#D914C8]/40 text-[#F0D8FA] font-extrabold text-xs cursor-pointer transition-all active:scale-95 shadow-xs"
+            title="Sınıfı Değiştir"
           >
-            <School size={13} className="text-amber-400" />
+            <School size={13} className="text-[#D914C8]" />
             <span>{activeClassCode} Şubesi</span>
             <span className="text-[10px] opacity-75">▼</span>
           </button>
         </div>
 
-        {/* Center: Live Digital Clock */}
-        <div className="hidden lg:flex items-center gap-2">
-          <div className="font-mono text-xs sm:text-sm font-black tracking-wider bg-black/40 border border-white/10 px-3.5 py-1 rounded-xl backdrop-blur-md text-amber-300">
-            <span>{timeStr || '10:20:00'}</span>
-            <span className="text-[11px] font-sans font-medium text-gray-300 ml-2">
-              • {dateStr}
-            </span>
+        {/* Center: Live Date & Clock Pill (Exact match to screenshot style) */}
+        <div className="hidden lg:flex items-center">
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1C152B] border border-[#8D49A6]/30 text-xs font-bold shadow-xs">
+            <span className="text-gray-300 font-medium">{dateStr}</span>
+            <span className="text-[#C58ADB] font-black">•</span>
+            <div className="flex items-center gap-1.5 text-[#F0D8FA] font-mono font-black">
+              <span className="w-2 h-2 rounded-full bg-[#D914C8] animate-ping" />
+              <span>{timeStr || '10:20:00'}</span>
+            </div>
           </div>
         </div>
 
         {/* Right: Quick Actions, Tahtaya Gönder, Superadmin & EXIT OS */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           {/* Quick Smartboard Launch Button */}
           <button
             type="button"
             onClick={() => setIsSmartboardModalOpen(true)}
-            className="h-8 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/20 cursor-pointer transition-all active:scale-95"
+            className="h-9 px-3.5 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-[#D914C8]/25 cursor-pointer transition-all active:scale-95"
             title="Akıllı Tahtaya Dosya veya Sınav Gönder"
           >
             <Tv size={14} />
@@ -416,81 +417,100 @@ export default function TeacherDesktopOSView() {
             href="/superadmin/os-settings"
             target="_blank"
             rel="noopener noreferrer"
-            className="h-8 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 hover:text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-colors border border-white/10"
+            className="h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition-colors border border-white/10"
             title="Superadmin OS Ayarları (Afiş & Slider Yönetimi)"
           >
-            <Sliders size={13} />
+            <Sliders size={13} className="text-[#D914C8]" />
             <span className="hidden md:inline">Afiş Ayarları</span>
           </Link>
 
-          {/* CRITICAL EXIT BUTTON: Prominent button to exit OS screen */}
+          {/* EXIT OS BUTTON: Clearly styled without being cramped */}
           <button
             type="button"
             onClick={handleExitOS}
-            className="h-8 px-3 rounded-xl bg-rose-600/80 hover:bg-rose-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-rose-950/30 transition-all cursor-pointer active:scale-95 border border-rose-500/40"
+            className="h-9 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-extrabold text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
             title="OS Ekranından Çık ve Panoya Dön"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={13} />
             <span>OS'ten Çık</span>
           </button>
         </div>
       </header>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 2. MAIN STREAMING FEED (HERO SLIDER + CATEGORY ROWS)         */}
+      {/* 2. MAIN FEED CONTAINER (Spacious, Proportional, Harmonized)   */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <main className="flex-1 w-full pb-28 space-y-8">
-        {/* ── A) CINEMATIC HERO SLIDER (Web & Mobile, Image 1 & 2 Style) ── */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-10 pb-28">
+        {/* ── A) TOP SUBTITLE BAR & SEARCH ── */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] flex items-center justify-center text-white text-xs font-black">
+                ✨
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                Öğretmen Çalışma Alanı & Modüller
+              </h1>
+              <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#D914C8]/20 text-[#F0D8FA] border border-[#D914C8]/40 uppercase tracking-wider">
+                CANLI MASAÜSTÜ
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-gray-400">
+              {activeClassCode} sınıfı müfredatına özel hazırlanmış interaktif ders araçları ve film afişi kısayolları.
+            </p>
+          </div>
+        </div>
+
+        {/* ── B) HERO BANNER (Exact Style from /student/gamestudio Screenshot) ── */}
         <section
           onMouseEnter={() => setIsSliderHovered(true)}
           onMouseLeave={() => setIsSliderHovered(false)}
-          className="relative w-full overflow-hidden bg-black"
+          className="relative w-full rounded-3xl lg:rounded-[32px] overflow-hidden bg-[#161224] border border-[#312547]/60 shadow-2xl transition-all"
         >
           {activeSlides[activeSlideIndex] && (
-            <div className="relative w-full min-h-[360px] sm:min-h-[440px] md:min-h-[500px] lg:min-h-[560px] flex items-end">
-              {/* Web Banner Background (Hidden on small mobile) */}
-              <div className="hidden sm:block absolute inset-0">
+            <div className="relative w-full min-h-[380px] sm:min-h-[440px] lg:min-h-[480px] flex items-center">
+              {/* Background Cover Photo with Vignette */}
+              <div className="absolute inset-0">
                 <img
                   src={activeSlides[activeSlideIndex].webImage}
                   alt={activeSlides[activeSlideIndex].title}
-                  className="w-full h-full object-cover object-center transform scale-100 transition-all duration-1000 ease-out"
+                  className="w-full h-full object-cover object-right transform scale-100 transition-all duration-1000 ease-out"
                 />
               </div>
 
-              {/* Mobile Banner Background (Displayed on mobile) */}
-              <div className="sm:hidden absolute inset-0">
-                <img
-                  src={
-                    activeSlides[activeSlideIndex].mobileImage ||
-                    activeSlides[activeSlideIndex].webImage
-                  }
-                  alt={activeSlides[activeSlideIndex].title}
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
+              {/* Smooth Vignette Gradient Overlays (Blending to #161224 on left & bottom) */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#161224] via-[#161224]/85 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#161224] via-transparent to-transparent sm:hidden" />
 
-              {/* Dramatic Cinematic Vignette Gradient Overlays */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B0D13] via-[#0B0D13]/60 to-transparent" />
-              <div className="hidden sm:block absolute inset-0 bg-gradient-to-r from-[#0B0D13] via-[#0B0D13]/70 to-transparent" />
+              {/* Slide Content Box with Proportional Padding */}
+              <div className="relative z-10 w-full max-w-2xl p-6 sm:p-10 lg:p-12 space-y-4">
+                {/* Badges Row (Matching Screenshot: EDİTÖRÜN SEÇİMİ + Category + Rating) */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-3.5 py-1 rounded-full bg-gradient-to-r from-[#D914C8] to-[#9B1BBF] text-white text-xs font-black uppercase tracking-wider shadow-md shadow-[#D914C8]/30">
+                    {activeSlides[activeSlideIndex].badge || 'EDİTÖRÜN SEÇİMİ'}
+                  </span>
 
-              {/* Slide Content Box */}
-              <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 pb-8 sm:pb-12 space-y-3 sm:space-y-4">
-                {activeSlides[activeSlideIndex].badge && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 text-black text-xs font-black uppercase tracking-wider shadow-lg">
-                    <Sparkles size={13} />
-                    <span>{activeSlides[activeSlideIndex].badge}</span>
-                  </div>
-                )}
+                  <span className="px-3 py-1 rounded-full bg-black/60 text-white text-xs font-bold border border-white/15 backdrop-blur-xs">
+                    {activeSlides[activeSlideIndex].categoryTag || 'Ders & Tahta'}
+                  </span>
 
-                <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight max-w-3xl drop-shadow-xl leading-tight">
+                  <span className="px-2.5 py-1 rounded-full bg-black/60 text-amber-300 text-xs font-extrabold border border-white/15 backdrop-blur-xs flex items-center gap-1">
+                    <Star size={12} fill="currentColor" />
+                    <span>{activeSlides[activeSlideIndex].rating || '4.9'}</span>
+                  </span>
+                </div>
+
+                {/* Big Crisp Title */}
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight drop-shadow-md">
                   {activeSlides[activeSlideIndex].title}
-                </h1>
+                </h2>
 
-                <p className="text-xs sm:text-base text-gray-200 max-w-xl line-clamp-2 sm:line-clamp-3 leading-relaxed drop-shadow-md">
+                {/* Description with Clean Whitespace */}
+                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed max-w-xl drop-shadow-xs line-clamp-3">
                   {activeSlides[activeSlideIndex].subtitle}
                 </p>
 
-                {/* Action Buttons */}
+                {/* Action Buttons (Matching Screenshot Magenta Pill Button) */}
                 <div className="pt-2 flex flex-wrap items-center gap-3">
                   <button
                     type="button"
@@ -499,7 +519,7 @@ export default function TeacherDesktopOSView() {
                       if (link) openAppWindow(link)
                       else setIsSmartboardModalOpen(true)
                     }}
-                    className="h-11 sm:h-12 px-6 sm:px-8 rounded-2xl bg-[#F5A623] hover:bg-[#F5A623]/90 text-black font-black text-xs sm:text-sm flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#F5A623]/30 cursor-pointer"
+                    className="h-12 px-7 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-black text-sm flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#D914C8]/30 cursor-pointer"
                   >
                     <Play size={16} fill="currentColor" />
                     <span>{activeSlides[activeSlideIndex].actionText || 'Hemen Başlat'}</span>
@@ -512,9 +532,8 @@ export default function TeacherDesktopOSView() {
                         const secLink = activeSlides[activeSlideIndex].secondaryActionLink
                         if (secLink) openAppWindow(secLink)
                       }}
-                      className="h-11 sm:h-12 px-5 sm:px-6 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm flex items-center gap-2 backdrop-blur-md border border-white/20 transition-all cursor-pointer"
+                      className="h-12 px-6 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-sm flex items-center gap-2 backdrop-blur-md border border-white/20 transition-all cursor-pointer"
                     >
-                      <Plus size={16} />
                       <span>{activeSlides[activeSlideIndex].secondaryActionText}</span>
                     </button>
                   )}
@@ -522,42 +541,24 @@ export default function TeacherDesktopOSView() {
               </div>
 
               {/* Slider Dots Indicator */}
-              <div className="absolute bottom-4 right-4 sm:right-8 z-20 flex items-center gap-1.5">
+              <div className="absolute bottom-6 right-6 sm:right-10 z-20 flex items-center gap-1.5">
                 {activeSlides.map((_, dotIdx) => (
                   <button
                     key={dotIdx}
                     type="button"
                     onClick={() => setActiveSlideIndex(dotIdx)}
-                    className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                      activeSlideIndex === dotIdx ? 'w-6 bg-[#F5A623]' : 'w-2 bg-white/40'
+                    className={`h-2 rounded-full transition-all cursor-pointer ${
+                      activeSlideIndex === dotIdx ? 'w-6 bg-[#D914C8]' : 'w-2 bg-white/30 hover:bg-white/50'
                     }`}
                   />
                 ))}
               </div>
-
-              {/* Prev / Next Chevrons on Hero */}
-              <button
-                type="button"
-                onClick={() =>
-                  setActiveSlideIndex((prev) => (prev === 0 ? activeSlides.length - 1 : prev - 1))
-                }
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center opacity-0 hover:opacity-100 sm:group-hover:opacity-100 transition-opacity"
-              >
-                <ChevronLeft size={22} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveSlideIndex((prev) => (prev + 1) % activeSlides.length)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center opacity-0 hover:opacity-100 sm:group-hover:opacity-100 transition-opacity"
-              >
-                <ChevronRight size={22} />
-              </button>
             </div>
           )}
         </section>
 
-        {/* ── B) CATEGORY FILTER PILLS (Matching Image 1: Movies, Sports...) ── */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-8">
+        {/* ── C) CATEGORY FILTER PILLS (Matching Screenshot) ── */}
+        <section className="space-y-2">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
             {SHORTCUT_CATEGORIES.map((cat) => {
               const active = selectedCategory === cat.id
@@ -566,10 +567,10 @@ export default function TeacherDesktopOSView() {
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 sm:px-5 py-2 rounded-full text-xs font-black transition-all cursor-pointer shrink-0 ${
+                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 ${
                     active
-                      ? 'bg-[#F5A623] text-black shadow-lg shadow-[#F5A623]/25 scale-102'
-                      : 'bg-white/10 hover:bg-white/20 text-gray-200 border border-white/10'
+                      ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white font-black shadow-lg shadow-[#D914C8]/30 scale-102'
+                      : 'bg-[#1C152B] hover:bg-[#281F3D] text-gray-200 border border-white/10'
                   }`}
                 >
                   {cat.title}
@@ -579,11 +580,64 @@ export default function TeacherDesktopOSView() {
           </div>
         </section>
 
-        {/* ── C) CATEGORIZED STREAMING ROWS (Netflix / Peacock Style) ── */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 space-y-10">
+        {/* ── D) "TREND OLANLAR" SECTION (From the Screenshot!) ── */}
+        {selectedCategory === 'all' && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Flame size={18} className="text-[#D914C8]" />
+                <h2 className="text-base sm:text-lg font-black text-white tracking-tight">
+                  Trend Olan Modüller
+                </h2>
+              </div>
+              <span className="text-xs text-gray-400">Bu hafta en çok kullanılanlar</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {trendItems.map((item, idx) => (
+                <div
+                  key={item.id}
+                  onClick={() => openAppWindow(item.windowId)}
+                  className="p-3.5 sm:p-4 rounded-2xl bg-[#171224] border border-white/10 hover:border-[#D914C8]/60 transition-all duration-300 flex items-center justify-between gap-4 cursor-pointer group shadow-sm hover:shadow-xl hover:shadow-[#D914C8]/10"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="text-sm font-black text-gray-400 font-mono">#{idx + 1}</span>
+                    <img
+                      src={item.posterImage}
+                      alt={item.title}
+                      className="w-13 h-13 rounded-xl object-cover shrink-0 border border-white/10 group-hover:scale-105 transition-transform"
+                    />
+                    <div className="min-w-0">
+                      <h3 className="text-xs sm:text-sm font-black text-white truncate group-hover:text-[#F0D8FA] transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-[11px] text-gray-400 truncate mt-0.5">
+                        {item.subtitle} • <span className="text-[#D914C8] font-bold">{item.tagInfo || 'Aktif'}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      openAppWindow(item.windowId)
+                    }}
+                    className="h-8 px-4 rounded-full bg-white/10 group-hover:bg-gradient-to-r group-hover:from-[#D914C8] group-hover:to-[#8D49A6] text-white font-extrabold text-xs transition-all shrink-0 border border-white/15"
+                  >
+                    Aç
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── E) CATEGORIZED MOVIE POSTER ROWS (Spacious, Proportional, No Cramping) ── */}
+        <div className="space-y-12">
           {categorizedSections.map((section) => (
-            <section key={section.id} className="space-y-3 relative group/row">
-              {/* Row Header with Category Title & Scroll Chevrons */}
+            <section key={section.id} className="space-y-4 relative group/row">
+              {/* Row Header */}
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-base sm:text-xl font-black text-white tracking-tight flex items-center gap-2">
@@ -593,22 +647,22 @@ export default function TeacherDesktopOSView() {
                 </div>
 
                 {/* Left / Right Scroll Chevrons */}
-                <div className="hidden sm:flex items-center gap-1.5">
+                <div className="hidden sm:flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => scrollRow(section.id, 'left')}
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-[#1C152B] hover:bg-[#D914C8] text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
                     title="Önceki"
                   >
-                    <ChevronLeft size={18} />
+                    <ChevronLeft size={16} />
                   </button>
                   <button
                     type="button"
                     onClick={() => scrollRow(section.id, 'right')}
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-[#1C152B] hover:bg-[#D914C8] text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
                     title="Sonraki"
                   >
-                    <ChevronRight size={18} />
+                    <ChevronRight size={16} />
                   </button>
                 </div>
               </div>
@@ -618,7 +672,7 @@ export default function TeacherDesktopOSView() {
                 ref={(el) => {
                   rowRefs.current[section.id] = el
                 }}
-                className="flex items-stretch gap-4 overflow-x-auto pb-4 pt-1 scroll-smooth scrollbar-none"
+                className="flex items-stretch gap-5 overflow-x-auto pb-4 pt-1 scroll-smooth scrollbar-none"
               >
                 {section.items.map((item) => {
                   const isLandscape = item.format === 'landscape'
@@ -627,56 +681,52 @@ export default function TeacherDesktopOSView() {
                     <div
                       key={item.id}
                       onClick={() => openAppWindow(item.windowId)}
-                      className={`group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-[#141926] border border-white/10 hover:border-amber-400/80 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/20 cursor-pointer shrink-0 select-none flex flex-col justify-end ${
+                      className={`group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-[#171224] border border-white/10 hover:border-[#D914C8]/80 transition-all duration-300 hover:scale-104 hover:shadow-2xl hover:shadow-[#D914C8]/20 cursor-pointer shrink-0 select-none flex flex-col justify-end ${
                         isLandscape
-                          ? 'w-[280px] sm:w-[360px] aspect-[16/9]'
-                          : 'w-[160px] sm:w-[210px] md:w-[230px] aspect-[2/3]'
+                          ? 'w-[290px] sm:w-[360px] aspect-[16/9]'
+                          : 'w-[170px] sm:w-[220px] md:w-[240px] aspect-[2/3]'
                       }`}
                     >
                       {/* Poster Cover Image */}
                       <img
                         src={item.posterImage}
                         alt={item.title}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
                       />
 
-                      {/* Dark Vignette Overlay for Crisp Readability */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                      {/* Smooth Dark Vignette Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0E0917] via-[#0E0917]/50 to-transparent" />
 
-                      {/* Top Badges (e.g. HER DERS, CANLI, MEB, 4K) */}
-                      <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-10">
-                        {item.badge ? (
-                          <span
-                            className={`text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded-md shadow-lg ${
-                              item.badgeColor || 'bg-emerald-500 text-white'
-                            }`}
-                          >
-                            {item.badge}
+                      {/* Top Badges (Left Category + Right Highlight, matching screenshot) */}
+                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10 gap-1.5">
+                        {item.tagInfo ? (
+                          <span className="text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 rounded-full bg-black/70 text-gray-200 border border-white/20 backdrop-blur-xs">
+                            {item.tagInfo}
                           </span>
                         ) : (
                           <span />
                         )}
 
-                        {item.tagInfo && (
-                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-black/75 text-gray-200 border border-white/20 backdrop-blur-xs">
-                            {item.tagInfo}
+                        {item.badge && (
+                          <span className="text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white shadow-md">
+                            {item.badge}
                           </span>
                         )}
                       </div>
 
-                      {/* Play / Open Hover Overlay Icon */}
+                      {/* Play / Open Center Overlay Icon */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-                        <div className="w-12 h-12 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-xl shadow-black/60 transform scale-75 group-hover:scale-100 transition-transform">
+                        <div className="w-13 h-13 rounded-full bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] text-white flex items-center justify-center shadow-xl shadow-black/60 transform scale-75 group-hover:scale-100 transition-transform">
                           <Play size={20} fill="currentColor" className="ml-0.5" />
                         </div>
                       </div>
 
-                      {/* Bottom Info: Title & Subtitle */}
-                      <div className="relative z-10 p-3 sm:p-4 space-y-0.5">
-                        <h3 className="font-black text-sm sm:text-base text-white tracking-tight leading-snug drop-shadow-md group-hover:text-amber-300 transition-colors">
+                      {/* Bottom Info Area with Proportional Padding */}
+                      <div className="relative z-10 p-4 sm:p-5 space-y-1">
+                        <h3 className="font-black text-sm sm:text-base text-white tracking-tight leading-snug drop-shadow-md group-hover:text-[#F0D8FA] transition-colors">
                           {item.title}
                         </h3>
-                        <p className="text-[10px] sm:text-xs text-gray-300 line-clamp-1 drop-shadow-xs font-medium">
+                        <p className="text-[11px] sm:text-xs text-gray-300 line-clamp-1 drop-shadow-xs font-medium">
                           {item.subtitle}
                         </p>
                       </div>
@@ -694,24 +744,24 @@ export default function TeacherDesktopOSView() {
       {/* ───────────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {activeWindowAppId && activeApp && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-8 bg-black/80 backdrop-blur-md">
             <motion.div
               initial={{ opacity: 0, scale: 0.94, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 20 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className={`bg-white dark:bg-[#15101E] text-gray-900 dark:text-white rounded-[28px] sm:rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden transition-all duration-300 ${
+              className={`bg-white dark:bg-[#161024] text-gray-900 dark:text-white rounded-[28px] sm:rounded-3xl shadow-2xl border border-gray-200 dark:border-[#312547] flex flex-col overflow-hidden transition-all duration-300 ${
                 isWindowMaximized
                   ? 'w-full h-full rounded-none'
                   : 'w-full max-w-5xl h-[88vh] max-h-[900px]'
               }`}
             >
               {/* Window Header Titlebar (Mac / OS Style) */}
-              <div className="h-14 px-4 sm:px-6 bg-gray-100 dark:bg-[#1C1628] border-b border-gray-200 dark:border-gray-800 flex items-center justify-between select-none shrink-0">
+              <div className="h-14 px-5 sm:px-7 bg-gray-100 dark:bg-[#1E1630] border-b border-gray-200 dark:border-white/10 flex items-center justify-between select-none shrink-0">
                 {/* Left: App Icon & Title */}
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500 text-black flex items-center justify-center shadow-xs shrink-0 font-black">
-                    <Tv size={18} />
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] text-white flex items-center justify-center shadow-xs shrink-0 font-black">
+                    <Tv size={16} />
                   </div>
                   <div>
                     <h2 className="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white m-0 leading-tight">
@@ -723,33 +773,33 @@ export default function TeacherDesktopOSView() {
                   </div>
                 </div>
 
-                {/* Right: Window Controls & Giant Close Button */}
+                {/* Right: Window Controls & Close Button */}
                 <div className="flex items-center gap-2">
                   {/* Maximize Toggle */}
                   <button
                     type="button"
                     onClick={() => setIsWindowMaximized((v) => !v)}
-                    className="w-9 h-9 rounded-xl bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition-colors cursor-pointer hidden sm:flex"
+                    className="w-8 h-8 rounded-xl bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 flex items-center justify-center transition-colors cursor-pointer hidden sm:flex"
                     title={isWindowMaximized ? 'Küçült' : 'Tam Ekran'}
                   >
-                    {isWindowMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                    {isWindowMaximized ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
                   </button>
 
-                  {/* Giant Red Close Button */}
+                  {/* Red Close Button */}
                   <button
                     type="button"
                     onClick={closeAppWindow}
-                    className="h-9 px-3.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+                    className="h-8 px-3.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
                     title="Pencereyi Kapat ve Masaüstüne Dön"
                   >
-                    <X size={15} strokeWidth={2.5} />
+                    <X size={14} strokeWidth={2.5} />
                     <span>Kapat</span>
                   </button>
                 </div>
               </div>
 
               {/* Window Body: Actual Interactive View */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#FCF9FD] dark:bg-[#17101C]">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#FCF9FD] dark:bg-[#120B1D]">
                 {activeWindowAppId === 'attendance' && <TeacherAttendanceView />}
                 {activeWindowAppId === 'schedule' && <TeacherScheduleView />}
                 {activeWindowAppId === 'classes' && <TeacherClassesView />}
@@ -764,7 +814,7 @@ export default function TeacherDesktopOSView() {
                 {activeWindowAppId === 'academicCalendar' && <TeacherScheduleView />}
                 {activeWindowAppId === 'smartboard' && (
                   <div className="max-w-2xl mx-auto space-y-6 py-6 text-center">
-                    <div className="w-16 h-16 rounded-3xl bg-cyan-500/20 text-cyan-400 mx-auto flex items-center justify-center border border-cyan-500/30">
+                    <div className="w-16 h-16 rounded-3xl bg-[#D914C8]/20 text-[#D914C8] mx-auto flex items-center justify-center border border-[#D914C8]/30">
                       <Tv size={32} />
                     </div>
                     <div className="space-y-2">
@@ -782,7 +832,7 @@ export default function TeacherDesktopOSView() {
                           closeAppWindow()
                           setIsSmartboardModalOpen(true)
                         }}
-                        className="h-11 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20"
+                        className="h-11 px-6 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-extrabold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-[#D914C8]/20"
                       >
                         <Upload size={16} />
                         <span>Tahtaya Dosya / Sınav Gönder</span>
@@ -790,7 +840,7 @@ export default function TeacherDesktopOSView() {
                       <Link
                         href={`/pano/${boardId}/tahta`}
                         target="_blank"
-                        className="h-11 px-6 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-xs flex items-center gap-2"
+                        className="h-11 px-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs flex items-center gap-2 border border-white/15"
                       >
                         <ExternalLink size={15} />
                         <span>Tahtayı Yeni Sekmede Başlat</span>
@@ -809,16 +859,16 @@ export default function TeacherDesktopOSView() {
       {/* ───────────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {isClassPickerOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-[#141926] text-white p-6 rounded-3xl max-w-md w-full shadow-2xl border border-white/10"
+              className="bg-[#171224] text-white p-6 rounded-3xl max-w-md w-full shadow-2xl border border-white/10"
             >
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <h3 className="text-base font-black flex items-center gap-2">
-                  <School size={18} className="text-amber-400" />
+                  <School size={18} className="text-[#D914C8]" />
                   <span>Aktif Çalışma Sınıfı Seçin</span>
                 </h3>
                 <button
@@ -840,14 +890,14 @@ export default function TeacherDesktopOSView() {
                       onClick={() => handleSelectClass(cls)}
                       className={`w-full p-3 rounded-2xl border flex items-center justify-between transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-extrabold shadow-sm'
+                          ? 'bg-[#D914C8]/20 border-[#D914C8] text-[#F0D8FA] font-extrabold shadow-sm'
                           : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black ${
-                            isSelected ? 'bg-amber-500 text-black' : 'bg-white/10 text-gray-300'
+                            isSelected ? 'bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] text-white' : 'bg-white/10 text-gray-300'
                           }`}
                         >
                           {cls.code}
@@ -857,7 +907,7 @@ export default function TeacherDesktopOSView() {
                           <div className="text-[10px] text-gray-400">{cls.grade_level}. Sınıf Seviyesi</div>
                         </div>
                       </div>
-                      {isSelected && <Check size={16} className="text-amber-400" />}
+                      {isSelected && <Check size={16} className="text-[#D914C8]" />}
                     </button>
                   )
                 })}
@@ -872,16 +922,16 @@ export default function TeacherDesktopOSView() {
       {/* ───────────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {isSmartboardModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
             <motion.div
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
-              className="w-full max-w-lg bg-[#141926] text-white rounded-3xl p-5 sm:p-6 border border-white/15 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-lg bg-[#171224] text-white rounded-3xl p-5 sm:p-6 border border-white/15 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2">
-                  <Tv size={20} className="text-emerald-400" />
+                  <Tv size={20} className="text-[#D914C8]" />
                   <h3 className="text-base font-black m-0">Akıllı Tahtaya Gönder</h3>
                 </div>
                 <button
@@ -899,7 +949,6 @@ export default function TeacherDesktopOSView() {
               {/* Step 1: Main Menu Options */}
               {smartboardStep === 'main' && (
                 <div className="space-y-4">
-                  {/* Board selector */}
                   <div>
                     <label className="text-xs font-bold text-gray-300 block mb-1.5">
                       Hedef Akıllı Tahta No
@@ -916,18 +965,17 @@ export default function TeacherDesktopOSView() {
                     </select>
                   </div>
 
-                  {/* 2 Options: Sınav Gönder or Dosya Gönder */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <button
                       type="button"
                       onClick={() => setSmartboardStep('file')}
-                      className="p-5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 border-2 border-cyan-500/40 text-left transition-all cursor-pointer group space-y-2"
+                      className="p-5 rounded-2xl bg-white/5 hover:bg-white/10 border-2 border-[#D914C8]/40 text-left transition-all cursor-pointer group space-y-2"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-cyan-500 text-black flex items-center justify-center shadow-md">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] text-white flex items-center justify-center shadow-md">
                         <Upload size={20} />
                       </div>
                       <div>
-                        <div className="text-sm font-black text-cyan-300 group-hover:underline">
+                        <div className="text-sm font-black text-white group-hover:text-[#F0D8FA]">
                           Tahtaya Görsel / Dosya
                         </div>
                         <div className="text-[11px] text-gray-400 mt-1">
@@ -939,13 +987,13 @@ export default function TeacherDesktopOSView() {
                     <button
                       type="button"
                       onClick={() => setSmartboardStep('exam')}
-                      className="p-5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border-2 border-rose-500/40 text-left transition-all cursor-pointer group space-y-2"
+                      className="p-5 rounded-2xl bg-white/5 hover:bg-white/10 border-2 border-purple-500/40 text-left transition-all cursor-pointer group space-y-2"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-md">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md">
                         <Award size={20} />
                       </div>
                       <div>
-                        <div className="text-sm font-black text-rose-300 group-hover:underline">
+                        <div className="text-sm font-black text-white group-hover:text-purple-300">
                           Pano Sınavı Gönder
                         </div>
                         <div className="text-[11px] text-gray-400 mt-1">
@@ -964,8 +1012,7 @@ export default function TeacherDesktopOSView() {
                     Hedef Tahta: <strong>{boardId}</strong>
                   </div>
 
-                  {/* Drop zone */}
-                  <div className="border-2 border-dashed border-white/20 rounded-2xl p-6 text-center hover:border-cyan-400 transition-colors">
+                  <div className="border-2 border-dashed border-white/20 rounded-2xl p-6 text-center hover:border-[#D914C8] transition-colors">
                     {filePreview ? (
                       <div className="space-y-3">
                         <img
@@ -986,7 +1033,7 @@ export default function TeacherDesktopOSView() {
                       </div>
                     ) : (
                       <label className="cursor-pointer block space-y-2">
-                        <Upload size={32} className="mx-auto text-cyan-400" />
+                        <Upload size={32} className="mx-auto text-[#D914C8]" />
                         <div className="text-xs font-bold text-gray-200">
                           Görseli buraya sürükleyin veya dosya seçin
                         </div>
@@ -1012,7 +1059,7 @@ export default function TeacherDesktopOSView() {
                     <button
                       type="button"
                       onClick={handleSendFileToBoard}
-                      className="h-10 px-6 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-black shadow-lg"
+                      className="h-10 px-6 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white text-xs font-black shadow-lg shadow-[#D914C8]/25"
                     >
                       Tahtaya Gönder
                     </button>
@@ -1037,7 +1084,7 @@ export default function TeacherDesktopOSView() {
                   </div>
 
                   <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2">
-                    <div className="text-xs font-black text-rose-300">Örnek Soru 1:</div>
+                    <div className="text-xs font-black text-[#F0D8FA]">Örnek Soru 1:</div>
                     <div className="text-xs text-gray-200">{questions[0].text}</div>
                     <div className="grid grid-cols-2 gap-1.5 pt-1">
                       {questions[0].options.map((opt, oIdx) => (
@@ -1045,7 +1092,7 @@ export default function TeacherDesktopOSView() {
                           key={oIdx}
                           className={`p-2 rounded-lg text-[11px] font-bold ${
                             oIdx === questions[0].correctAnswer
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                              ? 'bg-[#D914C8]/20 text-[#F0D8FA] border border-[#D914C8]/40'
                               : 'bg-white/5 text-gray-400'
                           }`}
                         >
@@ -1066,7 +1113,7 @@ export default function TeacherDesktopOSView() {
                     <button
                       type="button"
                       onClick={handleSendExamToBoard}
-                      className="h-10 px-6 rounded-xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-black shadow-lg"
+                      className="h-10 px-6 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white text-xs font-black shadow-lg"
                     >
                       Panoya Sınavı Gönder
                     </button>
@@ -1079,21 +1126,20 @@ export default function TeacherDesktopOSView() {
       </AnimatePresence>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 6. BOTTOM DOCK (iPadOS / Image 1 Glassy Dock)                 */}
+      {/* 6. BOTTOM DOCK (Proportional Pill Floating Bar)              */}
       {/* ───────────────────────────────────────────────────────────── */}
       <footer className="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 w-[94%] max-w-lg pointer-events-none">
-        <div className="pointer-events-auto bg-[#141926]/90 backdrop-blur-2xl border border-white/15 rounded-full px-4 py-2 flex items-center justify-between gap-2 shadow-2xl">
+        <div className="pointer-events-auto bg-[#171224]/90 backdrop-blur-2xl border border-white/15 rounded-full px-4 py-2 flex items-center justify-between gap-2 shadow-2xl">
           {/* All Apps / Categories */}
           <button
             type="button"
             onClick={() => setSelectedCategory('all')}
             className={`h-10 px-4 rounded-full font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
               selectedCategory === 'all'
-                ? 'bg-[#F5A623] text-black shadow-md'
+                ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white shadow-md shadow-[#D914C8]/20'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
           >
-            <Grid size={15} />
             <span>Tümü</span>
           </button>
 
@@ -1115,7 +1161,7 @@ export default function TeacherDesktopOSView() {
                   type="button"
                   onClick={() => openAppWindow(d.id)}
                   className={`relative w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95 ${
-                    isOpen ? 'bg-[#F5A623] text-black font-black shadow-md' : 'bg-white/10 hover:bg-white/20 text-white'
+                    isOpen ? 'bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] text-white font-black shadow-md' : 'bg-white/10 hover:bg-white/20 text-white'
                   }`}
                   title={d.title}
                 >
