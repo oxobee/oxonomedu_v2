@@ -19,6 +19,7 @@ import {
   CalendarDays,
   ShieldAlert,
   Radio,
+  Sliders,
 } from 'lucide-react'
 
 export type FeatureStatus = 'active' | 'passive' | 'restricted'
@@ -80,6 +81,17 @@ export const PRINCIPAL_MENU_CONFIG: PrincipalMenuItem[] = [
     sortOrder: 2,
     category: 'management',
     description: 'Okul kurumsal bilgileri, müdür kimliği, 2FA güvenlik ayarları ve sistem tercihleri.',
+  },
+  {
+    id: 'superadmin-os',
+    label: 'OS Ayarları (Afiş & Slider)',
+    path: '/superadmin/os-settings',
+    icon: Sliders,
+    status: 'active',
+    sortOrder: 2.5,
+    category: 'management',
+    badge: 'Yeni',
+    description: 'Öğretmen Masaüstü OS film afişleri, hero slider ve pencere içerik yönetimi.',
   },
 
   // ── 2. ÖĞRETMENLER & KADRO ──
