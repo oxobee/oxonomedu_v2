@@ -357,7 +357,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     teacher_name: 'Özlem ZOR',
   },
 
-  // ── 9-A ŞUBESİ (TÜRK DİLİ & EDEBİYAT) ──
+  // ── 1/A ŞUBESİ (TÜRK DİLİ & EDEBİYAT) ──
   {
     id: 'hw-reading-1',
     assignment_uuid: 'asg_dede_korkut_okuma',
@@ -366,7 +366,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     subject: 'Türkçe',
     category: 'READING',
     tool_type: 'READING',
-    className: '9-A Şubesi',
+    className: '1/A Şubesi',
     assignedDate: '06.10.2026',
     dueDate: '11.10.2026',
     assignedTimestamp: Date.now() - 6 * 86400000,
@@ -387,7 +387,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     category: 'WHITEBOARD',
     tool_type: 'WHITEBOARD',
     board_uuid: 'board_edebi_sanatlar_9a',
-    className: '9-A Şubesi',
+    className: '1/A Şubesi',
     assignedDate: '08.10.2026',
     dueDate: '13.10.2026',
     assignedTimestamp: Date.now() - 4 * 86400000,
@@ -407,7 +407,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     subject: 'Türkçe',
     category: 'QUIZ',
     tool_type: 'QUIZ',
-    className: '9-A Şubesi',
+    className: '1/A Şubesi',
     assignedDate: '09.10.2026',
     dueDate: '14.10.2026',
     assignedTimestamp: Date.now() - 3 * 86400000,
@@ -428,7 +428,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     subject: 'Türkçe',
     category: 'WORKSHEET',
     tool_type: 'WORKSHEET',
-    className: '9-A Şubesi',
+    className: '1/A Şubesi',
     assignedDate: '05.10.2026',
     dueDate: '12.10.2026',
     assignedTimestamp: Date.now() - 7 * 86400000,
@@ -448,7 +448,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     subject: 'Matematik',
     category: 'MATH',
     tool_type: 'WORKSHEET',
-    className: '9-A Şubesi',
+    className: '1/A Şubesi',
     assignedDate: '07.10.2026',
     dueDate: '13.10.2026',
     assignedTimestamp: Date.now() - 5 * 86400000,
@@ -1292,7 +1292,7 @@ export default function MHomeworkClient({
         quizQuestions: editToolType === 'QUIZ' ? editQuizQuestions : undefined,
         quizQuestionCount: editToolType === 'QUIZ' ? editQuizQuestions.length : undefined,
       },
-      classes: [{ id: 101, name: editingHomework.className || '9-A Şubesi', code: '9/A' }],
+      classes: [{ id: 101, name: editingHomework.className || '1/A Şubesi', code: (editingHomework.className || '1/A').replace(' Şubesi', '') }],
       due_date: editDueDate || '2026-10-25T23:59:00',
       max_score: Number(editMaxScore) || 100,
       published: true,
@@ -1363,7 +1363,7 @@ export default function MHomeworkClient({
         targetStudentName: permScope === 'INDIVIDUAL' ? targetStudent.name : null,
         permissions: permissionsObj,
       },
-      classes: [{ id: 101, name: permissionHomework.className || '9-A Şubesi', code: '9/A' }],
+      classes: [{ id: 101, name: permissionHomework.className || '1/A Şubesi', code: (permissionHomework.className || '1/A').replace(' Şubesi', '') }],
       due_date: new Date(permissionHomework.dueTimestamp || Date.now() + 7 * 86400000).toISOString(),
       max_score: permissionHomework.max_score || 100,
       published: permScope !== 'DRAFT',
@@ -2740,7 +2740,7 @@ export default function MHomeworkClient({
                             : 'bg-white dark:bg-[#182033] border-gray-200 dark:border-gray-700 text-gray-600'
                         }`}
                       >
-                        <div>👥 Tüm Sınıf (9-A)</div>
+                        <div>👥 Tüm Sınıf ({editingHomework?.className || '1/A'})</div>
                         <div className="text-[10px] font-normal text-gray-400 mt-0.5">Sınıftaki herkese açık</div>
                       </button>
 
@@ -2861,7 +2861,7 @@ export default function MHomeworkClient({
                         <div className="flex items-center gap-2.5">
                           <Users size={18} className="text-emerald-600 shrink-0" />
                           <div>
-                            <div className="text-xs font-bold">Tüm Sınıf Yetkili (9-A Şubesi)</div>
+                            <div className="text-xs font-bold">Tüm Sınıf Yetkili ({permissionHomework?.className || '1/A Şubesi'})</div>
                             <div className="text-[11px] text-gray-500 dark:text-gray-400">Şubedeki tüm öğrenciler ödevi görüntüler ve teslim eder</div>
                           </div>
                         </div>

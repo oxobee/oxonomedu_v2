@@ -90,7 +90,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   const handleFillDemoStudent = () => {
     setIdentifier('ogrenci@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Öğrenci (Erçil UĞURLU — 9-A) bilgileri dolduruldu!', {
+    toast.success('Öğrenci (Erçil UĞURLU — 1/A) bilgileri dolduruldu!', {
       icon: '🎒',
       duration: 2500,
     })
@@ -192,10 +192,10 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
             tcNo: registeredTeacher?.tcNo || '10000000204',
             phone: registeredTeacher?.phone || '+90 532 999 3300',
             branch: registeredTeacher?.branch || 'Türk Dili ve Edebiyatı · Rehberlik',
-            bio: 'Türk Dili ve Edebiyatı Öğretmeni · 9-A Sınıf Rehber Öğretmeni · Oxonom Okulları',
+            bio: 'Türk Dili ve Edebiyatı Öğretmeni · 1/A Sınıf Rehber Öğretmeni · Oxonom Okulları',
             extraDetails: [
               'Edebiyat Zümre Başkanı',
-              '9-A Rehber Öğretmeni',
+              '1/A Rehber Öğretmeni',
               'Akıllı Tahta & Kütüphane Koordinatörü',
             ],
             isFirstLogin: false,
@@ -314,7 +314,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               type="button"
               onClick={handleFillDemoStudent}
               className="text-[10px] font-bold text-sky-300 bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0"
-              title="Öğrenci (Erçil UĞURLU — 9-A) ile giriş yap"
+              title="Öğrenci (Erçil UĞURLU — 1/A) ile giriş yap"
             >
               <BookOpen size={11} className="text-sky-400" />
               <span>Öğrenci</span>
@@ -411,9 +411,9 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
                 {identifier.includes('mudur') || identifier.includes('idare')
                   ? 'Okul Müdürü (Dr. Uğur UĞURLU) yönetim hesabı'
                   : identifier.includes('ogrenci')
-                  ? 'Öğrenci (Erçil UĞURLU — 9-A) hesabı'
+                  ? 'Öğrenci (Erçil UĞURLU — 1/A) hesabı'
                   : identifier.includes('ogretmen')
-                  ? 'Öğretmen (Ebru TEKNECİ — 9-A Rehberi) hesabı'
+                  ? 'Öğretmen (Ebru TEKNECİ — 1/A Rehberi) hesabı'
                   : 'Oxonom Okulları hesabınıza erişmek için bilgilerinizi girin.'}
               </p>
             </div>

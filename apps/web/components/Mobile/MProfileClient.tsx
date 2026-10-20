@@ -54,6 +54,7 @@ import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { signOut, useAuth } from '@components/Contexts/AuthContext'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
+import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
 export interface MProfileClientProps {
   hideDock?: boolean
@@ -105,16 +106,16 @@ export default function MProfileClient({
   const [mebbisNo, setMebbisNo] = useState('MEB-34019284')
   const [address, setAddress] = useState('Beşiktaş / İstanbul')
   const [emergencyContact, setEmergencyContact] = useState('Eşi · +90 533 280 0399')
-  const [bio, setBio] = useState('Türk Dili ve Edebiyatı Öğretmeni · 9-A Sınıf Rehber Öğretmeni · Oxonom Okulları')
+  const [bio, setBio] = useState(() => `Türk Dili ve Edebiyatı Öğretmeni · ${ALL_CLASSROOMS[0]?.code || '1/A'} Sınıf Rehber Öğretmeni · Oxonom Okulları`)
 
   // ── 2. GÖREV & DERSLER STATE ──
   const [branchTitle, setBranchTitle] = useState('Türk Dili ve Edebiyatı (Edebiyat Öğretmeni)')
   const [titleLevel, setTitleLevel] = useState('Uzman Öğretmen (9 Yıl)')
   const [employmentType, setEmploymentType] = useState('Kadrolu · MEB Kadrosu')
-  const [homeroomClass, setHomeroomClass] = useState('9/A Şubesi')
+  const [homeroomClass, setHomeroomClass] = useState(() => `${ALL_CLASSROOMS[0]?.code || '1/A'} Şubesi`)
   const [weeklyLessonHours, setWeeklyLessonHours] = useState('30 Saat / Hafta')
   const [lessonDistribution, setLessonDistribution] = useState('15 Saat Maaş Karşılığı + 15 Saat Ek Ders')
-  const [teachingClasses, setTeachingClasses] = useState('9/A')
+  const [teachingClasses, setTeachingClasses] = useState(() => ALL_CLASSROOMS[0]?.code || '1/A')
   const [dutyDayLocation, setDutyDayLocation] = useState('Salı · 1. Kat Koridor & Bahçe Kapısı')
   const [clubAdvisory, setClubAdvisory] = useState('Satranç ve Akıl Oyunları Kulübü')
   const [workingHours, setWorkingHours] = useState('08:30 – 15:30 (Pazartesi – Cuma)')

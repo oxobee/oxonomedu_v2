@@ -53,7 +53,7 @@ import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileAdminDock from './MobileAdminDock'
 import MobileAdminMoreSheet from './MobileAdminMoreSheet'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
-import { getOrgTeachers, SCHOOL_ORGS } from '@services/demo/schoolDirectory'
+import { getOrgTeachers, SCHOOL_ORGS, ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
 export interface MAdminTeachersClientProps {
   orgSlug?: string
@@ -345,7 +345,7 @@ export default function MAdminTeachersClient({
   const [newPassword, setNewPassword] = useState('Ugur2803*')
   const [newPhone, setNewPhone] = useState('')
   const [newBranch, setNewBranch] = useState('Matematik Öğretmeni')
-  const [newMentorClass, setNewMentorClass] = useState('9-A')
+  const [newMentorClass, setNewMentorClass] = useState(() => ALL_CLASSROOMS[0]?.code || '1/A')
   const [newEmploymentType, setNewEmploymentType] = useState<'Kadrolu' | 'Sözleşmeli'>('Kadrolu')
   const [newWeeklyHours, setNewWeeklyHours] = useState<number>(30)
   const [newTitle, setNewTitle] = useState('Öğretmen')
@@ -392,7 +392,7 @@ export default function MAdminTeachersClient({
     setNewPassword('Ugur2803*')
     setNewPhone('')
     setNewBranch('Matematik Öğretmeni')
-    setNewMentorClass('9-A')
+    setNewMentorClass(ALL_CLASSROOMS[0]?.code || '1/A')
     setNewEmploymentType('Kadrolu')
     setNewWeeklyHours(30)
     setNewTitle('Öğretmen')
@@ -442,8 +442,8 @@ export default function MAdminTeachersClient({
       password: assignedPassword,
       phone: newPhone.trim() || '+90 532 000 0000',
       branch: newBranch.trim() || 'Öğretmen',
-      mentorClass: newMentorClass || '9-A',
-      assignedClasses: [newMentorClass || '9-A'],
+      mentorClass: newMentorClass || ALL_CLASSROOMS[0]?.code || '1/A',
+      assignedClasses: [newMentorClass || ALL_CLASSROOMS[0]?.code || '1/A'],
       employmentType: newEmploymentType,
       weeklyHours: newWeeklyHours || 30,
       title: newTitle || 'Öğretmen',
@@ -1390,7 +1390,7 @@ export default function MAdminTeachersClient({
                       <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
                         <span className="text-gray-500 font-bold">Sınıf Rehberliği</span>
                         <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
-                          {formatClassCode(selectedTeacherForDetail.mentorClass || '9/A')} Şubesi
+                          {formatClassCode(selectedTeacherForDetail.mentorClass || ALL_CLASSROOMS[0]?.code || '1/A')} Şubesi
                         </span>
                       </div>
 
@@ -1415,7 +1415,7 @@ export default function MAdminTeachersClient({
                         <span className="font-extrabold text-gray-900 dark:text-white">
                           {(
                             selectedTeacherForDetail.assignedClasses || [
-                              selectedTeacherForDetail.mentorClass || '9/A',
+                              selectedTeacherForDetail.mentorClass || ALL_CLASSROOMS[0]?.code || '1/A',
                             ]
                           ).map(formatClassCode).join(', ')}
                         </span>
@@ -2917,7 +2917,11 @@ export default function MAdminTeachersClient({
                           onChange={(e) => setNewMentorClass(e.target.value)}
                           className="w-full h-11 px-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white outline-hidden focus:border-emerald-500"
                         >
-                          <option value="9-A">9-A Şubesi</option>
+                          {ALL_CLASSROOMS.map((cls) => (
+                            <option key={cls.id} value={cls.code}>
+                              {cls.code} Şubesi
+                            </option>
+                          ))}
                         </select>
                       </div>
                       <div>

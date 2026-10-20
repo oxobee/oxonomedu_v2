@@ -264,7 +264,7 @@ export default function TeacherFilesView() {
   // ── Smartboard Dispatch Actions ──
   const handleOpenSmartboardModal = (file: TeacherFileItem) => {
     setSmartboardModalFile(file)
-    // Pre-populate with last dispatched or 9-A board
+    // Pre-populate with last dispatched or active board
     if (typeof window !== 'undefined') {
       const last = localStorage.getItem('oxonom_last_dispatched_board_id')
       if (last) setTargetBoardId(last)
@@ -715,7 +715,7 @@ export default function TeacherFilesView() {
                   <input
                     type="text"
                     required
-                    placeholder="Örn: 9-A_Edebiyat_Siir_Tahlili_Ders_Notu.pdf"
+                    placeholder={`Örn: ${uploadClassShare.replace('/', '-')}_Edebiyat_Siir_Tahlili_Ders_Notu.pdf`}
                     value={customFileName}
                     onChange={(e) => setCustomFileName(e.target.value)}
                     className="w-full h-10 px-3 text-xs bg-gray-50 dark:bg-[#161D2E] border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
@@ -1318,14 +1318,14 @@ export default function TeacherFilesView() {
                               <span>Puan: 100</span>
                             </div>
                             <p className="text-[11px] text-emerald-800">
-                              Bu çalışma formu, 1. Dönem 1. Ortak Edebiyat Sınavı öncesi 9-A ve 9-B şubelerinde kavrama amaçlı dağıtılmak üzere onaylanmıştır.
+                              {`Bu çalışma formu, 1. Dönem 1. Ortak Edebiyat Sınavı öncesi ${uploadClassShare} ve ${ALL_CLASSROOMS[1]?.code || '1/B'} şubelerinde kavrama amaçlı dağıtılmak üzere onaylanmıştır.`}
                             </p>
                           </div>
 
                           <div className="pt-12 flex justify-between items-end font-sans">
                             <div>
                               <div className="text-[10px] text-gray-400">Tarih: 14 Ekim 2026</div>
-                              <div className="text-[10px] text-gray-400">Şube: 9-A / 9-B</div>
+                              <div className="text-[10px] text-gray-400">Şube: {uploadClassShare} / {ALL_CLASSROOMS[1]?.code || '1/B'}</div>
                             </div>
                             <div className="text-center">
                               <div className="font-bold text-xs">Ebru TEKNECİ</div>
@@ -1373,7 +1373,7 @@ export default function TeacherFilesView() {
                           <div className="flex items-center gap-2">
                             <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
                             <span className="font-mono text-xs font-bold text-teal-400">
-                              VESTEL 75&quot; AKILLI TAHTA ÇIKTISI • 9/A DERSİ
+                              VESTEL 75&quot; AKILLI TAHTA ÇIKTISI • {uploadClassShare} DERSİ
                             </span>
                           </div>
                           <span className="font-mono text-[11px] text-gray-400">

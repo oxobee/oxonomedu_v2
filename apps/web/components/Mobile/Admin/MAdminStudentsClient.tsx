@@ -782,7 +782,7 @@ export default function MAdminStudentsClient({
             onClick={() => {
               if (filteredStudents.length > 0) {
                 setStudentToTransfer(filteredStudents[0])
-                setTargetTransferClass(orgClassrooms[0]?.code || '9-A')
+                setTargetTransferClass(orgClassrooms[0]?.code || '1/A')
                 setIsTransferModalOpen(true)
               } else {
                 toast.error('Nakil yapılacak öğrenci bulunamadı.')

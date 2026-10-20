@@ -47,7 +47,7 @@ const DEFAULT_STEPS: Omit<OnboardingStep, 'completed'>[] = [
   {
     id: 'create_classes',
     title: 'Dönem ve Sınıfları Oluşturun',
-    description: 'Okulunuzun sınıflarını (Örn: 9-A, 10-B) ve şubelerini sisteme tanımlayın.',
+    description: 'Okulunuzun sınıflarını (Örn: 1/A, 1/B) ve şubelerini sisteme tanımlayın.',
     action: 'Sınıf Ekle',
     href: '/dash/classrooms',
     completePath: '/dash/classrooms',

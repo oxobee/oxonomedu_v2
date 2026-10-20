@@ -1,8 +1,8 @@
 import React from 'react'
-import DashV2Client from '@components/DashboardV2/DashV2Client'
+import TeacherDesktopOSView from '@components/Teacher/TeacherDesktopOSView'
 
 export const dynamic = 'force-dynamic'
 
 export default function TeacherDashboardPage() {
-  return <DashV2Client hideDock hideHeader />
+  return <TeacherDesktopOSView />
 }

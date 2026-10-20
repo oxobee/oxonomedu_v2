@@ -283,8 +283,8 @@ export default function TeacherClassesView() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {availableClasses.map((cls) => {
-              const isLead = cls.code === '9-A'
+            {availableClasses.map((cls, idx) => {
+              const isLead = idx === 0 || cls.code === availableClasses[0]?.code
 
               return (
                 <div

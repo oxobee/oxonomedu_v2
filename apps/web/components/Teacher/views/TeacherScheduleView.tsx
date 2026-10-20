@@ -36,6 +36,7 @@ import { CANONICAL_9A_SCHEDULE_30 } from '@/lib/student/studentData'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import MockBadge from '@components/Common/MockBadge'
 import LiveClassRadar from '@components/Common/LiveClassRadar'
+import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 
 interface LessonPlanModalData {
   title: string
@@ -153,6 +154,30 @@ export default function TeacherScheduleView() {
 
   // Current Logged-in Teacher Name
   const teacherName = 'Ebru TEKNECİ'
+
+  // Dynamic Active / Lead Class
+  const [activeClassCode, setActiveClassCode] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('oxonom_selected_class')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (parsed.code) return parsed.code
+        }
+      } catch (_) {}
+    }
+    return ALL_CLASSROOMS[0]?.code || '1/A'
+  })
+
+  useEffect(() => {
+    const handleClassChanged = (e: any) => {
+      if (e?.detail?.code) {
+        setActiveClassCode(e.detail.code)
+      }
+    }
+    window.addEventListener('oxonom_class_changed', handleClassChanged)
+    return () => window.removeEventListener('oxonom_class_changed', handleClassChanged)
+  }, [])
 
   // Load schedule entries synced from Principal/Admin
   const allEntries = useMemo<ScheduleEntry[]>(() => {
@@ -376,11 +401,11 @@ export default function TeacherScheduleView() {
           <div>
             <span className="text-[11px] font-bold text-gray-400 uppercase">Rehberlik & Sınıf</span>
             <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">
-              9/A Şubesi
+              {activeClassCode.includes('Şube') ? activeClassCode : `${activeClassCode} Şubesi`}
             </div>
           </div>
           <span className="px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-extrabold">
-            Derslik 9-A
+            Derslik {activeClassCode}
           </span>
         </div>
 
@@ -397,7 +422,7 @@ export default function TeacherScheduleView() {
       </div>
 
       {/* Canlı Ders Takip Radarı & Akış */}
-      <LiveClassRadar role="teacher" initialClassCode="9-A" />
+      <LiveClassRadar role="teacher" initialClassCode={activeClassCode} />
 
       {/* Week Day Selector Tabs (for Daily mode) */}
       {viewMode === 'daily' && (
@@ -458,8 +483,8 @@ export default function TeacherScheduleView() {
             dayEntries.map((lesson) => {
               const isCurrent = lesson.period === 1 && selectedDayKey === 'mon'
               const timeStr = PERIOD_TIMES[lesson.period] || '08:30 - 09:10'
-              const goal = CURRICULUM_GOALS[lesson.subject] || 'MEB 9. Sınıf müfredat kazanımı ve metin uygulaması.'
-              const classroomDisplay = lesson.classCode === '9-A' ? '9/A Şubesi' : `${lesson.classCode} Şubesi`
+              const goal = CURRICULUM_GOALS[lesson.subject] || `${lesson.classCode || activeClassCode} müfredat kazanımı ve ders uygulaması.`
+              const classroomDisplay = lesson.classCode?.includes('Şube') ? lesson.classCode : `${lesson.classCode || activeClassCode} Şubesi`
 
               return (
                 <motion.article
@@ -636,11 +661,11 @@ export default function TeacherScheduleView() {
                                 setSelectedLessonModal({
                                   title: match.subject,
                                   subject: match.subject,
-                                  classroom: match.classCode === '9-A' ? '9/A Şubesi' : `${match.classCode} Şubesi`,
+                                  classroom: match.classCode?.includes('Şube') ? match.classCode : `${match.classCode || activeClassCode} Şubesi`,
                                   teacher: (match as any).activeTeacherName || match.teacherName,
                                   time: period.time,
                                   room: match.roomName,
-                                  curriculumGoal: CURRICULUM_GOALS[match.subject] || 'MEB 9. Sınıf müfredat kazanımı ve metin uygulaması.',
+                                  curriculumGoal: CURRICULUM_GOALS[match.subject] || `${match.classCode || activeClassCode} müfredat kazanımı ve ders uygulaması.`,
                                   materials: [
                                     'Ders Kitabı ve Etkileşimli Föy',
                                     'Akıllı Tahta Sunumu',

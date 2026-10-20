@@ -128,6 +128,16 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
   // Filter out hidden modules (e.g. AI Assistant for now)
   const visibleMenuItems = TEACHER_MENU_CONFIG.filter((item) => !item.hidden)
 
+  const isDashboard = pathname === '/teacher/dashboard' || pathname === '/teacher'
+
+  if (isDashboard) {
+    return (
+      <div className={`${theme} min-h-screen w-full font-jakarta bg-[#0D1117]`}>
+        {children}
+      </div>
+    )
+  }
+
   return (
     <div className={`${theme} min-h-screen bg-[#FCF9FD] dark:bg-[#17101C] text-[#241329] dark:text-[#FCF9FD] font-jakarta flex flex-col lg:flex-row transition-colors duration-200`}>
       {/* ── DESKTOP SIDEBAR (lg+) ── */}
@@ -257,6 +267,15 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
             <HeaderLiveClock theme="oxonom" variant="desktop" />
 
             <Link
+              href="/teacher/dashboard"
+              className="h-9 px-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 transition-colors border border-emerald-500/30"
+              title="Öğretmen Masaüstü İşletim Sistemine Dön"
+            >
+              <LayoutGrid size={13} />
+              <span>Masaüstü OS</span>
+            </Link>
+
+            <Link
               href="/teacher/schedule"
               className="h-9 px-3 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#241329] dark:text-[#FCF9FD] font-bold text-xs flex items-center gap-1.5 transition-colors border border-[#E8DFEB] dark:border-[#49364F]"
             >
@@ -294,7 +313,16 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <Link
+              href="/teacher/dashboard"
+              className="h-8 px-2 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] flex items-center gap-1 border border-emerald-500/30"
+              title="Masaüstü OS"
+            >
+              <LayoutGrid size={12} />
+              <span>Masaüstü</span>
+            </Link>
+
             <HeaderLiveClock theme="oxonom" variant="mobile" />
 
             <button

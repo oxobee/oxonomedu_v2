@@ -438,7 +438,7 @@ export default function TeacherReportsView() {
                 Ortalama Derse Katılım
               </div>
               <div className="text-3xl font-black text-gray-900 dark:text-white mt-1">
-                {selectedClassId === '9-A' ? '22.8' : '20.2'} / {activeClass.studentCount}
+                {activeClass.studentCount > 0 ? (activeClass.studentCount * 0.95).toFixed(1) : '24.0'} / {activeClass.studentCount}
               </div>
               <div className="text-[11px] text-gray-400 mt-1">Ders başına ortalama mevcut</div>
             </div>
@@ -448,7 +448,7 @@ export default function TeacherReportsView() {
                 Raporlu / İzinli Gün Sayısı
               </div>
               <div className="text-3xl font-black text-gray-900 dark:text-white mt-1">
-                {selectedClassId === '9-A' ? '8' : '12'} Gün
+                {Math.max(1, Math.round((activeClass.studentCount || 24) * 0.3))} Gün
               </div>
               <div className="text-[11px] text-gray-400 mt-1">Bu ay toplam izinli kayıt</div>
             </div>

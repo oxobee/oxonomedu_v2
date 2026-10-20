@@ -62,7 +62,7 @@ import MobileAdminDock from './MobileAdminDock'
 import MobileAdminMoreSheet from './MobileAdminMoreSheet'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import LiveClassRadar from '@components/Common/LiveClassRadar'
-import { SCHOOL_ORGS, getOrgTeachers } from '@services/demo/schoolDirectory'
+import { SCHOOL_ORGS, getOrgTeachers, ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 import {
   INITIAL_SCHEDULE_ENTRIES,
   ScheduleEntry,
@@ -1629,7 +1629,7 @@ export default function MAdminClient({
         {/* Okul Geneli Canlı Ders ve Zaman Radarı */}
         <LiveClassRadar
           role="principal"
-          initialClassCode="9-A"
+          initialClassCode={ALL_CLASSROOMS[0]?.code || '1/A'}
           showClassSelector={true}
           titleOverride="Okul Geneli Canlı Ders ve Zaman Radarı"
         />
@@ -2244,7 +2244,7 @@ export default function MAdminClient({
                   </div>
                   <div className="p-2.5 rounded-xl bg-[#FCF9FD] dark:bg-[#17101C]/60 flex items-center justify-between">
                     <span>Fiziksel Derslik & Atölye Kotası</span>
-                    <span className="font-extrabold text-[#16805D]">Derslik 9-A Uygun</span>
+                    <span className="font-extrabold text-[#16805D]">Derslik {ALL_CLASSROOMS[0]?.code || '1/A'} Uygun</span>
                   </div>
                   <div className="p-2.5 rounded-xl bg-[#FCF9FD] dark:bg-[#17101C]/60 flex items-center justify-between">
                     <span>Haftalık Zorunlu Saat Kotası</span>

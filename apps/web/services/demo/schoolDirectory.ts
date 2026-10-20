@@ -63,7 +63,7 @@ export const TEACHER_RAW_LIST: { grade: string; orgId: number; teachers: { class
     grade: '9. Sınıf',
     orgId: 30,
     teachers: [
-      { className: '9/A', name: 'Ebru TEKNECİ' },
+      { className: '1/A', name: 'Ebru TEKNECİ' },
     ],
   },
 ]
@@ -462,8 +462,8 @@ export function getOrgTeachers(orgId?: number) {
       weeklyHours: 30,
       employmentType: 'Kadrolu' as const,
       isClassMentor: true,
-      mentorClass: '9/A',
-      assignedClasses: ['9/A'],
+      mentorClass: '1/A',
+      assignedClasses: ['1/A'],
       status: 'active' as const,
       documents: [
         {
@@ -664,7 +664,7 @@ export const KNOWN_TC_REGISTRY: Record<string, TcRecord> = {
     bloodType: '0 Rh+',
     address: 'Beşiktaş / İstanbul',
     school: 'Oxonom Okulları',
-    classroom: '9/A',
+    classroom: '1/A',
     is_verified: true,
     mernis_status: 'MERNİS NVİ MEB Öğretmen Kütüğü Doğrulanmış Kayıt',
   },
@@ -683,7 +683,7 @@ export const KNOWN_TC_REGISTRY: Record<string, TcRecord> = {
     bloodType: 'A Rh+',
     address: 'Caddebostan Mah. Bağdat Cad. No: 142/5 Kadıköy / İstanbul',
     school: 'Oxonom Okulları',
-    classroom: '9/A',
+    classroom: '1/A',
     is_verified: true,
     mernis_status: 'MERNİS Nüfus ve Vatandaşlık İşleri (NVİ) Aktif Öğrenci Kütük Kaydı',
     parents: [
@@ -727,7 +727,7 @@ export function lookupTcRecord(tc: string): TcRecord | null {
       bloodType: 'A Rh+',
       address: 'İstanbul',
       school: 'Oxonom Okulları',
-      classroom: '9-A',
+      classroom: '1/A',
       is_verified: true,
       mernis_status: 'MERNİS Nüfus ve Vatandaşlık İşleri (NVİ) Doğrulanmış Kayıt',
     }

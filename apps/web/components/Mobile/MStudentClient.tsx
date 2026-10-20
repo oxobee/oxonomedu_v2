@@ -125,7 +125,7 @@ const INITIAL_STUDENTS: MStudentItem[] = [
     address: 'Caddebostan Mah. Bağdat Cad. No: 142/5 Kadıköy / İstanbul',
     specialHealthNote: 'Herhangi bir kronik rahatsızlığı veya alerjisi bulunmamaktadır.',
     disciplineStatus: 'Temiz Sicil — Örnek Öğrenci',
-    notes: '9-A sınıfı öğrencisi.',
+    notes: '1/A sınıfı öğrencisi.',
     guidanceNotes: [
       {
         id: 'gn-1',

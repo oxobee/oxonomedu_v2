@@ -196,7 +196,7 @@ export default function TeacherAssessmentsView() {
     return exams.filter((ex) => {
       // Class filter
       if (selectedClass !== 'all') {
-        const exClass = ex.className || '9-A'
+        const exClass = ex.className || (selectedClass !== 'all' ? selectedClass : '1/A')
         const matchClass =
           exClass === 'Tüm Sınıflar' ||
           exClass === selectedClass ||

@@ -512,7 +512,7 @@ export default function TeacherAgendaView() {
               </div>
               <div>
                 <div className="text-xl font-black text-gray-900 dark:text-white leading-tight">
-                  9-A
+                  {examClassFilter}
                 </div>
                 <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                   Aktif Şube
@@ -957,8 +957,8 @@ export default function TeacherAgendaView() {
           <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/80 flex items-start gap-3">
             <Info size={18} className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
             <div className="text-xs text-indigo-950 dark:text-indigo-200 leading-relaxed">
-              <span className="font-bold">Öğrenci Portalı Entegrasyonu:</span> Bu ekranda tanımladığınız tüm yazılı sınav ve quizler, ilgili sınıftaki (örn. 9-A) tüm öğrencilerin{' '}
-              <span className="font-extrabold underline">"Sınav Takvimi"</span> ekranında otomatik olarak görüntülenir.
+              <span className="font-bold">Öğrenci Portalı Entegrasyonu:</span> Bu ekranda tanımladığınız tüm yazılı sınav ve quizler, ilgili sınıftaki ({examClassFilter}) tüm öğrencilerin{' '}
+              <span className="font-extrabold underline">&quot;Sınav Takvimi&quot;</span> ekranında otomatik olarak görüntülenir.
             </div>
           </div>
 
@@ -1125,7 +1125,7 @@ export default function TeacherAgendaView() {
                   <input
                     type="text"
                     required
-                    placeholder="Örn: 9-A Şiir Bilgisi & Vezin Uygulaması"
+                    placeholder={`Örn: ${examClassFilter} Ders Uygulaması`}
                     value={noteFormTitle}
                     onChange={(e) => setNoteFormTitle(e.target.value)}
                     className="w-full h-10 px-3.5 rounded-xl bg-gray-50 dark:bg-[#131C31] border border-gray-200 dark:border-gray-800 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/30"

@@ -43,7 +43,7 @@ import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileAdminDock from './MobileAdminDock'
 import MobileAdminMoreSheet from './MobileAdminMoreSheet'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
-import { SCHOOL_ORGS, getOrgTeachers } from '@services/demo/schoolDirectory'
+import { SCHOOL_ORGS, getOrgTeachers, ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
 import { getStoredPrincipalProfile } from '@/lib/principal/principalProfileStorage'
 
 export interface MAdminReportsClientProps {
@@ -127,7 +127,7 @@ export default function MAdminReportsClient({
           if (rawM) {
             const parsed = JSON.parse(rawM)
             if (Array.isArray(parsed) && parsed.length > 0) {
-              const s = parsed.find((st: any) => st.className?.includes('9-A') || st.className?.includes('9/A')) || parsed[0]
+              const s = parsed.find((st: any) => st.studentNo === '101' || (st.name && st.name.toLowerCase().includes('erçil')) || st.className?.includes('1/A')) || parsed[0]
               if (s) {
                 if (s.grades && s.grades.length > 0) {
                   const valid = s.grades.filter((g: any) => g.average !== undefined && g.average !== null && !isNaN(Number(g.average)))
@@ -156,7 +156,7 @@ export default function MAdminReportsClient({
 
       return [
         {
-          code: '9/A',
+          code: ALL_CLASSROOMS[0]?.code || '1/A',
           teacher: 'Ebru TEKNECİ',
           students: 24,
           average: avg > 0 ? avg : 89.2,
