@@ -346,31 +346,18 @@ const PanoClockCalendarCard = () => {
     return () => clearInterval(timer)
   }, [])
 
-  const hours = now.toLocaleTimeString('tr-TR', { hour: '2-digit' })
-  const minutes = now.toLocaleTimeString('tr-TR', { minute: '2-digit' })
-  const seconds = now.toLocaleTimeString('tr-TR', { second: '2-digit' })
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
   const dateStr = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
   const dayName = now.toLocaleDateString('tr-TR', { weekday: 'long' })
 
   return (
-    <div className="flex items-center gap-3.5 sm:gap-5 px-5 py-3 bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl rounded-3xl border border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-lg shadow-purple-950/10">
-      {/* Big Attention-Grabbing Digital Clock */}
-      <div className="flex items-center font-mono tabular-nums tracking-tight">
-        <span className="text-3xl sm:text-4xl lg:text-[2.6rem] font-black text-[#4B075F] dark:text-white drop-shadow-xs leading-none">
-          {hours}
-        </span>
-        <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#D914C8] mx-1 sm:mx-1.5 animate-pulse drop-shadow-[0_0_12px_rgba(217,20,200,0.6)]">
-          :
-        </span>
-        <span className="text-3xl sm:text-4xl lg:text-[2.6rem] font-black text-[#4B075F] dark:text-white drop-shadow-xs leading-none">
-          {minutes}
-        </span>
-        <div className="flex flex-col ml-2 self-center">
-          <span className="text-[10px] font-black text-[#D914C8] uppercase tracking-wider">SN</span>
-          <span className="text-xs sm:text-sm font-black text-[#8D49A6] dark:text-[#E9D5FF] bg-[#F0D8FA] dark:bg-[#350444] px-1.5 py-0.5 rounded-md font-mono">
-            {seconds}
-          </span>
-        </div>
+    <div className="flex items-center gap-4 sm:gap-6 px-5 py-3.5 bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl rounded-3xl border border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-lg shadow-purple-950/10">
+      {/* Big Attention-Grabbing Digital Clock in XX:XX format */}
+      <div className="flex items-center font-mono font-black text-3xl sm:text-4xl lg:text-[2.6rem] text-[#4B075F] dark:text-white tracking-wider tabular-nums leading-none">
+        <span>{hours}</span>
+        <span className="text-[#D914C8] mx-1 animate-pulse drop-shadow-[0_0_12px_rgba(217,20,200,0.6)]">:</span>
+        <span>{minutes}</span>
       </div>
 
       <div className="h-10 w-[1.5px] bg-[#E8DFEB] dark:bg-[#49364F]" />
@@ -381,13 +368,8 @@ const PanoClockCalendarCard = () => {
           <Calendar className="w-3.5 h-3.5 text-[#8D49A6] shrink-0" />
           <span className="truncate">{dateStr}</span>
         </div>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-[11px] sm:text-xs font-bold text-[#D914C8] capitalize">
-            {dayName}
-          </span>
-          <span className="text-[9.5px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-            Ders Saati Aktif
-          </span>
+        <div className="text-xs font-bold text-[#D914C8] capitalize mt-0.5">
+          {dayName}
         </div>
       </div>
     </div>
@@ -614,19 +596,24 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
     setCalcDisplay(String(Number(val.toFixed(4))))
   }
 
-  // Student Picker from Single Source of Truth with Progressive Deceleration Animation
-  const handlePickStudent = () => {
-    if (isPickingStudent) return
-    setIsPickingStudent(true)
-    setIsWinnerCelebration(false)
-
+  // Memoized pool of students for the active class from single source of truth
+  const candidateStudents = useMemo(() => {
     const allStudents = getSingleSourceOfTruthStudents(30)
     const classCode = selectedClass ? normalizeClassCode(selectedClass.name.replace('Şubesi', '').trim()) : ''
     const pool = allStudents.filter((s) => {
       if (!classCode) return true
       return normalizeClassCode(s.className) === classCode
     })
-    const candidateList = pool.length > 0 ? pool : allStudents
+    return pool.length > 0 ? pool : allStudents
+  }, [selectedClass])
+
+  // Student Picker from Single Source of Truth with Progressive Deceleration Animation
+  const handlePickStudent = () => {
+    if (isPickingStudent) return
+    setIsPickingStudent(true)
+    setIsWinnerCelebration(false)
+
+    const candidateList = candidateStudents
 
     // Progressive easing intervals: fast at start, slows down smoothly
     const intervals = [40, 45, 55, 70, 90, 115, 145, 185, 235, 300, 380, 480, 600]
@@ -662,20 +649,14 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
   return (
     <div className="pt-2">
       <div className="flex items-center justify-between mb-4 pl-1">
-        <h2 className="text-xs sm:text-sm font-black text-[#514458] dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
-          <span>İnteraktif Sınıf Araçları</span>
-          <span className="text-[10px] font-bold text-[#8D49A6] dark:text-[#F0D8FA] bg-[#F0D8FA]/70 dark:bg-[#350444] px-2 py-0.5 rounded-full">
-            Akıllı Tahta OS
-          </span>
+        <h2 className="text-xs sm:text-sm font-black text-[#514458] dark:text-slate-400 uppercase tracking-wider">
+          İnteraktif Sınıf Araçları
         </h2>
-        <span className="text-xs text-[#716779] dark:text-[#B5A5BD] hidden sm:inline">
-          Dokunmatik ekran için optimize edilmiştir
-        </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
         {/* 1. Classroom Timer */}
-        <div className="p-5 rounded-3xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
+        <div className="p-4 sm:p-5 rounded-3xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -707,8 +688,8 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
               </div>
             </div>
 
-            {/* Big Digital Display */}
-            <div className="text-center py-4 my-auto">
+            {/* Big Digital Display & Progress */}
+            <div className="text-center py-2.5">
               <span
                 className={`font-mono text-4xl sm:text-5xl font-black tracking-widest drop-shadow-xs ${
                   timerSeconds === 0
@@ -720,6 +701,32 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
               >
                 {formatTimer(timerSeconds)}
               </span>
+
+              {/* Visual Progress Bar */}
+              <div className="w-full max-w-[200px] mx-auto h-2 rounded-full bg-[#FAF5FC] dark:bg-[#2A1833] overflow-hidden mt-2.5 border border-[#E8DFEB]/80 dark:border-[#49364F]/80">
+                <div
+                  className="h-full bg-brand-gradient transition-all duration-300 rounded-full"
+                  style={{ width: `${Math.max(0, Math.min(100, (timerSeconds / timerInitial) * 100))}%` }}
+                />
+              </div>
+
+              {/* Quick minute modifiers */}
+              <div className="flex items-center justify-center gap-2 mt-2.5">
+                <button
+                  type="button"
+                  onClick={() => setTimerSeconds((s) => Math.max(0, s - 60))}
+                  className="px-2.5 py-1 rounded-lg bg-[#FAF5FC] dark:bg-[#2A1833] hover:bg-[#F0D8FA] text-[10.5px] font-bold text-[#4B075F] dark:text-[#E9D5FF] border border-[#E8DFEB] dark:border-[#49364F] active:scale-95 transition-all cursor-pointer"
+                >
+                  -1 Dk
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTimerSeconds((s) => s + 60)}
+                  className="px-2.5 py-1 rounded-lg bg-[#FAF5FC] dark:bg-[#2A1833] hover:bg-[#F0D8FA] text-[10.5px] font-bold text-[#4B075F] dark:text-[#E9D5FF] border border-[#E8DFEB] dark:border-[#49364F] active:scale-95 transition-all cursor-pointer"
+                >
+                  +1 Dk
+                </button>
+              </div>
             </div>
           </div>
 
@@ -756,8 +763,8 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
           </div>
         </div>
 
-        {/* 2. Random Student Picker (Animasyonlu Soru & Söz Hakkı Çarkı) */}
-        <div className="p-5 rounded-3xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between relative overflow-hidden">
+        {/* 2. Random Student Picker */}
+        <div className="p-4 sm:p-5 rounded-3xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between relative overflow-hidden">
           {/* Ambient Glow on Celebration */}
           {isWinnerCelebration && (
             <motion.div
@@ -783,14 +790,14 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
             </div>
 
             {/* Selected Student Display with High-Impact Animation */}
-            <div className="min-h-[110px] flex flex-col items-center justify-center text-center py-2 relative z-10">
+            <div className="min-h-[120px] flex flex-col items-center justify-center text-center py-2 relative z-10">
               {isPickingStudent ? (
                 <motion.div
                   key="rolling"
                   initial={{ scale: 0.9, opacity: 0.5 }}
                   animate={{ scale: [0.95, 1.05, 0.95], opacity: 1 }}
                   transition={{ repeat: Infinity, duration: 0.2 }}
-                  className="p-3 rounded-2xl bg-gradient-to-r from-purple-100 to-pink-100 dark:from-[#350444] dark:to-[#4B075F] border border-[#8D49A6]/40 w-full shadow-inner"
+                  className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-100 to-pink-100 dark:from-[#350444] dark:to-[#4B075F] border border-[#8D49A6]/40 w-full shadow-inner"
                 >
                   <span className="text-[10px] uppercase font-black tracking-wider text-[#8D49A6] dark:text-[#F0D8FA] block animate-pulse">
                     Öğrenci Seçiliyor...
@@ -819,13 +826,17 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
                   </p>
                 </motion.div>
               ) : (
-                <div className="space-y-1">
-                  <div className="w-10 h-10 rounded-2xl bg-[#F0D8FA]/70 dark:bg-[#350444]/60 mx-auto flex items-center justify-center text-[#8D49A6]">
-                    <Dice5 size={20} />
+                <div className="space-y-2 py-1">
+                  <div className="w-11 h-11 rounded-2xl bg-[#F0D8FA]/80 dark:bg-[#350444]/60 mx-auto flex items-center justify-center text-[#8D49A6]">
+                    <Dice5 size={22} />
                   </div>
-                  <p className="text-xs text-slate-400 font-medium">
-                    Soru sormak veya tahtaya kaldırmak için butona dokunun.
+                  <p className="text-xs text-[#514458] dark:text-slate-300 font-bold">
+                    Tahtaya Kaldırma & Soru Çarkı
                   </p>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FAF5FC] dark:bg-[#2A1833] border border-[#E8DFEB] dark:border-[#49364F] text-[10.5px] font-bold text-[#8D49A6] dark:text-[#E9D5FF]">
+                    <Users size={11} />
+                    <span>{candidateStudents.length} Öğrenci Hazır</span>
+                  </span>
                 </div>
               )}
             </div>
@@ -847,10 +858,10 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
           </div>
         </div>
 
-        {/* 3. Dokunmatik Akıllı Tahta Hesap Makinesi (Zil yerine Hesap Makinesi) */}
+        {/* 3. Dokunmatik Akıllı Tahta Hesap Makinesi */}
         <div className="p-4 sm:p-5 rounded-3xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border border-[#E8DFEB] dark:border-[#49364F] shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
                   <Calculator className="w-4 h-4" />
@@ -867,43 +878,43 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
             </div>
 
             {/* Calculator Digital Screen */}
-            <div className="p-2 sm:p-2.5 rounded-2xl bg-slate-900 text-white font-mono text-right border border-white/10 shadow-inner mb-2.5">
-              <div className="text-[10px] text-slate-400 h-4 truncate">
+            <div className="p-2 rounded-xl bg-slate-900 text-white font-mono text-right border border-white/10 shadow-inner mb-2">
+              <div className="text-[10px] text-slate-400 h-3.5 truncate">
                 {calcEquation || '\u00A0'}
               </div>
-              <div className="text-xl sm:text-2xl font-black text-emerald-400 truncate tracking-tight">
+              <div className="text-lg sm:text-xl font-black text-emerald-400 truncate tracking-tight">
                 {calcDisplay}
               </div>
             </div>
 
-            {/* Touch Keypad (Ergonomic for Smartboard & Phone) */}
-            <div className="grid grid-cols-4 gap-1.5 text-xs font-black">
+            {/* Touch Keypad */}
+            <div className="grid grid-cols-4 gap-1 text-xs font-black">
               {/* Row 1 */}
               <button
                 type="button"
                 onClick={handleCalcClear}
-                className="h-8 rounded-xl bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 active:scale-90 transition-transform cursor-pointer"
               >
                 C
               </button>
               <button
                 type="button"
                 onClick={handleCalcBackspace}
-                className="h-8 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 active:scale-90 transition-transform cursor-pointer"
               >
                 ⌫
               </button>
               <button
                 type="button"
                 onClick={handleCalcPercent}
-                className="h-8 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 active:scale-90 transition-transform cursor-pointer"
               >
                 %
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcOp('÷')}
-                className="h-8 rounded-xl bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
               >
                 ÷
               </button>
@@ -912,28 +923,28 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
               <button
                 type="button"
                 onClick={() => handleCalcDigit('7')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 7
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcDigit('8')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 8
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcDigit('9')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 9
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcOp('×')}
-                className="h-8 rounded-xl bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
               >
                 ×
               </button>
@@ -942,28 +953,28 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
               <button
                 type="button"
                 onClick={() => handleCalcDigit('4')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 4
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcDigit('5')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 5
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcDigit('6')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 6
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcOp('-')}
-                className="h-8 rounded-xl bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
               >
                 -
               </button>
@@ -972,28 +983,28 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
               <button
                 type="button"
                 onClick={() => handleCalcDigit('1')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 1
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcDigit('2')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 2
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcDigit('3')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 3
               </button>
               <button
                 type="button"
                 onClick={() => handleCalcOp('+')}
-                className="h-8 rounded-xl bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-[#F0D8FA] hover:bg-[#E8DFEB] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] active:scale-90 transition-transform cursor-pointer"
               >
                 +
               </button>
@@ -1002,21 +1013,21 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
               <button
                 type="button"
                 onClick={() => handleCalcDigit('0')}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer col-span-2"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer col-span-2"
               >
                 0
               </button>
               <button
                 type="button"
                 onClick={handleCalcDot}
-                className="h-8 rounded-xl bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
+                className="h-7 sm:h-7.5 rounded-lg bg-white dark:bg-[#2A1833] text-[#241329] dark:text-white border border-[#E8DFEB] dark:border-[#49364F] active:scale-90 transition-transform cursor-pointer"
               >
                 ,
               </button>
               <button
                 type="button"
                 onClick={handleCalcEquals}
-                className="h-8 rounded-xl bg-brand-gradient text-white active:scale-90 transition-transform cursor-pointer shadow-xs"
+                className="h-7 sm:h-7.5 rounded-lg bg-brand-gradient text-white active:scale-90 transition-transform cursor-pointer shadow-xs"
               >
                 =
               </button>
@@ -3352,10 +3363,6 @@ export default function PanoClient() {
                     <h2 className="text-3xl sm:text-4xl font-black text-[#241329] dark:text-white tracking-tight">
                       {selectedClass.name}
                     </h2>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-gradient text-white text-xs font-black shadow-xs">
-                      <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                      Aktif Sınıf
-                    </span>
 
                     {/* Donanım Kimlik Rozeti (Pano ID & Tahta ID) */}
                     <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-gradient-to-r from-[#4B075F] to-[#8D49A6] text-white text-xs font-black shadow-sm border border-white/20">
@@ -3442,79 +3449,6 @@ export default function PanoClient() {
                     <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">GÜNLÜK DEVAM</span>
                     <span className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400">{liveAttendanceRate}</span>
                   </div>
-                </div>
-              </div>
-
-              {/* ======================================================== */}
-              {/* HERO ALTINDAKİ BUTONLAR (GENİŞ 3'LÜ GRID: AKILLI TAHTA, TAHTALAR & ÖDEVLER) */}
-              {/* ======================================================== */}
-              <div className="pt-4 border-t border-[#E8DFEB] dark:border-[#49364F] relative z-10">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full">
-                  {/* 1. Akıllı Tahta (Hızlı Çizim) Butonu */}
-                  <Link
-                    href="/pano/tahta"
-                    className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-[#4B075F] via-[#620B79] to-[#8D49A6] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
-                    title="Yeni İnteraktif Akıllı Tahtayı Aç"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        <Presentation className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="text-base font-black text-white truncate">Akıllı Tahta</span>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-lg text-xs bg-white/25 text-white font-black shrink-0 flex items-center gap-1">
-                      <Sparkles size={11} className="text-white" />
-                      <span className="text-white">Çizim</span>
-                    </span>
-                  </Link>
-
-                  {/* 2. Kayıtlı Tahtalar Butonu */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      openAppInWindow({
-                        id: 'past_boards',
-                        type: 'app',
-                        title: `${selectedClass.name} - Geçmiş Tahtalar`,
-                        icon: 'Board',
-                        color: 'bg-brand-gradient',
-                        iconColor: 'text-white',
-                        badge: `${liveBoardCount} Tahta`,
-                        path: `/dash/boards?usergroupId=${selectedClass.id}`
-                      })
-                    }}
-                    className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-[#350444] via-[#4B075F] to-[#620B79] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        <FileText className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="text-base font-black text-white truncate">Tahtalar</span>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-lg text-xs bg-white/25 text-white font-black shrink-0">
-                      {liveBoardCount} Kayıt
-                    </span>
-                  </button>
-
-                  {/* 3. Ödevler Butonu */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const hwApp = apps.find(a => a.id === 'homework')
-                      if (hwApp) openAppInWindow(hwApp)
-                    }}
-                    className="w-full px-5 py-4 rounded-2xl bg-gradient-to-r from-[#8D49A6] via-[#B90FAB] to-[#D914C8] text-white font-bold border border-white/20 hover:opacity-95 transition-all flex items-center justify-between cursor-pointer shadow-md shadow-purple-950/20 hover:-translate-y-0.5 group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        <CheckCircle2 className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="text-base font-black text-white truncate">Ödevler</span>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-lg text-xs bg-white/25 text-white font-black shrink-0">
-                      {liveAssignmentCount} Aktif
-                    </span>
-                  </button>
                 </div>
               </div>
             </motion.div>
