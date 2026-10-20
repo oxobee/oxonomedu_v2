@@ -219,9 +219,30 @@ export default function WhiteboardClient() {
     } catch (_) {}
   }, [])
 
+  // Helper to convert dataUrl or remote url to Blob for native whiteboard placement
+  const urlToBlob = async (url: string): Promise<Blob> => {
+    if (url.startsWith('data:')) {
+      try {
+        const arr = url.split(',')
+        const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg'
+        const bstr = atob(arr[1])
+        let n = bstr.length
+        const u8arr = new Uint8Array(n)
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n)
+        }
+        return new Blob([u8arr], { type: mime })
+      } catch (_) {
+        return new Blob([], { type: 'image/jpeg' })
+      }
+    }
+    const res = await fetch(url)
+    return await res.blob()
+  }
+
   // Insert image directly onto the drawing canvas
   const insertIncomingMaterial = useCallback(
-    (material: {
+    async (material: {
       id?: string
       name?: string
       url: string
@@ -236,52 +257,52 @@ export default function WhiteboardClient() {
         return
       }
 
-      const img = new Image()
-      img.onload = () => {
-        try {
-          const w = img.naturalWidth || 800
-          const h = img.naturalHeight || 600
-          const vp = board.editor.viewportPageBounds?.() || {
-            x: 0,
-            y: 0,
-            w: typeof window !== 'undefined' ? window.innerWidth : 1200,
-            h: typeof window !== 'undefined' ? window.innerHeight : 800,
+      try {
+        const blob = await urlToBlob(material.url)
+        if (blob && blob.size > 0) {
+          if (typeof board.editor.importImageBlobs === 'function') {
+            await board.editor.importImageBlobs([blob])
+          } else {
+            // Fallback manual store insertion
+            const img = new Image()
+            img.onload = () => {
+              try {
+                const w = img.naturalWidth || 800
+                const h = img.naturalHeight || 600
+                const vp = board.editor.viewportPageBounds?.() || {
+                  x: 0,
+                  y: 0,
+                  w: typeof window !== 'undefined' ? window.innerWidth : 1200,
+                  h: typeof window !== 'undefined' ? window.innerHeight : 800,
+                }
+                const scale = Math.min(1, (vp.w * 0.65) / w, (vp.h * 0.65) / h)
+                const pw = Math.max(120, Math.round(w * scale))
+                const ph = Math.max(120, Math.round(h * scale))
+                const cx = vp.x + vp.w / 2
+                const cy = vp.y + vp.h / 2
+                const assetId = `asset:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+                const shapeId = `shape:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+                board.editor.store.transact(() => {
+                  board.editor.store.put({ id: assetId, typeName: 'asset', src: material.url, w, h })
+                  board.editor.store.put({
+                    id: shapeId,
+                    typeName: 'shape',
+                    type: 'image',
+                    x: cx - pw / 2,
+                    y: cy - ph / 2,
+                    rot: 0,
+                    z: (board.editor.store.maxZ?.() || 10) + 1,
+                    props: { w: pw, h: ph, assetId },
+                  })
+                })
+              } catch (_) {}
+            }
+            img.src = material.url
           }
 
-          // Land at a comfortable size: max ~65% of viewport width/height
-          const scale = Math.min(1, (vp.w * 0.65) / w, (vp.h * 0.65) / h)
-          const pw = Math.max(120, Math.round(w * scale))
-          const ph = Math.max(120, Math.round(h * scale))
-          const cx = vp.x + vp.w / 2
-          const cy = vp.y + vp.h / 2
-
-          const assetId = `asset:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
-          const shapeId = `shape:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
-
-          board.editor.store.transact(() => {
-            board.editor.store.put({
-              id: assetId,
-              typeName: 'asset',
-              src: material.url,
-              w,
-              h,
-            })
-            board.editor.store.put({
-              id: shapeId,
-              typeName: 'shape',
-              type: 'image',
-              x: cx - pw / 2,
-              y: cy - ph / 2,
-              rot: 0,
-              z: (board.editor.store.maxZ?.() || 10) + 1,
-              props: { w: pw, h: ph, assetId },
-            })
-          })
-
           board.editor.setTool?.('select')
-          board.editor.setSelection?.([shapeId])
           board.editor.requestRender?.()
-          saveNow()
+          setTimeout(() => saveNow(), 200)
 
           playAudioChime()
 
@@ -295,11 +316,10 @@ export default function WhiteboardClient() {
           incomingBannerTimerRef.current = setTimeout(() => {
             setIncomingBanner(null)
           }, 8000)
-        } catch (err) {
-          console.error('Error inserting material to whiteboard', err)
         }
+      } catch (err) {
+        console.error('Error inserting material to whiteboard', err)
       }
-      img.src = material.url
     },
     [saveNow, playAudioChime]
   )
@@ -595,8 +615,10 @@ export default function WhiteboardClient() {
     }
     window.addEventListener('storage', handleStorage)
 
-    // 4. Initial check for recently sent file on tab mount
+    // 4. Initial check for recently sent file on tab mount or explicit ?import= query
     try {
+      const urlParams = new URLSearchParams(window.location.search)
+      const hasImportParam = urlParams.get('import') === 'latest' || !!urlParams.get('import')
       const rawLatest =
         localStorage.getItem(`oxonom_whiteboard_incoming_${boardInfo.fullId}`) ||
         localStorage.getItem('oxonom_pano_latest_file')
@@ -606,14 +628,19 @@ export default function WhiteboardClient() {
         const currentFull = boardInfo.fullId.toUpperCase()
         const currentPano = boardInfo.pano.toUpperCase()
 
-        if (target === currentFull || target === currentPano) {
+        if (target === currentFull || target === currentPano || hasImportParam) {
           const ageMs = Date.now() - (parsed.uploadedAt || 0)
-          const sessionKey = `oxonom_wb_inserted_${parsed.id}`
-          if (ageMs < 5 * 60 * 1000 && !sessionStorage.getItem(sessionKey)) {
+          const sessionKey = `oxonom_wb_inserted_${parsed.id || 'latest'}`
+          if (hasImportParam || (ageMs < 10 * 60 * 1000 && !sessionStorage.getItem(sessionKey))) {
             sessionStorage.setItem(sessionKey, '1')
             setTimeout(() => {
               insertIncomingMaterial(parsed)
-            }, 400)
+            }, 450)
+            if (hasImportParam) {
+              const cleanUrl = new URL(window.location.href)
+              cleanUrl.searchParams.delete('import')
+              window.history.replaceState({}, '', cleanUrl.toString())
+            }
           }
         }
       }

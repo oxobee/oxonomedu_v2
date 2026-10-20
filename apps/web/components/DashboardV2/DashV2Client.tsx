@@ -334,14 +334,18 @@ export default function DashV2Client({
   const [examQuestions, setExamQuestions] = useState<
     {
       id: string
+      type?: 'single' | 'multiple' | 'boolean' | 'fill'
       text: string
       options: { id: string; text: string }[]
       correctOptionId: string
+      correctOptionIds?: string[]
+      correctAnswerText?: string
       points?: number
     }[]
   >([
     {
       id: 'q1',
+      type: 'single',
       text: 'Aşağıdaki sayılardan hangisi 4 basamaklı en küçük çift doğal sayıdır?',
       options: [
         { id: 'A', text: '1000' },
@@ -350,18 +354,48 @@ export default function DashV2Client({
         { id: 'D', text: '1020' },
       ],
       correctOptionId: 'A',
+      correctOptionIds: ['A'],
       points: 25,
     },
     {
       id: 'q2',
-      text: 'Güneş Sistemi’ndeki yaşam barındırdığı bilinen tek gezegen hangisidir?',
+      type: 'boolean',
+      text: 'Güneş Sistemi’ndeki en büyük gezegen Jüpiter\'dir.',
       options: [
-        { id: 'A', text: 'Mars' },
-        { id: 'B', text: 'Dünya' },
-        { id: 'C', text: 'Jüpiter' },
-        { id: 'D', text: 'Venüs' },
+        { id: 'true', text: 'DOĞRU' },
+        { id: 'false', text: 'YANLIŞ' },
       ],
-      correctOptionId: 'B',
+      correctOptionId: 'true',
+      correctOptionIds: ['true'],
+      points: 25,
+    },
+    {
+      id: 'q3',
+      type: 'multiple',
+      text: 'Aşağıdaki canlılardan hangileri memeliler sınıfına aittir?',
+      options: [
+        { id: 'A', text: 'Balina' },
+        { id: 'B', text: 'Yunus' },
+        { id: 'C', text: 'Penguen' },
+        { id: 'D', text: 'Yarasa' },
+      ],
+      correctOptionId: 'A',
+      correctOptionIds: ['A', 'B', 'D'],
+      points: 25,
+    },
+    {
+      id: 'q4',
+      type: 'fill',
+      text: 'Türkiye Cumhuriyeti\'nin başkenti _______ şehridir.',
+      correctAnswerText: 'Ankara',
+      options: [
+        { id: 'A', text: 'Ankara' },
+        { id: 'B', text: 'İstanbul' },
+        { id: 'C', text: 'İzmir' },
+        { id: 'D', text: 'Bursa' },
+      ],
+      correctOptionId: 'A',
+      correctOptionIds: ['A'],
       points: 25,
     },
   ])
@@ -392,13 +426,14 @@ export default function DashV2Client({
     message: '',
   })
 
-  // Soru Ekleme
+  // Soru Ekleme (Son sorunun altına eklenecek)
   const handleAddQuestion = () => {
     const nextNum = examQuestions.length + 1
     setExamQuestions((prev) => [
       ...prev,
       {
         id: `q_${Date.now()}_${nextNum}`,
+        type: 'single',
         text: '',
         options: [
           { id: 'A', text: '' },
@@ -407,9 +442,101 @@ export default function DashV2Client({
           { id: 'D', text: '' },
         ],
         correctOptionId: 'A',
+        correctOptionIds: ['A'],
+        correctAnswerText: '',
         points: 25,
       },
     ])
+  }
+
+  // Soru Türü Değiştirme
+  const handleUpdateQuestionType = (
+    qIndex: number,
+    type: 'single' | 'multiple' | 'boolean' | 'fill'
+  ) => {
+    setExamQuestions((prev) => {
+      const copy = [...prev]
+      const cur = copy[qIndex]
+      let newOptions = cur.options || []
+      let correctOptionId = cur.correctOptionId || 'A'
+      let correctOptionIds = cur.correctOptionIds || ['A']
+      let correctAnswerText = cur.correctAnswerText || ''
+
+      if (type === 'boolean') {
+        newOptions = [
+          { id: 'true', text: 'DOĞRU' },
+          { id: 'false', text: 'YANLIŞ' },
+        ]
+        correctOptionId = 'true'
+        correctOptionIds = ['true']
+      } else if (type === 'fill') {
+        if (!correctAnswerText) correctAnswerText = 'Ankara'
+        newOptions = [
+          { id: 'A', text: correctAnswerText || 'Ankara' },
+          { id: 'B', text: 'İstanbul' },
+          { id: 'C', text: 'İzmir' },
+          { id: 'D', text: 'Bursa' },
+        ]
+        correctOptionId = 'A'
+        correctOptionIds = ['A']
+      } else if (newOptions.length < 4 || newOptions[0]?.id === 'true') {
+        newOptions = [
+          { id: 'A', text: '' },
+          { id: 'B', text: '' },
+          { id: 'C', text: '' },
+          { id: 'D', text: '' },
+        ]
+        correctOptionId = 'A'
+        correctOptionIds = ['A']
+      }
+
+      copy[qIndex] = {
+        ...cur,
+        type,
+        options: newOptions,
+        correctOptionId,
+        correctOptionIds,
+        correctAnswerText,
+      }
+      return copy
+    })
+  }
+
+  // Çoklu Seçmeli Sorularda Doğru Şık Seçimi (Birden Çok Doğru)
+  const handleToggleMultipleCorrectOption = (qIndex: number, optId: string) => {
+    setExamQuestions((prev) => {
+      const copy = [...prev]
+      const cur = copy[qIndex]
+      const existing = cur.correctOptionIds || [cur.correctOptionId || 'A']
+      const updated = existing.includes(optId)
+        ? existing.filter((id) => id !== optId)
+        : [...existing, optId]
+
+      const finalIds = updated.length > 0 ? updated : [optId]
+      copy[qIndex] = {
+        ...cur,
+        correctOptionIds: finalIds,
+        correctOptionId: finalIds[0],
+      }
+      return copy
+    })
+  }
+
+  // Boşluk Doldurma Doğru Cevap Metni Güncelleme
+  const handleUpdateFillAnswer = (qIndex: number, val: string) => {
+    setExamQuestions((prev) => {
+      const copy = [...prev]
+      const cur = copy[qIndex]
+      const newOptions = (cur.options || []).map((opt) =>
+        opt.id === 'A' ? { ...opt, text: val } : opt
+      )
+      copy[qIndex] = {
+        ...cur,
+        correctAnswerText: val,
+        options: newOptions,
+      }
+      return copy
+    })
   }
 
   // Soru Silme
@@ -446,17 +573,22 @@ export default function DashV2Client({
   const handleSelectCorrectOption = (qIndex: number, optId: string) => {
     setExamQuestions((prev) => {
       const copy = [...prev]
-      copy[qIndex] = { ...copy[qIndex], correctOptionId: optId }
+      copy[qIndex] = {
+        ...copy[qIndex],
+        correctOptionId: optId,
+        correctOptionIds: [optId],
+      }
       return copy
     })
   }
 
-  // Örnek Sorularla Doldur
+  // Örnek Sorularla Doldur (Tüm Soru Türlerini İçerir)
   const handleFillSampleQuestions = () => {
     setExamTitle(`${selectedClass?.name || '1/A'} Genel Değerlendirme Testi`)
     setExamQuestions([
       {
         id: 'q1',
+        type: 'single',
         text: 'Aşağıdaki sayılardan hangisi 4 basamaklı en küçük çift doğal sayıdır?',
         options: [
           { id: 'A', text: '1000' },
@@ -465,49 +597,55 @@ export default function DashV2Client({
           { id: 'D', text: '1020' },
         ],
         correctOptionId: 'A',
+        correctOptionIds: ['A'],
         points: 25,
       },
       {
         id: 'q2',
-        text: 'Bir dikdörtgenin kısa kenarı 6 cm, uzun kenarı 12 cm ise çevresi kaç cm\'dir?',
+        type: 'boolean',
+        text: 'Güneş Sistemi’ndeki en büyük gezegen Jüpiter\'dir.',
         options: [
-          { id: 'A', text: '18 cm' },
-          { id: 'B', text: '36 cm' },
-          { id: 'C', text: '72 cm' },
-          { id: 'D', text: '24 cm' },
+          { id: 'true', text: 'DOĞRU' },
+          { id: 'false', text: 'YANLIŞ' },
         ],
-        correctOptionId: 'B',
+        correctOptionId: 'true',
+        correctOptionIds: ['true'],
         points: 25,
       },
       {
         id: 'q3',
-        text: 'Güneş Sistemi’ndeki yaşam barındırdığı bilinen gezegen hangisidir?',
+        type: 'multiple',
+        text: 'Aşağıdaki canlılardan hangileri memeliler sınıfına aittir?',
         options: [
-          { id: 'A', text: 'Mars' },
-          { id: 'B', text: 'Dünya' },
-          { id: 'C', text: 'Jüpiter' },
-          { id: 'D', text: 'Venüs' },
+          { id: 'A', text: 'Balina' },
+          { id: 'B', text: 'Yunus' },
+          { id: 'C', text: 'Penguen' },
+          { id: 'D', text: 'Yarasa' },
         ],
-        correctOptionId: 'B',
+        correctOptionId: 'A',
+        correctOptionIds: ['A', 'B', 'D'],
         points: 25,
       },
       {
         id: 'q4',
-        text: 'Aşağıdaki cümlelerin hangisinde mecaz anlamlı bir sözcük kullanılmıştır?',
+        type: 'fill',
+        text: 'Türkiye Cumhuriyeti\'nin başkenti _______ şehridir.',
+        correctAnswerText: 'Ankara',
         options: [
-          { id: 'A', text: 'Bugün hava oldukça sıcaktı.' },
-          { id: 'B', text: 'Sözleriyle kalbimi kırdı.' },
-          { id: 'C', text: 'Kitabın kapağı yırtılmış.' },
-          { id: 'D', text: 'Bahçedeki ağaçlar çiçek açtı.' },
+          { id: 'A', text: 'Ankara' },
+          { id: 'B', text: 'İstanbul' },
+          { id: 'C', text: 'İzmir' },
+          { id: 'D', text: 'Bursa' },
         ],
-        correctOptionId: 'B',
+        correctOptionId: 'A',
+        correctOptionIds: ['A'],
         points: 25,
       },
     ])
-    toast.success('Örnek sınav soruları yüklendi!', { icon: '✨' })
+    toast.success('Farklı soru türlerinde örnek sınav yüklendi!', { icon: '✨' })
   }
 
-  // Görsel Dosyası İşleme
+  // Görsel Dosyası İşleme & Canvas ile Optimize Etme (QuotaExceeded koruması)
   const processImageFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
       setFeedbackModal({
@@ -518,26 +656,60 @@ export default function DashV2Client({
       })
       return
     }
-    if (file.size > 8 * 1024 * 1024) {
+    if (file.size > 12 * 1024 * 1024) {
       setFeedbackModal({
         isOpen: true,
         type: 'error',
         title: 'Dosya Boyutu Çok Büyük',
-        message: 'Görsel dosya boyutu 8MB\'dan küçük olmalıdır.',
+        message: 'Görsel dosya boyutu 12MB\'dan küçük olmalıdır.',
       })
       return
     }
-    const reader = new FileReader()
-    reader.onload = () => {
-      setSelectedFile({
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        previewUrl: reader.result as string,
-      })
-      toast.success(`"${file.name}" yüklendi.`, { icon: '🖼️' })
+
+    const objectUrl = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      try {
+        const maxDim = 1600
+        let w = img.naturalWidth || 800
+        let h = img.naturalHeight || 600
+        const scale = Math.min(1, maxDim / Math.max(w, h))
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.round(w * scale)
+        canvas.height = Math.round(h * scale)
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85)
+          setSelectedFile({
+            name: file.name,
+            size: Math.round((compressedDataUrl.length * 3) / 4),
+            type: 'image/jpeg',
+            previewUrl: compressedDataUrl,
+          })
+          toast.success(`"${file.name}" yüklendi ve optimize edildi.`, { icon: '🖼️' })
+        }
+      } catch (err) {
+        const reader = new FileReader()
+        reader.onload = () => {
+          setSelectedFile({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            previewUrl: reader.result as string,
+          })
+          toast.success(`"${file.name}" yüklendi.`, { icon: '🖼️' })
+        }
+        reader.readAsDataURL(file)
+      } finally {
+        URL.revokeObjectURL(objectUrl)
+      }
     }
-    reader.readAsDataURL(file)
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      toast.error('Görsel okunamadı, lütfen başka bir görsel seçin.')
+    }
+    img.src = objectUrl
   }
 
   // Sınavı Panoya Gönder
@@ -565,22 +737,33 @@ export default function DashV2Client({
         })
         return
       }
-      const emptyOpt = q.options.find((opt) => !opt.text.trim())
-      if (emptyOpt) {
+      if (q.type === 'fill' && !q.correctAnswerText?.trim()) {
         setFeedbackModal({
           isOpen: true,
           type: 'error',
-          title: 'Eksik Şık Bilgisi',
-          message: `Lütfen ${i + 1}. sorunun ${emptyOpt.id} şıkkının metnini doldurunuz.`,
+          title: 'Boşluk Doldurma Cevabı Eksik',
+          message: `Lütfen ${i + 1}. sorunun doğru kabul edilecek cevabını yazınız.`,
         })
         return
       }
-      if (!q.correctOptionId) {
+      if (q.type !== 'fill' && q.type !== 'boolean') {
+        const emptyOpt = q.options.find((opt) => !opt.text.trim())
+        if (emptyOpt) {
+          setFeedbackModal({
+            isOpen: true,
+            type: 'error',
+            title: 'Eksik Şık Bilgisi',
+            message: `Lütfen ${i + 1}. sorunun ${emptyOpt.id} şıkkının metnini doldurunuz.`,
+          })
+          return
+        }
+      }
+      if (!q.correctOptionId && (!q.correctOptionIds || q.correctOptionIds.length === 0)) {
         setFeedbackModal({
           isOpen: true,
           type: 'error',
           title: 'Doğru Cevap Seçilmedi',
-          message: `Lütfen ${i + 1}. sorunun doğru cevabını şıklar arasından işaretleyiniz.`,
+          message: `Lütfen ${i + 1}. sorunun doğru cevabını işaretleyiniz.`,
         })
         return
       }
@@ -597,9 +780,12 @@ export default function DashV2Client({
         teacherName: user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Ders Öğretmeni',
         questions: examQuestions.map((q, idx) => ({
           id: q.id || `q_${idx + 1}`,
+          type: q.type || 'single',
           text: q.text.trim(),
-          options: q.options.map((opt) => ({ id: opt.id, text: opt.text.trim() })),
-          correctOptionId: q.correctOptionId,
+          options: (q.options || []).map((opt) => ({ id: opt.id, text: opt.text.trim() })),
+          correctOptionId: q.correctOptionId || 'A',
+          correctOptionIds: q.correctOptionIds || (q.correctOptionId ? [q.correctOptionId] : ['A']),
+          correctAnswerText: q.correctAnswerText?.trim() || '',
           points: q.points || 25,
         })),
       }
@@ -608,6 +794,13 @@ export default function DashV2Client({
         localStorage.setItem(`oxonom_pano_exam_${cleanTarget}`, JSON.stringify(examPayload))
         localStorage.setItem('oxonom_pano_active_exam', JSON.stringify(examPayload))
         window.dispatchEvent(new CustomEvent('oxonom_pano_exam_updated', { detail: examPayload }))
+
+        // Multi-tab BroadcastChannel
+        try {
+          const bc = new BroadcastChannel('oxonom_pano_channel')
+          bc.postMessage({ type: 'oxonom_pano_exam_updated', payload: examPayload })
+          bc.close()
+        } catch (_) {}
       } catch (e) {
         console.warn('Storage save skipped', e)
       }
@@ -1888,105 +2081,255 @@ export default function DashV2Client({
 
                   {/* Sorular Listesi */}
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between pb-1">
                       <span className="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                        Sorular ({examQuestions.length} Soru)
+                        Sınav Soruları ({examQuestions.length} Soru)
                       </span>
-                      <button
-                        type="button"
-                        onClick={handleAddQuestion}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-brand-gradient text-white text-xs font-bold shadow-xs hover:opacity-95 cursor-pointer"
-                      >
-                        <Plus size={14} />
-                        <span>Yeni Soru Ekle</span>
-                      </button>
+                      <span className="text-[11px] font-bold text-[#8D49A6] dark:text-[#E9D5FF]">
+                        Çoktan seçmeli, çoklu, D/Y ve boşluk doldurma
+                      </span>
                     </div>
 
-                    {examQuestions.map((question, qIdx) => (
-                      <div
-                        key={question.id}
-                        className="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 space-y-3"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="px-2.5 py-0.5 rounded-full bg-[#4B075F] text-white text-xs font-black">
-                            Soru #{qIdx + 1}
-                          </span>
+                    {examQuestions.map((question, qIdx) => {
+                      const qType = question.type || 'single'
+                      return (
+                        <div
+                          key={question.id}
+                          className="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 space-y-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="px-2.5 py-0.5 rounded-full bg-[#4B075F] text-white text-xs font-black">
+                                Soru #{qIdx + 1}
+                              </span>
+                              <span className="text-[11px] font-extrabold text-[#8D49A6] dark:text-[#E9D5FF]">
+                                {qType === 'boolean'
+                                  ? '⚖️ Doğru / Yanlış'
+                                  : qType === 'multiple'
+                                  ? '☑️ Çoklu Seçmeli'
+                                  : qType === 'fill'
+                                  ? '✍️ Boşluk Doldurma'
+                                  : '🎯 Çoktan Seçmeli'}
+                              </span>
+                            </div>
 
-                          {examQuestions.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveQuestion(qIdx)}
-                              className="w-7 h-7 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center justify-center transition-colors cursor-pointer"
-                              title="Soruyu Sil"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Soru Metni */}
-                        <div>
-                          <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">
-                            Soru Cümlesi / Metni:
-                          </label>
-                          <textarea
-                            value={question.text}
-                            onChange={(e) => handleUpdateQuestionText(qIdx, e.target.value)}
-                            placeholder="Örn: Aşağıdaki sayılardan hangisi en büyük basamak değerine sahiptir?"
-                            rows={2}
-                            className="w-full p-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs sm:text-sm font-semibold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
-                          />
-                        </div>
-
-                        {/* Şıklar ve Doğru Cevap Seçimi */}
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 dark:text-gray-400">
-                            <span>Şıklar (Doğru cevaba dokunup yeşil yapın):</span>
-                            <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">
-                              Seçili Doğru: {question.correctOptionId}
-                            </span>
+                            {examQuestions.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveQuestion(qIdx)}
+                                className="w-7 h-7 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center justify-center transition-colors cursor-pointer"
+                                title="Soruyu Sil"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {question.options.map((opt) => {
-                              const isCorrect = question.correctOptionId === opt.id
-                              return (
-                                <div
-                                  key={opt.id}
-                                  className={`p-2 rounded-xl border flex items-center gap-2 transition-all ${
-                                    isCorrect
-                                      ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500/20'
-                                      : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700'
+                          {/* Soru Türü Seçimi (Tabs) */}
+                          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-gray-200/60 dark:bg-gray-900/60 flex-wrap">
+                            {(
+                              [
+                                { id: 'single', label: '🎯 Çoktan Seçmeli' },
+                                { id: 'multiple', label: '☑️ Çoklu Seçmeli' },
+                                { id: 'boolean', label: '⚖️ Doğru / Yanlış' },
+                                { id: 'fill', label: '✍️ Boşluk Doldurma' },
+                              ] as const
+                            ).map((tab) => (
+                              <button
+                                key={tab.id}
+                                type="button"
+                                onClick={() => handleUpdateQuestionType(qIdx, tab.id)}
+                                className={`flex-1 py-1 px-2 rounded-lg text-[11px] font-black transition-all cursor-pointer whitespace-nowrap text-center ${
+                                  qType === tab.id
+                                    ? 'bg-white dark:bg-gray-800 text-[#4B075F] dark:text-white shadow-xs'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900'
+                                }`}
+                              >
+                                {tab.label}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Soru Metni */}
+                          <div>
+                            <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1">
+                              {qType === 'fill'
+                                ? 'Soru Cümlesi (Boşluğu _______ şeklinde belirtin):'
+                                : 'Soru Cümlesi / Metni:'}
+                            </label>
+                            <textarea
+                              value={question.text}
+                              onChange={(e) => handleUpdateQuestionText(qIdx, e.target.value)}
+                              placeholder={
+                                qType === 'fill'
+                                  ? 'Örn: Türkiye Cumhuriyeti\'nin başkenti _______ şehridir.'
+                                  : qType === 'boolean'
+                                  ? 'Örn: Güneş Sistemi\'ndeki en büyük gezegen Jüpiter\'dir.'
+                                  : 'Örn: Aşağıdaki sayılardan hangisi 4 basamaklı en küçük çifttir?'
+                              }
+                              rows={2}
+                              className="w-full p-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs sm:text-sm font-semibold text-gray-900 dark:text-white outline-hidden focus:border-[#8D49A6]"
+                            />
+                          </div>
+
+                          {/* Soru Tipine Göre Cevap Editörü */}
+
+                          {/* 1. DOĞRU / YANLIŞ SEÇENEKLERİ */}
+                          {qType === 'boolean' && (
+                            <div className="space-y-1.5 pt-1">
+                              <span className="block text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                Doğru olan cevaba dokunun:
+                              </span>
+                              <div className="grid grid-cols-2 gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleSelectCorrectOption(qIdx, 'true')}
+                                  className={`p-3 rounded-xl border-2 font-black text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                                    question.correctOptionId === 'true'
+                                      ? 'bg-emerald-500 text-white border-emerald-600 shadow-md ring-2 ring-emerald-400/40'
+                                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-emerald-400'
                                   }`}
                                 >
-                                  {/* Doğru Seçim Butonu */}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSelectCorrectOption(qIdx, opt.id)}
-                                    className={`w-7 h-7 rounded-lg font-black text-xs shrink-0 flex items-center justify-center cursor-pointer transition-all ${
-                                      isCorrect
-                                        ? 'bg-emerald-600 text-white shadow-xs'
-                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
-                                    }`}
-                                    title={`${opt.id} şıkkını doğru cevap yap`}
-                                  >
-                                    {isCorrect ? '✓ ' + opt.id : opt.id}
-                                  </button>
+                                  <span>✓ DOĞRU</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSelectCorrectOption(qIdx, 'false')}
+                                  className={`p-3 rounded-xl border-2 font-black text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                                    question.correctOptionId === 'false'
+                                      ? 'bg-rose-500 text-white border-rose-600 shadow-md ring-2 ring-rose-400/40'
+                                      : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-rose-400'
+                                  }`}
+                                >
+                                  <span>✗ YANLIŞ</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
 
-                                  <input
-                                    type="text"
-                                    value={opt.text}
-                                    onChange={(e) => handleUpdateOptionText(qIdx, opt.id, e.target.value)}
-                                    placeholder={`${opt.id} Şıkkı Cevap Metni`}
-                                    className="flex-1 min-w-0 bg-transparent text-xs font-semibold text-gray-900 dark:text-white outline-hidden"
-                                  />
+                          {/* 2. BOŞLUK DOLDURMA ALANI */}
+                          {qType === 'fill' && (
+                            <div className="space-y-3 pt-1">
+                              <div className="space-y-1">
+                                <label className="block text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                  ✓ Doğru Kabul Edilecek Cevap Kelimesi:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={question.correctAnswerText || ''}
+                                  onChange={(e) => handleUpdateFillAnswer(qIdx, e.target.value)}
+                                  placeholder="Örn: Ankara"
+                                  className="w-full h-10 px-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border-2 border-emerald-500 text-xs font-bold text-emerald-900 dark:text-emerald-200 outline-hidden focus:ring-2 focus:ring-emerald-400"
+                                />
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                  Akıllı Tahta Seçenek Havuzu (Dokunarak seçim için şıklar):
+                                </label>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {question.options.map((opt) => (
+                                    <div
+                                      key={opt.id}
+                                      className="p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center gap-2"
+                                    >
+                                      <span className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-800 text-[11px] font-black flex items-center justify-center shrink-0">
+                                        {opt.id}
+                                      </span>
+                                      <input
+                                        type="text"
+                                        value={opt.text}
+                                        onChange={(e) => handleUpdateOptionText(qIdx, opt.id, e.target.value)}
+                                        placeholder={`Seçenek ${opt.id}`}
+                                        className="flex-1 min-w-0 bg-transparent text-xs font-semibold text-gray-900 dark:text-white outline-hidden"
+                                      />
+                                    </div>
+                                  ))}
                                 </div>
-                              )
-                            })}
-                          </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 3. ÇOKTAN SEÇMELİ VEYA ÇOKLU SEÇMELİ */}
+                          {(qType === 'single' || qType === 'multiple') && (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                <span>
+                                  {qType === 'multiple'
+                                    ? 'Şıklar (Birden fazla doğru şıkka dokunabilirsiniz):'
+                                    : 'Şıklar (Doğru cevaba dokunup yeşil yapın):'}
+                                </span>
+                                <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">
+                                  {qType === 'multiple'
+                                    ? `Doğrular: ${(question.correctOptionIds || [question.correctOptionId || 'A']).join(', ')}`
+                                    : `Doğru: ${question.correctOptionId}`}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {question.options.map((opt) => {
+                                  const isCorrect =
+                                    qType === 'multiple'
+                                      ? (question.correctOptionIds || [question.correctOptionId]).includes(opt.id)
+                                      : question.correctOptionId === opt.id
+
+                                  return (
+                                    <div
+                                      key={opt.id}
+                                      className={`p-2 rounded-xl border flex items-center gap-2 transition-all ${
+                                        isCorrect
+                                          ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500/20'
+                                          : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700'
+                                      }`}
+                                    >
+                                      {/* Doğru Seçim Butonu */}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (qType === 'multiple') {
+                                            handleToggleMultipleCorrectOption(qIdx, opt.id)
+                                          } else {
+                                            handleSelectCorrectOption(qIdx, opt.id)
+                                          }
+                                        }}
+                                        className={`w-7 h-7 rounded-lg font-black text-xs shrink-0 flex items-center justify-center cursor-pointer transition-all ${
+                                          isCorrect
+                                            ? 'bg-emerald-600 text-white shadow-xs'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
+                                        }`}
+                                        title={`${opt.id} şıkkını doğru cevap olarak işaretle`}
+                                      >
+                                        {isCorrect ? '✓ ' + opt.id : opt.id}
+                                      </button>
+
+                                      <input
+                                        type="text"
+                                        value={opt.text}
+                                        onChange={(e) => handleUpdateOptionText(qIdx, opt.id, e.target.value)}
+                                        placeholder={`${opt.id} Şıkkı Cevap Metni`}
+                                        className="flex-1 min-w-0 bg-transparent text-xs font-semibold text-gray-900 dark:text-white outline-hidden"
+                                      />
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
+                      )
+                    })}
+
+                    {/* ── YENİ SORU EKLEME BUTONU (SON SORUNUN ALTINDA) ── */}
+                    <button
+                      type="button"
+                      onClick={handleAddQuestion}
+                      className="w-full py-3.5 rounded-2xl border-2 border-dashed border-[#8D49A6]/40 hover:border-[#8D49A6] bg-[#FAF5FC]/80 hover:bg-[#FAF5FC] dark:bg-[#261730]/40 dark:hover:bg-[#261730]/70 text-[#4B075F] dark:text-[#E9D5FF] font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs hover:shadow-md transition-all cursor-pointer group active:scale-[0.99]"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-brand-gradient text-white flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform">
+                        <Plus size={15} />
                       </div>
-                    ))}
+                      <span>+ Yeni Soru Ekle (Test, Çoklu, D/Y veya Boşluk Doldurma)</span>
+                    </button>
                   </div>
                 </div>
               )}

@@ -1722,8 +1722,11 @@ function playAudioChime(frequency1 = 880, frequency2 = 1174.66) {
 interface LiveExamQuestionItem {
   id: string
   text: string
+  type?: 'single' | 'multiple' | 'boolean' | 'fill'
   options: { id: string; text: string }[]
   correctOptionId: string
+  correctOptionIds?: string[]
+  correctAnswerText?: string
   points?: number
 }
 
@@ -1745,6 +1748,7 @@ const DEFAULT_PANO_EXAM: LiveExamData = {
   questions: [
     {
       id: 'q1',
+      type: 'single',
       text: 'Aşağıdaki sayılardan hangisi 4 basamaklı en küçük çift doğal sayıdır?',
       options: [
         { id: 'A', text: '1000' },
@@ -1757,38 +1761,41 @@ const DEFAULT_PANO_EXAM: LiveExamData = {
     },
     {
       id: 'q2',
-      text: 'Bir dikdörtgenin kısa kenarı 6 cm, uzun kenarı 12 cm ise bu dikdörtgenin çevresi kaç cm\'dir?',
+      type: 'multiple',
+      text: 'Aşağıdaki sayılardan hangileri hem 2’ye hem de 3’e kalansız bölünebilir (6’nın katlarıdır)?',
       options: [
-        { id: 'A', text: '18 cm' },
-        { id: 'B', text: '36 cm' },
-        { id: 'C', text: '72 cm' },
-        { id: 'D', text: '24 cm' },
+        { id: 'A', text: '12' },
+        { id: 'B', text: '18' },
+        { id: 'C', text: '25' },
+        { id: 'D', text: '30' },
       ],
-      correctOptionId: 'B',
+      correctOptionId: 'A',
+      correctOptionIds: ['A', 'B', 'D'],
       points: 25,
     },
     {
       id: 'q3',
-      text: 'Güneş Sistemi’ndeki yaşam barındırdığı bilinen tek gezegen hangisidir?',
+      type: 'boolean',
+      text: 'Dünya, Güneş Sistemi’nde üzerinde yaşam olduğu kanıtlanan tek gezegendir.',
       options: [
-        { id: 'A', text: 'Mars' },
-        { id: 'B', text: 'Dünya' },
-        { id: 'C', text: 'Jüpiter' },
-        { id: 'D', text: 'Venüs' },
+        { id: 'A', text: 'DOĞRU' },
+        { id: 'B', text: 'YANLIŞ' },
       ],
-      correctOptionId: 'B',
+      correctOptionId: 'A',
       points: 25,
     },
     {
       id: 'q4',
-      text: 'Aşağıdaki cümlelerin hangisinde mecaz anlamlı bir sözcük kullanılmıştır?',
+      type: 'fill',
+      text: 'Türkiye Cumhuriyeti’nin başkenti _______ ilidir.',
       options: [
-        { id: 'A', text: 'Bugün hava oldukça sıcaktı.' },
-        { id: 'B', text: 'Sözleriyle kalbimi kırdı.' },
-        { id: 'C', text: 'Kitabın kapağı yırtılmış.' },
-        { id: 'D', text: 'Bahçedeki ağaçlar çiçek açtı.' },
+        { id: 'A', text: 'Ankara' },
+        { id: 'B', text: 'İstanbul' },
+        { id: 'C', text: 'İzmir' },
+        { id: 'D', text: 'Bursa' },
       ],
-      correctOptionId: 'B',
+      correctOptionId: 'A',
+      correctAnswerText: 'Ankara',
       points: 25,
     },
   ],
@@ -1810,12 +1817,25 @@ function MockExamModal({
 }) {
   const [activeQuestion, setActiveQuestion] = useState(0)
   const [questionAnswers, setQuestionAnswers] = useState<
-    Record<number, { selectedId: string; isCorrect: boolean; studentName?: string }>
+    Record<
+      number,
+      {
+        selectedId?: string
+        selectedIds?: string[]
+        isCorrect: boolean
+        studentName?: string
+        summaryText?: string
+      }
+    >
   >({})
   const [questionStudents, setQuestionStudents] = useState<Record<number, string>>({})
   const [isRollingStudent, setIsRollingStudent] = useState(false)
   const [rollingName, setRollingName] = useState<string>('')
   const [isFinished, setIsFinished] = useState(false)
+
+  // Transient selection states for interactive questions
+  const [selectedMultipleIds, setSelectedMultipleIds] = useState<string[]>([])
+  const [selectedFillWord, setSelectedFillWord] = useState<string>('')
 
   // Dynamic Exam loaded from Teacher Screen or Default
   const [examData, setExamData] = useState<LiveExamData>(() => {
@@ -1853,13 +1873,23 @@ function MockExamModal({
     }
   }, [boardId])
 
-  const questions = examData?.questions && examData.questions.length > 0 ? examData.questions : DEFAULT_PANO_EXAM.questions
+  const questions =
+    examData?.questions && examData.questions.length > 0
+      ? examData.questions
+      : DEFAULT_PANO_EXAM.questions
   const curQ = questions[activeQuestion] || questions[0]
+  const qType = curQ.type || 'single'
   const currentAnswer = questionAnswers[activeQuestion]
   const currentAssignedStudent = questionStudents[activeQuestion] || rollingName
 
-  // Student Picker from Class Pool with Fast Rolling Animation
-  const handlePickStudent = () => {
+  // Reset interactive selections on question change
+  useEffect(() => {
+    setSelectedMultipleIds([])
+    setSelectedFillWord('')
+  }, [activeQuestion])
+
+  // Student Picker with Fast Rolling Animation
+  const handlePickStudent = useCallback(() => {
     if (isRollingStudent) return
     setIsRollingStudent(true)
 
@@ -1899,17 +1929,28 @@ function MockExamModal({
       }
     }
     run()
-  }
+  }, [isRollingStudent, students, activeQuestion])
 
-  // Handle Option Click (Instant Correct/Wrong Feedback)
-  const handleSelectOption = (optId: string) => {
-    if (currentAnswer) return // Already answered this step
+  // AUTO-ROLL EFFECT: Automatically pick random student when question opens/changes if unassigned
+  useEffect(() => {
+    if (!isOpen || isFinished) return
+    if (!questionStudents[activeQuestion] && !questionAnswers[activeQuestion]) {
+      const timer = setTimeout(() => {
+        handlePickStudent()
+      }, 400)
+      return () => clearTimeout(timer)
+    }
+  }, [activeQuestion, isOpen, isFinished, questionStudents, questionAnswers, handlePickStudent])
+
+  // 1. Single Choice Selection Handler
+  const handleSelectSingleOption = (optId: string) => {
+    if (currentAnswer) return
 
     const isCorrect = optId === curQ.correctOptionId
     if (isCorrect) {
-      playAudioChime(523.25, 659.25) // High triumph chime
+      playAudioChime(523.25, 659.25)
     } else {
-      playAudioChime(260, 180) // Low chime
+      playAudioChime(260, 180)
     }
 
     const assigned = currentAssignedStudent || 'Öğrenci'
@@ -1919,6 +1960,104 @@ function MockExamModal({
         selectedId: optId,
         isCorrect,
         studentName: assigned,
+        summaryText: `${optId} Şıkkı`,
+      },
+    }))
+  }
+
+  // 2. Multiple Choice Handler
+  const handleToggleMultipleOption = (optId: string) => {
+    if (currentAnswer) return
+    setSelectedMultipleIds((prev) =>
+      prev.includes(optId) ? prev.filter((id) => id !== optId) : [...prev, optId]
+    )
+  }
+
+  const handleConfirmMultiple = () => {
+    if (currentAnswer || selectedMultipleIds.length === 0) return
+
+    const correctList =
+      curQ.correctOptionIds && curQ.correctOptionIds.length > 0
+        ? curQ.correctOptionIds
+        : [curQ.correctOptionId || 'A']
+
+    const isCorrect =
+      selectedMultipleIds.length === correctList.length &&
+      selectedMultipleIds.every((id) => correctList.includes(id))
+
+    if (isCorrect) {
+      playAudioChime(523.25, 659.25)
+    } else {
+      playAudioChime(260, 180)
+    }
+
+    const assigned = currentAssignedStudent || 'Öğrenci'
+    setQuestionAnswers((prev) => ({
+      ...prev,
+      [activeQuestion]: {
+        selectedIds: selectedMultipleIds,
+        selectedId: selectedMultipleIds.join(', '),
+        isCorrect,
+        studentName: assigned,
+        summaryText: `Seçim: ${selectedMultipleIds.join(', ')}`,
+      },
+    }))
+  }
+
+  // 3. Boolean (True/False) Handler
+  const handleSelectBoolean = (optId: string) => {
+    if (currentAnswer) return
+    const isCorrect = optId === (curQ.correctOptionId || 'A')
+    if (isCorrect) {
+      playAudioChime(523.25, 659.25)
+    } else {
+      playAudioChime(260, 180)
+    }
+
+    const assigned = currentAssignedStudent || 'Öğrenci'
+    const chosenText = optId === 'A' ? 'DOĞRU' : 'YANLIŞ'
+    setQuestionAnswers((prev) => ({
+      ...prev,
+      [activeQuestion]: {
+        selectedId: optId,
+        isCorrect,
+        studentName: assigned,
+        summaryText: chosenText,
+      },
+    }))
+  }
+
+  // 4. Fill in the Blank Handler
+  const handleSelectFillWord = (word: string) => {
+    if (currentAnswer) return
+    setSelectedFillWord(word)
+  }
+
+  const handleConfirmFill = () => {
+    if (currentAnswer || !selectedFillWord) return
+
+    const targetAnswer = (
+      curQ.correctAnswerText ||
+      curQ.options.find((o) => o.id === curQ.correctOptionId)?.text ||
+      ''
+    ).trim().toLowerCase()
+
+    const isCorrect = selectedFillWord.trim().toLowerCase() === targetAnswer
+
+    if (isCorrect) {
+      playAudioChime(523.25, 659.25)
+    } else {
+      playAudioChime(260, 180)
+    }
+
+    const assigned = currentAssignedStudent || 'Öğrenci'
+    setQuestionAnswers((prev) => ({
+      ...prev,
+      [activeQuestion]: {
+        selectedId: selectedFillWord,
+        isCorrect,
+        studentName: assigned,
+        summaryText: `Kelime: ${selectedFillWord}`,
       },
     }))
   }
@@ -1980,38 +2119,61 @@ function MockExamModal({
             {/* Content: Step-by-Step Questions or Final Summary */}
             {!isFinished ? (
               <div className="space-y-6">
-                {/* 1. Sınıftan Rastgele Öğrenci Seçim Alanı */}
-                <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-[#F0D8FA]/70 via-[#FAF5FC] to-[#F0D8FA]/70 dark:from-[#350444]/60 dark:via-[#261730] dark:to-[#350444]/60 border-2 border-[#8D49A6]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={handlePickStudent}
-                      disabled={isRollingStudent || !!currentAnswer}
-                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#4B075F] to-[#8D49A6] hover:opacity-95 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-purple-950/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
-                    >
-                      <Dice5 className={`w-4 h-4 ${isRollingStudent ? 'animate-spin' : ''}`} />
-                      <span>{isRollingStudent ? 'Öğrenci Seçiliyor...' : '🎲 Sınıftan Rastgele Öğrenci Seç'}</span>
-                    </button>
-                    {isRollingStudent && (
-                      <span className="font-mono text-sm sm:text-base font-black text-[#8D49A6] dark:text-[#F17AE6] animate-pulse">
-                        {rollingName}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {currentAssignedStudent ? (
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-[#1E1124] border border-[#8D49A6]/40 shadow-xs">
-                        <Users className="w-4 h-4 text-[#8D49A6]" />
-                        <span className="text-xs sm:text-sm font-black text-[#4B075F] dark:text-[#F17AE6]">
-                          Sıradaki Cevaplayıcı: <strong>{currentAssignedStudent}</strong>
+                {/* 1. ÖĞRENCİ SEÇİM SAHNESİ (GÖZ ALICI, ÇOK BELİRGİN & ANİMASYONLU) */}
+                <div className="relative overflow-hidden rounded-3xl p-5 sm:p-6 bg-gradient-to-r from-[#4B075F] via-[#7B2CBF] to-[#D914C8] text-white shadow-xl shadow-purple-950/25 border-2 border-white/20">
+                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-pink-100 flex items-center gap-1.5 border border-white/25">
+                          <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                          {isRollingStudent
+                            ? 'ŞANSLI ÖĞRENCİ BELİRLENİYOR...'
+                            : 'SÖZ HAKKI SIRASI • TAHTAYA DAVET EDİLDİ ✨'}
                         </span>
                       </div>
-                    ) : (
-                      <span className="text-xs font-semibold text-slate-400">
-                        Soruyu yanıtlayacak öğrenciyi tahtada belirlemek için dokunun
-                      </span>
-                    )}
+
+                      <div className="flex items-center gap-3">
+                        {isRollingStudent ? (
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl sm:text-4xl md:text-5xl font-black text-amber-300 tracking-wide font-mono animate-pulse">
+                              {rollingName || 'Öğrenci Seçiliyor...'}
+                            </span>
+                            <Dice5 className="w-8 h-8 text-amber-300 animate-spin" />
+                          </div>
+                        ) : currentAssignedStudent ? (
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className="text-3xl sm:text-4xl md:text-5xl font-black text-amber-300 drop-shadow-md tracking-tight">
+                              {currentAssignedStudent}
+                            </span>
+                            <span className="px-3 py-1 rounded-xl bg-amber-400/20 border border-amber-300/40 text-amber-200 text-xs sm:text-sm font-black">
+                              🎤 Sıra Sende!
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xl sm:text-2xl font-bold text-white/80">
+                            Öğrenci belirleniyor...
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs sm:text-sm text-purple-100/80 font-medium">
+                        {isRollingStudent
+                          ? 'Sınıf listesinden rastgele öğrenci çarkı dönüyor...'
+                          : 'Bu soruyu akıllı tahtada cevaplamak için seçildin, cevabına dokun!'}
+                      </p>
+                    </div>
+
+                    <div className="shrink-0 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handlePickStudent}
+                        disabled={isRollingStudent || !!currentAnswer}
+                        className="px-5 py-3 rounded-2xl bg-white text-[#4B075F] hover:bg-amber-100 font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        <Dice5 className={`w-4 h-4 text-[#8D49A6] ${isRollingStudent ? 'animate-spin' : ''}`} />
+                        <span>{isRollingStudent ? 'Çark Dönüyor...' : '🎲 Başka Öğrenci Seç (Yeniden Çark)'}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -2049,84 +2211,371 @@ function MockExamModal({
 
                 {/* 3. Büyük Soru Kutusu (Uzaktan Kolay Görünür) */}
                 <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#FAF5FC] via-white to-[#F9F5FA] dark:from-[#261730] dark:via-[#1E1124] dark:to-[#17101C] border-2 border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-md">
-                  <span className="inline-block text-xs font-black uppercase tracking-wider text-[#8D49A6] dark:text-[#E9D5FF] mb-2">
-                    SORU {activeQuestion + 1}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-950 dark:text-white leading-relaxed">
-                    {curQ.text}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className="text-xs font-black uppercase tracking-wider text-[#8D49A6] dark:text-[#E9D5FF]">
+                      SORU {activeQuestion + 1}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]">
+                      {qType === 'multiple'
+                        ? '☑️ Çoklu Seçmeli (Birden Fazla Doğru)'
+                        : qType === 'boolean'
+                        ? '⚖️ Doğru / Yanlış'
+                        : qType === 'fill'
+                        ? '✍️ Boşluk Doldurma'
+                        : '🎯 Çoktan Seçmeli (Tek Doğru)'}
+                    </span>
+                  </div>
+
+                  {/* Soru Metni: Boşluk doldurma ise boşluk alanı vurgulu */}
+                  {qType === 'fill' ? (
+                    <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-950 dark:text-white leading-relaxed">
+                      {curQ.text.includes('_______') ? (
+                        <>
+                          {curQ.text.split('_______')[0]}
+                          <span
+                            className={`inline-flex items-center px-4 py-1 mx-2 rounded-2xl border-2 font-black transition-all ${
+                              currentAnswer
+                                ? currentAnswer.isCorrect
+                                  ? 'bg-emerald-500 text-white border-emerald-400'
+                                  : 'bg-rose-500 text-white border-rose-400'
+                                : selectedFillWord
+                                ? 'bg-amber-400 text-slate-950 border-amber-300 ring-4 ring-amber-300/40 animate-pulse'
+                                : 'bg-purple-100 dark:bg-purple-950/70 border-dashed border-purple-500 text-purple-700 dark:text-purple-300'
+                            }`}
+                          >
+                            {selectedFillWord || '_______ (Seçiniz)'}
+                          </span>
+                          {curQ.text.split('_______')[1]}
+                        </>
+                      ) : (
+                        curQ.text
+                      )}
+                    </h3>
+                  ) : (
+                    <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-950 dark:text-white leading-relaxed">
+                      {curQ.text}
+                    </h3>
+                  )}
                 </div>
 
-                {/* 4. Şıklar (Büyük Dokunmatik Kartlar) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {curQ.options.map((opt) => {
-                    const isSelected = currentAnswer?.selectedId === opt.id
-                    const isCorrectAnswer = opt.id === curQ.correctOptionId
-                    const isAnswered = !!currentAnswer
+                {/* 4. TÜRE ÖZEL CEVAP SEÇİM ALANI */}
 
-                    let buttonStyle =
-                      'bg-white dark:bg-[#261730]/90 text-slate-900 dark:text-white border-2 border-[#E8DFEB] dark:border-[#49364F] hover:border-[#8D49A6]'
-                    let badgeStyle = 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]'
+                {/* 4A. DOĞRU / YANLIŞ SEÇENEKLERİ */}
+                {qType === 'boolean' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* DOĞRU BUTONU */}
+                    {(() => {
+                      const isSelected = currentAnswer?.selectedId === 'A'
+                      const isCorrectChoice = (curQ.correctOptionId || 'A') === 'A'
+                      const isAnswered = !!currentAnswer
 
-                    if (isAnswered) {
-                      if (isSelected) {
-                        if (currentAnswer.isCorrect) {
-                          // DOĞRU CEVAP: YEŞİL & BAŞARI PARILTISI
-                          buttonStyle =
-                            'bg-emerald-600 border-2 border-emerald-500 text-white shadow-xl shadow-emerald-600/30 ring-4 ring-emerald-400 scale-[1.02]'
-                          badgeStyle = 'bg-white text-emerald-700'
+                      let style =
+                        'bg-white dark:bg-[#261730]/90 border-2 border-emerald-500/30 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20'
+                      if (isAnswered) {
+                        if (isSelected) {
+                          style = currentAnswer.isCorrect
+                            ? 'bg-emerald-600 border-2 border-emerald-400 text-white shadow-xl shadow-emerald-600/30 ring-4 ring-emerald-400'
+                            : 'bg-rose-600 border-2 border-rose-400 text-white shadow-xl shadow-rose-600/30 ring-4 ring-rose-400'
+                        } else if (isCorrectChoice) {
+                          style =
+                            'bg-emerald-500/20 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 ring-2 ring-emerald-500/40 animate-pulse'
                         } else {
-                          // YANLIŞ CEVAP: KIRMIZI
-                          buttonStyle =
-                            'bg-rose-600 border-2 border-rose-500 text-white shadow-xl shadow-rose-600/30 ring-4 ring-rose-400'
-                          badgeStyle = 'bg-white text-rose-700'
+                          style = 'opacity-40 border-slate-200 dark:border-slate-800'
                         }
-                      } else if (isCorrectAnswer) {
-                        // Yanlış seçildiğinde doğru şık yeşil ile gösterilir
-                        buttonStyle =
-                          'bg-emerald-500/15 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 ring-2 ring-emerald-500/40 animate-pulse'
-                        badgeStyle = 'bg-emerald-600 text-white'
-                      } else {
-                        buttonStyle = 'opacity-40 border-slate-200 dark:border-slate-800'
                       }
-                    }
 
-                    return (
-                      <motion.button
-                        key={opt.id}
-                        type="button"
-                        whileHover={!isAnswered ? { scale: 1.01 } : {}}
-                        whileTap={!isAnswered ? { scale: 0.99 } : {}}
-                        onClick={() => handleSelectOption(opt.id)}
-                        disabled={isAnswered}
-                        className={`p-5 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center gap-4 transition-all text-left cursor-pointer ${buttonStyle}`}
-                      >
-                        <span
-                          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl font-black text-lg sm:text-xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${badgeStyle}`}
+                      return (
+                        <motion.button
+                          type="button"
+                          whileHover={!isAnswered ? { scale: 1.01 } : {}}
+                          whileTap={!isAnswered ? { scale: 0.99 } : {}}
+                          onClick={() => handleSelectBoolean('A')}
+                          disabled={isAnswered}
+                          className={`p-6 sm:p-8 rounded-3xl flex items-center justify-between transition-all cursor-pointer ${style}`}
                         >
-                          {isAnswered && isSelected
-                            ? currentAnswer.isCorrect
-                              ? '✓'
-                              : '✗'
-                            : isAnswered && isCorrectAnswer
-                            ? '✓'
-                            : opt.id}
-                        </span>
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-2xl shadow-md">
+                              ✓
+                            </div>
+                            <div className="text-left">
+                              <span className="block text-2xl sm:text-3xl font-black">DOĞRU</span>
+                              <span className="text-xs sm:text-sm opacity-80 font-bold">Önerme doğru</span>
+                            </div>
+                          </div>
+                          <span className="text-xl font-black opacity-60">A</span>
+                        </motion.button>
+                      )
+                    })()}
 
-                        <span className="text-base sm:text-lg md:text-xl font-bold flex-1 leading-snug">
-                          {opt.text}
-                        </span>
-                      </motion.button>
-                    )
-                  })}
-                </div>
+                    {/* YANLIŞ BUTONU */}
+                    {(() => {
+                      const isSelected = currentAnswer?.selectedId === 'B'
+                      const isCorrectChoice = (curQ.correctOptionId || 'A') === 'B'
+                      const isAnswered = !!currentAnswer
+
+                      let style =
+                        'bg-white dark:bg-[#261730]/90 border-2 border-rose-500/30 hover:border-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-950/20'
+                      if (isAnswered) {
+                        if (isSelected) {
+                          style = currentAnswer.isCorrect
+                            ? 'bg-emerald-600 border-2 border-emerald-400 text-white shadow-xl shadow-emerald-600/30 ring-4 ring-emerald-400'
+                            : 'bg-rose-600 border-2 border-rose-400 text-white shadow-xl shadow-rose-600/30 ring-4 ring-rose-400'
+                        } else if (isCorrectChoice) {
+                          style =
+                            'bg-emerald-500/20 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 ring-2 ring-emerald-500/40 animate-pulse'
+                        } else {
+                          style = 'opacity-40 border-slate-200 dark:border-slate-800'
+                        }
+                      }
+
+                      return (
+                        <motion.button
+                          type="button"
+                          whileHover={!isAnswered ? { scale: 1.01 } : {}}
+                          whileTap={!isAnswered ? { scale: 0.99 } : {}}
+                          onClick={() => handleSelectBoolean('B')}
+                          disabled={isAnswered}
+                          className={`p-6 sm:p-8 rounded-3xl flex items-center justify-between transition-all cursor-pointer ${style}`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-black text-2xl shadow-md">
+                              ✗
+                            </div>
+                            <div className="text-left">
+                              <span className="block text-2xl sm:text-3xl font-black">YANLIŞ</span>
+                              <span className="text-xs sm:text-sm opacity-80 font-bold">Önerme yanlış</span>
+                            </div>
+                          </div>
+                          <span className="text-xl font-black opacity-60">B</span>
+                        </motion.button>
+                      )
+                    })()}
+                  </div>
+                )}
+
+                {/* 4B. BOŞLUK DOLDURMA KELİME HAVUZU */}
+                {qType === 'fill' && (
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-300 dark:border-purple-800 flex items-center justify-between flex-wrap gap-2">
+                      <span className="text-xs sm:text-sm font-black text-[#4B075F] dark:text-[#E9D5FF]">
+                        Kelime Havuzundan Doğru Kelimeye Dokunun:
+                      </span>
+                      {selectedFillWord && !currentAnswer && (
+                        <button
+                          type="button"
+                          onClick={handleConfirmFill}
+                          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs sm:text-sm font-black shadow-md hover:opacity-95 active:scale-95 cursor-pointer transition-all flex items-center gap-1.5"
+                        >
+                          <span>✓ Boşluğu Doldur & Onayla</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {curQ.options.map((opt) => {
+                        const isSelected = selectedFillWord === opt.text
+                        const isAnswered = !!currentAnswer
+                        const targetAnswer = (
+                          curQ.correctAnswerText ||
+                          curQ.options.find((o) => o.id === curQ.correctOptionId)?.text ||
+                          ''
+                        )
+                          .trim()
+                          .toLowerCase()
+                        const isCorrectWord = opt.text.trim().toLowerCase() === targetAnswer
+
+                        let btnStyle =
+                          'bg-white dark:bg-[#261730] border-2 border-[#E8DFEB] dark:border-[#49364F] hover:border-[#8D49A6]'
+                        if (isAnswered) {
+                          if (isSelected) {
+                            btnStyle = currentAnswer.isCorrect
+                              ? 'bg-emerald-600 text-white border-emerald-400 ring-4 ring-emerald-400'
+                              : 'bg-rose-600 text-white border-rose-400 ring-4 ring-rose-400'
+                          } else if (isCorrectWord) {
+                            btnStyle =
+                              'bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border-2 border-emerald-500 animate-pulse'
+                          } else {
+                            btnStyle = 'opacity-40'
+                          }
+                        } else if (isSelected) {
+                          btnStyle = 'bg-amber-400 text-slate-950 border-amber-500 ring-4 ring-amber-300'
+                        }
+
+                        return (
+                          <motion.button
+                            key={opt.id}
+                            type="button"
+                            whileHover={!isAnswered ? { scale: 1.02 } : {}}
+                            whileTap={!isAnswered ? { scale: 0.98 } : {}}
+                            onClick={() => handleSelectFillWord(opt.text)}
+                            disabled={isAnswered}
+                            className={`p-4 sm:p-5 rounded-2xl font-black text-base sm:text-lg text-center cursor-pointer transition-all shadow-xs ${btnStyle}`}
+                          >
+                            {opt.text}
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4C. ÇOKLU SEÇMELİ ŞIKLAR */}
+                {qType === 'multiple' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 flex-wrap gap-2">
+                      <span className="text-xs sm:text-sm font-bold text-[#4B075F] dark:text-[#E9D5FF]">
+                        Doğru olduğunu düşündüğünüz tüm şıkları işaretleyin ({selectedMultipleIds.length} şık seçildi):
+                      </span>
+                      {!currentAnswer && (
+                        <button
+                          type="button"
+                          disabled={selectedMultipleIds.length === 0}
+                          onClick={handleConfirmMultiple}
+                          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 disabled:opacity-40 text-white text-xs sm:text-sm font-black shadow-md hover:opacity-95 active:scale-95 cursor-pointer transition-all flex items-center gap-1.5"
+                        >
+                          <span>✓ Seçimleri Onayla</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {curQ.options.map((opt) => {
+                        const isSelected = selectedMultipleIds.includes(opt.id)
+                        const targetIds = curQ.correctOptionIds || [curQ.correctOptionId || 'A']
+                        const isTargetCorrect = targetIds.includes(opt.id)
+                        const isAnswered = !!currentAnswer
+
+                        let buttonStyle =
+                          'bg-white dark:bg-[#261730]/90 text-slate-900 dark:text-white border-2 border-[#E8DFEB] dark:border-[#49364F]'
+                        let badgeStyle =
+                          'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]'
+
+                        if (isAnswered) {
+                          if (isSelected) {
+                            if (isTargetCorrect) {
+                              buttonStyle =
+                                'bg-emerald-600 border-2 border-emerald-500 text-white ring-4 ring-emerald-400'
+                              badgeStyle = 'bg-white text-emerald-700'
+                            } else {
+                              buttonStyle =
+                                'bg-rose-600 border-2 border-rose-500 text-white ring-4 ring-rose-400'
+                              badgeStyle = 'bg-white text-rose-700'
+                            }
+                          } else if (isTargetCorrect) {
+                            buttonStyle =
+                              'bg-emerald-500/15 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 ring-2 ring-emerald-500/40 animate-pulse'
+                            badgeStyle = 'bg-emerald-600 text-white'
+                          } else {
+                            buttonStyle = 'opacity-40 border-slate-200 dark:border-slate-800'
+                          }
+                        } else if (isSelected) {
+                          buttonStyle =
+                            'bg-[#FAF5FC] dark:bg-[#350444] border-2 border-[#8D49A6] ring-4 ring-[#8D49A6]/20'
+                          badgeStyle = 'bg-brand-gradient text-white shadow-xs'
+                        }
+
+                        return (
+                          <motion.button
+                            key={opt.id}
+                            type="button"
+                            whileHover={!isAnswered ? { scale: 1.01 } : {}}
+                            whileTap={!isAnswered ? { scale: 0.99 } : {}}
+                            onClick={() => handleToggleMultipleOption(opt.id)}
+                            disabled={isAnswered}
+                            className={`p-5 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center gap-4 transition-all text-left cursor-pointer ${buttonStyle}`}
+                          >
+                            <span
+                              className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl font-black text-lg sm:text-xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${badgeStyle}`}
+                            >
+                              {isAnswered && isSelected
+                                ? isTargetCorrect
+                                  ? '✓'
+                                  : '✗'
+                                : isAnswered && isTargetCorrect
+                                ? '✓'
+                                : isSelected
+                                ? '✓ ' + opt.id
+                                : opt.id}
+                            </span>
+                            <span className="text-base sm:text-lg md:text-xl font-bold flex-1 leading-snug">
+                              {opt.text}
+                            </span>
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4D. ÇOKTAN SEÇMELİ ŞIKLAR (TEK DOĞRU) */}
+                {qType === 'single' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {curQ.options.map((opt) => {
+                      const isSelected = currentAnswer?.selectedId === opt.id
+                      const isCorrectAnswer = opt.id === curQ.correctOptionId
+                      const isAnswered = !!currentAnswer
+
+                      let buttonStyle =
+                        'bg-white dark:bg-[#261730]/90 text-slate-900 dark:text-white border-2 border-[#E8DFEB] dark:border-[#49364F] hover:border-[#8D49A6]'
+                      let badgeStyle = 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]'
+
+                      if (isAnswered) {
+                        if (isSelected) {
+                          if (currentAnswer.isCorrect) {
+                            buttonStyle =
+                              'bg-emerald-600 border-2 border-emerald-500 text-white shadow-xl shadow-emerald-600/30 ring-4 ring-emerald-400 scale-[1.02]'
+                            badgeStyle = 'bg-white text-emerald-700'
+                          } else {
+                            buttonStyle =
+                              'bg-rose-600 border-2 border-rose-500 text-white shadow-xl shadow-rose-600/30 ring-4 ring-rose-400'
+                            badgeStyle = 'bg-white text-rose-700'
+                          }
+                        } else if (isCorrectAnswer) {
+                          buttonStyle =
+                            'bg-emerald-500/15 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 ring-2 ring-emerald-500/40 animate-pulse'
+                          badgeStyle = 'bg-emerald-600 text-white'
+                        } else {
+                          buttonStyle = 'opacity-40 border-slate-200 dark:border-slate-800'
+                        }
+                      }
+
+                      return (
+                        <motion.button
+                          key={opt.id}
+                          type="button"
+                          whileHover={!isAnswered ? { scale: 1.01 } : {}}
+                          whileTap={!isAnswered ? { scale: 0.99 } : {}}
+                          onClick={() => handleSelectSingleOption(opt.id)}
+                          disabled={isAnswered}
+                          className={`p-5 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center gap-4 transition-all text-left cursor-pointer ${buttonStyle}`}
+                        >
+                          <span
+                            className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl font-black text-lg sm:text-xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${badgeStyle}`}
+                          >
+                            {isAnswered && isSelected
+                              ? currentAnswer.isCorrect
+                                ? '✓'
+                                : '✗'
+                              : isAnswered && isCorrectAnswer
+                              ? '✓'
+                              : opt.id}
+                          </span>
+
+                          <span className="text-base sm:text-lg md:text-xl font-bold flex-1 leading-snug">
+                            {opt.text}
+                          </span>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                )}
 
                 {/* 5. Cevaplama Sonuç Bildirim Alanı (Doğru / Yanlış Animasyonu) */}
                 {currentAnswer && (
                   <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className={`p-4 sm:p-5 rounded-2xl border-2 flex items-center justify-between gap-4 ${
+                    className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                       currentAnswer.isCorrect
                         ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-900 dark:text-emerald-200'
                         : 'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-900 dark:text-rose-200'
@@ -2144,11 +2593,19 @@ function MockExamModal({
                         <h4 className="text-base sm:text-lg font-black">
                           {currentAnswer.isCorrect
                             ? `🎉 Harika! Doğru Cevap (${currentAnswer.studentName || 'Öğrenci'} Bildi)`
-                            : `❌ Yanlış Cevap — Doğru seçenek: ${curQ.correctOptionId} şıkkı`}
+                            : `❌ Yanlış Cevap — ${
+                                qType === 'multiple'
+                                  ? `Doğru şıklar: ${(curQ.correctOptionIds || [curQ.correctOptionId || 'A']).join(', ')}`
+                                  : qType === 'boolean'
+                                  ? `Doğru cevap: ${(curQ.correctOptionId || 'A') === 'A' ? 'DOĞRU' : 'YANLIŞ'}`
+                                  : qType === 'fill'
+                                  ? `Doğru kelime: ${curQ.correctAnswerText || curQ.options.find((o) => o.id === curQ.correctOptionId)?.text}`
+                                  : `Doğru seçenek: ${curQ.correctOptionId} şıkkı`
+                              }`}
                         </h4>
                         <p className="text-xs sm:text-sm font-semibold opacity-90 mt-0.5">
                           {currentAnswer.isCorrect
-                            ? 'Öğrenci puanı hanesine eklendi. Bir sonraki soruya geçebilirsiniz.'
+                            ? 'Tebrikler! Bir sonraki soruya geçildiğinde yeni öğrenci otomatik seçilecektir.'
                             : `${currentAnswer.studentName || 'Öğrenci'} için doğru çözüm sınıfla paylaşıldı.`}
                         </p>
                       </div>
@@ -2269,6 +2726,7 @@ function MockExamModal({
                       const res = questionAnswers[qIndex]
                       const student = res?.studentName || questionStudents[qIndex] || 'Belirlenmedi'
                       const isCorrect = res?.isCorrect
+                      const questionType = q.type || 'single'
 
                       return (
                         <div
@@ -2286,9 +2744,20 @@ function MockExamModal({
                               #{qIndex + 1}
                             </span>
                             <div>
-                              <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
-                                {q.text}
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
+                                  {q.text}
+                                </p>
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                  {questionType === 'multiple'
+                                    ? 'Çoklu'
+                                    : questionType === 'boolean'
+                                    ? 'D/Y'
+                                    : questionType === 'fill'
+                                    ? 'Boşluk'
+                                    : 'Test'}
+                                </span>
+                              </div>
                               <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 Cevaplayan Öğrenci: <strong className="text-slate-800 dark:text-slate-200">{student}</strong>
                               </p>
@@ -2299,11 +2768,11 @@ function MockExamModal({
                             {res ? (
                               isCorrect ? (
                                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-emerald-600 text-white font-black text-xs">
-                                  ✓ Bildi ({res.selectedId} Şıkkı)
+                                  ✓ Bildi ({res.summaryText || res.selectedId})
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-rose-600 text-white font-black text-xs">
-                                  ✗ Bilemedi (Doğru: {q.correctOptionId})
+                                  ✗ Bilemedi ({res.summaryText || res.selectedId})
                                 </span>
                               )
                             ) : (
@@ -4513,8 +4982,19 @@ export default function PanoClient() {
               </p>
             </div>
             <Link
-              href={`/pano/${boardIdentity.panoId}-${boardIdentity.boardNo}/tahta`}
-              onClick={() => setIncomingSharedFile(null)}
+              href={`/pano/${boardIdentity.panoId}-${boardIdentity.boardNo}/tahta?import=latest`}
+              onClick={() => {
+                if (typeof window !== 'undefined' && incomingSharedFile) {
+                  try {
+                    localStorage.setItem('oxonom_pano_latest_file', JSON.stringify(incomingSharedFile))
+                    localStorage.setItem(
+                      `oxonom_whiteboard_incoming_${boardIdentity.panoId}-${boardIdentity.boardNo}`,
+                      JSON.stringify(incomingSharedFile)
+                    )
+                  } catch (_) {}
+                }
+                setIncomingSharedFile(null)
+              }}
               className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95"
             >
               <span>Tahtada Aç 🎨</span>
