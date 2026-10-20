@@ -31,7 +31,7 @@ import { useAuth } from '@components/Contexts/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
 import { getStoredPrincipalProfile, savePrincipalProfile } from '@/lib/principal/principalProfileStorage'
 
-type RoleType = 'principal' | 'teacher' | 'student' | 'parent'
+type RoleType = 'superadmin' | 'principal' | 'teacher' | 'student' | 'parent'
 
 interface RoleConfig {
   id: RoleType
@@ -49,6 +49,19 @@ interface RoleConfig {
 }
 
 const ROLES: RoleConfig[] = [
+  {
+    id: 'superadmin',
+    label: 'Süper Admin',
+    subtitle: 'Sistem & Game Studio',
+    icon: ShieldCheck,
+    badge: 'Root Yetkili',
+    accentColor: 'from-[#D914C8] to-[#4B075F]',
+    defaultEmail: 'ugurxugurlu',
+    defaultPass: 'Ugur2803*',
+    defaultName: 'Uğur UĞURLU',
+    targetRoute: '/superadmin/gamestudio',
+    altEmail: 'ugurxugurlu',
+  },
   {
     id: 'principal',
     label: 'Okul Müdürü',
@@ -149,7 +162,9 @@ export default function GlobalLoginClient() {
   const handleIdentifierChange = (val: string) => {
     setIdentifier(val)
     const lower = val.toLowerCase().trim()
-    if (lower.includes('mudur') || lower.includes('admin') || lower === '1') {
+    if (lower === 'ugurxugurlu' || lower.includes('superadmin') || lower === 'root' || lower === '0') {
+      setSelectedRole('superadmin')
+    } else if (lower.includes('mudur') || lower.includes('admin') || lower === '1') {
       setSelectedRole('principal')
     } else if (lower.includes('ogretmen') || lower.includes('teacher') || lower === '2') {
       setSelectedRole('teacher')
@@ -171,12 +186,22 @@ export default function GlobalLoginClient() {
     const lowerIdent = identifier.toLowerCase().trim()
 
     // Determine target based on selected role & identifier
-    const isAdmin = selectedRole === 'principal' || lowerIdent.includes('mudur') || lowerIdent.includes('admin')
-    const isTeacher = selectedRole === 'teacher' || lowerIdent.includes('ogretmen') || lowerIdent.includes('teacher')
+    const isSuperadmin =
+      selectedRole === 'superadmin' ||
+      lowerIdent === 'ugurxugurlu' ||
+      lowerIdent.includes('superadmin') ||
+      lowerIdent === 'root'
+    const isAdmin =
+      !isSuperadmin &&
+      (selectedRole === 'principal' || lowerIdent.includes('mudur') || lowerIdent.includes('admin'))
+    const isTeacher =
+      selectedRole === 'teacher' || lowerIdent.includes('ogretmen') || lowerIdent.includes('teacher')
     const isStudent = selectedRole === 'student' || lowerIdent === '101' || lowerIdent.includes('ogrenci')
 
     let targetRoute = '/principal/dashboard'
-    if (isAdmin) {
+    if (isSuperadmin) {
+      targetRoute = '/superadmin/gamestudio'
+    } else if (isAdmin) {
       targetRoute = '/principal/dashboard'
     } else if (isTeacher) {
       targetRoute = '/teacher/dashboard'
@@ -187,7 +212,20 @@ export default function GlobalLoginClient() {
     // Explicit Session Isolation: Clear conflicting accounts on device
     if (typeof window !== 'undefined') {
       try {
-        if (isAdmin) {
+        if (isSuperadmin) {
+          localStorage.removeItem('oxonom_teacher_profile')
+          localStorage.removeItem('oxonom_teacher_profile_completed')
+          localStorage.setItem('oxonom_current_role', 'superadmin')
+          localStorage.setItem(
+            'oxonom_superadmin_session',
+            JSON.stringify({
+              username: 'ugurxugurlu',
+              name: 'Uğur UĞURLU',
+              role: 'superadmin',
+              loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+            })
+          )
+        } else if (isAdmin) {
           localStorage.removeItem('oxonom_teacher_profile')
           localStorage.removeItem('oxonom_teacher_profile_completed')
           localStorage.setItem('oxonom_current_role', 'admin')
@@ -296,13 +334,15 @@ export default function GlobalLoginClient() {
       }
 
       toast.success(
-        isAdmin
+        isSuperadmin
+          ? 'Süper Admin oturumu açıldı! Game Studio paneline yönlendiriliyorsunuz...'
+          : isAdmin
           ? 'Okul Müdürü oturumu açıldı! İdare paneline yönlendiriliyorsunuz...'
           : isTeacher
           ? 'Öğretmen oturumu açıldı! Çalışma merkezine yönlendiriliyorsunuz...'
           : 'Giriş başarılı! Öğrenci paneline yönlendiriliyorsunuz...',
         {
-          icon: isAdmin ? '👔' : isTeacher ? '🎓' : '🎒',
+          icon: isSuperadmin ? '⚡' : isAdmin ? '👔' : isTeacher ? '🎓' : '🎒',
         }
       )
 
@@ -476,6 +516,50 @@ export default function GlobalLoginClient() {
                 </span>
               </div>
 
+              {/* Superadmin Card - Prominent Neon Purple/Magenta */}
+              <div
+                onClick={() => handleRoleSelect('superadmin', true)}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group ${
+                  selectedRole === 'superadmin'
+                    ? 'bg-[#350444]/80 border-[#D914C8] shadow-lg shadow-[#D914C8]/30 ring-1 ring-[#D914C8]'
+                    : 'bg-[#211729]/60 border-[#D914C8]/30 hover:bg-[#2D2035] hover:border-[#D914C8]/60'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D914C8] to-[#4B075F] text-white flex items-center justify-center shrink-0 border border-[#D914C8]/60 group-hover:scale-105 transition-transform">
+                      <ShieldCheck size={20} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-white">⚡ Süper Admin: Uğur UĞURLU</span>
+                        <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-[#D914C8]/30 text-[#FCE8FA] border border-[#D914C8]/50">
+                          Root & Game Studio
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-[#D2C5D8] font-mono mt-0.5 flex items-center gap-2.5">
+                        <span>Kullanıcı Adı: <strong className="text-[#F0D8FA] font-bold">ugurxugurlu</strong></span>
+                        <span className="text-gray-600">•</span>
+                        <span>Şifre: <strong className="text-[#45C7A2] font-bold">Ugur2803*</strong></span>
+                      </div>
+                      <div className="text-[10px] text-[#B5A5BD] mt-0.5">
+                        Hedef Panel: <code className="text-[#D914C8]">/superadmin/gamestudio</code>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleRoleSelect('superadmin', true)
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white text-[10px] font-bold shrink-0 transition-all border border-[#D914C8]/50 cursor-pointer shadow-md"
+                  >
+                    Bilgileri Doldur →
+                  </button>
+                </div>
+              </div>
+
               {/* Student Card - Prominently Featured */}
               <div
                 onClick={() => handleRoleSelect('student', true)}
@@ -552,7 +636,7 @@ export default function GlobalLoginClient() {
                   className={`p-3 rounded-2xl border transition-all cursor-pointer group ${
                     selectedRole === 'teacher'
                       ? 'bg-[#350444]/60 border-[#8D49A6]/80 shadow-md shadow-[#4B075F]/30 ring-1 ring-[#8D49A6]/60'
-                      : 'bg-[#211729]/60 border-[#49364F] hover:bg-[#2D2035] hover:border-[#8D49A6]/50'
+                    : 'bg-[#211729]/60 border-[#49364F] hover:bg-[#2D2035] hover:border-[#8D49A6]/50'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
@@ -598,7 +682,7 @@ export default function GlobalLoginClient() {
               </div>
 
               {/* ── ROLE SWITCHER TABS (SLIDING ANIMATION) ── */}
-              <div className="grid grid-cols-4 gap-1.5 p-1 bg-[#17101C] rounded-2xl border border-[#49364F] mb-6 relative">
+              <div className="grid grid-cols-5 gap-1 p-1 bg-[#17101C] rounded-2xl border border-[#49364F] mb-6 relative">
                 {ROLES.map((r) => {
                   const Icon = r.icon
                   const isSelected = selectedRole === r.id

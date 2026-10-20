@@ -12,6 +12,7 @@ import {
   LucideIcon,
   Radio,
   CalendarDays,
+  Gamepad2,
 } from 'lucide-react'
 
 export type FeatureStatus = 'active' | 'passive' | 'restricted'
@@ -48,6 +49,17 @@ export const STUDENT_MENU_CONFIG: StudentMenuItem[] = [
     sortOrder: 1,
     category: 'main',
     description: 'Günlük ders akışı, sıradaki ders, bekleyen ödevler ve öğrenci genel görünümü.',
+  },
+  {
+    id: 'gamestudio',
+    label: 'Game Studio',
+    path: '/student/gamestudio',
+    icon: Gamepad2,
+    status: 'active',
+    sortOrder: 2,
+    badge: 'Yeni Mağaza',
+    category: 'learning',
+    description: 'Eğitici oyun mağazası: Matematik, fen, kodlama, zeka ve dil maceraları.',
   },
 
   {

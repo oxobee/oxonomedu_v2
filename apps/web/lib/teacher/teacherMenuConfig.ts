@@ -16,6 +16,7 @@ import {
   LucideIcon,
   CalendarDays,
   Monitor,
+  Gamepad2,
 } from 'lucide-react'
 
 export type FeatureStatus = 'active' | 'passive' | 'restricted'
@@ -64,6 +65,16 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     openInNewTab: true,
     badge: 'Yeni',
     description: 'Sürükle-bırak ikonlu, yaşlı dostu pencereli tam ekran masaüstü işletim sistemi.',
+  },
+  {
+    id: 'gamestudio',
+    label: 'Game Studio',
+    path: '/teacher/gamestudio',
+    icon: Gamepad2,
+    status: 'active',
+    sortOrder: 1.5,
+    badge: 'Oyunlar',
+    description: 'Öğrenciler ve sınıflar için eğitsel oyun kütüphanesi ve sınıf aktiviteleri.',
   },
   {
     id: 'schedule',

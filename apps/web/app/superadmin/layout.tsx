@@ -13,11 +13,11 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Oxonom Superadmin — Sistem & OS Yönetim Portalı',
-  description: 'Öğretmen OS arayüzü, hero slider yönetimi, film afişi kısayolları ve sistem ayarları.',
+  title: 'Oxonom Superadmin — Sistem, OS & Game Studio Yönetim Portalı',
+  description: 'Game Studio oyun yönetimi, Öğretmen OS arayüzü, hero slider ve sistem ayarları.',
 }
 
-export default function SuperadminLayout({
+export default function SuperadminRootLayout({
   children,
 }: {
   children: React.ReactNode

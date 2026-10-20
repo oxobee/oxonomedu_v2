@@ -11,6 +11,7 @@ import {
   Tv,
   CheckSquare,
   ArrowRight,
+  Gamepad2,
 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -26,13 +27,22 @@ export default function SuperadminDashboardPage() {
             <span>Süper Yönetici Paneli</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-            Öğretmen OS & Dijital Ekosistem Yönetimi
+            Game Studio & Öğretmen OS Yönetimi
           </h1>
           <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
-            Bu alandan Öğretmen Masaüstü İşletim Sistemi (<code className="text-amber-300 font-mono text-xs">/teacher/desktop-os</code>) için film afişi görsellerini, kategorileri, pencereleri ve hem Web hem Mobil için Hero Slider bannerlarını yönetebilirsiniz.
+            Bu alandan Game Studio eğitici oyun kataloğunu, kapak görsellerini, sınıf ve ders yetkilendirmelerini yönetebilir; Öğretmen OS masaüstü afişlerini ve Hero Slider bannerlarını düzenleyebilirsiniz.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
+            <Link
+              href="/superadmin/gamestudio"
+              className="h-11 px-6 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-black text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-xl shadow-[#D914C8]/30"
+            >
+              <Gamepad2 size={18} />
+              <span>Game Studio Paneline Git</span>
+              <ArrowRight size={15} />
+            </Link>
+
             <Link
               href="/superadmin/os-settings"
               className="h-11 px-6 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-xl shadow-amber-500/20"
@@ -57,7 +67,20 @@ export default function SuperadminDashboardPage() {
       </div>
 
       {/* Quick Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+        <div className="p-6 rounded-3xl bg-[#141926] border border-white/10 space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-fuchsia-500/20 border border-fuchsia-500/30 flex items-center justify-center text-fuchsia-400">
+            <Gamepad2 size={22} />
+          </div>
+          <h2 className="text-base font-extrabold text-white">Game Studio Kataloğu</h2>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            Matematik, Fen, Kodlama ve Türkçe oyunlarını yükleyin, kapak görsellerini düzenleyin ve aktif/pasif yapın.
+          </p>
+          <div className="text-[11px] font-mono text-fuchsia-300/80 bg-black/30 p-2 rounded-xl">
+            Durum: Canlı Mağaza & İzinler
+          </div>
+        </div>
+
         <div className="p-6 rounded-3xl bg-[#141926] border border-white/10 space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
             <ImageIcon size={22} />

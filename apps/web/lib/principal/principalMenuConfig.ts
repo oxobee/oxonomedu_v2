@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   Radio,
   Sliders,
+  Gamepad2,
 } from 'lucide-react'
 
 export type FeatureStatus = 'active' | 'passive' | 'restricted'
@@ -71,6 +72,17 @@ export const PRINCIPAL_MENU_CONFIG: PrincipalMenuItem[] = [
     sortOrder: 1,
     category: 'management',
     description: 'Okul mevcudu, günlük devamsızlık durumu, açık tahtalar ve yönetici hızlı aksiyonları.',
+  },
+  {
+    id: 'gamestudio',
+    label: 'Game Studio & Oyun İzinleri',
+    path: '/principal/gamestudio',
+    icon: Gamepad2,
+    status: 'active',
+    sortOrder: 2,
+    category: 'management',
+    badge: 'Oyun İzinleri',
+    description: 'Hangi oyunun hangi sınıflarda görüneceğini belirleme ve okul geneli aktif/pasif kontrolü.',
   },
   {
     id: 'settings',

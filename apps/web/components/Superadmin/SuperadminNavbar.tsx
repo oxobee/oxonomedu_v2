@@ -12,12 +12,19 @@ import {
   School,
   Sliders,
   Layers,
+  Gamepad2,
 } from 'lucide-react'
 
 export default function SuperadminNavbar() {
   const pathname = usePathname()
 
   const navItems = [
+    {
+      label: 'Game Studio',
+      path: '/superadmin/gamestudio',
+      icon: Gamepad2,
+      badge: 'Oyunlar',
+    },
     {
       label: 'OS Ayarları (Afiş & Slider)',
       path: '/superadmin/os-settings',
