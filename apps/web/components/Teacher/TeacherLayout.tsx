@@ -26,6 +26,7 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
+  ExternalLink,
 } from 'lucide-react'
 import { TEACHER_MENU_CONFIG, getMenuItemByPath } from '@/lib/teacher/teacherMenuConfig'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
@@ -128,9 +129,9 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
   // Filter out hidden modules (e.g. AI Assistant for now)
   const visibleMenuItems = TEACHER_MENU_CONFIG.filter((item) => !item.hidden)
 
-  const isDashboard = pathname === '/teacher/dashboard' || pathname === '/teacher'
+  const isDesktopOS = pathname === '/teacher/desktop-os'
 
-  if (isDashboard) {
+  if (isDesktopOS) {
     return (
       <div className={`${theme} min-h-screen w-full font-jakarta bg-[#0D1117]`}>
         {children}
@@ -193,6 +194,8 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               <Link
                 key={item.id}
                 href={item.path}
+                target={item.openInNewTab ? '_blank' : undefined}
+                rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
                 className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   active
                     ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#FCF9FD] shadow-xs'
@@ -215,11 +218,19 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                   <span className="truncate">{item.label}</span>
                 </div>
 
-                {isPassive && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-semibold shrink-0">
-                    Geliştirme
-                  </span>
-                )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {item.badge && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                      {item.badge}
+                      {item.openInNewTab && <ExternalLink size={9} />}
+                    </span>
+                  )}
+                  {isPassive && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-semibold">
+                      Geliştirme
+                    </span>
+                  )}
+                </div>
               </Link>
             )
           })}
@@ -267,12 +278,15 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
             <HeaderLiveClock theme="oxonom" variant="desktop" />
 
             <Link
-              href="/teacher/dashboard"
+              href="/teacher/desktop-os"
+              target="_blank"
+              rel="noopener noreferrer"
               className="h-9 px-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 transition-colors border border-emerald-500/30"
-              title="Öğretmen Masaüstü İşletim Sistemine Dön"
+              title="Öğretmen Masaüstü İşletim Sistemini Yeni Sekmede Aç"
             >
               <LayoutGrid size={13} />
               <span>Masaüstü OS</span>
+              <ExternalLink size={10} className="opacity-70" />
             </Link>
 
             <Link
@@ -315,12 +329,15 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
 
           <div className="flex items-center gap-1.5">
             <Link
-              href="/teacher/dashboard"
+              href="/teacher/desktop-os"
+              target="_blank"
+              rel="noopener noreferrer"
               className="h-8 px-2 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] flex items-center gap-1 border border-emerald-500/30"
               title="Masaüstü OS"
             >
               <LayoutGrid size={12} />
               <span>Masaüstü</span>
+              <ExternalLink size={9} className="opacity-70" />
             </Link>
 
             <HeaderLiveClock theme="oxonom" variant="mobile" />
@@ -445,6 +462,8 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                     <Link
                       key={item.id}
                       href={item.path}
+                      target={item.openInNewTab ? '_blank' : undefined}
+                      rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
                       onClick={() => setIsMoreSheetOpen(false)}
                       className={`p-3 rounded-2xl border flex flex-col justify-between transition-all ${
                         active
@@ -464,11 +483,19 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                         }`}>
                           <Icon size={16} />
                         </div>
-                        {isPassive && (
-                          <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-bold">
-                            Pasif
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1">
+                          {item.badge && (
+                            <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5">
+                              {item.badge}
+                              {item.openInNewTab && <ExternalLink size={8} />}
+                            </span>
+                          )}
+                          {isPassive && (
+                            <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-bold">
+                              Pasif
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <div className="text-xs font-bold leading-tight">

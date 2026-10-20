@@ -15,6 +15,7 @@ import {
   Settings,
   LucideIcon,
   CalendarDays,
+  Monitor,
 } from 'lucide-react'
 
 export type FeatureStatus = 'active' | 'passive' | 'restricted'
@@ -39,6 +40,8 @@ export interface TeacherMenuItem {
   missingDependency?: string
   hidden?: boolean
   children?: TeacherSubMenuItem[]
+  openInNewTab?: boolean
+  badge?: string
 }
 
 export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
@@ -50,6 +53,17 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     status: 'active',
     sortOrder: 1,
     description: 'Günlük ders akışı, sıradaki ders, akıllı tahta bağlantısı ve hızlı öğretmen işlemleri.',
+  },
+  {
+    id: 'desktop-os',
+    label: 'Masaüstü OS',
+    path: '/teacher/desktop-os',
+    icon: Monitor,
+    status: 'active',
+    sortOrder: 1.2,
+    openInNewTab: true,
+    badge: 'Yeni',
+    description: 'Sürükle-bırak ikonlu, yaşlı dostu pencereli tam ekran masaüstü işletim sistemi.',
   },
   {
     id: 'schedule',
