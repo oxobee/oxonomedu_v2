@@ -383,6 +383,8 @@ export default function DashV2Client({
     title: string
     message: string
     badge?: string
+    targetUrl?: string
+    actionLabel?: string
   }>({
     isOpen: false,
     type: 'success',
@@ -617,11 +619,13 @@ export default function DashV2Client({
         title: '🎉 Sınav Başarıyla Gönderildi!',
         message: `${cleanTarget} nolu akıllı tahtanın "Sınav" menüsüne ${examPayload.questions.length} soruluk interaktif sınav aktarıldı. Akıllı tahtadan öğrencilerle anında başlatılabilir.`,
         badge: cleanTarget,
+        targetUrl: `/pano/${encodeURIComponent(cleanTarget)}`,
+        actionLabel: 'Panoyu Canlı Aç 🚀',
       })
     }, 600)
   }
 
-  // Görseli Tahtaya Gönder
+  // Görseli Akıllı Tahtaya Gönder
   const handleSendFileToBoard = () => {
     const cleanTarget = sendBoardTargetId.trim().toUpperCase()
     if (!cleanTarget) {
@@ -662,7 +666,15 @@ export default function DashV2Client({
         const existing = JSON.parse(localStorage.getItem(`oxonom_pano_files_${cleanTarget}`) || '[]')
         localStorage.setItem(`oxonom_pano_files_${cleanTarget}`, JSON.stringify([filePayload, ...existing]))
         localStorage.setItem('oxonom_pano_latest_file', JSON.stringify(filePayload))
+        localStorage.setItem(`oxonom_whiteboard_incoming_${cleanTarget}`, JSON.stringify(filePayload))
         window.dispatchEvent(new CustomEvent('oxonom_pano_file_shared', { detail: filePayload }))
+
+        // Multi-tab BroadcastChannel for real-time cross-tab delivery
+        try {
+          const bc = new BroadcastChannel('oxonom_pano_channel')
+          bc.postMessage({ type: 'oxonom_pano_file_shared', payload: filePayload })
+          bc.close()
+        } catch (_) {}
       } catch (e) {
         console.warn('File storage skipped', e)
       }
@@ -673,9 +685,11 @@ export default function DashV2Client({
       setFeedbackModal({
         isOpen: true,
         type: 'success',
-        title: '🖼️ Görsel Başarıyla Gönderildi!',
-        message: `"${filePayload.name}" görseli ${cleanTarget} nolu akıllı tahtaya aktarıldı ve tahtada görüntülenmeye hazırlandı.`,
+        title: '🎨 Görsel Akıllı Tahtaya Gönderildi!',
+        message: `"${filePayload.name}" materyali ${cleanTarget} Akıllı Tahtasına aktarıldı ve çizim tahtasında kullanıma hazırlandı.`,
         badge: cleanTarget,
+        targetUrl: `/pano/${encodeURIComponent(cleanTarget)}/tahta`,
+        actionLabel: 'Akıllı Tahtayı Aç 🎨',
       })
     }, 600)
   }
@@ -2239,13 +2253,16 @@ export default function DashV2Client({
                     type="button"
                     onClick={() => {
                       if (typeof window !== 'undefined') {
-                        window.open(`/pano/${encodeURIComponent(feedbackModal.badge || '')}`, '_blank')
+                        const target =
+                          feedbackModal.targetUrl ||
+                          `/pano/${encodeURIComponent(feedbackModal.badge || '')}`
+                        window.open(target, '_blank')
                       }
                       setFeedbackModal({ ...feedbackModal, isOpen: false })
                     }}
                     className="w-full h-11 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md shadow-purple-950/20 cursor-pointer"
                   >
-                    <span>Tahtayı Canlı Aç 🚀</span>
+                    <span>{feedbackModal.actionLabel || 'Tahtayı Canlı Aç 🚀'}</span>
                   </button>
                 )}
 

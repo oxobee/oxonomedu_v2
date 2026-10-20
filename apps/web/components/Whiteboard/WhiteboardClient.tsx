@@ -9,6 +9,10 @@ import {
   FolderOpen,
   Plus,
   Trash2,
+  UploadCloud,
+  X,
+  Image as ImageIcon,
+  CheckCircle2,
 } from 'lucide-react'
 
 interface WhiteboardFile {
@@ -185,6 +189,120 @@ export default function WhiteboardClient() {
       console.warn('Whiteboard save skipped (storage limit)', err)
     }
   }, [currentFile, filesIndex, getFileKey, indexKey])
+
+  // ── INCOMING LIVE MATERIAL FROM TEACHER ──
+  const [incomingBanner, setIncomingBanner] = useState<{
+    name: string
+    sender: string
+    note?: string
+  } | null>(null)
+  const incomingBannerTimerRef = useRef<any>(null)
+
+  // Play pleasant notification audio chime
+  const playAudioChime = useCallback(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const now = audioCtx.currentTime
+      const osc = audioCtx.createOscillator()
+      const gain = audioCtx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(523.25, now) // C5
+      osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.12) // E5
+      osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.25) // G5
+      gain.gain.setValueAtTime(0.25, now)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55)
+      osc.connect(gain)
+      gain.connect(audioCtx.destination)
+      osc.start(now)
+      osc.stop(now + 0.55)
+    } catch (_) {}
+  }, [])
+
+  // Insert image directly onto the drawing canvas
+  const insertIncomingMaterial = useCallback(
+    (material: {
+      id?: string
+      name?: string
+      url: string
+      sender?: string
+      note?: string
+    }) => {
+      if (!material || !material.url) return
+      const board = boardInstanceRef.current
+      if (!board || !board.editor) {
+        // If whiteboard engine is still initializing, retry after short delay
+        setTimeout(() => insertIncomingMaterial(material), 350)
+        return
+      }
+
+      const img = new Image()
+      img.onload = () => {
+        try {
+          const w = img.naturalWidth || 800
+          const h = img.naturalHeight || 600
+          const vp = board.editor.viewportPageBounds?.() || {
+            x: 0,
+            y: 0,
+            w: typeof window !== 'undefined' ? window.innerWidth : 1200,
+            h: typeof window !== 'undefined' ? window.innerHeight : 800,
+          }
+
+          // Land at a comfortable size: max ~65% of viewport width/height
+          const scale = Math.min(1, (vp.w * 0.65) / w, (vp.h * 0.65) / h)
+          const pw = Math.max(120, Math.round(w * scale))
+          const ph = Math.max(120, Math.round(h * scale))
+          const cx = vp.x + vp.w / 2
+          const cy = vp.y + vp.h / 2
+
+          const assetId = `asset:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+          const shapeId = `shape:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+
+          board.editor.store.transact(() => {
+            board.editor.store.put({
+              id: assetId,
+              typeName: 'asset',
+              src: material.url,
+              w,
+              h,
+            })
+            board.editor.store.put({
+              id: shapeId,
+              typeName: 'shape',
+              type: 'image',
+              x: cx - pw / 2,
+              y: cy - ph / 2,
+              rot: 0,
+              z: (board.editor.store.maxZ?.() || 10) + 1,
+              props: { w: pw, h: ph, assetId },
+            })
+          })
+
+          board.editor.setTool?.('select')
+          board.editor.setSelection?.([shapeId])
+          board.editor.requestRender?.()
+          saveNow()
+
+          playAudioChime()
+
+          setIncomingBanner({
+            name: material.name || 'Ders Görseli',
+            sender: material.sender || 'Ders Öğretmeni',
+            note: material.note || '',
+          })
+
+          if (incomingBannerTimerRef.current) clearTimeout(incomingBannerTimerRef.current)
+          incomingBannerTimerRef.current = setTimeout(() => {
+            setIncomingBanner(null)
+          }, 8000)
+        } catch (err) {
+          console.error('Error inserting material to whiteboard', err)
+        }
+      }
+      img.src = material.url
+    },
+    [saveNow, playAudioChime]
+  )
 
   // Open file by id
   const openFile = useCallback((id: string, fit = true) => {
@@ -431,10 +549,117 @@ export default function WhiteboardClient() {
     return () => document.removeEventListener('pointerdown', handlePointerDown)
   }, [isMenuOpen])
 
+  // Listen for materials sent to this smartboard
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handlePayload = (payload: any) => {
+      if (!payload || !payload.url) return
+      const target = (payload.boardId || '').toUpperCase()
+      const currentFull = boardInfo.fullId.toUpperCase()
+      const currentPano = boardInfo.pano.toUpperCase()
+
+      if (target === currentFull || target === currentPano) {
+        insertIncomingMaterial(payload)
+      }
+    }
+
+    // 1. BroadcastChannel (cross-tab real-time sync)
+    let bc: BroadcastChannel | null = null
+    try {
+      bc = new BroadcastChannel('oxonom_pano_channel')
+      bc.onmessage = (event) => {
+        if (event.data?.type === 'oxonom_pano_file_shared') {
+          handlePayload(event.data.payload)
+        }
+      }
+    } catch (_) {}
+
+    // 2. CustomEvent on window
+    const handleCustomEvent = (e: any) => {
+      handlePayload(e.detail)
+    }
+    window.addEventListener('oxonom_pano_file_shared', handleCustomEvent)
+
+    // 3. Storage event
+    const handleStorage = (e: StorageEvent) => {
+      if (
+        (e.key === 'oxonom_pano_latest_file' ||
+          e.key === `oxonom_whiteboard_incoming_${boardInfo.fullId}`) &&
+        e.newValue
+      ) {
+        try {
+          handlePayload(JSON.parse(e.newValue))
+        } catch (_) {}
+      }
+    }
+    window.addEventListener('storage', handleStorage)
+
+    // 4. Initial check for recently sent file on tab mount
+    try {
+      const rawLatest =
+        localStorage.getItem(`oxonom_whiteboard_incoming_${boardInfo.fullId}`) ||
+        localStorage.getItem('oxonom_pano_latest_file')
+      if (rawLatest) {
+        const parsed = JSON.parse(rawLatest)
+        const target = (parsed.boardId || '').toUpperCase()
+        const currentFull = boardInfo.fullId.toUpperCase()
+        const currentPano = boardInfo.pano.toUpperCase()
+
+        if (target === currentFull || target === currentPano) {
+          const ageMs = Date.now() - (parsed.uploadedAt || 0)
+          const sessionKey = `oxonom_wb_inserted_${parsed.id}`
+          if (ageMs < 5 * 60 * 1000 && !sessionStorage.getItem(sessionKey)) {
+            sessionStorage.setItem(sessionKey, '1')
+            setTimeout(() => {
+              insertIncomingMaterial(parsed)
+            }, 400)
+          }
+        }
+      }
+    } catch (_) {}
+
+    return () => {
+      bc?.close()
+      window.removeEventListener('oxonom_pano_file_shared', handleCustomEvent)
+      window.removeEventListener('storage', handleStorage)
+      if (incomingBannerTimerRef.current) clearTimeout(incomingBannerTimerRef.current)
+    }
+  }, [boardInfo.fullId, boardInfo.pano, insertIncomingMaterial])
+
   return (
     <div className={`fixed inset-0 w-full h-full overflow-hidden select-none bg-[#fbf9f4] dark:bg-[#191713] ${boardTheme === 'dark' ? 'dark' : ''}`}>
       {/* ── WHITEBOARD CANVAS CONTAINER ── */}
       <div ref={boardRef} id="board" className="fixed inset-0 w-full h-full" />
+
+      {/* ── FLOATING BANNER: INCOMING MATERIAL FROM TEACHER ── */}
+      {incomingBanner && (
+        <div className="fixed top-3 left-1/2 -translate-x-1/2 z-70 flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/95 dark:bg-[#211729]/95 backdrop-blur-md border border-emerald-500/50 shadow-2xl shadow-emerald-950/20 text-[#241329] dark:text-[#FCF9FD] animate-in fade-in slide-in-from-top-3 duration-300">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <UploadCloud size={16} />
+          </div>
+          <div className="text-left">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-[320px]">
+                {incomingBanner.name}
+              </span>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800">
+                ✓ Tahtaya Eklendi
+              </span>
+            </div>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+              Gönderen: {incomingBanner.sender} {incomingBanner.note ? `• "${incomingBanner.note}"` : ''}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIncomingBanner(null)}
+            className="w-6 h-6 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ml-1 cursor-pointer"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* ── TOP-LEFT CHROME: OXONOM LOGO & FILE BAR ── */}
       <div className="fixed top-2.5 left-2.5 z-60 flex items-center gap-2 font-sans">

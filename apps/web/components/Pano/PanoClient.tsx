@@ -3454,6 +3454,7 @@ export default function PanoClient() {
   } | null>(null)
 
   useEffect(() => {
+    let timer: any = null
     const handleFileIncoming = (e?: any) => {
       if (typeof window === 'undefined') return
       try {
@@ -3461,7 +3462,10 @@ export default function PanoClient() {
         const file = e?.detail || JSON.parse(localStorage.getItem(`oxonom_pano_latest_file`) || 'null')
         if (file && (file.boardId === fullId || file.boardId === boardIdentity.panoId)) {
           setIncomingSharedFile(file)
-          toast.success(`🖼️ ${file.sender || 'Öğretmeniniz'} tahtaya görsel aktardı!`, { icon: '📺', duration: 4000 })
+          if (timer) clearTimeout(timer)
+          timer = setTimeout(() => {
+            setIncomingSharedFile(null)
+          }, 10000)
         }
       } catch (_) {}
     }
@@ -3469,6 +3473,7 @@ export default function PanoClient() {
     window.addEventListener('oxonom_pano_file_shared', handleFileIncoming)
     window.addEventListener('storage', handleFileIncoming)
     return () => {
+      if (timer) clearTimeout(timer)
       window.removeEventListener('oxonom_pano_file_shared', handleFileIncoming)
       window.removeEventListener('storage', handleFileIncoming)
     }
@@ -4482,68 +4487,46 @@ export default function PanoClient() {
         students={candidateStudents}
       />
 
-      {/* INCOMING SHARED BOARD IMAGE MODAL */}
+      {/* INCOMING WHITEBOARD MATERIAL NOTIFICATION (NON-INTRUSIVE) */}
       <AnimatePresence>
         {incomingSharedFile && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-4xl max-h-[92vh] overflow-hidden rounded-[2.5rem] bg-white dark:bg-[#1E1124] border-2 border-[#8D49A6]/40 shadow-2xl flex flex-col"
-            >
-              {/* Header */}
-              <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-emerald-500/15 via-[#8D49A6]/10 to-transparent">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md">
-                    <ImageIcon size={22} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white flex items-center gap-2">
-                      <span>{incomingSharedFile.name}</span>
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                        Canlı Görsel
-                      </span>
-                    </h3>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                      Gönderen: {incomingSharedFile.sender} • {incomingSharedFile.note || 'Ders görseli ekrana aktarıldı'}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIncomingSharedFile(null)}
-                  className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-300 flex items-center justify-center cursor-pointer transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Image Preview Container */}
-              <div className="p-4 overflow-y-auto flex items-center justify-center bg-gray-950/5 dark:bg-black/50 min-h-[300px] max-h-[70vh]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={incomingSharedFile.url}
-                  alt={incomingSharedFile.name}
-                  className="max-h-[65vh] w-auto object-contain rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800"
-                />
-              </div>
-
-              {/* Footer */}
-              <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex items-center justify-between text-xs">
-                <span className="text-gray-600 dark:text-gray-300 font-semibold">
-                  {incomingSharedFile.note ? `Not: "${incomingSharedFile.note}"` : 'Akıllı tahta canlı ders materyali'}
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-5 left-1/2 -translate-x-1/2 z-60 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border-2 border-emerald-500/50 shadow-2xl shadow-emerald-950/20 text-[#241329] dark:text-white"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <ImageIcon size={18} />
+            </div>
+            <div className="text-left pr-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black text-gray-900 dark:text-white truncate max-w-[180px] sm:max-w-[280px]">
+                  {incomingSharedFile.name}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIncomingSharedFile(null)}
-                  className="px-6 py-2 rounded-xl bg-brand-gradient text-white font-black shadow-md cursor-pointer hover:opacity-95"
-                >
-                  Kapat ✓
-                </button>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                  Akıllı Tahtaya Aktarıldı
+                </span>
               </div>
-            </motion.div>
-          </div>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                {incomingSharedFile.sender} tarafından gönderildi.
+              </p>
+            </div>
+            <Link
+              href={`/pano/${boardIdentity.panoId}-${boardIdentity.boardNo}/tahta`}
+              onClick={() => setIncomingSharedFile(null)}
+              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+            >
+              <span>Tahtada Aç 🎨</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setIncomingSharedFile(null)}
+              className="w-7 h-7 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ml-1 cursor-pointer"
+            >
+              <X size={15} />
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
 
