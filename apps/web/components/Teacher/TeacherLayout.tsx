@@ -281,7 +281,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               href="/teacher/desktop-os"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-9 px-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 transition-colors border border-emerald-500/30"
+              className="h-9 px-3 rounded-xl bg-[#D914C8]/15 hover:bg-[#D914C8]/25 text-[#D914C8] dark:text-[#F0D8FA] font-extrabold text-xs flex items-center gap-1.5 transition-colors border border-[#D914C8]/30 shadow-xs"
               title="Öğretmen Masaüstü İşletim Sistemini Yeni Sekmede Aç"
             >
               <LayoutGrid size={13} />
@@ -332,7 +332,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               href="/teacher/desktop-os"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-8 px-2 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] flex items-center gap-1 border border-emerald-500/30"
+              className="h-8 px-2 rounded-lg bg-[#D914C8]/15 text-[#D914C8] dark:text-[#F0D8FA] font-bold text-[11px] flex items-center gap-1 border border-[#D914C8]/30"
               title="Masaüstü OS"
             >
               <LayoutGrid size={12} />

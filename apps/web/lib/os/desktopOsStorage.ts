@@ -133,7 +133,7 @@ export const CURATED_POSTER_PRESETS = [
 
 // ── DEFAULT INITIAL CONFIGURATION (MATCHING OXONOM GAME STUDIO STYLE) ──
 export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
-  version: 3,
+  version: 4,
   updatedAt: new Date().toISOString(),
   heroSlides: [
     {
@@ -371,7 +371,7 @@ export const DEFAULT_DESKTOP_OS_CONFIG: DesktopOSConfig = {
   ],
 }
 
-const STORAGE_KEY = 'oxonom_desktop_os_config_v3'
+const STORAGE_KEY = 'oxonom_desktop_os_config_v4'
 
 // ── GET CONFIG ──
 export function getDesktopOSConfig(): DesktopOSConfig {
@@ -379,10 +379,20 @@ export function getDesktopOSConfig(): DesktopOSConfig {
     return DEFAULT_DESKTOP_OS_CONFIG
   }
   try {
+    // Purge deprecated older cache keys
+    localStorage.removeItem('oxonom_desktop_os_config_v1')
+    localStorage.removeItem('oxonom_desktop_os_config_v2')
+    localStorage.removeItem('oxonom_desktop_os_config_v3')
+
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return DEFAULT_DESKTOP_OS_CONFIG
     const parsed = JSON.parse(raw)
-    if (parsed && Array.isArray(parsed.shortcuts) && Array.isArray(parsed.heroSlides)) {
+    if (
+      parsed &&
+      Array.isArray(parsed.shortcuts) &&
+      Array.isArray(parsed.heroSlides) &&
+      parsed.version === 4
+    ) {
       return parsed
     }
   } catch (err) {
