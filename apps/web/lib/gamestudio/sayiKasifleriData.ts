@@ -641,6 +641,8 @@ export const ALL_12_LEVELS: GameLevel[] = [
   },
 ]
 
+export const LEVELS_DATA = ALL_12_LEVELS
+
 const PROGRESS_STORAGE_KEY = 'oxonom_game_sayi_kasifleri_v1'
 
 /**

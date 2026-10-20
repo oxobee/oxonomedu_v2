@@ -216,7 +216,7 @@ export const DEFAULT_GAMES: EducationalGame[] = [
     subjects: ['Türkçe'],
     topics: ['Sözcükte Anlam', 'Eş Anlamlı / Zıt Anlamlılar', 'Yazım Kuralları', 'Deyimler'],
     ageRange: '7 - 12 Yaş',
-    difficulty: 'Kolay',
+    difficulty: 'Başlangıç',
     rating: 4.75,
     reviewCount: 198,
     playsCount: 8120,

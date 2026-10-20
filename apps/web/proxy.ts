@@ -509,6 +509,8 @@ export default async function proxy(req: NextRequest) {
     pathname.startsWith('/superadmin/') ||
     pathname === '/gamestudio' ||
     pathname.startsWith('/gamestudio/') ||
+    pathname === '/games' ||
+    pathname.startsWith('/games/') ||
     pathname === '/loginv2' ||
     pathname.startsWith('/loginv2/') ||
     pathname === '/pano' ||
