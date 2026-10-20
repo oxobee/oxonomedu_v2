@@ -594,7 +594,7 @@ export default function MAdminClient({
 
   const handleCopyPanoLink = (id: string) => {
     if (typeof window !== 'undefined') {
-      const url = `${window.location.origin}/pano?id=${encodeURIComponent(id)}`
+      const url = `${window.location.origin}/pano/${encodeURIComponent(id)}`
       navigator.clipboard.writeText(url)
       toast.success(`${id} canlı bağlantı linki kopyalandı!`, { icon: '📋' })
     }
@@ -602,7 +602,7 @@ export default function MAdminClient({
 
   const handleLaunchPanoLive = (id: string) => {
     if (typeof window !== 'undefined') {
-      window.open(`/pano?id=${encodeURIComponent(id)}`, '_blank')
+      window.open(`/pano/${encodeURIComponent(id)}`, '_blank')
       toast.success(`${id} canlı pano ekranı yeni pencerede açıldı!`, { icon: '🚀' })
     }
   }
@@ -2563,7 +2563,7 @@ export default function MAdminClient({
                     Otomatik Oluşacak Canlı Pano Linki:
                   </span>
                   <div className="font-mono text-[11px] font-bold text-[#D914C8] break-all">
-                    /pano?id={(newPanoCode || '1A').trim().toUpperCase()}-{(newBoardNo || '01').trim().toUpperCase()}
+                    /pano/{(newPanoCode || '1A').trim().toUpperCase()}-{(newBoardNo || '01').trim().toUpperCase()}
                   </div>
                 </div>
 

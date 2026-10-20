@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { createQuickdraw } from './core/index.js'
 import './core/quickdraw.css'
 import {
@@ -56,34 +56,52 @@ function normalizeIndex(raw: any): WhiteboardIndex {
 export default function WhiteboardClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const params = useParams() as any
   const boardRef = useRef<HTMLDivElement>(null)
   const boardInstanceRef = useRef<any>(null)
   const saveTimerRef = useRef<any>(null)
 
-  // Hardware board identity (e.g. Pano: 1A, Board: 01)
-  const rawId = searchParams?.get('id') || searchParams?.get('boardId') || ''
+  // Hardware board identity (supports short clean path /pano/1A-01/tahta or query ?id=1A-01)
+  const routeBoardId = (params?.boardId as string) || (params?.id as string) || ''
+  const rawId = routeBoardId || searchParams?.get('id') || searchParams?.get('boardId') || ''
   const pId = searchParams?.get('panoId') || ''
   const tId = searchParams?.get('tahtaId') || searchParams?.get('boardNo') || ''
 
   const boardInfo = useMemo(() => {
     let pano = '1A'
     let board = '01'
-    if (rawId && rawId.includes('-')) {
-      const parts = rawId.split('-')
-      pano = (parts[0] || '1A').trim().toUpperCase()
-      board = (parts.slice(1).join('-') || '01').trim().toUpperCase()
-    } else if (pId) {
-      pano = pId.trim().toUpperCase()
-      board = (tId || '01').trim().toUpperCase()
-    } else if (rawId) {
-      pano = rawId.trim().toUpperCase()
-      board = '01'
-    } else if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('oxonom_active_board_id') || '1A-01'
-      const parts = saved.split('-')
-      pano = (parts[0] || '1A').trim().toUpperCase()
-      board = (parts.slice(1).join('-') || '01').trim().toUpperCase()
+    const candidate = rawId || (typeof window !== 'undefined' ? localStorage.getItem('oxonom_active_board_id') : '') || '1A-01'
+    const clean = decodeURIComponent(candidate).trim().toUpperCase()
+
+    if (clean.includes('-')) {
+      const parts = clean.split('-').filter(Boolean)
+      if (parts.length >= 3 && /^[1-9][0-9]?$/.test(parts[0]) && /^[A-Z]$/.test(parts[1])) {
+        pano = `${parts[0]}${parts[1]}`
+        board = parts.slice(2).join('-') || '01'
+      } else if (parts.length === 2 && /^[1-9][0-9]?$/.test(parts[0]) && /^[A-Z]$/.test(parts[1])) {
+        pano = `${parts[0]}${parts[1]}`
+        board = '01'
+      } else if (parts.length >= 2) {
+        pano = parts[0]
+        board = parts.slice(1).join('-') || '01'
+      } else {
+        pano = parts[0] || '1A'
+        board = '01'
+      }
+    } else {
+      const matchWithNum = clean.match(/^([1-9][0-9]?[A-Z])([0-9]{2})$/)
+      if (matchWithNum) {
+        pano = matchWithNum[1]
+        board = matchWithNum[2]
+      } else {
+        pano = clean || '1A'
+        board = '01'
+      }
     }
+
+    if (pId) pano = pId.trim().toUpperCase()
+    if (tId) board = tId.trim().toUpperCase()
+
     const fullId = `${pano}-${board}`
     const scopeKey = `${pano}_${board}`.replace(/[^A-Za-z0-9_]/g, '_')
     return { pano, board, fullId, scopeKey }
@@ -420,9 +438,9 @@ export default function WhiteboardClient() {
 
       {/* ── TOP-LEFT CHROME: OXONOM LOGO & FILE BAR ── */}
       <div className="fixed top-2.5 left-2.5 z-60 flex items-center gap-2 font-sans">
-        {/* Oxonom Logo Button -> Returns to exact /pano with the preserved ID */}
+        {/* Oxonom Logo Button -> Returns to exact short clean /pano URL */}
         <Link
-          href={`/pano?id=${encodeURIComponent(boardInfo.fullId)}&panoId=${encodeURIComponent(boardInfo.pano)}&tahtaId=${encodeURIComponent(boardInfo.board)}`}
+          href={`/pano/${encodeURIComponent(boardInfo.fullId)}`}
           title={`${boardInfo.fullId} Panosuna Geri Dön`}
           className="h-10 px-3.5 rounded-full bg-white/90 dark:bg-[#211729]/90 backdrop-blur-md border border-[#E8DFEB] dark:border-[#49364F] shadow-lg shadow-purple-950/10 flex items-center gap-2 text-[#241329] dark:text-[#FCF9FD] hover:bg-[#F0D8FA]/50 dark:hover:bg-[#2D2035] transition-all cursor-pointer group active:scale-95"
         >

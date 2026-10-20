@@ -2117,51 +2117,61 @@ export default function PanoClient() {
   // Classrooms list
   const [classrooms, setClassrooms] = useState<ClassroomItem[]>(DEFAULT_CLASSROOMS)
 
-  // Hardware Board & Pano ID (e.g., "1A-01" -> Pano: 1A, Board: 01)
-  const rawIdParam = searchParams?.get('id') || searchParams?.get('boardId') || ''
+  // Hardware Board & Pano ID (supports short clean path /pano/1A-01 or legacy query ?id=1A-01)
+  const routeBoardId = (params?.boardId as string) || (params?.id as string) || ''
+  const rawIdParam = routeBoardId || searchParams?.get('id') || searchParams?.get('boardId') || ''
   const panoIdParam = searchParams?.get('panoId') || ''
   const tahtaIdParam = searchParams?.get('tahtaId') || searchParams?.get('boardNo') || ''
 
-  const [boardIdentity, setBoardIdentity] = useState<{ panoId: string; boardNo: string }>(() => {
-    if (typeof window !== 'undefined') {
-      if (rawIdParam && rawIdParam.includes('-')) {
-        const parts = rawIdParam.split('-')
-        return { panoId: (parts[0] || '1A').trim().toUpperCase(), boardNo: (parts.slice(1).join('-') || '01').trim().toUpperCase() }
+  const resolveBoardIdentity = useCallback((rawInput?: string, pInput?: string, tInput?: string): { panoId: string; boardNo: string } => {
+    let pano = '1A'
+    let board = '01'
+    const candidate = (rawInput || (typeof window !== 'undefined' ? localStorage.getItem('oxonom_active_board_id') : '') || '1A-01').trim()
+    const clean = decodeURIComponent(candidate).toUpperCase()
+
+    if (clean.includes('-')) {
+      const parts = clean.split('-').filter(Boolean)
+      if (parts.length >= 3 && /^[1-9][0-9]?$/.test(parts[0]) && /^[A-Z]$/.test(parts[1])) {
+        pano = `${parts[0]}${parts[1]}`
+        board = parts.slice(2).join('-') || '01'
+      } else if (parts.length === 2 && /^[1-9][0-9]?$/.test(parts[0]) && /^[A-Z]$/.test(parts[1])) {
+        pano = `${parts[0]}${parts[1]}`
+        board = '01'
+      } else if (parts.length >= 2) {
+        pano = parts[0]
+        board = parts.slice(1).join('-') || '01'
+      } else {
+        pano = parts[0] || '1A'
+        board = '01'
       }
-      if (panoIdParam) {
-        return { panoId: panoIdParam.trim().toUpperCase(), boardNo: (tahtaIdParam || '01').trim().toUpperCase() }
+    } else {
+      const matchWithNum = clean.match(/^([1-9][0-9]?[A-Z])([0-9]{2})$/)
+      if (matchWithNum) {
+        pano = matchWithNum[1]
+        board = matchWithNum[2]
+      } else {
+        pano = clean || '1A'
+        board = '01'
       }
-      if (rawIdParam) {
-        return { panoId: rawIdParam.trim().toUpperCase(), boardNo: '01' }
-      }
-      const saved = localStorage.getItem('oxonom_active_board_id') || '1A-01'
-      const parts = saved.split('-')
-      return { panoId: (parts[0] || '1A').trim().toUpperCase(), boardNo: (parts.slice(1).join('-') || '01').trim().toUpperCase() }
     }
-    return { panoId: '1A', boardNo: '01' }
+
+    if (pInput) pano = pInput.trim().toUpperCase()
+    if (tInput) board = tInput.trim().toUpperCase()
+
+    return { panoId: pano, boardNo: board }
+  }, [])
+
+  const [boardIdentity, setBoardIdentity] = useState<{ panoId: string; boardNo: string }>(() => {
+    return resolveBoardIdentity(rawIdParam, panoIdParam, tahtaIdParam)
   })
 
   useEffect(() => {
-    let p = ''
-    let b = ''
-    if (rawIdParam && rawIdParam.includes('-')) {
-      const parts = rawIdParam.split('-')
-      p = (parts[0] || '1A').trim().toUpperCase()
-      b = (parts.slice(1).join('-') || '01').trim().toUpperCase()
-    } else if (panoIdParam) {
-      p = panoIdParam.trim().toUpperCase()
-      b = (tahtaIdParam || '01').trim().toUpperCase()
-    } else if (rawIdParam) {
-      p = rawIdParam.trim().toUpperCase()
-      b = '01'
+    const resolved = resolveBoardIdentity(rawIdParam, panoIdParam, tahtaIdParam)
+    setBoardIdentity(resolved)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('oxonom_active_board_id', `${resolved.panoId}-${resolved.boardNo}`)
     }
-    if (p && b) {
-      setBoardIdentity({ panoId: p, boardNo: b })
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('oxonom_active_board_id', `${p}-${b}`)
-      }
-    }
-  }, [rawIdParam, panoIdParam, tahtaIdParam])
+  }, [rawIdParam, panoIdParam, tahtaIdParam, resolveBoardIdentity])
 
   // Prevent any lingering dark mode class on document.documentElement from affecting the rest of the site
   useEffect(() => {
@@ -2977,7 +2987,7 @@ export default function PanoClient() {
       color: 'bg-brand-gradient',
       iconColor: 'text-white',
       badge: `${boardIdentity.panoId}-${boardIdentity.boardNo}`,
-      path: `/pano/tahta?id=${encodeURIComponent(`${boardIdentity.panoId}-${boardIdentity.boardNo}`)}&panoId=${encodeURIComponent(boardIdentity.panoId)}&tahtaId=${encodeURIComponent(boardIdentity.boardNo)}`
+      path: `/pano/${boardIdentity.panoId}-${boardIdentity.boardNo}/tahta`
     },
     {
       id: 'tools',
@@ -3870,7 +3880,7 @@ export default function PanoClient() {
                   item={item}
                   onAction={(app) => {
                     if (app.id === 'board') {
-                      router.push(`/pano/tahta?id=${encodeURIComponent(`${boardIdentity.panoId}-${boardIdentity.boardNo}`)}&panoId=${encodeURIComponent(boardIdentity.panoId)}&tahtaId=${encodeURIComponent(boardIdentity.boardNo)}`)
+                      router.push(`/pano/${boardIdentity.panoId}-${boardIdentity.boardNo}/tahta`)
                     } else if (app.id === 'tools') {
                       setIsToolsModalOpen(true)
                     } else if (app.id === 'exam') {

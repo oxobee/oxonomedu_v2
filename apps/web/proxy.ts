@@ -403,6 +403,20 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL(`/principal/dashboard${search}`, req.url), 307)
   }
 
+  // Fast shortcuts for smartboard & classroom URLs (e.g. /1A-01, /1A, /1a, /tahta/1A-01)
+  if (pathname.startsWith('/tahta/')) {
+    const rawBoard = pathname.replace(/^\/tahta\//, '').trim()
+    if (rawBoard) {
+      return NextResponse.redirect(new URL(`/pano/${encodeURIComponent(rawBoard.toUpperCase())}/tahta${search}`, req.url), 307)
+    }
+  }
+
+  const shortBoardMatch = pathname.match(/^\/([1-9][0-9]?[A-Za-z](?:-[0-9]{1,3})?|[1-9][0-9]?-[A-Za-z](?:-[0-9]{1,3})?)$/i)
+  if (shortBoardMatch) {
+    const code = shortBoardMatch[1].toUpperCase()
+    return NextResponse.redirect(new URL(`/pano/${encodeURIComponent(code)}${search}`, req.url), 307)
+  }
+
   const AUTH_PREFIX_MAP: Record<string, string> = {
     '/auth': '/login',
     '/auth/': '/login',
