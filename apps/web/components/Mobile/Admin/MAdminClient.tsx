@@ -61,7 +61,6 @@ import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileAdminDock from './MobileAdminDock'
 import MobileAdminMoreSheet from './MobileAdminMoreSheet'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
-import MockBadge from '@components/Common/MockBadge'
 import LiveClassRadar from '@components/Common/LiveClassRadar'
 import { SCHOOL_ORGS, getOrgTeachers } from '@services/demo/schoolDirectory'
 import {
@@ -1254,7 +1253,6 @@ export default function MAdminClient({
                   <h3 className="text-sm font-black text-[#241329] dark:text-white">
                     İstatistiksel Analitik & Grafik Paneli
                   </h3>
-                  <MockBadge size="sm" />
                 </div>
               </div>
               <p className="text-xs text-[#716779] dark:text-[#B5A5BD] mt-0.5">
@@ -1311,7 +1309,6 @@ export default function MAdminClient({
                   <span className="text-xs font-bold text-[#514458] dark:text-[#D2C5D8]">
                     Haftalık Katılım Eğrisi & Günlük Yoklama Analizi
                   </span>
-                  <MockBadge size="xs" />
                 </div>
                 <span className="text-xs font-black text-[#16805D] dark:text-[#45C7A2] bg-[#E4F5ED] dark:bg-[#16805D]/20 px-2.5 py-1 rounded-xl">
                   Haftalık Katılım Ortalaması: %100
@@ -1475,7 +1472,6 @@ export default function MAdminClient({
               <div className="flex items-center justify-between text-xs text-[#716779] dark:text-[#B5A5BD]">
                 <div className="flex items-center gap-2">
                   <span className="font-bold">Branş Başarı & Müfredat İlerleme Oranları</span>
-                  <MockBadge size="xs" />
                 </div>
                 <span>Zümre: Edebiyat & Türkçe</span>
               </div>
@@ -1720,7 +1716,6 @@ export default function MAdminClient({
                     <h4 className="text-xs font-black text-[#241329] dark:text-white">
                       Öğretmen & Personel Devam Özeti
                     </h4>
-                    <MockBadge size="xs" />
                   </div>
                   <p className="text-[10px] text-[#716779] dark:text-[#B5A5BD] font-medium">
                     Bugünkü Mesai Katılımı & İşe Geliş Analizi

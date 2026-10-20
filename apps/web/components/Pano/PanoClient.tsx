@@ -59,6 +59,9 @@ import {
   HelpCircle,
   Wrench,
   Compass,
+  Image as ImageIcon,
+  FileQuestion,
+  UploadCloud,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import {
@@ -1681,48 +1684,250 @@ const NewBoardModal = ({
 }
 
 // Interactive Mock Exam Modal
+// Standalone Web Audio Chime Helper
+function playAudioChime(frequency1 = 880, frequency2 = 1174.66) {
+  try {
+    if (typeof window === 'undefined') return
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    if (!AudioCtx) return
+    const ctx = new AudioCtx()
+    const now = ctx.currentTime
+
+    const osc1 = ctx.createOscillator()
+    const gain1 = ctx.createGain()
+    osc1.type = 'sine'
+    osc1.frequency.setValueAtTime(frequency1, now)
+    gain1.gain.setValueAtTime(0.25, now)
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.65)
+    osc1.connect(gain1)
+    gain1.connect(ctx.destination)
+    osc1.start(now)
+    osc1.stop(now + 0.65)
+
+    if (frequency2) {
+      const osc2 = ctx.createOscillator()
+      const gain2 = ctx.createGain()
+      osc2.type = 'sine'
+      osc2.frequency.setValueAtTime(frequency2, now + 0.12)
+      gain2.gain.setValueAtTime(0.25, now + 0.12)
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.85)
+      osc2.connect(gain2)
+      gain2.connect(ctx.destination)
+      osc2.start(now + 0.12)
+      osc2.stop(now + 0.85)
+    }
+  } catch (_) {}
+}
+
+interface LiveExamQuestionItem {
+  id: string
+  text: string
+  options: { id: string; text: string }[]
+  correctOptionId: string
+  points?: number
+}
+
+interface LiveExamData {
+  id: string
+  title: string
+  boardId: string
+  createdAt: number
+  teacherName: string
+  questions: LiveExamQuestionItem[]
+}
+
+const DEFAULT_PANO_EXAM: LiveExamData = {
+  id: 'curriculum_default',
+  title: 'Haftalık İnteraktif Kazanım Değerlendirmesi',
+  boardId: '1A-01',
+  createdAt: Date.now(),
+  teacherName: 'Zümre Kurulu',
+  questions: [
+    {
+      id: 'q1',
+      text: 'Aşağıdaki sayılardan hangisi 4 basamaklı en küçük çift doğal sayıdır?',
+      options: [
+        { id: 'A', text: '1000' },
+        { id: 'B', text: '1002' },
+        { id: 'C', text: '1001' },
+        { id: 'D', text: '1020' },
+      ],
+      correctOptionId: 'A',
+      points: 25,
+    },
+    {
+      id: 'q2',
+      text: 'Bir dikdörtgenin kısa kenarı 6 cm, uzun kenarı 12 cm ise bu dikdörtgenin çevresi kaç cm\'dir?',
+      options: [
+        { id: 'A', text: '18 cm' },
+        { id: 'B', text: '36 cm' },
+        { id: 'C', text: '72 cm' },
+        { id: 'D', text: '24 cm' },
+      ],
+      correctOptionId: 'B',
+      points: 25,
+    },
+    {
+      id: 'q3',
+      text: 'Güneş Sistemi’ndeki yaşam barındırdığı bilinen tek gezegen hangisidir?',
+      options: [
+        { id: 'A', text: 'Mars' },
+        { id: 'B', text: 'Dünya' },
+        { id: 'C', text: 'Jüpiter' },
+        { id: 'D', text: 'Venüs' },
+      ],
+      correctOptionId: 'B',
+      points: 25,
+    },
+    {
+      id: 'q4',
+      text: 'Aşağıdaki cümlelerin hangisinde mecaz anlamlı bir sözcük kullanılmıştır?',
+      options: [
+        { id: 'A', text: 'Bugün hava oldukça sıcaktı.' },
+        { id: 'B', text: 'Sözleriyle kalbimi kırdı.' },
+        { id: 'C', text: 'Kitabın kapağı yırtılmış.' },
+        { id: 'D', text: 'Bahçedeki ağaçlar çiçek açtı.' },
+      ],
+      correctOptionId: 'B',
+      points: 25,
+    },
+  ],
+}
+
+// Interactive Pano Live Exam Modal (High-Visibility Smartboard Quiz)
 function MockExamModal({
   isOpen,
   onClose,
-  className
+  className,
+  boardId = '1A-01',
+  students = [],
 }: {
   isOpen: boolean
   onClose: () => void
   className: string
+  boardId?: string
+  students?: any[]
 }) {
   const [activeQuestion, setActiveQuestion] = useState(0)
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
+  const [questionAnswers, setQuestionAnswers] = useState<
+    Record<number, { selectedId: string; isCorrect: boolean; studentName?: string }>
+  >({})
+  const [questionStudents, setQuestionStudents] = useState<Record<number, string>>({})
+  const [isRollingStudent, setIsRollingStudent] = useState(false)
+  const [rollingName, setRollingName] = useState<string>('')
   const [isFinished, setIsFinished] = useState(false)
 
-  const questions = [
-    {
-      q: 'Aşağıdaki sayılardan hangisi en büyük basamak değerine sahip rakamı içerir?',
-      options: ['4.852', '7.129', '3.999', '6.050'],
-      correct: '7.129'
-    },
-    {
-      q: 'Bir dikdörtgenin kısa kenarı 6 cm, uzun kenarı 12 cm ise bu dikdörtgenin çevresi kaç cm\'dir?',
-      options: ['18 cm', '36 cm', '72 cm', '24 cm'],
-      correct: '36 cm'
-    },
-    {
-      q: 'Hangi gezegen Güneş Sistemi\'nin en büyük gezegenidir?',
-      options: ['Mars', 'Satürn', 'Jüpiter', 'Venüs'],
-      correct: 'Jüpiter'
-    },
-    {
-      q: 'Aşağıdaki cümlelerin hangisinde mecaz anlamlı bir sözcük kullanılmıştır?',
-      options: [
-        'Bugün hava oldukça sıcaktı.',
-        'Sözleriyle kalbimi kırdı.',
-        'Kitabın kapağı yırtılmış.',
-        'Bahçedeki ağaçlar çiçek açtı.'
-      ],
-      correct: 'Sözleriyle kalbimi kırdı.'
+  // Dynamic Exam loaded from Teacher Screen or Default
+  const [examData, setExamData] = useState<LiveExamData>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved =
+          localStorage.getItem(`oxonom_pano_exam_${boardId}`) ||
+          localStorage.getItem('oxonom_pano_active_exam')
+        if (saved) return JSON.parse(saved)
+      } catch (_) {}
     }
-  ]
+    return DEFAULT_PANO_EXAM
+  })
 
-  const curQ = questions[activeQuestion]
+  // Synchronize on mount and storage events
+  useEffect(() => {
+    const loadExam = () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const saved =
+            localStorage.getItem(`oxonom_pano_exam_${boardId}`) ||
+            localStorage.getItem('oxonom_pano_active_exam')
+          if (saved) {
+            setExamData(JSON.parse(saved))
+          }
+        } catch (_) {}
+      }
+    }
+    loadExam()
+    window.addEventListener('oxonom_pano_exam_updated', loadExam)
+    window.addEventListener('storage', loadExam)
+    return () => {
+      window.removeEventListener('oxonom_pano_exam_updated', loadExam)
+      window.removeEventListener('storage', loadExam)
+    }
+  }, [boardId])
+
+  const questions = examData?.questions && examData.questions.length > 0 ? examData.questions : DEFAULT_PANO_EXAM.questions
+  const curQ = questions[activeQuestion] || questions[0]
+  const currentAnswer = questionAnswers[activeQuestion]
+  const currentAssignedStudent = questionStudents[activeQuestion] || rollingName
+
+  // Student Picker from Class Pool with Fast Rolling Animation
+  const handlePickStudent = () => {
+    if (isRollingStudent) return
+    setIsRollingStudent(true)
+
+    const candidateList =
+      students && students.length > 0
+        ? students
+        : [
+            { name: 'Ahmet Yılmaz' },
+            { name: 'Zeynep Kaya' },
+            { name: 'Mehmet Demir' },
+            { name: 'Elif Çelik' },
+            { name: 'Can Özkan' },
+            { name: 'Selin Arslan' },
+            { name: 'Burak Koç' },
+            { name: 'Ayşe Şahin' },
+            { name: 'Emir Yıldız' },
+            { name: 'Fatma Aydın' },
+          ]
+
+    const intervals = [35, 45, 60, 80, 110, 150, 200, 270, 360, 480]
+    let step = 0
+
+    const run = () => {
+      const pick = candidateList[Math.floor(Math.random() * candidateList.length)]
+      setRollingName(pick.name)
+      playAudioChime(550 + step * 30, 0)
+      step++
+      if (step < intervals.length) {
+        setTimeout(run, intervals[step])
+      } else {
+        const finalWinner = candidateList[Math.floor(Math.random() * candidateList.length)]
+        setRollingName(finalWinner.name)
+        setQuestionStudents((prev) => ({ ...prev, [activeQuestion]: finalWinner.name }))
+        setIsRollingStudent(false)
+        playAudioChime(523.25, 659.25)
+        toast.success(`🎉 Soru Cevaplayıcısı: ${finalWinner.name}`, { icon: '🏆', duration: 2500 })
+      }
+    }
+    run()
+  }
+
+  // Handle Option Click (Instant Correct/Wrong Feedback)
+  const handleSelectOption = (optId: string) => {
+    if (currentAnswer) return // Already answered this step
+
+    const isCorrect = optId === curQ.correctOptionId
+    if (isCorrect) {
+      playAudioChime(523.25, 659.25) // High triumph chime
+    } else {
+      playAudioChime(260, 180) // Low chime
+    }
+
+    const assigned = currentAssignedStudent || 'Öğrenci'
+    setQuestionAnswers((prev) => ({
+      ...prev,
+      [activeQuestion]: {
+        selectedId: optId,
+        isCorrect,
+        studentName: assigned,
+      },
+    }))
+  }
+
+  // Summary Metrics
+  const totalAnswered = Object.keys(questionAnswers).length
+  const correctCount = Object.values(questionAnswers).filter((a) => a.isCorrect).length
+  const incorrectCount = totalAnswered - correctCount
+  const successPercentage = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0
 
   return (
     <AnimatePresence>
@@ -1731,134 +1936,273 @@ function MockExamModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 lg:p-8"
           onClick={onClose}
         >
           <motion.div
-            initial={{ scale: 0.93, opacity: 0, y: 15 }}
+            initial={{ scale: 0.94, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.93, opacity: 0, y: 15 }}
-            transition={{ type: "spring", duration: 0.35, bounce: 0.1 }}
+            exit={{ scale: 0.94, opacity: 0, y: 15 }}
+            transition={{ type: 'spring', duration: 0.35, bounce: 0.1 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl border border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-2xl p-5 sm:p-8"
+            className="relative w-full max-w-5xl md:max-w-6xl max-h-[92vh] overflow-y-auto rounded-[2.5rem] bg-white/98 dark:bg-[#1A1020]/98 backdrop-blur-3xl border-2 border-[#8D49A6]/40 dark:border-[#8D49A6]/60 shadow-2xl p-5 sm:p-8 lg:p-10 text-left select-none"
           >
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 mb-5 border-b border-[#E8DFEB] dark:border-[#49364F]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#620B79] to-[#8D49A6] text-white flex items-center justify-center shadow-md">
-                  <FileText className="w-5 h-5 text-white" />
+            <div className="flex items-center justify-between pb-5 mb-6 border-b border-[#E8DFEB] dark:border-[#49364F]">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-[#4B075F] to-[#8D49A6] text-white flex items-center justify-center shadow-lg shadow-purple-950/20 shrink-0">
+                  <FileQuestion className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base sm:text-lg font-black text-[#241329] dark:text-white">
-                      Haftalık Değerlendirme Sınavı
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-xl sm:text-2xl font-black text-[#241329] dark:text-white">
+                      {examData.title}
                     </h2>
-                    <span className="px-2 py-0.5 rounded-full bg-[#FAF5FC] dark:bg-[#350444] border border-[#E8DFEB] dark:border-[#49364F] text-[10px] font-black text-[#8D49A6] dark:text-[#E9D5FF]">
-                      MOCK
+                    <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-xs font-black">
+                      CANLI DERSLİK
                     </span>
                   </div>
-                  <p className="text-xs text-[#716779] dark:text-[#C58ADB]">
-                    {className || 'Tüm Sınıflar'} • 4 Soru • Süre: 20 Dk
+                  <p className="text-xs sm:text-sm text-[#716779] dark:text-[#C58ADB] mt-1 font-semibold">
+                    {className || '1/A Sınıfı'} • Akıllı Tahta: {boardId} • {questions.length} Soru
                   </p>
                 </div>
               </div>
+
               <button
+                type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 dark:bg-[#2D1636] dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-400 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-11 h-11 rounded-2xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 dark:bg-[#2D1636] dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-400 flex items-center justify-center transition-colors cursor-pointer shrink-0"
               >
-                <X className="w-4 h-4" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
-            {/* Content */}
+            {/* Content: Step-by-Step Questions or Final Summary */}
             {!isFinished ? (
-              <div className="space-y-5">
-                {/* Progress bar & Question numbers */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    {questions.map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setActiveQuestion(i)}
-                        className={`w-7 h-7 rounded-lg text-xs font-black transition-all cursor-pointer ${
-                          activeQuestion === i
-                            ? 'bg-[#4B075F] text-white ring-2 ring-[#8D49A6]'
-                            : selectedAnswers[i]
-                            ? 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]'
-                            : 'bg-slate-100 dark:bg-[#2D1636] text-slate-600 dark:text-slate-300'
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
+              <div className="space-y-6">
+                {/* 1. Sınıftan Rastgele Öğrenci Seçim Alanı */}
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-[#F0D8FA]/70 via-[#FAF5FC] to-[#F0D8FA]/70 dark:from-[#350444]/60 dark:via-[#261730] dark:to-[#350444]/60 border-2 border-[#8D49A6]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handlePickStudent}
+                      disabled={isRollingStudent || !!currentAnswer}
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#4B075F] to-[#8D49A6] hover:opacity-95 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-purple-950/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <Dice5 className={`w-4 h-4 ${isRollingStudent ? 'animate-spin' : ''}`} />
+                      <span>{isRollingStudent ? 'Öğrenci Seçiliyor...' : '🎲 Sınıftan Rastgele Öğrenci Seç'}</span>
+                    </button>
+                    {isRollingStudent && (
+                      <span className="font-mono text-sm sm:text-base font-black text-[#8D49A6] dark:text-[#F17AE6] animate-pulse">
+                        {rollingName}
+                      </span>
+                    )}
                   </div>
-                  <span className="text-xs font-bold text-[#8D49A6] dark:text-[#F17AE6]">
+
+                  <div className="flex items-center gap-2">
+                    {currentAssignedStudent ? (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-[#1E1124] border border-[#8D49A6]/40 shadow-xs">
+                        <Users className="w-4 h-4 text-[#8D49A6]" />
+                        <span className="text-xs sm:text-sm font-black text-[#4B075F] dark:text-[#F17AE6]">
+                          Sıradaki Cevaplayıcı: <strong>{currentAssignedStudent}</strong>
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs font-semibold text-slate-400">
+                        Soruyu yanıtlayacak öğrenciyi tahtada belirlemek için dokunun
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Step Progress Bar */}
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {questions.map((_, idx) => {
+                      const ans = questionAnswers[idx]
+                      const isActive = activeQuestion === idx
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActiveQuestion(idx)}
+                          className={`w-10 h-10 rounded-xl text-sm font-black transition-all cursor-pointer flex items-center justify-center ${
+                            isActive
+                              ? 'bg-[#4B075F] text-white ring-4 ring-[#8D49A6]/40 shadow-md scale-105'
+                              : ans
+                              ? ans.isCorrect
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-rose-500 text-white'
+                              : 'bg-slate-100 dark:bg-[#2D1636] text-slate-600 dark:text-slate-300 hover:bg-[#F0D8FA]'
+                          }`}
+                        >
+                          {ans ? (ans.isCorrect ? '✓' : '✗') : idx + 1}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <span className="text-sm font-black text-[#8D49A6] dark:text-[#F17AE6]">
                     Soru {activeQuestion + 1} / {questions.length}
                   </span>
                 </div>
 
-                {/* Question Box */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#FAF5FC] to-white dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F]">
-                  <p className="text-sm sm:text-base font-bold text-[#241329] dark:text-white leading-relaxed">
-                    {curQ.q}
-                  </p>
+                {/* 3. Büyük Soru Kutusu (Uzaktan Kolay Görünür) */}
+                <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#FAF5FC] via-white to-[#F9F5FA] dark:from-[#261730] dark:via-[#1E1124] dark:to-[#17101C] border-2 border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-md">
+                  <span className="inline-block text-xs font-black uppercase tracking-wider text-[#8D49A6] dark:text-[#E9D5FF] mb-2">
+                    SORU {activeQuestion + 1}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-950 dark:text-white leading-relaxed">
+                    {curQ.text}
+                  </h3>
                 </div>
 
-                {/* Options */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {curQ.options.map((opt, idx) => {
-                    const letters = ['A', 'B', 'C', 'D']
-                    const isSelected = selectedAnswers[activeQuestion] === opt
+                {/* 4. Şıklar (Büyük Dokunmatik Kartlar) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {curQ.options.map((opt) => {
+                    const isSelected = currentAnswer?.selectedId === opt.id
+                    const isCorrectAnswer = opt.id === curQ.correctOptionId
+                    const isAnswered = !!currentAnswer
+
+                    let buttonStyle =
+                      'bg-white dark:bg-[#261730]/90 text-slate-900 dark:text-white border-2 border-[#E8DFEB] dark:border-[#49364F] hover:border-[#8D49A6]'
+                    let badgeStyle = 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]'
+
+                    if (isAnswered) {
+                      if (isSelected) {
+                        if (currentAnswer.isCorrect) {
+                          // DOĞRU CEVAP: YEŞİL & BAŞARI PARILTISI
+                          buttonStyle =
+                            'bg-emerald-600 border-2 border-emerald-500 text-white shadow-xl shadow-emerald-600/30 ring-4 ring-emerald-400 scale-[1.02]'
+                          badgeStyle = 'bg-white text-emerald-700'
+                        } else {
+                          // YANLIŞ CEVAP: KIRMIZI
+                          buttonStyle =
+                            'bg-rose-600 border-2 border-rose-500 text-white shadow-xl shadow-rose-600/30 ring-4 ring-rose-400'
+                          badgeStyle = 'bg-white text-rose-700'
+                        }
+                      } else if (isCorrectAnswer) {
+                        // Yanlış seçildiğinde doğru şık yeşil ile gösterilir
+                        buttonStyle =
+                          'bg-emerald-500/15 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 ring-2 ring-emerald-500/40 animate-pulse'
+                        badgeStyle = 'bg-emerald-600 text-white'
+                      } else {
+                        buttonStyle = 'opacity-40 border-slate-200 dark:border-slate-800'
+                      }
+                    }
+
                     return (
-                      <button
-                        key={opt}
+                      <motion.button
+                        key={opt.id}
                         type="button"
-                        onClick={() => setSelectedAnswers({ ...selectedAnswers, [activeQuestion]: opt })}
-                        className={`p-3.5 rounded-2xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#4B075F] text-white border-[#4B075F] shadow-md shadow-purple-950/20'
-                            : 'bg-white/80 dark:bg-[#261730]/80 text-[#241329] dark:text-white border-[#E8DFEB] dark:border-[#49364F] hover:bg-[#F0D8FA]/50'
-                        }`}
+                        whileHover={!isAnswered ? { scale: 1.01 } : {}}
+                        whileTap={!isAnswered ? { scale: 0.99 } : {}}
+                        onClick={() => handleSelectOption(opt.id)}
+                        disabled={isAnswered}
+                        className={`p-5 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center gap-4 transition-all text-left cursor-pointer ${buttonStyle}`}
                       >
                         <span
-                          className={`w-6 h-6 rounded-lg font-black text-xs flex items-center justify-center shrink-0 ${
-                            isSelected
-                              ? 'bg-white text-[#4B075F]'
-                              : 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]'
-                          }`}
+                          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl font-black text-lg sm:text-xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${badgeStyle}`}
                         >
-                          {letters[idx]}
+                          {isAnswered && isSelected
+                            ? currentAnswer.isCorrect
+                              ? '✓'
+                              : '✗'
+                            : isAnswered && isCorrectAnswer
+                            ? '✓'
+                            : opt.id}
                         </span>
-                        <span className="text-xs sm:text-sm font-semibold">{opt}</span>
-                      </button>
+
+                        <span className="text-base sm:text-lg md:text-xl font-bold flex-1 leading-snug">
+                          {opt.text}
+                        </span>
+                      </motion.button>
                     )
                   })}
                 </div>
 
-                {/* Navigation actions */}
+                {/* 5. Cevaplama Sonuç Bildirim Alanı (Doğru / Yanlış Animasyonu) */}
+                {currentAnswer && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    className={`p-4 sm:p-5 rounded-2xl border-2 flex items-center justify-between gap-4 ${
+                      currentAnswer.isCorrect
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-900 dark:text-emerald-200'
+                        : 'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-900 dark:text-rose-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-xl shrink-0 ${
+                          currentAnswer.isCorrect ? 'bg-emerald-600' : 'bg-rose-600'
+                        }`}
+                      >
+                        {currentAnswer.isCorrect ? '✓' : '✗'}
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black">
+                          {currentAnswer.isCorrect
+                            ? `🎉 Harika! Doğru Cevap (${currentAnswer.studentName || 'Öğrenci'} Bildi)`
+                            : `❌ Yanlış Cevap — Doğru seçenek: ${curQ.correctOptionId} şıkkı`}
+                        </h4>
+                        <p className="text-xs sm:text-sm font-semibold opacity-90 mt-0.5">
+                          {currentAnswer.isCorrect
+                            ? 'Öğrenci puanı hanesine eklendi. Bir sonraki soruya geçebilirsiniz.'
+                            : `${currentAnswer.studentName || 'Öğrenci'} için doğru çözüm sınıfla paylaşıldı.`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Next step button */}
+                    {activeQuestion < questions.length - 1 ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveQuestion((q) => q + 1)}
+                        className="px-6 py-3 rounded-2xl bg-brand-gradient text-white text-sm font-black shadow-lg hover:opacity-95 transition-all cursor-pointer shrink-0"
+                      >
+                        Sonraki Soru →
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsFinished(true)}
+                        className="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black shadow-lg transition-all cursor-pointer shrink-0"
+                      >
+                        Sonuçları Gör 📊
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Bottom navigation */}
                 <div className="flex items-center justify-between pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
                   <button
                     type="button"
                     disabled={activeQuestion === 0}
                     onClick={() => setActiveQuestion((q) => Math.max(0, q - 1))}
-                    className="px-4 py-2 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] text-xs font-bold text-[#514458] dark:text-slate-300 disabled:opacity-30 cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] text-xs sm:text-sm font-bold text-[#514458] dark:text-slate-300 disabled:opacity-30 cursor-pointer"
                   >
                     ← Önceki Soru
                   </button>
+
+                  <div className="text-xs font-bold text-slate-400">
+                    Cevaplanan: {totalAnswered} / {questions.length}
+                  </div>
+
                   {activeQuestion < questions.length - 1 ? (
                     <button
                       type="button"
                       onClick={() => setActiveQuestion((q) => Math.min(questions.length - 1, q + 1))}
-                      className="px-5 py-2 rounded-xl bg-brand-gradient text-white text-xs font-bold shadow-xs hover:opacity-95 cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs sm:text-sm font-bold transition-colors cursor-pointer"
                     >
-                      Sonraki Soru →
+                      Geç →
                     </button>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setIsFinished(true)}
-                      className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold shadow-md cursor-pointer"
                     >
                       Sınavı Tamamla ✓
                     </button>
@@ -1866,27 +2210,135 @@ function MockExamModal({
                 </div>
               </div>
             ) : (
-              <div className="text-center py-6 space-y-4">
-                <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto shadow-inner">
-                  <CheckCircle2 className="w-8 h-8" />
+              /* ──────────────────────────────────────────────────────── */
+              /* 6. DETAYLI SINAV SONU RAPORU VE ÖĞRENCİ LİSTESİ         */
+              /* ──────────────────────────────────────────────────────── */
+              <div className="space-y-6">
+                {/* Celebration Hero */}
+                <div className="text-center py-4 space-y-3">
+                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center mx-auto shadow-xl shadow-emerald-600/30">
+                    <Trophy className="w-10 h-10" />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                    Sınav Başarıyla Tamamlandı!
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                    {className} sınıfı için interaktif sınav değerlendirmesi sonuçlandı.
+                  </p>
                 </div>
-                <h3 className="text-xl font-black text-[#241329] dark:text-white">
-                  Sınav Başarıyla Tamamlandı!
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                  {className} sınıfı için örnek deneme sınavı tamamlandı. Yanıtlar sisteme kaydedildi.
-                </p>
-                <div className="pt-2">
+
+                {/* Metrics Cards */}
+                <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
+                  <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30">
+                    <span className="text-xs font-bold uppercase text-emerald-600 dark:text-emerald-400">
+                      Doğru
+                    </span>
+                    <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                      {correctCount}
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-500/30">
+                    <span className="text-xs font-bold uppercase text-rose-600 dark:text-rose-400">
+                      Yanlış
+                    </span>
+                    <div className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400 mt-1">
+                      {incorrectCount}
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-500/30">
+                    <span className="text-xs font-bold uppercase text-[#8D49A6] dark:text-[#E9D5FF]">
+                      Başarı Oranı
+                    </span>
+                    <div className="text-2xl sm:text-3xl font-black text-[#8D49A6] dark:text-[#E9D5FF] mt-1">
+                      %{successPercentage}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Kimler Bildi & Kimler Bilemedi Detaylı Listesi */}
+                <div className="space-y-3">
+                  <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <Award className="w-5 h-5 text-[#8D49A6]" />
+                    <span>Öğrenci Soru Değerlendirme Çizelgesi</span>
+                  </h4>
+
+                  <div className="space-y-2.5">
+                    {questions.map((q, qIndex) => {
+                      const res = questionAnswers[qIndex]
+                      const student = res?.studentName || questionStudents[qIndex] || 'Belirlenmedi'
+                      const isCorrect = res?.isCorrect
+
+                      return (
+                        <div
+                          key={q.id || qIndex}
+                          className={`p-4 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                            isCorrect
+                              ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-500/40'
+                              : res
+                              ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-500/40'
+                              : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="w-8 h-8 rounded-xl bg-slate-900 text-white text-xs font-black flex items-center justify-center shrink-0">
+                              #{qIndex + 1}
+                            </span>
+                            <div>
+                              <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
+                                {q.text}
+                              </p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                Cevaplayan Öğrenci: <strong className="text-slate-800 dark:text-slate-200">{student}</strong>
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            {res ? (
+                              isCorrect ? (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-emerald-600 text-white font-black text-xs">
+                                  ✓ Bildi ({res.selectedId} Şıkkı)
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-rose-600 text-white font-black text-xs">
+                                  ✗ Bilemedi (Doğru: {q.correctOptionId})
+                                </span>
+                              )
+                            ) : (
+                              <span className="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl">
+                                Yanıtlanmadı
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Summary Actions */}
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E8DFEB] dark:border-[#49364F]">
                   <button
                     type="button"
                     onClick={() => {
                       setIsFinished(false)
-                      setSelectedAnswers({})
+                      setQuestionAnswers({})
+                      setQuestionStudents({})
                       setActiveQuestion(0)
                     }}
-                    className="px-5 py-2.5 rounded-xl bg-brand-gradient text-white text-xs font-bold shadow-sm cursor-pointer"
+                    className="px-6 py-2.5 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   >
-                    Tekrar Başlat
+                    🔄 Sınavı Yeniden Başlat
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-6 py-2.5 rounded-xl bg-brand-gradient text-white text-xs sm:text-sm font-black shadow-md hover:opacity-95 transition-opacity cursor-pointer"
+                  >
+                    Pano Ekranına Dön ✓
                   </button>
                 </div>
               </div>
@@ -2972,10 +3424,55 @@ export default function PanoClient() {
     return '%100'
   }, [savedAttendanceRate, selectedClass])
 
+  // Single Source of Truth Student Pool for selected class
+  const candidateStudents = useMemo(() => {
+    const allStudents = getSingleSourceOfTruthStudents(30)
+    const classCode = selectedClass ? normalizeClassCode(selectedClass.name.replace('Şubesi', '').trim()) : ''
+    const pool = allStudents.filter((s) => {
+      if (!classCode) return true
+      return normalizeClassCode(s.className) === classCode
+    })
+    return pool.length > 0 ? pool : allStudents
+  }, [selectedClass])
+
   // Modal states for interactive animated windows
   const [isToolsModalOpen, setIsToolsModalOpen] = useState(false)
   const [isExamModalOpen, setIsExamModalOpen] = useState(false)
   const [isExploreModalOpen, setIsExploreModalOpen] = useState(false)
+
+  // Incoming file sent by teacher to this board
+  const [incomingSharedFile, setIncomingSharedFile] = useState<{
+    id: string
+    boardId: string
+    name: string
+    size: number
+    type: string
+    url: string
+    uploadedAt: number
+    sender: string
+    note?: string
+  } | null>(null)
+
+  useEffect(() => {
+    const handleFileIncoming = (e?: any) => {
+      if (typeof window === 'undefined') return
+      try {
+        const fullId = `${boardIdentity.panoId}-${boardIdentity.boardNo}`
+        const file = e?.detail || JSON.parse(localStorage.getItem(`oxonom_pano_latest_file`) || 'null')
+        if (file && (file.boardId === fullId || file.boardId === boardIdentity.panoId)) {
+          setIncomingSharedFile(file)
+          toast.success(`🖼️ ${file.sender || 'Öğretmeniniz'} tahtaya görsel aktardı!`, { icon: '📺', duration: 4000 })
+        }
+      } catch (_) {}
+    }
+
+    window.addEventListener('oxonom_pano_file_shared', handleFileIncoming)
+    window.addEventListener('storage', handleFileIncoming)
+    return () => {
+      window.removeEventListener('oxonom_pano_file_shared', handleFileIncoming)
+      window.removeEventListener('storage', handleFileIncoming)
+    }
+  }, [boardIdentity.panoId, boardIdentity.boardNo])
 
   // Exactly 4 Apps requested: Akıllı Tahta - Araçlar - Sınav (mock) - Keşfet (mock)
   const apps: AppItem[] = useMemo(() => [
@@ -3002,17 +3499,17 @@ export default function PanoClient() {
     {
       id: 'exam',
       type: 'app',
-      title: 'Sınav (mock)',
+      title: 'Sınav',
       icon: 'Exam',
       color: 'bg-gradient-to-br from-[#620B79] to-[#8D49A6]',
       iconColor: 'text-white',
-      badge: 'Deneme',
+      badge: 'Canlı',
       path: '#exam'
     },
     {
       id: 'explore',
       type: 'app',
-      title: 'Keşfet (mock)',
+      title: 'Keşfet',
       icon: 'Explore',
       color: 'bg-gradient-to-br from-[#8D49A6] to-[#D914C8]',
       iconColor: 'text-white',
@@ -3976,12 +4473,79 @@ export default function PanoClient() {
         )}
       </AnimatePresence>
 
-      {/* MOCK EXAM MODAL */}
+      {/* PANO LIVE EXAM MODAL */}
       <MockExamModal
         isOpen={isExamModalOpen}
         onClose={() => setIsExamModalOpen(false)}
-        className={selectedClass?.name || ''}
+        className={selectedClass?.name || '1/A Sınıfı'}
+        boardId={`${boardIdentity.panoId}-${boardIdentity.boardNo}`}
+        students={candidateStudents}
       />
+
+      {/* INCOMING SHARED BOARD IMAGE MODAL */}
+      <AnimatePresence>
+        {incomingSharedFile && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-4xl max-h-[92vh] overflow-hidden rounded-[2.5rem] bg-white dark:bg-[#1E1124] border-2 border-[#8D49A6]/40 shadow-2xl flex flex-col"
+            >
+              {/* Header */}
+              <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-emerald-500/15 via-[#8D49A6]/10 to-transparent">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md">
+                    <ImageIcon size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-black text-gray-900 dark:text-white flex items-center gap-2">
+                      <span>{incomingSharedFile.name}</span>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                        Canlı Görsel
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Gönderen: {incomingSharedFile.sender} • {incomingSharedFile.note || 'Ders görseli ekrana aktarıldı'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIncomingSharedFile(null)}
+                  className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-300 flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Image Preview Container */}
+              <div className="p-4 overflow-y-auto flex items-center justify-center bg-gray-950/5 dark:bg-black/50 min-h-[300px] max-h-[70vh]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={incomingSharedFile.url}
+                  alt={incomingSharedFile.name}
+                  className="max-h-[65vh] w-auto object-contain rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800"
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex items-center justify-between text-xs">
+                <span className="text-gray-600 dark:text-gray-300 font-semibold">
+                  {incomingSharedFile.note ? `Not: "${incomingSharedFile.note}"` : 'Akıllı tahta canlı ders materyali'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIncomingSharedFile(null)}
+                  className="px-6 py-2 rounded-xl bg-brand-gradient text-white font-black shadow-md cursor-pointer hover:opacity-95"
+                >
+                  Kapat ✓
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* MOCK EXPLORE MODAL */}
       <MockExploreModal

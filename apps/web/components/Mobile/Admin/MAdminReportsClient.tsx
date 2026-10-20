@@ -45,7 +45,6 @@ import MobileAdminMoreSheet from './MobileAdminMoreSheet'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import { SCHOOL_ORGS, getOrgTeachers } from '@services/demo/schoolDirectory'
 import { getStoredPrincipalProfile } from '@/lib/principal/principalProfileStorage'
-import MockBadge from '@components/Common/MockBadge'
 
 export interface MAdminReportsClientProps {
   orgSlug?: string

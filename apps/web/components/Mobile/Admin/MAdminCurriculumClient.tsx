@@ -48,7 +48,6 @@ import {
 } from '@services/demo/schoolDirectory'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getStoredPrincipalProfile } from '@/lib/principal/principalProfileStorage'
-import MockBadge from '@components/Common/MockBadge'
 import { INITIAL_SCHEDULE_ENTRIES } from './MAdminScheduleClient'
 import { CANONICAL_9A_SCHEDULE_30 } from '@/lib/student/studentData'
 
