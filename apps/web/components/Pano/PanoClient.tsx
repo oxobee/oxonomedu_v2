@@ -57,6 +57,8 @@ import {
   Trophy,
   Crown,
   HelpCircle,
+  Wrench,
+  Compass,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import {
@@ -116,6 +118,24 @@ const Icons = {
   LogOut: () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+    </svg>
+  ),
+  Tools: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-full h-full">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.54 2.54 0 01-3.58 0 2.54 2.54 0 010-3.58l5.653-4.655m5.078-2.652a6.375 6.375 0 00-7.394-7.394c-.468.14-.891.382-1.208.766L3 5.75" />
+    </svg>
+  ),
+  Exam: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-full h-full">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l2 2 4-4" />
+    </svg>
+  ),
+  Explore: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-full h-full">
+      <circle cx="12" cy="12" r="9" />
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" fillOpacity="0.2" />
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
     </svg>
   ),
   OxonomLogo: () => (
@@ -663,7 +683,7 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
                 <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] flex items-center justify-center font-bold">
                   <Timer className="w-4 h-4" />
                 </div>
-                <span className="font-black text-sm text-[#241329] dark:text-white">Ders Kronometresi</span>
+                <span className="font-black text-sm text-[#241329] dark:text-white">Kronometre</span>
               </div>
               <div className="flex items-center gap-1">
                 {[
@@ -783,10 +803,6 @@ function SmartboardClassroomTools({ selectedClass }: { selectedClass: ClassroomI
                 </div>
                 <span className="font-black text-sm text-[#241329] dark:text-white">Soru & Söz Hakkı</span>
               </div>
-              <span className="text-[10.5px] font-bold text-[#8D49A6] bg-[#FAF5FC] dark:bg-[#2A1833] px-2.5 py-0.5 rounded-lg border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-1">
-                <Sparkles size={11} className="text-[#D914C8]" />
-                <span>Animasyonlu</span>
-              </span>
             </div>
 
             {/* Selected Student Display with High-Impact Animation */}
@@ -1664,6 +1680,393 @@ const NewBoardModal = ({
   )
 }
 
+// Interactive Mock Exam Modal
+function MockExamModal({
+  isOpen,
+  onClose,
+  className
+}: {
+  isOpen: boolean
+  onClose: () => void
+  className: string
+}) {
+  const [activeQuestion, setActiveQuestion] = useState(0)
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
+  const [isFinished, setIsFinished] = useState(false)
+
+  const questions = [
+    {
+      q: 'Aşağıdaki sayılardan hangisi en büyük basamak değerine sahip rakamı içerir?',
+      options: ['4.852', '7.129', '3.999', '6.050'],
+      correct: '7.129'
+    },
+    {
+      q: 'Bir dikdörtgenin kısa kenarı 6 cm, uzun kenarı 12 cm ise bu dikdörtgenin çevresi kaç cm\'dir?',
+      options: ['18 cm', '36 cm', '72 cm', '24 cm'],
+      correct: '36 cm'
+    },
+    {
+      q: 'Hangi gezegen Güneş Sistemi\'nin en büyük gezegenidir?',
+      options: ['Mars', 'Satürn', 'Jüpiter', 'Venüs'],
+      correct: 'Jüpiter'
+    },
+    {
+      q: 'Aşağıdaki cümlelerin hangisinde mecaz anlamlı bir sözcük kullanılmıştır?',
+      options: [
+        'Bugün hava oldukça sıcaktı.',
+        'Sözleriyle kalbimi kırdı.',
+        'Kitabın kapağı yırtılmış.',
+        'Bahçedeki ağaçlar çiçek açtı.'
+      ],
+      correct: 'Sözleriyle kalbimi kırdı.'
+    }
+  ]
+
+  const curQ = questions[activeQuestion]
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.93, opacity: 0, y: 15 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.93, opacity: 0, y: 15 }}
+            transition={{ type: "spring", duration: 0.35, bounce: 0.1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl border border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-2xl p-5 sm:p-8"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 mb-5 border-b border-[#E8DFEB] dark:border-[#49364F]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#620B79] to-[#8D49A6] text-white flex items-center justify-center shadow-md">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base sm:text-lg font-black text-[#241329] dark:text-white">
+                      Haftalık Değerlendirme Sınavı
+                    </h2>
+                    <span className="px-2 py-0.5 rounded-full bg-[#FAF5FC] dark:bg-[#350444] border border-[#E8DFEB] dark:border-[#49364F] text-[10px] font-black text-[#8D49A6] dark:text-[#E9D5FF]">
+                      MOCK
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#716779] dark:text-[#C58ADB]">
+                    {className || 'Tüm Sınıflar'} • 4 Soru • Süre: 20 Dk
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 dark:bg-[#2D1636] dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-400 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Content */}
+            {!isFinished ? (
+              <div className="space-y-5">
+                {/* Progress bar & Question numbers */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    {questions.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setActiveQuestion(i)}
+                        className={`w-7 h-7 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                          activeQuestion === i
+                            ? 'bg-[#4B075F] text-white ring-2 ring-[#8D49A6]'
+                            : selectedAnswers[i]
+                            ? 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]'
+                            : 'bg-slate-100 dark:bg-[#2D1636] text-slate-600 dark:text-slate-300'
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-xs font-bold text-[#8D49A6] dark:text-[#F17AE6]">
+                    Soru {activeQuestion + 1} / {questions.length}
+                  </span>
+                </div>
+
+                {/* Question Box */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#FAF5FC] to-white dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F]">
+                  <p className="text-sm sm:text-base font-bold text-[#241329] dark:text-white leading-relaxed">
+                    {curQ.q}
+                  </p>
+                </div>
+
+                {/* Options */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {curQ.options.map((opt, idx) => {
+                    const letters = ['A', 'B', 'C', 'D']
+                    const isSelected = selectedAnswers[activeQuestion] === opt
+                    return (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => setSelectedAnswers({ ...selectedAnswers, [activeQuestion]: opt })}
+                        className={`p-3.5 rounded-2xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#4B075F] text-white border-[#4B075F] shadow-md shadow-purple-950/20'
+                            : 'bg-white/80 dark:bg-[#261730]/80 text-[#241329] dark:text-white border-[#E8DFEB] dark:border-[#49364F] hover:bg-[#F0D8FA]/50'
+                        }`}
+                      >
+                        <span
+                          className={`w-6 h-6 rounded-lg font-black text-xs flex items-center justify-center shrink-0 ${
+                            isSelected
+                              ? 'bg-white text-[#4B075F]'
+                              : 'bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]'
+                          }`}
+                        >
+                          {letters[idx]}
+                        </span>
+                        <span className="text-xs sm:text-sm font-semibold">{opt}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Navigation actions */}
+                <div className="flex items-center justify-between pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
+                  <button
+                    type="button"
+                    disabled={activeQuestion === 0}
+                    onClick={() => setActiveQuestion((q) => Math.max(0, q - 1))}
+                    className="px-4 py-2 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] text-xs font-bold text-[#514458] dark:text-slate-300 disabled:opacity-30 cursor-pointer"
+                  >
+                    ← Önceki Soru
+                  </button>
+                  {activeQuestion < questions.length - 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => setActiveQuestion((q) => Math.min(questions.length - 1, q + 1))}
+                      className="px-5 py-2 rounded-xl bg-brand-gradient text-white text-xs font-bold shadow-xs hover:opacity-95 cursor-pointer"
+                    >
+                      Sonraki Soru →
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsFinished(true)}
+                      className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md cursor-pointer"
+                    >
+                      Sınavı Tamamla ✓
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6 space-y-4">
+                <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto shadow-inner">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-black text-[#241329] dark:text-white">
+                  Sınav Başarıyla Tamamlandı!
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                  {className} sınıfı için örnek deneme sınavı tamamlandı. Yanıtlar sisteme kaydedildi.
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsFinished(false)
+                      setSelectedAnswers({})
+                      setActiveQuestion(0)
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-brand-gradient text-white text-xs font-bold shadow-sm cursor-pointer"
+                  >
+                    Tekrar Başlat
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+// Interactive Mock Explore Modal
+function MockExploreModal({
+  isOpen,
+  onClose
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const [activeTab, setActiveTab] = useState<string>('solar')
+
+  const items = [
+    {
+      id: 'solar',
+      title: 'Güneş Sistemi & 3D Gezegenler',
+      category: 'Uzay & Astronomi',
+      icon: '🪐',
+      color: 'from-[#4B075F] to-[#8D49A6]',
+      desc: 'Güneş Sistemi’ndeki 8 gezegenin yörüngelerini, kütlelerini ve özelliklerini 3 boyutlu simülasyonla inceleyin.',
+      tags: ['Astronomi', '3D Model', 'İnteraktif']
+    },
+    {
+      id: 'periodic',
+      title: 'Periyodik Tablo & Element Laboratuvarı',
+      category: 'Kimya',
+      icon: '⚗️',
+      color: 'from-[#620B79] to-[#8D49A6]',
+      desc: '118 elementin elektron dizilimlerini, atom numaralarını ve reaksiyon türlerini dokunmatik ekranda deneyimleyin.',
+      tags: ['Atom', 'Molekül', 'Deney']
+    },
+    {
+      id: 'anatomy',
+      title: 'İnsan Anatomisi & 3D Organlar',
+      category: 'Biyoloji',
+      icon: '🫀',
+      color: 'from-[#8D49A6] to-[#D914C8]',
+      desc: 'Kalp, beyin, iskelet ve kas sistemlerini katman katman açarak anatomi atlasında keşfe çıkın.',
+      tags: ['Sağlık', 'Biyoloji', 'Sistemler']
+    },
+    {
+      id: 'geometry',
+      title: 'Geometrik Cisimler & Hacim Simülatörü',
+      category: 'Matematik',
+      icon: '📐',
+      color: 'from-[#D914C8] to-[#F17AE6]',
+      desc: 'Prizmalar, piramitler ve silindirlerin açınımlarını döndürerek hacim ve yüzey alanı bağıntılarını görün.',
+      tags: ['Geometri', 'Hacim', '3 Boyut']
+    }
+  ]
+
+  const activeModule = items.find((m) => m.id === activeTab) || items[0]
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.93, opacity: 0, y: 15 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.93, opacity: 0, y: 15 }}
+            transition={{ type: "spring", duration: 0.35, bounce: 0.1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-[2rem] bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl border border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-2xl p-5 sm:p-8"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 mb-5 border-b border-[#E8DFEB] dark:border-[#49364F]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shadow-md">
+                  <Compass className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base sm:text-lg font-black text-[#241329] dark:text-white">
+                      Oxonom Keşfet & İnteraktif Laboratuvar
+                    </h2>
+                    <span className="px-2 py-0.5 rounded-full bg-[#FAF5FC] dark:bg-[#350444] border border-[#E8DFEB] dark:border-[#49364F] text-[10px] font-black text-[#8D49A6] dark:text-[#E9D5FF]">
+                      MOCK
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#716779] dark:text-[#C58ADB]">
+                    Akıllı tahta için dokunmatik 3D simülasyon ve fen atölyeleri
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 dark:bg-[#2D1636] dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-400 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Grid of Modules */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
+              {items.map((it) => {
+                const isSelected = it.id === activeTab
+                return (
+                  <button
+                    key={it.id}
+                    type="button"
+                    onClick={() => setActiveTab(it.id)}
+                    className={`p-3 rounded-2xl border text-center flex flex-col items-center gap-2 transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#FAF5FC] dark:bg-[#2D1636] border-[#8D49A6] shadow-sm ring-2 ring-[#8D49A6]/50'
+                        : 'bg-white/80 dark:bg-[#211729]/80 border-[#E8DFEB] dark:border-[#49364F] hover:bg-[#FAF5FC]/60'
+                    }`}
+                  >
+                    <span className="text-2xl">{it.icon}</span>
+                    <span className="text-[11px] font-black text-[#241329] dark:text-white truncate w-full">
+                      {it.category}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Active Module Detail Card */}
+            <div className="p-5 rounded-3xl bg-gradient-to-br from-[#FAF5FC] to-white dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] space-y-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${activeModule.color} text-white flex items-center justify-center text-2xl shadow-md`}>
+                  {activeModule.icon}
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-[#241329] dark:text-white">
+                    {activeModule.title}
+                  </h3>
+                  <span className="text-xs font-bold text-[#8D49A6] dark:text-[#E9D5FF]">
+                    {activeModule.category} Atölyesi
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs sm:text-sm text-[#514458] dark:text-slate-300 leading-relaxed">
+                {activeModule.desc}
+              </p>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {activeModule.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#350444] border border-[#E8DFEB] dark:border-[#49364F] text-[10.5px] font-bold text-[#4B075F] dark:text-[#E9D5FF]"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+
+              <div className="pt-2 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => toast.success(`${activeModule.title} simülasyonu başlatıldı! (Mock)`)}
+                  className="px-5 py-2.5 rounded-xl bg-brand-gradient text-white text-xs font-bold shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer"
+                >
+                  Simülasyonu Başlat 🚀
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 // MAIN PANO COMPONENT
 export default function PanoClient() {
   const router = useRouter()
@@ -1715,29 +2118,57 @@ export default function PanoClient() {
   const [classrooms, setClassrooms] = useState<ClassroomItem[]>(DEFAULT_CLASSROOMS)
 
   // Hardware Board & Pano ID (e.g., "1A-01" -> Pano: 1A, Board: 01)
-  const rawIdParam = searchParams?.get('id') || searchParams?.get('boardId') || searchParams?.get('panoId') || ''
+  const rawIdParam = searchParams?.get('id') || searchParams?.get('boardId') || ''
+  const panoIdParam = searchParams?.get('panoId') || ''
+  const tahtaIdParam = searchParams?.get('tahtaId') || searchParams?.get('boardNo') || ''
+
   const [boardIdentity, setBoardIdentity] = useState<{ panoId: string; boardNo: string }>(() => {
     if (typeof window !== 'undefined') {
-      const paramToUse = rawIdParam || localStorage.getItem('oxonom_active_board_id') || '1A-01'
-      const parts = paramToUse.split('-')
-      const panoId = (parts[0] || '1A').trim().toUpperCase()
-      const boardNo = (parts.slice(1).join('-') || '01').trim().toUpperCase()
-      return { panoId, boardNo }
+      if (rawIdParam && rawIdParam.includes('-')) {
+        const parts = rawIdParam.split('-')
+        return { panoId: (parts[0] || '1A').trim().toUpperCase(), boardNo: (parts.slice(1).join('-') || '01').trim().toUpperCase() }
+      }
+      if (panoIdParam) {
+        return { panoId: panoIdParam.trim().toUpperCase(), boardNo: (tahtaIdParam || '01').trim().toUpperCase() }
+      }
+      if (rawIdParam) {
+        return { panoId: rawIdParam.trim().toUpperCase(), boardNo: '01' }
+      }
+      const saved = localStorage.getItem('oxonom_active_board_id') || '1A-01'
+      const parts = saved.split('-')
+      return { panoId: (parts[0] || '1A').trim().toUpperCase(), boardNo: (parts.slice(1).join('-') || '01').trim().toUpperCase() }
     }
     return { panoId: '1A', boardNo: '01' }
   })
 
   useEffect(() => {
-    if (rawIdParam) {
+    let p = ''
+    let b = ''
+    if (rawIdParam && rawIdParam.includes('-')) {
       const parts = rawIdParam.split('-')
-      const panoId = (parts[0] || '1A').trim().toUpperCase()
-      const boardNo = (parts.slice(1).join('-') || '01').trim().toUpperCase()
-      setBoardIdentity({ panoId, boardNo })
+      p = (parts[0] || '1A').trim().toUpperCase()
+      b = (parts.slice(1).join('-') || '01').trim().toUpperCase()
+    } else if (panoIdParam) {
+      p = panoIdParam.trim().toUpperCase()
+      b = (tahtaIdParam || '01').trim().toUpperCase()
+    } else if (rawIdParam) {
+      p = rawIdParam.trim().toUpperCase()
+      b = '01'
+    }
+    if (p && b) {
+      setBoardIdentity({ panoId: p, boardNo: b })
       if (typeof window !== 'undefined') {
-        localStorage.setItem('oxonom_active_board_id', `${panoId}-${boardNo}`)
+        localStorage.setItem('oxonom_active_board_id', `${p}-${b}`)
       }
     }
-  }, [rawIdParam])
+  }, [rawIdParam, panoIdParam, tahtaIdParam])
+
+  // Prevent any lingering dark mode class on document.documentElement from affecting the rest of the site
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [])
 
   // Handle remote session termination (logout on either device)
   const handleRemoteSessionClosed = useCallback(() => {
@@ -2531,7 +2962,12 @@ export default function PanoClient() {
     return '%100'
   }, [savedAttendanceRate, selectedClass])
 
-  // The 5 Apps requested in exact order: Akıllı Tahta - Ödevler - Modüller - Kaynaklar - Oyunlar
+  // Modal states for interactive animated windows
+  const [isToolsModalOpen, setIsToolsModalOpen] = useState(false)
+  const [isExamModalOpen, setIsExamModalOpen] = useState(false)
+  const [isExploreModalOpen, setIsExploreModalOpen] = useState(false)
+
+  // Exactly 4 Apps requested: Akıllı Tahta - Araçlar - Sınav (mock) - Keşfet (mock)
   const apps: AppItem[] = useMemo(() => [
     {
       id: 'board',
@@ -2540,49 +2976,40 @@ export default function PanoClient() {
       icon: 'Board',
       color: 'bg-brand-gradient',
       iconColor: 'text-white',
-      badge: 'Çizim',
-      path: '/pano/tahta'
+      badge: `${boardIdentity.panoId}-${boardIdentity.boardNo}`,
+      path: `/pano/tahta?id=${encodeURIComponent(`${boardIdentity.panoId}-${boardIdentity.boardNo}`)}&panoId=${encodeURIComponent(boardIdentity.panoId)}&tahtaId=${encodeURIComponent(boardIdentity.boardNo)}`
     },
     {
-      id: 'homework',
+      id: 'tools',
       type: 'app',
-      title: 'Ödevler',
-      icon: 'Homework',
+      title: 'Araçlar',
+      icon: 'Tools',
       color: 'bg-gradient-to-br from-[#4B075F] to-[#701A75]',
       iconColor: 'text-white',
-      badge: `${liveAssignmentCount} Aktif`,
-      path: selectedClass ? `/dash/assignments?usergroupId=${selectedClass.id}` : `/dash/assignments`
+      badge: 'İnteraktif',
+      path: '#tools'
     },
     {
-      id: 'playgrounds',
+      id: 'exam',
       type: 'app',
-      title: 'Modüller',
-      icon: 'Playgrounds',
+      title: 'Sınav (mock)',
+      icon: 'Exam',
       color: 'bg-gradient-to-br from-[#620B79] to-[#8D49A6]',
       iconColor: 'text-white',
-      badge: 'İnteraktif',
-      path: `/dash/playgrounds`
+      badge: 'Deneme',
+      path: '#exam'
     },
     {
-      id: 'library',
+      id: 'explore',
       type: 'app',
-      title: 'Kaynaklar',
-      icon: 'Attendance',
-      color: 'bg-gradient-to-br from-[#8D49A6] to-[#B90FAB]',
-      iconColor: 'text-white',
-      path: `/library`
-    },
-    {
-      id: 'games',
-      type: 'app',
-      title: 'Oyunlar',
-      icon: 'Games',
-      color: 'bg-gradient-to-br from-[#B90FAB] to-[#D914C8]',
+      title: 'Keşfet (mock)',
+      icon: 'Explore',
+      color: 'bg-gradient-to-br from-[#8D49A6] to-[#D914C8]',
       iconColor: 'text-white',
       badge: 'Atölye',
-      path: `/games`
+      path: '#explore'
     }
-  ], [selectedClass, liveBoardCount, liveAssignmentCount])
+  ], [boardIdentity.panoId, boardIdentity.boardNo])
 
   // Check active session (all profiles: teacher, admin, student, smartboard supported)
   const hasActiveTeacher = !forceStandby
@@ -3390,8 +3817,8 @@ export default function PanoClient() {
                 </div>
               </div>
 
-              {/* 4 Stat Cards in Harmonious Brand Theme (Kademe, Öğrenci, Tahta, Devam) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 relative z-10">
+              {/* 3 Stat Cards in Harmonious Brand Theme (Kademe, Öğrenci, Günlük Devam) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 relative z-10">
                 {/* 1. KADEME */}
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-[#8D49A6]/60 shadow-2xs">
                   <div className="w-12 h-12 rounded-2xl bg-[#4B075F]/10 dark:bg-[#4B075F]/40 border border-[#4B075F]/20 flex items-center justify-center text-[#4B075F] dark:text-[#E9D5FF] shrink-0">
@@ -3414,33 +3841,7 @@ export default function PanoClient() {
                   </div>
                 </div>
 
-                {/* 3. TAHTA */}
-                <div
-                  onClick={() => {
-                    openAppInWindow({
-                      id: 'past_boards',
-                      type: 'app',
-                      title: `${selectedClass.name} - Geçmiş Tahtalar`,
-                      icon: 'Board',
-                      color: 'bg-brand-gradient',
-                      iconColor: 'text-white',
-                      badge: `${liveBoardCount} Tahta`,
-                      path: `/dash/boards?usergroupId=${selectedClass.id}`
-                    })
-                  }}
-                  className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 cursor-pointer hover:border-[#D914C8]/60 transition-all hover:-translate-y-0.5 shadow-2xs"
-                  title="Sınıfın geçmiş tahtalarını aç"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-[#D914C8]/10 dark:bg-[#D914C8]/40 border border-[#D914C8]/20 flex items-center justify-center text-[#D914C8] dark:text-[#FCF9FD] shrink-0">
-                    <Presentation className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">TAHTA</span>
-                    <span className="text-base sm:text-lg font-black text-[#8D49A6] dark:text-[#FCF9FD]">{liveBoardCount} Aktif</span>
-                  </div>
-                </div>
-
-                {/* 4. GÜNLÜK DEVAM */}
+                {/* 3. GÜNLÜK DEVAM */}
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-emerald-500/60 shadow-2xs">
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/40 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shrink-0">
                     <CheckCircle2 className="w-6 h-6" />
@@ -3455,21 +3856,27 @@ export default function PanoClient() {
           </div>
 
           {/* ======================================================== */}
-          {/* APPS & SHORTCUTS (TEK SIRA 5 İKON)                       */}
+          {/* APPS & SHORTCUTS (4 İKON: TAHTA, ARAÇLAR, SINAV, KEŞFET) */}
           {/* ======================================================== */}
           <div className="pt-2">
             <h2 className="text-xs sm:text-sm font-black text-[#514458] dark:text-slate-400 uppercase tracking-wider mb-4 pl-1">
               Uygulamalar
             </h2>
 
-            <div className="grid grid-cols-5 gap-3 sm:gap-4 md:gap-6 w-full max-w-5xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 md:gap-8 w-full max-w-4xl mx-auto">
               {apps.map((item) => (
                 <GridItem
                   key={item.id}
                   item={item}
                   onAction={(app) => {
                     if (app.id === 'board') {
-                      router.push('/pano/tahta')
+                      router.push(`/pano/tahta?id=${encodeURIComponent(`${boardIdentity.panoId}-${boardIdentity.boardNo}`)}&panoId=${encodeURIComponent(boardIdentity.panoId)}&tahtaId=${encodeURIComponent(boardIdentity.boardNo)}`)
+                    } else if (app.id === 'tools') {
+                      setIsToolsModalOpen(true)
+                    } else if (app.id === 'exam') {
+                      setIsExamModalOpen(true)
+                    } else if (app.id === 'explore') {
+                      setIsExploreModalOpen(true)
                     } else {
                       openAppInWindow(app)
                     }
@@ -3478,11 +3885,6 @@ export default function PanoClient() {
               ))}
             </div>
           </div>
-
-          {/* ======================================================== */}
-          {/* INTERAKTİF SINIF ARAÇLARI (KRONOMETRE, ÇARK, ZİL)        */}
-          {/* ======================================================== */}
-          <SmartboardClassroomTools selectedClass={selectedClass} />
 
         </div>
       </div>
@@ -3513,6 +3915,68 @@ export default function PanoClient() {
         onClose={() => dispatch({ type: 'CLOSE_MODAL' })}
         settings={settings}
         onSave={saveSettings}
+      />
+
+      {/* ANIMATED TOOLS MODAL (ARAÇLAR PENCERESİ) */}
+      <AnimatePresence>
+        {isToolsModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+            onClick={() => setIsToolsModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.93, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.93, opacity: 0, y: 15 }}
+              transition={{ type: "spring", duration: 0.35, bounce: 0.1 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[2rem] bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl border border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-2xl p-5 sm:p-8"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E8DFEB] dark:border-[#49364F]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-brand-gradient text-white flex items-center justify-center shadow-md">
+                    <Wrench className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-black text-[#241329] dark:text-white">
+                      İnteraktif Sınıf Araçları
+                    </h2>
+                    <p className="text-xs text-[#716779] dark:text-[#C58ADB]">
+                      Kronometre, Soru & Söz Hakkı, Dokunmatik Hesap Makinesi
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsToolsModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 dark:bg-[#2D1636] dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-400 flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Tools Content */}
+              <SmartboardClassroomTools selectedClass={selectedClass} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MOCK EXAM MODAL */}
+      <MockExamModal
+        isOpen={isExamModalOpen}
+        onClose={() => setIsExamModalOpen(false)}
+        className={selectedClass?.name || ''}
+      />
+
+      {/* MOCK EXPLORE MODAL */}
+      <MockExploreModal
+        isOpen={isExploreModalOpen}
+        onClose={() => setIsExploreModalOpen(false)}
       />
 
       {/* 8. MOBIL UZAKTAN KUMANDA EŞLEŞTİRME MODALI (QR & PIN) */}

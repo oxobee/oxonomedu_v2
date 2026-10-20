@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createQuickdraw } from './core/index.js'
 import './core/quickdraw.css'
 import {
@@ -10,10 +10,6 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react'
-
-const INDEX_KEY = 'oxonom-whiteboard-files'
-const THEME_KEY = 'oxonom-whiteboard-theme'
-const fileKey = (id: string) => `oxonom-whiteboard-file:${id}`
 
 interface WhiteboardFile {
   id: string
@@ -59,29 +55,91 @@ function normalizeIndex(raw: any): WhiteboardIndex {
 
 export default function WhiteboardClient() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const boardRef = useRef<HTMLDivElement>(null)
   const boardInstanceRef = useRef<any>(null)
   const saveTimerRef = useRef<any>(null)
+
+  // Hardware board identity (e.g. Pano: 1A, Board: 01)
+  const rawId = searchParams?.get('id') || searchParams?.get('boardId') || ''
+  const pId = searchParams?.get('panoId') || ''
+  const tId = searchParams?.get('tahtaId') || searchParams?.get('boardNo') || ''
+
+  const boardInfo = useMemo(() => {
+    let pano = '1A'
+    let board = '01'
+    if (rawId && rawId.includes('-')) {
+      const parts = rawId.split('-')
+      pano = (parts[0] || '1A').trim().toUpperCase()
+      board = (parts.slice(1).join('-') || '01').trim().toUpperCase()
+    } else if (pId) {
+      pano = pId.trim().toUpperCase()
+      board = (tId || '01').trim().toUpperCase()
+    } else if (rawId) {
+      pano = rawId.trim().toUpperCase()
+      board = '01'
+    } else if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('oxonom_active_board_id') || '1A-01'
+      const parts = saved.split('-')
+      pano = (parts[0] || '1A').trim().toUpperCase()
+      board = (parts.slice(1).join('-') || '01').trim().toUpperCase()
+    }
+    const fullId = `${pano}-${board}`
+    const scopeKey = `${pano}_${board}`.replace(/[^A-Za-z0-9_]/g, '_')
+    return { pano, board, fullId, scopeKey }
+  }, [rawId, pId, tId])
+
+  // Partitioned storage keys strictly isolated by classroom and board ID
+  const indexKey = `oxonom-whiteboard-files:${boardInfo.scopeKey}`
+  const themeKey = `oxonom-whiteboard-theme:${boardInfo.scopeKey}`
+  const getFileKey = useCallback((id: string) => `oxonom-whiteboard-file:${boardInfo.scopeKey}:${id}`, [boardInfo.scopeKey])
+
+  // Local scoped board theme (never pollutes global website documentElement)
+  const [boardTheme, setBoardTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light'
+    try {
+      const saved = localStorage.getItem(themeKey)
+      if (saved === 'dark' || saved === 'light') return saved
+    } catch {}
+    return 'light'
+  })
 
   const [filesIndex, setFilesIndex] = useState<WhiteboardIndex>(() => {
     if (typeof window === 'undefined') {
       return { current: 'f1', files: [{ id: 'f1', boardNumber: 1, name: 'Tahta 1', updatedAt: Date.now() }] }
     }
     try {
-      const saved = localStorage.getItem(INDEX_KEY)
+      const saved = localStorage.getItem(indexKey)
       if (saved) {
         const parsed = JSON.parse(saved)
         const normalized = normalizeIndex(parsed)
-        localStorage.setItem(INDEX_KEY, JSON.stringify(normalized))
+        localStorage.setItem(indexKey, JSON.stringify(normalized))
         return normalized
       }
     } catch {}
     const initialIndex = normalizeIndex(null)
     try {
-      localStorage.setItem(INDEX_KEY, JSON.stringify(initialIndex))
+      localStorage.setItem(indexKey, JSON.stringify(initialIndex))
     } catch {}
     return initialIndex
   })
+
+  // Synchronize index if scopeKey changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const saved = localStorage.getItem(indexKey)
+      if (saved) {
+        setFilesIndex(normalizeIndex(JSON.parse(saved)))
+        return
+      }
+    } catch {}
+    const initialIndex = normalizeIndex(null)
+    try {
+      localStorage.setItem(indexKey, JSON.stringify(initialIndex))
+    } catch {}
+    setFilesIndex(initialIndex)
+  }, [indexKey])
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentFileName, setCurrentFileName] = useState('')
@@ -102,13 +160,13 @@ export default function WhiteboardClient() {
 
     try {
       const snap = board.editor.store.getSnapshot()
-      localStorage.setItem(fileKey(file.id), JSON.stringify(snap))
+      localStorage.setItem(getFileKey(file.id), JSON.stringify(snap))
       file.updatedAt = Date.now()
-      localStorage.setItem(INDEX_KEY, JSON.stringify(filesIndex))
+      localStorage.setItem(indexKey, JSON.stringify(filesIndex))
     } catch (err) {
       console.warn('Whiteboard save skipped (storage limit)', err)
     }
-  }, [currentFile, filesIndex])
+  }, [currentFile, filesIndex, getFileKey, indexKey])
 
   // Open file by id
   const openFile = useCallback((id: string, fit = true) => {
@@ -119,10 +177,13 @@ export default function WhiteboardClient() {
     const newIdx = { ...filesIndex, current: target.id }
     setFilesIndex(newIdx)
     try {
-      localStorage.setItem(INDEX_KEY, JSON.stringify(newIdx))
+      localStorage.setItem(indexKey, JSON.stringify(newIdx))
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href)
-        url.searchParams.set('id', String(target.boardNumber))
+        url.searchParams.set('sheet', String(target.boardNumber))
+        url.searchParams.set('id', boardInfo.fullId)
+        url.searchParams.set('panoId', boardInfo.pano)
+        url.searchParams.set('tahtaId', boardInfo.board)
         window.history.replaceState({}, '', url.toString())
       }
     } catch {}
@@ -130,10 +191,10 @@ export default function WhiteboardClient() {
     if (board) {
       let snap = null
       try {
-        const raw = localStorage.getItem(fileKey(target.id))
+        const raw = localStorage.getItem(getFileKey(target.id))
         if (raw) snap = JSON.parse(raw)
       } catch {
-        localStorage.removeItem(fileKey(target.id))
+        localStorage.removeItem(getFileKey(target.id))
       }
 
       board.editor.store.loadSnapshot(snap || { document: { store: {} } }, 'remote')
@@ -146,7 +207,7 @@ export default function WhiteboardClient() {
       }
     }
     setCurrentFileName(target.name)
-  }, [filesIndex])
+  }, [filesIndex, getFileKey, indexKey, boardInfo])
 
   // Create new drawing file
   const handleCreateFile = () => {
@@ -165,10 +226,13 @@ export default function WhiteboardClient() {
     }
     setFilesIndex(newIdx)
     try {
-      localStorage.setItem(INDEX_KEY, JSON.stringify(newIdx))
+      localStorage.setItem(indexKey, JSON.stringify(newIdx))
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href)
-        url.searchParams.set('id', String(nextNumber))
+        url.searchParams.set('sheet', String(nextNumber))
+        url.searchParams.set('id', boardInfo.fullId)
+        url.searchParams.set('panoId', boardInfo.pano)
+        url.searchParams.set('tahtaId', boardInfo.board)
         window.history.replaceState({}, '', url.toString())
       }
     } catch {}
@@ -204,8 +268,8 @@ export default function WhiteboardClient() {
     }
     setFilesIndex(newIdx)
     try {
-      localStorage.removeItem(fileKey(id))
-      localStorage.setItem(INDEX_KEY, JSON.stringify(newIdx))
+      localStorage.removeItem(getFileKey(id))
+      localStorage.setItem(indexKey, JSON.stringify(newIdx))
     } catch {}
 
     if (filesIndex.current === id) {
@@ -225,7 +289,7 @@ export default function WhiteboardClient() {
     setFilesIndex(newIdx)
     setCurrentFileName(trimmed)
     try {
-      localStorage.setItem(INDEX_KEY, JSON.stringify(newIdx))
+      localStorage.setItem(indexKey, JSON.stringify(newIdx))
     } catch {}
   }
 
@@ -255,8 +319,10 @@ export default function WhiteboardClient() {
   useEffect(() => {
     if (!boardRef.current) return
 
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches
-    const savedTheme = localStorage.getItem(THEME_KEY) || (prefersDark ? 'dark' : 'light')
+    // Immediately ensure document.documentElement is NOT set to dark (protecting the rest of the site)
+    document.documentElement.classList.remove('dark')
+
+    const savedTheme = localStorage.getItem(themeKey) || boardTheme || 'light'
 
     // Create board instance
     const board = createQuickdraw({
@@ -274,7 +340,7 @@ export default function WhiteboardClient() {
       setCurrentFileName(cur.name)
       let snap = null
       try {
-        const raw = localStorage.getItem(fileKey(cur.id))
+        const raw = localStorage.getItem(getFileKey(cur.id))
         if (raw) snap = JSON.parse(raw)
       } catch {}
       if (snap) {
@@ -292,11 +358,12 @@ export default function WhiteboardClient() {
       }, 400)
     })
 
-    // Theme sync
+    // Theme sync - ONLY update local boardTheme state, NEVER toggle document.documentElement.classList!
     const syncTheme = () => {
-      const dark = board.editor.theme.id === 'dark'
-      localStorage.setItem(THEME_KEY, board.editor.theme.id)
-      document.documentElement.classList.toggle('dark', dark)
+      const isDark = board.editor.theme.id === 'dark'
+      setBoardTheme(isDark ? 'dark' : 'light')
+      localStorage.setItem(themeKey, board.editor.theme.id)
+      document.documentElement.classList.remove('dark')
     }
     syncTheme()
     board.editor.on('theme', syncTheme)
@@ -311,14 +378,16 @@ export default function WhiteboardClient() {
       unsub?.()
       board.destroy()
       boardInstanceRef.current = null
+      // Ensure dark mode class is never left lingering on global documentElement
+      document.documentElement.classList.remove('dark')
     }
-  }, [])
+  }, [indexKey, themeKey, getFileKey])
 
-  // Check URL query param ?id=... on initial mount
+  // Check URL query param ?sheet=... or fallback ?tahta=... on initial mount
   useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    const targetNum = parseInt(params.get('id') || params.get('tahta') || '', 10)
+    const targetNum = parseInt(params.get('sheet') || params.get('tahta') || '', 10)
     if (targetNum && !isNaN(targetNum)) {
       const target = filesIndex.files.find((f) => f.boardNumber === targetNum)
       if (target && target.id !== filesIndex.current) {
@@ -345,16 +414,16 @@ export default function WhiteboardClient() {
   }, [isMenuOpen])
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden select-none bg-[#fbf9f4] dark:bg-[#191713]">
+    <div className={`fixed inset-0 w-full h-full overflow-hidden select-none bg-[#fbf9f4] dark:bg-[#191713] ${boardTheme === 'dark' ? 'dark' : ''}`}>
       {/* ── WHITEBOARD CANVAS CONTAINER ── */}
       <div ref={boardRef} id="board" className="fixed inset-0 w-full h-full" />
 
       {/* ── TOP-LEFT CHROME: OXONOM LOGO & FILE BAR ── */}
       <div className="fixed top-2.5 left-2.5 z-60 flex items-center gap-2 font-sans">
-        {/* Oxonom Logo Button -> Returns to /pano with only "OXONOM" text */}
+        {/* Oxonom Logo Button -> Returns to exact /pano with the preserved ID */}
         <Link
-          href="/pano"
-          title="Pano Ana Ekranına Dön"
+          href={`/pano?id=${encodeURIComponent(boardInfo.fullId)}&panoId=${encodeURIComponent(boardInfo.pano)}&tahtaId=${encodeURIComponent(boardInfo.board)}`}
+          title={`${boardInfo.fullId} Panosuna Geri Dön`}
           className="h-10 px-3.5 rounded-full bg-white/90 dark:bg-[#211729]/90 backdrop-blur-md border border-[#E8DFEB] dark:border-[#49364F] shadow-lg shadow-purple-950/10 flex items-center gap-2 text-[#241329] dark:text-[#FCF9FD] hover:bg-[#F0D8FA]/50 dark:hover:bg-[#2D2035] transition-all cursor-pointer group active:scale-95"
         >
           <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#4B075F] via-[#8D49A6] to-[#D914C8] flex items-center justify-center text-white shrink-0 shadow-xs group-hover:scale-105 transition-transform">
@@ -371,6 +440,9 @@ export default function WhiteboardClient() {
           </div>
           <span className="text-xs sm:text-sm font-black tracking-wider leading-none text-[#241329] dark:text-[#FCF9FD]">
             OXONOM
+          </span>
+          <span className="inline-flex items-center gap-1 pl-1 text-[11px] font-bold text-[#8D49A6] dark:text-[#F17AE6]">
+            ← Pano ({boardInfo.fullId})
           </span>
         </Link>
 
