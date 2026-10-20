@@ -505,6 +505,8 @@ export default async function proxy(req: NextRequest) {
     pathname.startsWith('/teacher/') ||
     pathname === '/principal' ||
     pathname.startsWith('/principal/') ||
+    pathname === '/superadmin' ||
+    pathname.startsWith('/superadmin/') ||
     pathname === '/loginv2' ||
     pathname.startsWith('/loginv2/') ||
     pathname === '/pano' ||
