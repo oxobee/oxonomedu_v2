@@ -78,6 +78,38 @@ export const ALL_CATEGORIES = [
 
 export const DEFAULT_GAMES: EducationalGame[] = [
   {
+    id: 'sayi-kasifleri',
+    title: 'Sayı Kaşifleri: Kayıp Kristaller',
+    slug: 'sayi-kasifleri',
+    coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?auto=format&fit=crop&w=1600&q=80',
+    description: "Sayılar Adası'ndaki sönen enerjiyi kurtarmak için sevimli kaşifimizle macera dolu bir keşfe çık! 2. sınıf öğrencileri için onluk-birlik modelleri, sayı karşılaştırma, görsel nesnelerle toplama-çıkarma ve sayı örüntülerini Nintendo oyun felsefesiyle birleştiren 12 seviyeli özgün matematik macerası.",
+    shortDescription: '2. Sınıf öğrencileri için 12 seviyeli özgün matematik ve kristal keşif macerası.',
+    category: 'Matematik',
+    gameType: 'Macera',
+    targetGrades: ['2. Sınıf', '1. Sınıf', '3. Sınıf'],
+    subjects: ['Matematik'],
+    topics: ['Basamak Değeri (Onluk-Birlik)', 'Sayı Karşılaştırma', 'Toplama & Çıkarma', 'Sayı Örüntüleri'],
+    ageRange: '7 - 8 Yaş',
+    difficulty: 'Başlangıç',
+    rating: 4.98,
+    reviewCount: 512,
+    playsCount: 24500,
+    isActive: true,
+    gameUrl: '/student/gamestudio/play/sayi-kasifleri',
+    learningObjectives: [
+      'Onluk ve birlik taban bloklarını somut modellerle kavrama',
+      'Sayıları büyüklük-küçüklük yönünden doğru karşılaştırma',
+      'Görsel modeller ve sayı doğrusuyla toplama ve çıkarma yapabilme',
+      'Sayı örüntülerindeki eksik terimi kurala uygun bulma',
+    ],
+    badge: 'Yeni & Öne Çıkan',
+    developer: 'Oxonom Game Studio & Nintendo Pedagogy',
+    version: '1.0.0',
+    createdAt: '2026-10-21',
+    updatedAt: '2026-10-21',
+  },
+  {
     id: 'game-math-champion',
     title: 'Oxonom Matematik Şampiyonu: Sayı Avcıları',
     slug: 'matematik-sampiyonu',
@@ -312,6 +344,17 @@ export function getAllGames(): EducationalGame[] {
     }
     const parsed = JSON.parse(raw)
     if (Array.isArray(parsed) && parsed.length > 0) {
+      // Ensure any newly added default games (like sayi-kasifleri) are present
+      let updated = false
+      DEFAULT_GAMES.forEach((defGame) => {
+        if (!parsed.some((g: EducationalGame) => g.id === defGame.id || g.slug === defGame.slug)) {
+          parsed.unshift(defGame)
+          updated = true
+        }
+      })
+      if (updated) {
+        localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(parsed))
+      }
       return parsed
     }
     localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(DEFAULT_GAMES))

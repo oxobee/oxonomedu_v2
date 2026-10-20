@@ -20,6 +20,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { EducationalGame, getAllGames } from '@/lib/gamestudio/gameStorage'
+import SayiKasifleriGame from '@/components/GameStudio/SayiKasifleri/SayiKasifleriGame'
 
 interface FullscreenGamePlayerProps {
   gameId: string
@@ -142,6 +143,15 @@ export default function FullscreenGamePlayer({ gameId, returnPath }: FullscreenG
       document.exitFullscreen().catch(() => {})
     }
     router.push(returnPath)
+  }
+
+  // Sayı Kaşifleri - Kayıp Kristaller dedicated game engine
+  if (gameId === 'sayi-kasifleri' || gameId === 'game-sayi-kasifleri') {
+    return (
+      <div className="fixed inset-0 z-50 bg-[#070D18] text-white flex flex-col overflow-hidden select-none">
+        <SayiKasifleriGame onExit={handleExit} />
+      </div>
+    )
   }
 
   return (
