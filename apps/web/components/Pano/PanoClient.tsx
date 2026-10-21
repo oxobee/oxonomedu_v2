@@ -2084,24 +2084,24 @@ function MockExamModal({
             exit={{ scale: 0.94, opacity: 0, y: 15 }}
             transition={{ type: 'spring', duration: 0.35, bounce: 0.1 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-5xl md:max-w-6xl max-h-[92vh] overflow-y-auto rounded-[2.5rem] bg-white/98 dark:bg-[#1A1020]/98 backdrop-blur-3xl border-2 border-[#8D49A6]/40 dark:border-[#8D49A6]/60 shadow-2xl p-5 sm:p-8 lg:p-10 text-left select-none"
+            className="relative w-full max-w-4xl md:max-w-5xl max-h-[96vh] rounded-3xl bg-white/98 dark:bg-[#1A1020]/98 backdrop-blur-3xl border-2 border-[#8D49A6]/40 dark:border-[#8D49A6]/60 shadow-2xl p-4 sm:p-5 text-left select-none flex flex-col justify-between overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between pb-5 mb-6 border-b border-[#E8DFEB] dark:border-[#49364F]">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-[#4B075F] to-[#8D49A6] text-white flex items-center justify-center shadow-lg shadow-purple-950/20 shrink-0">
-                  <FileQuestion className="w-8 h-8 text-white" />
+            <div className="flex items-center justify-between pb-3 mb-2.5 border-b border-[#E8DFEB] dark:border-[#49364F]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#4B075F] to-[#8D49A6] text-white flex items-center justify-center shadow-md shadow-purple-950/20 shrink-0">
+                  <FileQuestion className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-xl sm:text-2xl font-black text-[#241329] dark:text-white">
+                    <h2 className="text-base sm:text-lg font-black text-[#241329] dark:text-white">
                       {examData.title}
                     </h2>
-                    <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-xs font-black">
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-[10px] font-black">
                       CANLI DERSLİK
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-[#716779] dark:text-[#C58ADB] mt-1 font-semibold">
+                  <p className="text-[11px] sm:text-xs text-[#716779] dark:text-[#C58ADB] font-semibold">
                     {className || '1/A Sınıfı'} • Akıllı Tahta: {boardId} • {questions.length} Soru
                   </p>
                 </div>
@@ -2110,57 +2110,51 @@ function MockExamModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-11 h-11 rounded-2xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 dark:bg-[#2D1636] dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-400 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 dark:bg-[#2D1636] dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-400 flex items-center justify-center transition-colors cursor-pointer shrink-0"
               >
-                <X className="w-6 h-6" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Content: Step-by-Step Questions or Final Summary */}
             {!isFinished ? (
-              <div className="space-y-6">
-                {/* 1. ÖĞRENCİ SEÇİM SAHNESİ (GÖZ ALICI, ÇOK BELİRGİN & ANİMASYONLU) */}
-                <div className="relative overflow-hidden rounded-3xl p-5 sm:p-6 bg-gradient-to-r from-[#4B075F] via-[#7B2CBF] to-[#D914C8] text-white shadow-xl shadow-purple-950/25 border-2 border-white/20">
-                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black uppercase tracking-wider text-pink-100 flex items-center gap-1.5 border border-white/25">
-                          <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+              <div className="space-y-2.5 flex-1 flex flex-col justify-between overflow-hidden">
+                {/* 1. ÖĞRENCİ SEÇİM SAHNESİ */}
+                <div className="relative overflow-hidden rounded-2xl p-2.5 sm:p-3 bg-gradient-to-r from-[#4B075F] via-[#7B2CBF] to-[#D914C8] text-white shadow-md border border-white/20">
+                  <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-wider text-pink-100 flex items-center gap-1 border border-white/25">
+                          <Sparkles className="w-3 h-3 text-yellow-300" />
                           {isRollingStudent
                             ? 'ŞANSLI ÖĞRENCİ BELİRLENİYOR...'
                             : 'SÖZ HAKKI SIRASI • TAHTAYA DAVET EDİLDİ ✨'}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         {isRollingStudent ? (
-                          <div className="flex items-center gap-3">
-                            <span className="text-3xl sm:text-4xl md:text-5xl font-black text-amber-300 tracking-wide font-mono animate-pulse">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl sm:text-2xl font-black text-amber-300 tracking-wide font-mono animate-pulse">
                               {rollingName || 'Öğrenci Seçiliyor...'}
                             </span>
-                            <Dice5 className="w-8 h-8 text-amber-300 animate-spin" />
+                            <Dice5 className="w-5 h-5 text-amber-300 animate-spin" />
                           </div>
                         ) : currentAssignedStudent ? (
-                          <div className="flex items-center gap-3 flex-wrap">
-                            <span className="text-3xl sm:text-4xl md:text-5xl font-black text-amber-300 drop-shadow-md tracking-tight">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xl sm:text-2xl font-black text-amber-300 drop-shadow-sm tracking-tight">
                               {currentAssignedStudent}
                             </span>
-                            <span className="px-3 py-1 rounded-xl bg-amber-400/20 border border-amber-300/40 text-amber-200 text-xs sm:text-sm font-black">
+                            <span className="px-2 py-0.5 rounded-lg bg-amber-400/20 border border-amber-300/40 text-amber-200 text-xs font-black">
                               🎤 Sıra Sende!
                             </span>
                           </div>
                         ) : (
-                          <span className="text-xl sm:text-2xl font-bold text-white/80">
+                          <span className="text-base font-bold text-white/80">
                             Öğrenci belirleniyor...
                           </span>
                         )}
                       </div>
-
-                      <p className="text-xs sm:text-sm text-purple-100/80 font-medium">
-                        {isRollingStudent
-                          ? 'Sınıf listesinden rastgele öğrenci çarkı dönüyor...'
-                          : 'Bu soruyu akıllı tahtada cevaplamak için seçildin, cevabına dokun!'}
-                      </p>
                     </div>
 
                     <div className="shrink-0 flex items-center gap-2">
@@ -2168,10 +2162,10 @@ function MockExamModal({
                         type="button"
                         onClick={handlePickStudent}
                         disabled={isRollingStudent || !!currentAnswer}
-                        className="px-5 py-3 rounded-2xl bg-white text-[#4B075F] hover:bg-amber-100 font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                        className="px-3.5 py-1.5 rounded-xl bg-white text-[#4B075F] hover:bg-amber-100 font-black text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                       >
-                        <Dice5 className={`w-4 h-4 text-[#8D49A6] ${isRollingStudent ? 'animate-spin' : ''}`} />
-                        <span>{isRollingStudent ? 'Çark Dönüyor...' : '🎲 Başka Öğrenci Seç (Yeniden Çark)'}</span>
+                        <Dice5 className={`w-3.5 h-3.5 text-[#8D49A6] ${isRollingStudent ? 'animate-spin' : ''}`} />
+                        <span>{isRollingStudent ? 'Çark Dönüyor...' : '🎲 Başka Öğrenci Seç'}</span>
                       </button>
                     </div>
                   </div>
@@ -2188,9 +2182,9 @@ function MockExamModal({
                           key={idx}
                           type="button"
                           onClick={() => setActiveQuestion(idx)}
-                          className={`w-10 h-10 rounded-xl text-sm font-black transition-all cursor-pointer flex items-center justify-center ${
+                          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
                             isActive
-                              ? 'bg-[#4B075F] text-white ring-4 ring-[#8D49A6]/40 shadow-md scale-105'
+                              ? 'bg-[#4B075F] text-white ring-2 ring-[#8D49A6]/40 shadow-sm scale-105'
                               : ans
                               ? ans.isCorrect
                                 ? 'bg-emerald-500 text-white'
@@ -2204,42 +2198,42 @@ function MockExamModal({
                     })}
                   </div>
 
-                  <span className="text-sm font-black text-[#8D49A6] dark:text-[#F17AE6]">
+                  <span className="text-xs font-black text-[#8D49A6] dark:text-[#F17AE6]">
                     Soru {activeQuestion + 1} / {questions.length}
                   </span>
                 </div>
 
-                {/* 3. Büyük Soru Kutusu (Uzaktan Kolay Görünür) */}
-                <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#FAF5FC] via-white to-[#F9F5FA] dark:from-[#261730] dark:via-[#1E1124] dark:to-[#17101C] border-2 border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-md">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className="text-xs font-black uppercase tracking-wider text-[#8D49A6] dark:text-[#E9D5FF]">
+                {/* 3. Soru Kutusu */}
+                <div className="p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-[#FAF5FC] via-white to-[#F9F5FA] dark:from-[#261730] dark:via-[#1E1124] dark:to-[#17101C] border border-[#8D49A6]/30 dark:border-[#8D49A6]/50 shadow-xs">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-[#8D49A6] dark:text-[#E9D5FF]">
                       SORU {activeQuestion + 1}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]">
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF]">
                       {qType === 'multiple'
-                        ? '☑️ Çoklu Seçmeli (Birden Fazla Doğru)'
+                        ? '☑️ Çoklu Seçmeli'
                         : qType === 'boolean'
                         ? '⚖️ Doğru / Yanlış'
                         : qType === 'fill'
                         ? '✍️ Boşluk Doldurma'
-                        : '🎯 Çoktan Seçmeli (Tek Doğru)'}
+                        : '🎯 Çoktan Seçmeli'}
                     </span>
                   </div>
 
                   {/* Soru Metni: Boşluk doldurma ise boşluk alanı vurgulu */}
                   {qType === 'fill' ? (
-                    <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-950 dark:text-white leading-relaxed">
+                    <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-950 dark:text-white leading-snug">
                       {curQ.text.includes('_______') ? (
                         <>
                           {curQ.text.split('_______')[0]}
                           <span
-                            className={`inline-flex items-center px-4 py-1 mx-2 rounded-2xl border-2 font-black transition-all ${
+                            className={`inline-flex items-center px-3 py-0.5 mx-1.5 rounded-xl border-2 font-black transition-all ${
                               currentAnswer
                                 ? currentAnswer.isCorrect
                                   ? 'bg-emerald-500 text-white border-emerald-400'
                                   : 'bg-rose-500 text-white border-rose-400'
                                 : selectedFillWord
-                                ? 'bg-amber-400 text-slate-950 border-amber-300 ring-4 ring-amber-300/40 animate-pulse'
+                                ? 'bg-amber-400 text-slate-950 border-amber-300 ring-2 ring-amber-300/40 animate-pulse'
                                 : 'bg-purple-100 dark:bg-purple-950/70 border-dashed border-purple-500 text-purple-700 dark:text-purple-300'
                             }`}
                           >
@@ -2252,7 +2246,7 @@ function MockExamModal({
                       )}
                     </h3>
                   ) : (
-                    <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-950 dark:text-white leading-relaxed">
+                    <h3 className="text-base sm:text-lg md:text-xl font-black text-slate-950 dark:text-white leading-snug">
                       {curQ.text}
                     </h3>
                   )}
@@ -2291,18 +2285,18 @@ function MockExamModal({
                           whileTap={!isAnswered ? { scale: 0.99 } : {}}
                           onClick={() => handleSelectBoolean('A')}
                           disabled={isAnswered}
-                          className={`p-6 sm:p-8 rounded-3xl flex items-center justify-between transition-all cursor-pointer ${style}`}
+                          className={`p-3.5 sm:p-4 rounded-2xl flex items-center justify-between transition-all cursor-pointer ${style}`}
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-2xl shadow-md">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-lg shadow-sm">
                               ✓
                             </div>
                             <div className="text-left">
-                              <span className="block text-2xl sm:text-3xl font-black">DOĞRU</span>
-                              <span className="text-xs sm:text-sm opacity-80 font-bold">Önerme doğru</span>
+                              <span className="block text-base sm:text-lg font-black">DOĞRU</span>
+                              <span className="text-[11px] opacity-80 font-bold">Önerme doğru</span>
                             </div>
                           </div>
-                          <span className="text-xl font-black opacity-60">A</span>
+                          <span className="text-base font-black opacity-60">A</span>
                         </motion.button>
                       )
                     })()}
@@ -2335,18 +2329,18 @@ function MockExamModal({
                           whileTap={!isAnswered ? { scale: 0.99 } : {}}
                           onClick={() => handleSelectBoolean('B')}
                           disabled={isAnswered}
-                          className={`p-6 sm:p-8 rounded-3xl flex items-center justify-between transition-all cursor-pointer ${style}`}
+                          className={`p-3.5 sm:p-4 rounded-2xl flex items-center justify-between transition-all cursor-pointer ${style}`}
                         >
-                          <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-black text-2xl shadow-md">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center font-black text-lg shadow-sm">
                               ✗
                             </div>
                             <div className="text-left">
-                              <span className="block text-2xl sm:text-3xl font-black">YANLIŞ</span>
-                              <span className="text-xs sm:text-sm opacity-80 font-bold">Önerme yanlış</span>
+                              <span className="block text-base sm:text-lg font-black">YANLIŞ</span>
+                              <span className="text-[11px] opacity-80 font-bold">Önerme yanlış</span>
                             </div>
                           </div>
-                          <span className="text-xl font-black opacity-60">B</span>
+                          <span className="text-base font-black opacity-60">B</span>
                         </motion.button>
                       )
                     })()}
@@ -2482,10 +2476,10 @@ function MockExamModal({
                             whileTap={!isAnswered ? { scale: 0.99 } : {}}
                             onClick={() => handleToggleMultipleOption(opt.id)}
                             disabled={isAnswered}
-                            className={`p-5 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center gap-4 transition-all text-left cursor-pointer ${buttonStyle}`}
+                            className={`p-2.5 sm:p-3 rounded-xl flex items-center gap-3 transition-all text-left cursor-pointer ${buttonStyle}`}
                           >
                             <span
-                              className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl font-black text-lg sm:text-xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${badgeStyle}`}
+                              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-black text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-xs transition-colors ${badgeStyle}`}
                             >
                               {isAnswered && isSelected
                                 ? isTargetCorrect
@@ -2497,7 +2491,7 @@ function MockExamModal({
                                 ? '✓ ' + opt.id
                                 : opt.id}
                             </span>
-                            <span className="text-base sm:text-lg md:text-xl font-bold flex-1 leading-snug">
+                            <span className="text-xs sm:text-sm font-bold flex-1 leading-snug">
                               {opt.text}
                             </span>
                           </motion.button>
@@ -2509,7 +2503,7 @@ function MockExamModal({
 
                 {/* 4D. ÇOKTAN SEÇMELİ ŞIKLAR (TEK DOĞRU) */}
                 {qType === 'single' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
                     {curQ.options.map((opt) => {
                       const isSelected = currentAnswer?.selectedId === opt.id
                       const isCorrectAnswer = opt.id === curQ.correctOptionId
@@ -2547,10 +2541,10 @@ function MockExamModal({
                           whileTap={!isAnswered ? { scale: 0.99 } : {}}
                           onClick={() => handleSelectSingleOption(opt.id)}
                           disabled={isAnswered}
-                          className={`p-5 sm:p-6 rounded-2xl sm:rounded-3xl flex items-center gap-4 transition-all text-left cursor-pointer ${buttonStyle}`}
+                          className={`p-2.5 sm:p-3 rounded-xl flex items-center gap-3 transition-all text-left cursor-pointer ${buttonStyle}`}
                         >
                           <span
-                            className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl font-black text-lg sm:text-xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${badgeStyle}`}
+                            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-black text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-xs transition-colors ${badgeStyle}`}
                           >
                             {isAnswered && isSelected
                               ? currentAnswer.isCorrect
@@ -2561,7 +2555,7 @@ function MockExamModal({
                               : opt.id}
                           </span>
 
-                          <span className="text-base sm:text-lg md:text-xl font-bold flex-1 leading-snug">
+                          <span className="text-xs sm:text-sm font-bold flex-1 leading-snug">
                             {opt.text}
                           </span>
                         </motion.button>
@@ -2575,22 +2569,22 @@ function MockExamModal({
                   <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                    className={`p-2.5 sm:p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                       currentAnswer.isCorrect
                         ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-900 dark:text-emerald-200'
                         : 'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-900 dark:text-rose-200'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <div
-                        className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-xl shrink-0 ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-sm shrink-0 ${
                           currentAnswer.isCorrect ? 'bg-emerald-600' : 'bg-rose-600'
                         }`}
                       >
                         {currentAnswer.isCorrect ? '✓' : '✗'}
                       </div>
                       <div>
-                        <h4 className="text-base sm:text-lg font-black">
+                        <h4 className="text-xs sm:text-sm font-black">
                           {currentAnswer.isCorrect
                             ? `🎉 Harika! Doğru Cevap (${currentAnswer.studentName || 'Öğrenci'} Bildi)`
                             : `❌ Yanlış Cevap — ${
@@ -2603,7 +2597,7 @@ function MockExamModal({
                                   : `Doğru seçenek: ${curQ.correctOptionId} şıkkı`
                               }`}
                         </h4>
-                        <p className="text-xs sm:text-sm font-semibold opacity-90 mt-0.5">
+                        <p className="text-[11px] sm:text-xs font-semibold opacity-90">
                           {currentAnswer.isCorrect
                             ? 'Tebrikler! Bir sonraki soruya geçildiğinde yeni öğrenci otomatik seçilecektir.'
                             : `${currentAnswer.studentName || 'Öğrenci'} için doğru çözüm sınıfla paylaşıldı.`}
@@ -2616,7 +2610,7 @@ function MockExamModal({
                       <button
                         type="button"
                         onClick={() => setActiveQuestion((q) => q + 1)}
-                        className="px-6 py-3 rounded-2xl bg-brand-gradient text-white text-sm font-black shadow-lg hover:opacity-95 transition-all cursor-pointer shrink-0"
+                        className="px-4 py-2 rounded-xl bg-brand-gradient text-white text-xs sm:text-sm font-black shadow hover:opacity-95 transition-all cursor-pointer shrink-0"
                       >
                         Sonraki Soru →
                       </button>
@@ -2624,7 +2618,7 @@ function MockExamModal({
                       <button
                         type="button"
                         onClick={() => setIsFinished(true)}
-                        className="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black shadow-lg transition-all cursor-pointer shrink-0"
+                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-black shadow transition-all cursor-pointer shrink-0"
                       >
                         Sonuçları Gör 📊
                       </button>
@@ -2633,12 +2627,12 @@ function MockExamModal({
                 )}
 
                 {/* Bottom navigation */}
-                <div className="flex items-center justify-between pt-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
+                <div className="flex items-center justify-between pt-2.5 border-t border-[#E8DFEB] dark:border-[#49364F]">
                   <button
                     type="button"
                     disabled={activeQuestion === 0}
                     onClick={() => setActiveQuestion((q) => Math.max(0, q - 1))}
-                    className="px-5 py-2.5 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] text-xs sm:text-sm font-bold text-[#514458] dark:text-slate-300 disabled:opacity-30 cursor-pointer"
+                    className="px-4 py-2 rounded-xl border border-[#E8DFEB] dark:border-[#49364F] text-xs sm:text-sm font-bold text-[#514458] dark:text-slate-300 disabled:opacity-30 cursor-pointer"
                   >
                     ← Önceki Soru
                   </button>
@@ -2651,7 +2645,7 @@ function MockExamModal({
                     <button
                       type="button"
                       onClick={() => setActiveQuestion((q) => Math.min(questions.length - 1, q + 1))}
-                      className="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs sm:text-sm font-bold transition-colors cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs sm:text-sm font-bold transition-colors cursor-pointer"
                     >
                       Geç →
                     </button>
@@ -4865,6 +4859,72 @@ export default function PanoClient() {
                 />
               ))}
             </div>
+
+            {/* AKILLI TAHTAYA AKTARILDI BİLDİRİMİ (UYGULAMALARIN HEMEN ALTINDA) */}
+            <AnimatePresence>
+              {incomingSharedFile && (
+                <motion.div
+                  initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 14, scale: 0.98 }}
+                  className="w-full max-w-4xl mx-auto mt-6 p-4 rounded-2xl sm:rounded-3xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border-2 border-emerald-500/50 shadow-xl shadow-emerald-950/15 flex items-center justify-between gap-4 text-[#241329] dark:text-white"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-600/20">
+                      <ImageIcon size={20} />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs sm:text-sm font-black text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-[340px]">
+                          {incomingSharedFile.name}
+                        </span>
+                        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                          Akıllı Tahtaya Aktarıldı
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {incomingSharedFile.sender} tarafından tahtaya aktarıldı.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      href={`/pano/${boardIdentity.panoId}-${boardIdentity.boardNo}/tahta?import=latest`}
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          try {
+                            localStorage.removeItem('oxonom_pano_latest_file')
+                            localStorage.removeItem(`oxonom_whiteboard_incoming_${boardIdentity.panoId}-${boardIdentity.boardNo}`)
+                          } catch (_) {}
+                        }
+                        setIncomingSharedFile(null)
+                      }}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md shadow-emerald-950/20 flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+                    >
+                      <span>Tahtada Aç 🎨</span>
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          try {
+                            localStorage.removeItem('oxonom_pano_latest_file')
+                            localStorage.removeItem(`oxonom_whiteboard_incoming_${boardIdentity.panoId}-${boardIdentity.boardNo}`)
+                          } catch (_) {}
+                        }
+                        setIncomingSharedFile(null)
+                      }}
+                      className="w-8 h-8 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                      title="Kapat ve Kaldır"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
         </div>
@@ -4957,58 +5017,6 @@ export default function PanoClient() {
       />
 
       {/* INCOMING WHITEBOARD MATERIAL NOTIFICATION (NON-INTRUSIVE) */}
-      <AnimatePresence>
-        {incomingSharedFile && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-5 left-1/2 -translate-x-1/2 z-60 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-xl border-2 border-emerald-500/50 shadow-2xl shadow-emerald-950/20 text-[#241329] dark:text-white"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <ImageIcon size={18} />
-            </div>
-            <div className="text-left pr-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-gray-900 dark:text-white truncate max-w-[180px] sm:max-w-[280px]">
-                  {incomingSharedFile.name}
-                </span>
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
-                  Akıllı Tahtaya Aktarıldı
-                </span>
-              </div>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                {incomingSharedFile.sender} tarafından gönderildi.
-              </p>
-            </div>
-            <Link
-              href={`/pano/${boardIdentity.panoId}-${boardIdentity.boardNo}/tahta?import=latest`}
-              onClick={() => {
-                if (typeof window !== 'undefined' && incomingSharedFile) {
-                  try {
-                    localStorage.setItem('oxonom_pano_latest_file', JSON.stringify(incomingSharedFile))
-                    localStorage.setItem(
-                      `oxonom_whiteboard_incoming_${boardIdentity.panoId}-${boardIdentity.boardNo}`,
-                      JSON.stringify(incomingSharedFile)
-                    )
-                  } catch (_) {}
-                }
-                setIncomingSharedFile(null)
-              }}
-              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap active:scale-95"
-            >
-              <span>Tahtada Aç 🎨</span>
-            </Link>
-            <button
-              type="button"
-              onClick={() => setIncomingSharedFile(null)}
-              className="w-7 h-7 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors ml-1 cursor-pointer"
-            >
-              <X size={15} />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* MOCK EXPLORE MODAL */}
       <MockExploreModal

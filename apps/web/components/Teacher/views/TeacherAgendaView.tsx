@@ -49,9 +49,10 @@ import {
   deleteExamFromServer,
 } from '@/lib/teacher/teacherAgendaStorage'
 import { ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
+import CalendarReminderWidget from '@components/Common/CalendarReminderWidget'
 
 export default function TeacherAgendaView() {
-  const [activeTab, setActiveTab] = useState<'all' | 'notes' | 'exams'>('all')
+  const [activeTab, setActiveTab] = useState<'all' | 'calendar' | 'notes' | 'exams'>('all')
 
   // ── Notes State ──
   const [notes, setNotes] = useState<TeacherNote[]>([])
@@ -428,6 +429,19 @@ export default function TeacherAgendaView() {
 
         <button
           type="button"
+          onClick={() => setActiveTab('calendar')}
+          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === 'calendar'
+              ? 'bg-brand-gradient text-white shadow-xs'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+          }`}
+        >
+          <CalendarIcon size={14} />
+          <span>Takvim & Hatırlatıcılar</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab('notes')}
           className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === 'notes'
@@ -520,6 +534,14 @@ export default function TeacherAgendaView() {
               </div>
             </div>
           </div>
+
+          {/* ── İNTERAKTİF TAKVİM & GÜNLÜK HATIRLATICI MODÜLÜ ── */}
+          <CalendarReminderWidget
+            storageKey="oxonom_teacher_calendar_reminders"
+            role="teacher"
+            title="Öğretmen Ajandası & Hatırlatıcı Takvimi"
+            description="Günlere özel ders/çalışma notları ekleyebilir, sesli ve açılır pencereli (pop-up) hatırlatıcılar kurabilirsiniz."
+          />
 
           {/* Side by Side Preview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -643,6 +665,18 @@ export default function TeacherAgendaView() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── 2. TAB: TAKVİM & HATIRLATICI MODÜLÜ (GÜN NOTLARI & SESLİ POPUP) ── */}
+      {activeTab === 'calendar' && (
+        <div className="space-y-6">
+          <CalendarReminderWidget
+            storageKey="oxonom_teacher_calendar_reminders"
+            role="teacher"
+            title="Öğretmen Ajandası & Hatırlatıcı Takvimi"
+            description="Tüm günlere özel çalışma ve ders notları ekleyebilir, belirlediğiniz gün ve saat geldiğinde sesli pop-up hatırlatıcı alabilirsiniz."
+          />
         </div>
       )}
 

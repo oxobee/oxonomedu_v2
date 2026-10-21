@@ -71,20 +71,22 @@ loadProfileFromFile()
 export async function GET(request: Request) {
   let profile = loadProfileFromFile()
 
-  // If memory/tmp was wiped on serverless cold start, check cookie fallback
-  if (!profile.is_customized) {
-    try {
-      const cookieHeader = request.headers.get('cookie') || ''
-      const match = cookieHeader.match(/oxonom_principal_profile=([^;]+)/)
-      if (match && match[1]) {
-        const decoded = JSON.parse(decodeURIComponent(match[1]))
-        if (decoded && decoded.name && decoded.name.trim().length > 0) {
+  // Always check cookie if cookie carries newer or customized data
+  try {
+    const cookieHeader = request.headers.get('cookie') || ''
+    const match = cookieHeader.match(/oxonom_principal_profile=([^;]+)/)
+    if (match && match[1]) {
+      const decoded = JSON.parse(decodeURIComponent(match[1]))
+      if (decoded && decoded.name && decoded.name.trim().length > 0) {
+        const cookieTime = decoded.updatedAt ? new Date(decoded.updatedAt).getTime() : 0
+        const serverTime = profile.updatedAt ? new Date(profile.updatedAt).getTime() : 0
+        if (cookieTime >= serverTime || !profile.is_customized) {
           profile = { ...DEFAULT_CANONICAL_PRINCIPAL, ...decoded, is_customized: true }
           saveProfileToFile(profile)
         }
       }
-    } catch (_) {}
-  }
+    }
+  } catch (_) {}
 
   return NextResponse.json(
     {

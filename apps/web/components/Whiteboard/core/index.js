@@ -43,6 +43,7 @@ export function createQuickdraw(opts) {
   const ui = buildUI(editor, {
     hidden: opts.hideUi || opts.readonly,
     onSave: opts.onSave,
+    onSaveBoard: opts.onSaveBoard,
     themeToggle: opts.themeToggle,
     gridControl: opts.gridControl,
   })

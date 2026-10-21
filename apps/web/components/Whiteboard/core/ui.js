@@ -38,6 +38,7 @@ const ICONS = {
   hexagon: SVG('<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'),
   star: SVG('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'),
   cloud: SVG(`<path d="M7 17h10a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 7 10a3.5 3.5 0 0 0 0 7z"/>`),
+  save: SVG('<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>'),
   // menu glyphs
   download: SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>'),
   transparent: SVG('<rect width="18" height="18" x="3" y="3" rx="2"/><rect x="4" y="4" width="8" height="8" fill="currentColor" fill-opacity=".22" stroke="none"/><rect x="12" y="12" width="8" height="8" fill="currentColor" fill-opacity=".22" stroke="none"/>'),
@@ -95,11 +96,11 @@ const DOCK_NAMES = ['select', 'hand', 'draw', 'highlight', 'eraser', 'laser', 'l
 // what gives way first as the frame narrows (select and draw never yield)
 const DROP_ORDER = ['hand', 'laser', 'line', 'note', 'image', 'highlight', 'text', 'arrow', 'eraser', 'geo']
 
-export function buildUI(editor, { hidden = false, onSave, themeToggle = true, gridControl = true } = {}) {
+export function buildUI(editor, { hidden = false, onSave, onSaveBoard, themeToggle = true, gridControl = true } = {}) {
   const root = editor.container
   // menu switches the host can drop — an app that owns its own theme chrome
   // doesn't want a second control for it on the canvas
-  const opts = { themeToggle: themeToggle !== false, gridControl: gridControl !== false }
+  const opts = { themeToggle: themeToggle !== false, gridControl: gridControl !== false, onSaveBoard }
   const ui = el('div', 'qd-ui')
   root.appendChild(ui)
 
@@ -371,10 +372,13 @@ export function buildUI(editor, { hidden = false, onSave, themeToggle = true, gr
       return row
     }
 
-    const hasSel = editor.selection.size > 0
-    item('download', 'PNG Olarak Dışa Aktar', null, () => saveImage(true, null))
-    item('transparent', 'Şeffaf Arka Planla Dışa Aktar', null, () => saveImage(false, null))
-    if (hasSel) item('image', 'Seçimi Dışa Aktar', null, () => saveImage(true, new Set(editor.selection)))
+    item('save', 'Tahtayı Kaydet', null, () => {
+      if (typeof opts.onSaveBoard === 'function') {
+        opts.onSaveBoard()
+      } else {
+        saveImage(true, null)
+      }
+    })
     item('copy', hasSel ? 'Seçimi Resim Olarak Kopyala' : 'Resim Olarak Kopyala', null, async () => {
       const blob = await editor.exportImage({ background: true, ids: hasSel ? new Set(editor.selection) : null })
       if (blob) await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])

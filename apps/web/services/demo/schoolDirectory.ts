@@ -88,7 +88,11 @@ export interface ClassroomItem {
 
 export function normalizeClassCode(code?: string): string {
   if (!code) return ''
-  return String(code).replace(/[-_]/g, '/').trim().toUpperCase()
+  return String(code)
+    .replace(/\s*şubesi\b|\s*subesi\b|\s*şube\b|\s*sube\b/gi, '')
+    .replace(/[-_]/g, '/')
+    .trim()
+    .toUpperCase()
 }
 
 // 32 Classrooms: 1/A through 8/D (MEB İlkokul & Ortaokul)

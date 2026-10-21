@@ -65,6 +65,7 @@ import {
   type StudentSubmission,
 } from '@/lib/student/studentData'
 import LiveClassRadar from '@components/Common/LiveClassRadar'
+import CalendarReminderWidget from '@components/Common/CalendarReminderWidget'
 import {
   getStoredCustomAssignments,
   DEFAULT_SCHOOL_ASSIGNMENTS,
@@ -364,7 +365,7 @@ export default function StudentDashboardView() {
 
     const fetchRemoteExams = async () => {
       try {
-        const res = await fetch('/api/exams?className=9-A', { cache: 'no-store' })
+        const res = await fetch('/api/exams', { cache: 'no-store' })
         if (res.ok) {
           const data = await res.json()
           if (data && Array.isArray(data.exams)) {
@@ -558,8 +559,15 @@ export default function StudentDashboardView() {
   const parseExamDate = (dateStr: string): Date | null => {
     if (!dateStr) return null
     if (dateStr.includes('-')) {
-      const d = new Date(dateStr)
-      if (!isNaN(d.getTime())) return d
+      const parts = dateStr.split('-')
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10)
+        const m = parseInt(parts[1], 10) - 1
+        const d = parseInt(parts[2], 10)
+        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+          return new Date(y, m, d)
+        }
+      }
     }
     if (dateStr.includes('.')) {
       const parts = dateStr.split('.')
@@ -581,7 +589,7 @@ export default function StudentDashboardView() {
       kasım: 10,
       aralık: 11,
     }
-    const parts = dateStr.trim().split(' ')
+    const parts = dateStr.trim().split(/\s+/)
     if (parts.length >= 3) {
       const day = parseInt(parts[0], 10)
       const month = monthsMap[parts[1].toLowerCase()]
@@ -590,6 +598,10 @@ export default function StudentDashboardView() {
         return new Date(year, month, day)
       }
     }
+    try {
+      const d = new Date(dateStr)
+      if (!isNaN(d.getTime())) return d
+    } catch (_) {}
     return null
   }
 
@@ -620,11 +632,7 @@ export default function StudentDashboardView() {
         return 0
       })
 
-    const withinOneWeek = sorted.filter((e) => e.daysLeft !== null && e.daysLeft >= 0 && e.daysLeft <= 7)
-    if (withinOneWeek.length >= 2) {
-      return withinOneWeek
-    }
-    return sorted.slice(0, 3)
+    return sorted.slice(0, 4)
   }, [assessments])
 
   // Toggle quick planner task
@@ -1033,22 +1041,202 @@ export default function StudentDashboardView() {
             </div>
           </div>
 
-          {/* ── "KALDIĞIN YERDEN DEVAM ET" / AKTİF VE SIRADAKİ DERS ── */}
-          <div className="space-y-3.5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                Kaldığın Yerden Devam Et
-              </h2>
-              <Link
-                href="/student/courses"
-                className="text-xs font-bold text-[#4B075F] dark:text-[#C58ADB] hover:underline flex items-center gap-1"
-              >
-                <span>Tüm Dersler</span>
-                <ChevronRight size={14} />
-              </Link>
+          {/* ── 1. YAKLAŞAN SINAVLAR & BEKLEYEN ÖDEVLER (WIDGET ÜST KISMA TAŞINDI) ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-stretch">
+            {/* ── YAKLAŞAN SINAVLAR ── */}
+            <div
+              id="yaklasan-sinavlar"
+              className="p-5 sm:p-6 rounded-[28px] bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-sm space-y-3.5 flex flex-col justify-between"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <CalendarDays size={18} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                        Yaklaşan Sınavlar
+                      </h3>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                        {upcomingWeekExams.length} Sınav
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      Resmi sınav takvimi ({profile.className || '1/A'})
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/student/planner?tab=calendar"
+                  className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+                >
+                  <span>Tümü</span>
+                  <ChevronRight size={13} />
+                </Link>
+              </div>
+
+              {upcomingWeekExams.length > 0 ? (
+                <div className="space-y-2.5 flex-1">
+                  {upcomingWeekExams.slice(0, 3).map((exam) => {
+                    const daysLeft = (exam as any).daysLeft
+                    let countdownLabel = 'Yaklaşıyor'
+                    if (daysLeft === 0) countdownLabel = 'Bugün!'
+                    else if (daysLeft === 1) countdownLabel = 'Yarın!'
+                    else if (daysLeft !== null && daysLeft > 1 && daysLeft <= 7) {
+                      countdownLabel = `${daysLeft} Gün Kaldı`
+                    } else if (daysLeft !== null && daysLeft > 7) {
+                      countdownLabel = `${daysLeft} Gün Sonra`
+                    }
+
+                    return (
+                      <div
+                        key={exam.id}
+                        className="p-3 rounded-2xl bg-amber-50/40 dark:bg-[#2D2035] border border-amber-200/60 dark:border-amber-900/30 flex items-center justify-between gap-3 hover:border-amber-400 transition-all"
+                      >
+                        <div className="min-w-0 space-y-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[9.5px] font-black px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                              {exam.courseName}
+                            </span>
+                            <span className="text-[9.5px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                              {countdownLabel}
+                            </span>
+                          </div>
+                          <h4 className="text-xs font-black text-slate-900 dark:text-white truncate">
+                            {exam.title}
+                          </h4>
+                          <div className="text-[10px] text-slate-400 flex items-center gap-2">
+                            <span>{exam.date} • {exam.time}</span>
+                            <span>•</span>
+                            <span>{exam.location}</span>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-amber-500 text-white shadow-xs">
+                            {exam.durationMinutes} dk
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="p-4 text-center bg-slate-50 dark:bg-[#2D2035] rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <CheckCircle2 size={22} className="mx-auto text-emerald-500 mb-1" />
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Önümüzdeki günlerde planlanmış sınavın bulunmuyor 🎉
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Live Class Radar integrated seamlessly */}
+            {/* ── BEKLEYEN ÖDEVLER ── */}
+            <div className="p-5 sm:p-6 rounded-[28px] bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-sm space-y-3.5 flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <BookOpen size={18} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                        Bekleyen Ödevler
+                      </h3>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
+                        {pendingAssignments.length} Aktif
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      Öğretmenler tarafından verilen çalışmalar
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/student/assignments"
+                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                >
+                  <span>Tümü</span>
+                  <ChevronRight size={13} />
+                </Link>
+              </div>
+
+              {pendingAssignments.length > 0 ? (
+                <div className="space-y-2.5 flex-1">
+                  {pendingAssignments.slice(0, 3).map((asg) => (
+                    <Link
+                      key={asg.id || asg.assignment_uuid}
+                      href={`/student/assignments/${asg.assignment_uuid || asg.id}`}
+                      className="p-3 rounded-2xl bg-slate-50 dark:bg-[#2D2035] border border-blue-50 dark:border-blue-900/30 flex items-center justify-between gap-3 hover:border-emerald-400 transition-all group"
+                    >
+                      <div className="min-w-0 space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9.5px] font-black px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600">
+                            {(asg as any).subject_name || asg.subject || 'Ders'}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            Son: {asg.due_date ? String(asg.due_date).slice(0, 10) : '28.10.2026'}
+                          </span>
+                        </div>
+                        <h4 className="text-xs font-black text-slate-900 dark:text-white truncate group-hover:text-emerald-500 transition-colors">
+                          {asg.title}
+                        </h4>
+                        <div className="text-[10px] text-slate-400">
+                          {asg.teacher_name || 'Öğretmen'}
+                        </div>
+                      </div>
+
+                      <div className="shrink-0">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600 text-white font-black text-[11px] shadow-xs group-hover:translate-x-0.5 transition-transform">
+                          <span>Çöz</span>
+                          <ArrowRight size={11} />
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center bg-slate-50 dark:bg-[#2D2035] rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <CheckCircle2 size={22} className="mx-auto text-emerald-500 mb-1" />
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Tüm ödevlerin tamamlandı, tebrikler! 🌟
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── 2. DEFTERİM & PLANLAYICI HATIRLATICI TAKVİMİ ── */}
+          <div>
+            <CalendarReminderWidget
+              storageKey="oxonom_student_calendar_reminders"
+              role="student"
+              compactMode={true}
+              title="Defterim ve Planlayıcı Takvimi"
+              description="Ders çalışma günlerine özel notlar ekleyebilir, sesli pop-up hatırlatıcılar kurabilirsiniz."
+            />
+          </div>
+
+          {/* ── 3. CANLI DERS TAKİP RADARI (MİNİMAL & EN BAŞTA DEĞİL) ── */}
+          <div className="p-4 sm:p-5 rounded-[26px] bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white tracking-tight">
+                  Canlı Ders Takibi
+                </h3>
+              </div>
+              <Link
+                href="/student/courses"
+                className="text-[11px] font-bold text-[#4B075F] dark:text-[#C58ADB] hover:underline flex items-center gap-0.5"
+              >
+                <span>Ders Programı</span>
+                <ChevronRight size={13} />
+              </Link>
+            </div>
             <LiveClassRadar role="student" initialClassCode={profile.className || '1/A'} />
           </div>
 
@@ -1795,178 +1983,6 @@ export default function StudentDashboardView() {
               <span>Tümünü Gör</span>
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* ── FULL WIDTH TIMETABLE & DETAILED CONTENT SECTION ── */}
-      <div className="space-y-6">
-
-        {/* ── 2 COLUMNS: YAKLAŞAN SINAVLAR & BEKLEYEN ÖDEVLER (REAL DATA) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* ── YAKLAŞAN SINAVLAR ── */}
-          <div
-            id="yaklasan-sinavlar"
-            className="p-6 sm:p-7 rounded-[32px] bg-white dark:bg-[#111A2E] border border-blue-100/80 dark:border-blue-900/40 shadow-[0_8px_30px_rgb(29,119,255,0.04)] space-y-4"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                  <CalendarDays size={20} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-black text-slate-900 dark:text-white">
-                      Yaklaşan Sınavlar
-                    </h3>
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400">
-                      {upcomingWeekExams.length} Sınav
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    Resmi sınav takvimi ve tarihler ({profile.className})
-                  </p>
-                </div>
-              </div>
-
-              <Link
-                href="/student/planner?tab=calendar"
-                className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
-              >
-                <span>Tümü</span>
-                <ChevronRight size={14} />
-              </Link>
-            </div>
-
-            {upcomingWeekExams.length > 0 ? (
-              <div className="space-y-3">
-                {upcomingWeekExams.map((exam) => {
-                  const daysLeft = (exam as any).daysLeft
-                  let countdownLabel = 'Yaklaşıyor'
-                  if (daysLeft === 0) countdownLabel = 'Bugün!'
-                  else if (daysLeft === 1) countdownLabel = 'Yarın!'
-                  else if (daysLeft !== null && daysLeft > 1 && daysLeft <= 7) {
-                    countdownLabel = `${daysLeft} Gün Kaldı`
-                  } else if (daysLeft !== null && daysLeft > 7) {
-                    countdownLabel = `${daysLeft} Gün Sonra`
-                  }
-
-                  return (
-                    <div
-                      key={exam.id}
-                      className="p-4 rounded-2xl bg-gradient-to-br from-amber-50/40 via-white to-amber-50/20 dark:from-[#1A2238] dark:to-[#141B2E] border border-amber-200/70 dark:border-amber-900/40 flex items-center justify-between gap-3 hover:border-amber-400 transition-all"
-                    >
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                            {exam.courseName}
-                          </span>
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
-                            {countdownLabel}
-                          </span>
-                        </div>
-                        <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate">
-                          {exam.title}
-                        </h4>
-                        <div className="text-[10px] text-slate-400 flex items-center gap-2">
-                          <span>{exam.date} • {exam.time}</span>
-                          <span>•</span>
-                          <span>{exam.location}</span>
-                        </div>
-                      </div>
-
-                      <div className="shrink-0 text-right">
-                        <span className="text-[11px] font-black px-3 py-1.5 rounded-full bg-amber-500 text-white shadow-xs">
-                          {exam.durationMinutes} dk
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="p-8 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                <CheckCircle2 size={28} className="mx-auto text-emerald-500 mb-1.5" />
-                <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  Önümüzdeki bir hafta içinde planlanmış sınavın bulunmuyor 🎉
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* ── BEKLEYEN ÖDEVLER (REAL DATA) ── */}
-          <div className="p-6 sm:p-7 rounded-[32px] bg-white dark:bg-[#111A2E] border border-blue-100/80 dark:border-blue-900/40 shadow-[0_8px_30px_rgb(29,119,255,0.04)] space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <BookOpen size={20} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-black text-slate-900 dark:text-white">
-                      Bekleyen Ödevler
-                    </h3>
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
-                      {pendingAssignments.length} Aktif
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    Öğretmenler tarafından sana verilen çalışmalar
-                  </p>
-                </div>
-              </div>
-
-              <Link
-                href="/student/assignments"
-                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-              >
-                <span>Tümü</span>
-                <ChevronRight size={14} />
-              </Link>
-            </div>
-
-            {pendingAssignments.length > 0 ? (
-              <div className="space-y-3">
-                {pendingAssignments.map((asg) => (
-                  <Link
-                    key={asg.id || asg.assignment_uuid}
-                    href={`/student/assignments/${asg.assignment_uuid || asg.id}`}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-blue-50 dark:border-blue-900/30 flex items-center justify-between gap-3 hover:border-emerald-400 transition-all group"
-                  >
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600">
-                          {(asg as any).subject_name || asg.subject || 'Ders'}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          Son: {asg.due_date ? String(asg.due_date).slice(0, 10) : '20.10.2026'}
-                        </span>
-                      </div>
-                      <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate group-hover:text-emerald-500 transition-colors">
-                        {asg.title}
-                      </h4>
-                      <div className="text-[10px] text-slate-400">
-                        {asg.teacher_name || 'Öğretmen'}
-                      </div>
-                    </div>
-
-                    <div className="shrink-0">
-                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-600 text-white font-black text-xs shadow-xs group-hover:translate-x-0.5 transition-transform">
-                        <span>Çöz</span>
-                        <ArrowRight size={12} />
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                <CheckCircle2 size={28} className="mx-auto text-emerald-500 mb-1.5" />
-                <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  Tebrikler! Bekleyen ödevin bulunmuyor 🎉
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

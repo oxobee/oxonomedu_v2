@@ -1499,188 +1499,117 @@ export default function MHomeworkClient({
           </div>
         ) : (
           <>
-            {/* ── TOP PROMINENT ACTION BAR / WEB TOOLBAR (IMAGE 1 GÖRÜNÜR & WEB UYUMLU ALAN) ── */}
-            <div className="mx-4 mt-3 bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4.5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-              {/* Sol: Başlık ve Bilgi */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#F0D8FA] border border-[#8D49A6]/30 text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
-                  <BookOpenCheck size={22} strokeWidth={2.2} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-black uppercase tracking-wider text-[#4B075F] dark:text-[#C58ADB]">
-                      Ödev & Değerlendirme Portalı
-                    </span>
-                    <span className="text-gray-300 dark:text-gray-700">•</span>
-                    <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">
-                      {currentHomework.subject}
-                    </span>
+            {/* ── UNIFIED MINIMAL HERO & TOOLBAR ── */}
+            <div className="mx-4 mt-3 bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800 rounded-3xl p-4 sm:p-5 shadow-xs space-y-4">
+              {/* Row 1: Header Info & Controls */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-800/80">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-[#F0D8FA] border border-[#8D49A6]/30 text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
+                    <BookOpenCheck size={20} strokeWidth={2.2} />
                   </div>
-                  <h2 className="text-sm sm:text-base font-black text-gray-900 dark:text-white leading-tight">
-                    {selectedBranch} Ödev ve Çalışma Görevleri
-                  </h2>
-                </div>
-              </div>
-
-              {/* Sağ: İstenen 3 Belirgin Kontrol (Sınıf Seçici, Ödev Seçici, Yeni Ödev Ver) */}
-              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap xl:flex-nowrap min-w-0">
-                {/* 1. Sınıf Seçimi Butonu */}
-                <button
-                  type="button"
-                  onClick={() => setIsBranchModalOpen(true)}
-                  className="flex-1 sm:flex-none h-11 px-3.5 sm:px-4 rounded-xl bg-gray-100 hover:bg-gray-200/80 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 group shrink-0"
-                  title="Sınıf / Şube Değiştir"
-                >
-                  <Users size={16} className="text-[#4B075F] dark:text-[#C58ADB] group-hover:scale-110 transition-transform" />
-                  <span>{selectedBranch}</span>
-                  <ChevronDown size={14} className="text-gray-400 group-hover:text-gray-700 dark:group-hover:text-white transition-colors" />
-                </button>
-
-                {/* 2. Ödev Seç Butonu */}
-                <button
-                  type="button"
-                  onClick={() => setIsHomeworkModalOpen(true)}
-                  className="flex-1 sm:flex-none h-11 px-3.5 sm:px-4 rounded-xl bg-[#F0D8FA]/70 hover:bg-[#F0D8FA] dark:bg-[#2D2035] dark:hover:bg-[#350444]/60 border border-[#8D49A6]/30 text-[#4B075F] dark:text-[#C58ADB] text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 group shrink-0"
-                  title="Bu sınıfa ait ödevleri seç ve tarihsel filtrele"
-                >
-                  <BookOpenCheck size={16} className="text-[#4B075F] dark:text-[#C58ADB] group-hover:scale-110 transition-transform" />
-                  <span>Ödev Seç</span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-[#4B075F] text-[10px] font-black text-white">
-                    {classHomeworks.length}
-                  </span>
-                  <ChevronDown size={14} className="text-[#8D49A6] group-hover:text-[#4B075F] dark:group-hover:text-[#C58ADB] transition-colors" />
-                </button>
-
-                {/* 3. Yeni Ödev Ver Butonu (Geniş, Yüksek Görünürlüklü Mor Buton) */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (selectedBranch !== 'Tüm Şubeler') {
-                      setCreateTargetClass(selectedBranch)
-                    }
-                    setIsCreateModalOpen(true)
-                  }}
-                  className="w-full sm:w-auto h-11 px-4 sm:px-5 rounded-xl bg-brand-gradient hover:opacity-95 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-md shadow-purple-950/20 active:scale-95 transition-all cursor-pointer border border-white/20 group shrink-0 whitespace-nowrap"
-                  title={`${selectedBranch} İçin Yeni Ödev Tanımla`}
-                >
-                  <Plus size={16} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-200" />
-                  <span>+ Yeni Ödev Ver</span>
-                </button>
-              </div>
-            </div>
-
-            {/* ── HERO / AKTİF ÖDEV KARTI (Oxonom Edu Brand Gradient Dark) ── */}
-            <motion.section
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{ contain: 'paint' }}
-              className="mx-4 mt-3 bg-brand-gradient-dark text-white rounded-[26px] sm:rounded-[30px] p-5 sm:p-6 flex flex-col gap-4.5 shadow-[0_16px_45px_rgba(75,7,95,0.25)] border border-[#8D49A6]/30 dark:border-[#8D49A6]/20 relative overflow-hidden"
-            >
-              {/* Animated Background Subtle Concentric Circles */}
-              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full pointer-events-none opacity-25 overflow-hidden">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 42, repeat: Infinity, ease: 'linear' }}
-                  className="w-full h-full relative"
-                >
-                  <div className="absolute inset-0 rounded-full border border-cyan-200/40" />
-                  <div className="absolute inset-6 rounded-full border border-white/20 border-dashed" />
-                  <div className="absolute inset-12 rounded-full border border-cyan-200/30" />
-                </motion.div>
-              </div>
-              <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-cyan-400/20 to-transparent rounded-full blur-2xl pointer-events-none" />
-
-              {/* Header: Title & Meta Badges */}
-              <div className="flex items-start gap-3.5 relative z-10">
-                <div className="w-11 h-11 rounded-2xl bg-white/20 border border-white/30 text-white flex items-center justify-center shrink-0 mt-0.5 backdrop-blur-md">
-                  <FileText size={22} strokeWidth={1.9} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/30 text-[10.5px] font-extrabold uppercase tracking-wide backdrop-blur-md">
-                      {currentHomework.subject}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-cyan-400/25 text-cyan-100 border border-cyan-300/40 text-[10.5px] font-bold">
-                      {currentHomework.category}
-                    </span>
-                    {currentHomework.target_type === 'INDIVIDUAL' ? (
-                      <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-white/95 border border-white/25 text-[10.5px] font-bold flex items-center gap-1">
-                        <User size={11} />
-                        <span>Bireysel: {currentHomework.target_student_name || 'Öğrenci'}</span>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[11px] font-black uppercase tracking-wider text-[#4B075F] dark:text-[#C58ADB]">
+                        Ödev ve Çalışmalar
                       </span>
-                    ) : (
-                      <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-white/95 border border-white/25 text-[10.5px] font-bold flex items-center gap-1">
-                        <Users size={11} />
-                        <span>Tüm Sınıf ({currentHomework.className || selectedBranch})</span>
+                      <span className="text-gray-300 dark:text-gray-700">•</span>
+                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                        {currentHomework.subject}
                       </span>
-                    )}
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-400/25 text-amber-200 border border-amber-300/40 text-[10.5px] font-bold flex items-center gap-1">
-                      <Clock size={11} />
-                      <span>Son Teslim: {currentHomework.dueDate}</span>
-                    </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-[#8D49A6] dark:text-[#F0D8FA]">
+                        {selectedBranch}
+                      </span>
+                    </div>
+                    <h2 className="text-sm sm:text-base font-black text-gray-900 dark:text-white leading-tight mt-0.5">
+                      {currentHomework.title}
+                    </h2>
                   </div>
+                </div>
 
+                {/* Controls */}
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  {/* Sınıf Seçimi */}
+                  <button
+                    type="button"
+                    onClick={() => setIsBranchModalOpen(true)}
+                    className="h-9.5 px-3 rounded-xl bg-gray-100 hover:bg-gray-200/80 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                    title="Sınıf Değiştir"
+                  >
+                    <Users size={14} className="text-[#4B075F] dark:text-[#C58ADB]" />
+                    <span>{selectedBranch}</span>
+                    <ChevronDown size={13} className="text-gray-400" />
+                  </button>
+
+                  {/* Ödev Seç Butonu */}
                   <button
                     type="button"
                     onClick={() => setIsHomeworkModalOpen(true)}
-                    className="text-left group flex items-center gap-2 w-full cursor-pointer"
-                    title="Ödevi değiştirmek için tıklayın"
+                    className="h-9.5 px-3 rounded-xl bg-[#F0D8FA]/70 hover:bg-[#F0D8FA] dark:bg-[#2D2035] dark:hover:bg-[#350444]/60 border border-[#8D49A6]/30 text-[#4B075F] dark:text-[#C58ADB] text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                    title="Ödev Değiştir"
                   >
-                    <h1 className="text-base sm:text-xl leading-snug font-extrabold tracking-tight text-white m-0 group-hover:text-cyan-200 transition-colors">
-                      {currentHomework.title} — Teslim ve Değerlendirme
-                    </h1>
-                    <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 group-hover:bg-white/25 text-white/90 text-[10px] font-bold transition-all border border-white/20">
-                      <ArrowUpDown size={10} />
-                      <span>Değiştir</span>
+                    <BookOpenCheck size={14} className="text-[#4B075F] dark:text-[#C58ADB]" />
+                    <span>Ödev Seç</span>
+                    <span className="px-1.5 py-0.2 rounded-full bg-[#4B075F] text-[9.5px] font-black text-white">
+                      {classHomeworks.length}
                     </span>
+                    <ChevronDown size={13} className="text-[#8D49A6]" />
+                  </button>
+
+                  {/* Yeni Ödev Ver Butonu */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedBranch !== 'Tüm Şubeler') {
+                        setCreateTargetClass(selectedBranch)
+                      }
+                      setIsCreateModalOpen(true)
+                    }}
+                    className="h-9.5 px-3.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white text-xs font-black flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                  >
+                    <Plus size={15} strokeWidth={2.5} />
+                    <span>+ Yeni Ödev</span>
                   </button>
                 </div>
               </div>
 
-              <p className="text-xs sm:text-[13px] leading-relaxed text-blue-100/90 m-0 relative z-10">
-                {currentHomework.description}
-              </p>
-
-              {/* 4 Stat Boxes (Clean contrast & frosted glass) */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 relative z-10">
-                <div className="bg-white/12 dark:bg-black/25 backdrop-blur-md border border-white/20 rounded-[18px] py-3 px-2 text-center shadow-xs">
-                  <div className="text-[22px] font-black text-white leading-tight">
-                    {stats.total}
-                  </div>
-                  <div className="text-[10px] font-extrabold tracking-wider text-blue-100/80 mt-1">
-                    TOPLAM ÖĞRENCİ
+              {/* Row 2: Assignment Meta & Stats in a clean minimal grid */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed max-w-xl">
+                  {currentHomework.description || 'Bu ödev için açıklama metni girilmemiş.'}
+                  <div className="flex items-center gap-2 mt-1 text-[11px] text-amber-600 dark:text-amber-400 font-bold">
+                    <Clock size={12} />
+                    <span>Son Teslim: {currentHomework.dueDate}</span>
                   </div>
                 </div>
 
-                <div className="bg-emerald-500/15 dark:bg-emerald-950/40 backdrop-blur-md border border-emerald-400/35 rounded-[18px] py-3 px-2 text-center shadow-xs">
-                  <div className="text-[22px] font-black text-[#A7F3D0] leading-tight">
-                    {stats.onTime}
+                <div className="grid grid-cols-4 gap-2 sm:gap-3 shrink-0">
+                  <div className="p-2 sm:p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 text-center min-w-[70px]">
+                    <div className="text-base sm:text-lg font-black text-gray-900 dark:text-white leading-tight">
+                      {stats.total}
+                    </div>
+                    <div className="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Toplam</div>
                   </div>
-                  <div className="text-[10px] font-extrabold tracking-wider text-emerald-200 mt-1">
-                    ZAMANINDA TESLİM
+                  <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-500/10 text-center min-w-[70px]">
+                    <div className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 leading-tight">
+                      {stats.onTime}
+                    </div>
+                    <div className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase mt-0.5">Teslim</div>
                   </div>
-                </div>
-
-                <div className="bg-amber-500/15 dark:bg-amber-950/40 backdrop-blur-md border border-amber-400/35 rounded-[18px] py-3 px-2 text-center shadow-xs">
-                  <div className="text-[22px] font-black text-[#FDE68A] leading-tight">
-                    {stats.late}
+                  <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500/10 text-center min-w-[70px]">
+                    <div className="text-base sm:text-lg font-black text-amber-600 dark:text-amber-400 leading-tight">
+                      {stats.late}
+                    </div>
+                    <div className="text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase mt-0.5">Geç</div>
                   </div>
-                  <div className="text-[10px] font-extrabold tracking-wider text-amber-200 mt-1">
-                    GEÇ TESLİM
-                  </div>
-                </div>
-
-                <div className="bg-rose-500/15 dark:bg-rose-950/40 backdrop-blur-md border border-rose-400/35 rounded-[18px] py-3 px-2 text-center shadow-xs">
-                  <div className="text-[22px] font-black text-[#FECDD3] leading-tight">
-                    {stats.notSubmitted}
-                  </div>
-                  <div className="text-[10px] font-extrabold tracking-wider text-rose-200 mt-1">
-                    TESLİM BEKLEYEN
+                  <div className="p-2 sm:p-2.5 rounded-xl bg-rose-500/10 text-center min-w-[70px]">
+                    <div className="text-base sm:text-lg font-black text-rose-600 dark:text-rose-400 leading-tight">
+                      {stats.notSubmitted}
+                    </div>
+                    <div className="text-[9px] font-bold text-rose-600 dark:text-rose-400 uppercase mt-0.5">Bekleyen</div>
                   </div>
                 </div>
               </div>
-            </motion.section>
+            </div>
 
         {/* ── MAIN CONTENT SECTIONS (RESPONSIVE WEB 2-COLUMN GRID) ── */}
         <main className="flex-1 px-4 py-4">

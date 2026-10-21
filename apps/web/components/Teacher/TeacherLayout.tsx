@@ -127,17 +127,15 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
   ]
 
   // Filter out hidden modules (e.g. AI Assistant for now)
+  // Filter out hidden modules (e.g. AI Assistant for now)
   const visibleMenuItems = TEACHER_MENU_CONFIG.filter((item) => !item.hidden)
 
-  const isDesktopOS = pathname === '/teacher/desktop-os'
-
-  if (isDesktopOS) {
-    return (
-      <div className={`${theme} min-h-screen w-full font-jakarta bg-[#0D1117]`}>
-        {children}
-      </div>
-    )
-  }
+  const CATEGORIES = [
+    'DERSLER & YÖNETİM',
+    'ÖLÇME & DEĞERLENDİRME',
+    'KAYNAKLAR & İLETİŞİM',
+    'DİĞER',
+  ] as const
 
   return (
     <div className={`${theme} min-h-screen bg-[#FCF9FD] dark:bg-[#17101C] text-[#241329] dark:text-[#FCF9FD] font-jakarta flex flex-col lg:flex-row transition-colors duration-200`}>
@@ -183,55 +181,71 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           </div>
         </div>
 
-        {/* Ordered Navigation Categories without scrollbar */}
-        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-1 scrollbar-none">
-          {visibleMenuItems.map((item) => {
-            const Icon = item.icon
-            const active = isCurrentPathActive(item.path)
-            const isPassive = item.status === 'passive'
+        {/* Ordered Categorized Navigation without scrollbar */}
+        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-4 scrollbar-none">
+          {CATEGORIES.map((cat) => {
+            const catItems = visibleMenuItems.filter((item) => (item.category || 'DERSLER & YÖNETİM') === cat)
+            if (catItems.length === 0) return null
 
             return (
-              <Link
-                key={item.id}
-                href={item.path}
-                target={item.openInNewTab ? '_blank' : undefined}
-                rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
-                className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  active
-                    ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#FCF9FD] shadow-xs'
-                    : isPassive
-                    ? 'text-[#716779]/60 dark:text-[#B5A5BD]/50 hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035]/40'
-                    : 'text-[#514458] dark:text-[#D2C5D8] hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035] hover:text-[#241329] dark:hover:text-white'
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <Icon
-                    size={17}
-                    className={`shrink-0 transition-colors ${
-                      active
-                        ? 'text-[#4B075F] dark:text-[#D914C8]'
-                        : isPassive
-                        ? 'text-[#716779]/50 dark:text-[#B5A5BD]/40'
-                        : 'text-[#716779] dark:text-[#B5A5BD] group-hover:text-[#4B075F] dark:group-hover:text-white'
-                    }`}
-                  />
-                  <span className="truncate">{item.label}</span>
+              <div key={cat} className="space-y-1">
+                <div className="px-3 pt-1 pb-1 text-[9.5px] font-black tracking-wider text-[#8D49A6] dark:text-[#C58ADB] uppercase">
+                  {cat}
                 </div>
+                {catItems.map((item) => {
+                  const Icon = item.icon
+                  const active = isCurrentPathActive(item.path)
+                  const isPassive = item.status === 'passive'
 
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {item.badge && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                      {item.badge}
-                      {item.openInNewTab && <ExternalLink size={9} />}
-                    </span>
-                  )}
-                  {isPassive && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-semibold">
-                      Geliştirme
-                    </span>
-                  )}
-                </div>
-              </Link>
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.path}
+                      target={item.openInNewTab ? '_blank' : undefined}
+                      rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
+                      className={`group flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                        active
+                          ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#FCF9FD] shadow-xs'
+                          : isPassive
+                          ? 'text-[#716779]/60 dark:text-[#B5A5BD]/50 hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035]/40'
+                          : 'text-[#514458] dark:text-[#D2C5D8] hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035] hover:text-[#241329] dark:hover:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Icon
+                          size={16}
+                          className={`shrink-0 transition-colors ${
+                            active
+                              ? 'text-[#4B075F] dark:text-[#D914C8]'
+                              : isPassive
+                              ? 'text-[#716779]/50 dark:text-[#B5A5BD]/40'
+                              : 'text-[#716779] dark:text-[#B5A5BD] group-hover:text-[#4B075F] dark:group-hover:text-white'
+                          }`}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {item.badge && (
+                          <span className={`text-[8.5px] px-1.5 py-0.5 rounded-md font-bold flex items-center gap-1 ${
+                            item.badge === 'Çok Yakında'
+                              ? 'bg-purple-500/15 text-[#8D49A6] dark:text-[#F0D8FA]'
+                              : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                          }`}>
+                            {item.badge}
+                            {item.openInNewTab && <ExternalLink size={9} />}
+                          </span>
+                        )}
+                        {isPassive && (
+                          <span className="text-[8.5px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-semibold">
+                            Geliştirme
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             )
           })}
         </nav>
@@ -278,18 +292,6 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
             <HeaderLiveClock theme="oxonom" variant="desktop" />
 
             <Link
-              href="/teacher/desktop-os"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="h-9 px-3 rounded-xl bg-[#D914C8]/15 hover:bg-[#D914C8]/25 text-[#D914C8] dark:text-[#F0D8FA] font-extrabold text-xs flex items-center gap-1.5 transition-colors border border-[#D914C8]/30 shadow-xs"
-              title="Öğretmen Masaüstü İşletim Sistemini Yeni Sekmede Aç"
-            >
-              <LayoutGrid size={13} />
-              <span>Masaüstü OS</span>
-              <ExternalLink size={10} className="opacity-70" />
-            </Link>
-
-            <Link
               href="/teacher/schedule"
               className="h-9 px-3 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#241329] dark:text-[#FCF9FD] font-bold text-xs flex items-center gap-1.5 transition-colors border border-[#E8DFEB] dark:border-[#49364F]"
             >
@@ -328,18 +330,6 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Link
-              href="/teacher/desktop-os"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="h-8 px-2 rounded-lg bg-[#D914C8]/15 text-[#D914C8] dark:text-[#F0D8FA] font-bold text-[11px] flex items-center gap-1 border border-[#D914C8]/30"
-              title="Masaüstü OS"
-            >
-              <LayoutGrid size={12} />
-              <span>Masaüstü</span>
-              <ExternalLink size={9} className="opacity-70" />
-            </Link>
-
             <HeaderLiveClock theme="oxonom" variant="mobile" />
 
             <button

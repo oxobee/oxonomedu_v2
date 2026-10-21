@@ -74,17 +74,6 @@ export const PRINCIPAL_MENU_CONFIG: PrincipalMenuItem[] = [
     description: 'Okul mevcudu, günlük devamsızlık durumu, açık tahtalar ve yönetici hızlı aksiyonları.',
   },
   {
-    id: 'gamestudio',
-    label: 'Game Studio & Oyun İzinleri',
-    path: '/principal/gamestudio',
-    icon: Gamepad2,
-    status: 'active',
-    sortOrder: 2,
-    category: 'management',
-    badge: 'Oyun İzinleri',
-    description: 'Hangi oyunun hangi sınıflarda görüneceğini belirleme ve okul geneli aktif/pasif kontrolü.',
-  },
-  {
     id: 'settings',
     label: 'Kurum & Profil Ayarları',
     path: '/principal/settings',
@@ -93,17 +82,6 @@ export const PRINCIPAL_MENU_CONFIG: PrincipalMenuItem[] = [
     sortOrder: 2,
     category: 'management',
     description: 'Okul kurumsal bilgileri, müdür kimliği, 2FA güvenlik ayarları ve sistem tercihleri.',
-  },
-  {
-    id: 'superadmin-os',
-    label: 'OS Ayarları (Afiş & Slider)',
-    path: '/superadmin/os-settings',
-    icon: Sliders,
-    status: 'active',
-    sortOrder: 2.5,
-    category: 'management',
-    badge: 'Yeni',
-    description: 'Öğretmen Masaüstü OS film afişleri, hero slider ve pencere içerik yönetimi.',
   },
 
   // ── 2. ÖĞRETMENLER & KADRO ──
@@ -264,6 +242,17 @@ export const PRINCIPAL_MENU_CONFIG: PrincipalMenuItem[] = [
     badge: 'Yakında',
     description: 'Yönetici hesapları, roller, denetim günlüğü, KVKK ve oturum kayıtları.',
     missingDependency: 'Detaylı audit log motoru tamamlandığında aktif olacaktır.',
+  },
+  {
+    id: 'gamestudio',
+    label: 'Game Studio',
+    path: '/principal/gamestudio',
+    icon: Gamepad2,
+    status: 'active',
+    sortOrder: 15,
+    category: 'additional',
+    badge: 'Çok Yakında',
+    description: 'Eğitici oyun mağazası ve okul geneli oyun izinleri kontrolü.',
   },
 ]
 

@@ -26,12 +26,6 @@ export default function SuperadminNavbar() {
       badge: 'Oyunlar',
     },
     {
-      label: 'OS Ayarları (Afiş & Slider)',
-      path: '/superadmin/os-settings',
-      icon: Sliders,
-      badge: 'Ana Menü',
-    },
-    {
       label: 'Genel Bakış',
       path: '/superadmin',
       icon: LayoutDashboard,
@@ -60,7 +54,7 @@ export default function SuperadminNavbar() {
                 </span>
               </div>
               <p className="text-[10px] text-gray-400 font-medium">
-                Öğretmen OS & Dijital Ekosistem Yönetimi
+                Oxonom Dijital Ekosistem Yönetimi
               </p>
             </div>
           </Link>
@@ -100,19 +94,6 @@ export default function SuperadminNavbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
-          {/* Launch Teacher Desktop OS in new tab */}
-          <Link
-            href="/teacher/desktop-os"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="h-9 px-3.5 rounded-xl bg-gradient-to-r from-[#D914C8]/20 to-[#8D49A6]/20 hover:from-[#D914C8]/30 hover:to-[#8D49A6]/30 text-[#F0D8FA] border border-[#D914C8]/40 text-xs font-extrabold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-md"
-            title="Öğretmen Masaüstü OS Arayüzünü Yeni Sekmede Canlı Aç"
-          >
-            <Monitor size={14} className="text-[#D914C8]" />
-            <span className="hidden sm:inline">Öğretmen OS'i Aç</span>
-            <ExternalLink size={11} className="opacity-75" />
-          </Link>
-
           {/* School Principal Portal Link */}
           <Link
             href="/principal/dashboard"

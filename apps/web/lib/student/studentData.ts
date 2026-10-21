@@ -1037,13 +1037,17 @@ export function getSynchronizedStudentAssessments(): StudentAssessment[] {
   try {
     const calendarExams = getStoredSchoolExams()
     const currentClass = profile.className || '1/A'
+    const normCurrent = currentClass.replace(/[-_]/g, '/').replace(/\s*şubesi\b|\s*subesi\b/gi, '').trim().toUpperCase()
 
     calendarExams.forEach((ce: any) => {
+      const normCeClass = (ce.className || '').replace(/[-_]/g, '/').replace(/\s*şubesi\b|\s*subesi\b/gi, '').trim().toUpperCase()
       const matchClass =
         !ce.className ||
         ce.className === 'Tüm Sınıflar' ||
-        ce.className === currentClass ||
-        currentClass.includes(ce.className)
+        normCeClass === normCurrent ||
+        normCeClass === '' ||
+        normCurrent.includes(normCeClass) ||
+        normCeClass.includes(normCurrent)
 
       if (!matchClass) return
 

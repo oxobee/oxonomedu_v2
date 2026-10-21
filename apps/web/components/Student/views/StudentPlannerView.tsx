@@ -26,6 +26,7 @@ import {
 } from '@/lib/student/studentData'
 import toast from 'react-hot-toast'
 import MockBadge from '@components/Common/MockBadge'
+import CalendarReminderWidget from '@components/Common/CalendarReminderWidget'
 
 interface StudentPlannerViewProps {
   initialTab?: 'all' | 'calendar' | 'notes' | 'tasks'
@@ -273,6 +274,14 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
           </button>
         </div>
       </div>
+
+      {/* ── İNTERAKTİF ÇALIŞMA & HATIRLATICI TAKVİMİ ── */}
+      <CalendarReminderWidget
+        storageKey="oxonom_student_calendar_reminders"
+        role="student"
+        title="Defterim ve Planlayıcı Takvimi"
+        description="Günlere özel ders çalışma hedefleri ve notlar ekleyebilir, belirlediğiniz tarih ve saatte sesli pop-up hatırlatıcılar kurabilirsiniz."
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* LEFT COLUMN: Yapılacaklar & Kişisel Görevler */}

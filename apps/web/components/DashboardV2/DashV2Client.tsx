@@ -74,12 +74,18 @@ import TeacherNotesModal from './TeacherNotesModal'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import {
   getAttendanceForClass,
+  saveAttendanceForClass,
   normalizeClassCode,
   AttendanceRecord,
+  getTodayDateString,
+  formatDateTurkish,
 } from '@services/demo/attendanceService'
+import { getSingleSourceOfTruthStudents } from '@services/demo/schoolDirectory'
+import CalendarReminderWidget from '@components/Common/CalendarReminderWidget'
 import MockBadge from '@components/Common/MockBadge'
 import LiveClassRadar from '@components/Common/LiveClassRadar'
 import WeeklyCurriculumProgressWidget from '@components/Teacher/widgets/WeeklyCurriculumProgressWidget'
+import { UserCheck } from 'lucide-react'
 
 export interface DashV2ClientProps {
   hideDock?: boolean
@@ -208,6 +214,37 @@ export default function DashV2Client({
       window.removeEventListener('storage', handleStorage)
     }
   }, [selectedClass?.code])
+
+  // Attendance Popup Modal State
+  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false)
+  const [modalAttendanceRecords, setModalAttendanceRecords] = useState<Record<string, 'present' | 'absent'>>({})
+  const [classStudentsList, setClassStudentsList] = useState<any[]>([])
+
+  const handleOpenAttendanceModal = () => {
+    const norm = normalizeClassCode(selectedClass?.code || '1/A')
+    const allSt = getSingleSourceOfTruthStudents(30)
+    const filtered = allSt.filter((s: any) => normalizeClassCode(s.className || '') === norm)
+    const stList = filtered.length > 0 ? filtered : allSt
+    setClassStudentsList(stList)
+
+    const initialRecords: Record<string, 'present' | 'absent'> = {}
+    stList.forEach((s: any) => {
+      const key = s.id || s.studentNo
+      initialRecords[key] = attendanceData?.records?.[key] || 'present'
+    })
+    setModalAttendanceRecords(initialRecords)
+    setIsAttendanceModalOpen(true)
+  }
+
+  const handleSaveAttendance = () => {
+    const norm = normalizeClassCode(selectedClass?.code || '1/A')
+    const total = classStudentsList.length || 1
+    const updated = saveAttendanceForClass(norm, modalAttendanceRecords, total)
+    setAttendanceData(updated)
+    window.dispatchEvent(new CustomEvent('oxonom_attendance_updated', { detail: { classCode: norm, record: updated } }))
+    setIsAttendanceModalOpen(false)
+    toast.success('Yoklama kaydedildi!')
+  }
 
   // Teacher Profile state (Synced from local storage & custom events)
   const [teacherProfile, setTeacherProfile] = useState<{
@@ -1463,6 +1500,19 @@ export default function DashV2Client({
           </motion.div>
 
           {/* ══════════════════════════════════════════════════════════════════════════
+              ÖĞRETMEN AJANDASI & GÜNLÜK HATIRLATICI TAKVİMİ
+          ══════════════════════════════════════════════════════════════════════════ */}
+          <motion.div variants={itemVariants}>
+            <CalendarReminderWidget
+              storageKey="oxonom_teacher_calendar_reminders"
+              role="teacher"
+              compactMode={true}
+              title="Öğretmen Ajandası & Hatırlatıcı Takvimi"
+              description="Dersler, toplantılar ve sınav hazırlıkları için günlere özel notlar ve sesli bildirimler"
+            />
+          </motion.div>
+
+          {/* ══════════════════════════════════════════════════════════════════════════
               KATEGORİ 1: GÜNLÜK SINIF VE DEVAM YÖNETİMİ
           ══════════════════════════════════════════════════════════════════════════ */}
           <motion.div variants={itemVariants} className="space-y-3.5">
@@ -1592,17 +1642,21 @@ export default function DashV2Client({
                   )}
                 </div>
 
-                <Link
-                  href={`/teacher/attendance?class=${encodeURIComponent(selectedClass.code)}`}
+                <button
+                  type="button"
+                  onClick={handleOpenAttendanceModal}
                   className={`w-full py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                     attendanceData?.taken
                       ? 'bg-gray-50 hover:bg-emerald-50 dark:bg-gray-800/60 dark:hover:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
-                      : 'bg-amber-500 hover:bg-amber-600 text-black shadow-xs'
+                      : 'bg-amber-500 hover:bg-amber-600 text-black shadow-xs font-black'
                   }`}
                 >
-                  <span>{attendanceData?.taken ? 'Yoklama Detaylarını Aç' : 'Yoklama Al'}</span>
+                  <span className="flex items-center gap-1.5">
+                    <UserCheck size={14} />
+                    <span>{attendanceData?.taken ? 'Yoklama Detaylarını Aç & Güncelle' : 'Yoklama Al'}</span>
+                  </span>
                   <ChevronRight size={14} />
-                </Link>
+                </button>
               </div>
 
               {/* Kart 1C: Bugünkü Canlı Ders Akışı */}
@@ -3169,6 +3223,137 @@ export default function DashV2Client({
                   </div>
                 )}
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── INTERACTIVE DAILY ATTENDANCE MODAL ── */}
+      <AnimatePresence>
+        {isAttendanceModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#1A1222] border border-[#E8DFEB] dark:border-[#49364F] shadow-2xl p-5 sm:p-6 flex flex-col max-h-[85vh] overflow-hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-[#E8DFEB] dark:border-[#49364F]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                    <UserCheck size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-gray-900 dark:text-white leading-tight">
+                      Günlük Sınıf Yoklaması
+                    </h3>
+                    <div className="text-xs text-[#8D49A6] dark:text-[#C58ADB] font-bold mt-0.5">
+                      {selectedClass.name || selectedClass.code} · {formatDateTurkish(getTodayDateString())}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAttendanceModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-black dark:hover:text-white cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Attendance Quick Stats */}
+              <div className="grid grid-cols-2 gap-3 py-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block">
+                    {Object.values(modalAttendanceRecords).filter((v) => v === 'present').length} Öğrenci
+                  </span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-500 uppercase font-black">
+                    Sınıfta Mevcut
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-center">
+                  <span className="text-xs font-bold text-rose-700 dark:text-rose-400 block">
+                    {Object.values(modalAttendanceRecords).filter((v) => v === 'absent').length} Öğrenci
+                  </span>
+                  <span className="text-[10px] text-rose-600 dark:text-rose-500 uppercase font-black">
+                    Yok / Gelmedi
+                  </span>
+                </div>
+              </div>
+
+              {/* Students Roster */}
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-none my-1">
+                {classStudentsList.map((st: any) => {
+                  const key = st.id || st.studentNo
+                  const status = modalAttendanceRecords[key] || 'present'
+                  return (
+                    <div
+                      key={key}
+                      className="p-3 rounded-2xl bg-gray-50 dark:bg-[#251A30] border border-gray-200/80 dark:border-gray-800 flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-[#4B075F] text-white flex items-center justify-center text-xs font-black shrink-0">
+                          {st.studentNo || '101'}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-black text-gray-900 dark:text-white truncate">
+                            {st.name}
+                          </div>
+                          <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+                            {st.className || selectedClass.code} · No: {st.studentNo || '101'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Toggle Buttons: Var / Yok */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setModalAttendanceRecords((prev) => ({ ...prev, [key]: 'present' }))}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                            status === 'present'
+                              ? 'bg-emerald-600 text-white shadow-xs'
+                              : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 border border-gray-200 dark:border-gray-700'
+                          }`}
+                        >
+                          Var
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setModalAttendanceRecords((prev) => ({ ...prev, [key]: 'absent' }))}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                            status === 'absent'
+                              ? 'bg-rose-600 text-white shadow-xs'
+                              : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 border border-gray-200 dark:border-gray-700'
+                          }`}
+                        >
+                          Yok
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Footer Save Button */}
+              <div className="pt-4 border-t border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAttendanceModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                >
+                  İptal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAttendance}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-brand-gradient hover:opacity-95 text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Check size={16} />
+                  <span>Yoklamayı Onayla ve Kaydet</span>
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

@@ -1423,19 +1423,6 @@ export default function WeeklyCurriculumProgressWidget({
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.location.href = `/pano`
-                }
-              }}
-              className="h-8.5 px-3.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-sm shadow-purple-950/20"
-              title="Akıllı Tahta Pano modunda bu konuya ait çizim ve tahta çalışma alanını aç"
-            >
-              <Tv size={14} className="text-white" />
-              <span>Tahtada Aç (Pano)</span>
-            </button>
           </div>
         </div>
       </div>

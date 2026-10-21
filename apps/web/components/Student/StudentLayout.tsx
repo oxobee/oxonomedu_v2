@@ -176,44 +176,63 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
           </button>
         </div>
 
-        {/* Navigation Items — Clean Pill Design without scrollbar */}
-        <nav className="flex-1 overflow-y-auto px-4 py-3 space-y-1 scrollbar-none">
-          {STUDENT_MENU_CONFIG.map((item) => {
-            const Icon = item.icon
-            const active = isCurrentPathActive(item.path)
-            const isPassive = item.status === 'passive'
+        {/* Navigation Items — Grouped by Category without scrollbar */}
+        <nav className="flex-1 overflow-y-auto px-3.5 py-2.5 space-y-3.5 scrollbar-none">
+          {(['DERSLERİM & ÇALIŞMALAR', 'PLANLAMA & GELİŞİM', 'KAYNAKLAR & İLETİŞİM', 'DİĞER'] as const).map((cat) => {
+            const catItems = STUDENT_MENU_CONFIG.filter((item) => (item.category || 'DERSLERİM & ÇALIŞMALAR') === cat)
+            if (catItems.length === 0) return null
 
             return (
-              <Link
-                key={item.id}
-                href={item.path}
-                className={`group flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-                  active
-                    ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#FCF9FD] shadow-xs'
-                    : isPassive
-                    ? 'text-[#716779]/60 dark:text-[#B5A5BD]/50 hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035]/40'
-                    : 'text-[#514458] dark:text-[#D2C5D8] hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035] hover:text-[#241329] dark:hover:text-white'
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                      active
-                        ? 'bg-[#4B075F]/10 dark:bg-[#D914C8]/20 text-[#4B075F] dark:text-[#D914C8]'
-                        : 'text-[#716779] dark:text-[#B5A5BD] group-hover:text-[#4B075F] dark:group-hover:text-white'
-                    }`}
-                  >
-                    <Icon size={18} strokeWidth={active ? 2.5 : 2} />
-                  </div>
-                  <span className="truncate">{item.label}</span>
+              <div key={cat} className="space-y-1">
+                <div className="px-3 pt-1 pb-1 text-[9.5px] font-black tracking-wider text-[#8D49A6] dark:text-[#C58ADB] uppercase">
+                  {cat}
                 </div>
+                {catItems.map((item) => {
+                  const Icon = item.icon
+                  const active = isCurrentPathActive(item.path)
+                  const isPassive = item.status === 'passive'
 
-                {isPassive && (
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-semibold shrink-0">
-                    Yakında
-                  </span>
-                )}
-              </Link>
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.path}
+                      className={`group flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                        active
+                          ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#FCF9FD] shadow-xs'
+                          : isPassive
+                          ? 'text-[#716779]/60 dark:text-[#B5A5BD]/50 hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035]/40'
+                          : 'text-[#514458] dark:text-[#D2C5D8] hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035] hover:text-[#241329] dark:hover:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            active
+                              ? 'bg-[#4B075F]/10 dark:bg-[#D914C8]/20 text-[#4B075F] dark:text-[#D914C8]'
+                              : 'text-[#716779] dark:text-[#B5A5BD] group-hover:text-[#4B075F] dark:group-hover:text-white'
+                          }`}
+                        >
+                          <Icon size={16} strokeWidth={active ? 2.5 : 2} />
+                        </div>
+                        <span className="truncate">{item.label}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        {item.badge && (
+                          <span className="text-[8.5px] px-1.5 py-0.5 rounded-md font-bold bg-purple-500/15 text-[#8D49A6] dark:text-[#F0D8FA]">
+                            {item.badge}
+                          </span>
+                        )}
+                        {isPassive && !item.badge && (
+                          <span className="text-[8.5px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-semibold">
+                            Yakında
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             )
           })}
         </nav>
@@ -540,11 +559,15 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
                         >
                           <Icon size={17} />
                         </div>
-                        {isPassive && (
+                        {item.badge ? (
+                          <span className="text-[8px] px-2 py-0.5 rounded-full bg-purple-500/15 text-[#8D49A6] dark:text-[#F0D8FA] font-bold">
+                            {item.badge}
+                          </span>
+                        ) : isPassive ? (
                           <span className="text-[8px] px-2 py-0.5 rounded-full bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-bold">
                             Yakında
                           </span>
-                        )}
+                        ) : null}
                       </div>
                       <div>
                         <div className="text-xs font-bold leading-tight">

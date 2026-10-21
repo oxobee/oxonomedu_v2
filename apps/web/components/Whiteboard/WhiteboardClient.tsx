@@ -13,7 +13,13 @@ import {
   X,
   Image as ImageIcon,
   CheckCircle2,
+  Save,
+  Check,
+  Loader2,
+  Sparkles,
+  AlertCircle,
 } from 'lucide-react'
+import { saveBoardNote } from '@/lib/board/boardNotesStorage'
 
 interface WhiteboardFile {
   id: string
@@ -198,6 +204,29 @@ export default function WhiteboardClient() {
   } | null>(null)
   const incomingBannerTimerRef = useRef<any>(null)
 
+  // ── SAVE BOARD TO STUDENT PROFILES STATE ──
+  const ALL_SCHOOL_CLASSES = useMemo(() => ['1/A', '1/B', '1/C', '1/D', '2/A', '2/B', '2/C', '2/D', '3/A', '3/B', '4/A', '4/B'], [])
+  const ALL_COURSES = useMemo(() => ['Türkçe', 'Matematik', 'Fen Bilimleri', 'Sosyal Bilgiler', 'Hayat Bilgisi', 'İngilizce', 'Bilişim Teknolojileri', 'Görsel Sanatlar'], [])
+
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false)
+  const defaultClassCode = useMemo(() => {
+    const raw = boardInfo.pano || '1A'
+    if (raw.length === 2 && /^[1-9][A-Z]$/i.test(raw)) {
+      return `${raw[0]}/${raw[1].toUpperCase()}`
+    }
+    return '1/A'
+  }, [boardInfo.pano])
+
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([defaultClassCode])
+  const [selectedCourse, setSelectedCourse] = useState('Türkçe')
+  const [isSavingBoard, setIsSavingBoard] = useState(false)
+  const [saveStatusToast, setSaveStatusToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+
+  const openSaveModal = useCallback(() => {
+    setSelectedClasses([defaultClassCode])
+    setIsSaveModalOpen(true)
+  }, [defaultClassCode])
+
   // Play pleasant notification audio chime
   const playAudioChime = useCallback(() => {
     if (typeof window === 'undefined') return
@@ -218,6 +247,57 @@ export default function WhiteboardClient() {
       osc.stop(now + 0.55)
     } catch (_) {}
   }, [])
+
+  const handleConfirmSaveBoard = useCallback(async () => {
+    if (selectedClasses.length === 0) return
+    setIsSavingBoard(true)
+    try {
+      saveNow()
+      const editor = boardInstanceRef.current?.editor
+      if (!editor) throw new Error('Editor bulunamadı')
+
+      const blob = await editor.exportImage({ background: true, scale: 2, margin: 32 })
+      if (!blob) throw new Error('Görsel oluşturulamadı')
+
+      const reader = new FileReader()
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      })
+
+      saveBoardNote({
+        courseName: selectedCourse,
+        classCodes: selectedClasses,
+        imageUrl: dataUrl,
+        teacherName: 'Ders Öğretmeni',
+        boardInfo: boardInfo.fullId,
+      })
+
+      playAudioChime()
+
+      setSaveStatusToast({
+        type: 'success',
+        message: 'Harika, seçtiğiniz sınıfa ait tüm öğrencilere gönderildi!',
+      })
+      setIsSaveModalOpen(false)
+
+      setTimeout(() => {
+        setSaveStatusToast(null)
+      }, 5000)
+    } catch (err) {
+      console.error('Board export failed:', err)
+      setSaveStatusToast({
+        type: 'error',
+        message: 'Kayıt işlemi sırasında bir hata oluştu, lütfen tekrar deneyin.',
+      })
+      setTimeout(() => {
+        setSaveStatusToast(null)
+      }, 5000)
+    } finally {
+      setIsSavingBoard(false)
+    }
+  }, [selectedClasses, saveNow, selectedCourse, boardInfo.fullId, playAudioChime])
 
   // Helper to convert dataUrl or remote url to Blob for native whiteboard placement
   const urlToBlob = async (url: string): Promise<Blob> => {
@@ -486,6 +566,7 @@ export default function WhiteboardClient() {
       theme: savedTheme,
       grid: 'lines',
       watermark: false, // We use custom Oxonom logo & navigation
+      onSaveBoard: openSaveModal,
     })
 
     boardInstanceRef.current = board
@@ -772,6 +853,17 @@ export default function WhiteboardClient() {
           />
         </div>
 
+        {/* Tahtayı Kaydet Button */}
+        <button
+          type="button"
+          onClick={openSaveModal}
+          title="Tahtayı Kaydet & Sınıflara Gönder"
+          className="h-10 px-3.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/20 flex items-center gap-1.5 text-xs font-black transition-all cursor-pointer active:scale-95 shrink-0"
+        >
+          <Save size={15} />
+          <span className="hidden sm:inline">Tahtayı Kaydet</span>
+        </button>
+
         {/* Files Dropdown Menu */}
         {isMenuOpen && (
           <div
@@ -841,6 +933,206 @@ export default function WhiteboardClient() {
           </div>
         )}
       </div>
+
+      {/* ── TOAST NOTIFICATION: SAVE BOARD STATUS ── */}
+      {saveStatusToast && (
+        <div
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-90 flex items-center gap-3 px-5 py-3 rounded-2xl backdrop-blur-md shadow-2xl text-white animate-in fade-in slide-in-from-top-3 duration-300 ${
+            saveStatusToast.type === 'success'
+              ? 'bg-emerald-600/95 border border-emerald-400/50 shadow-emerald-950/30'
+              : 'bg-rose-600/95 border border-rose-400/50 shadow-rose-950/30'
+          }`}
+        >
+          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+            {saveStatusToast.type === 'success' ? (
+              <Check size={16} strokeWidth={2.8} />
+            ) : (
+              <AlertCircle size={16} strokeWidth={2.8} />
+            )}
+          </div>
+          <span className="text-xs sm:text-sm font-black">
+            {saveStatusToast.message}
+          </span>
+          <button
+            type="button"
+            onClick={() => setSaveStatusToast(null)}
+            className="w-6 h-6 rounded-full hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white ml-1 cursor-pointer"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* ── CLASS SELECTION MODAL ("TAHTAYI KAYDET") ── */}
+      {isSaveModalOpen && (
+        <div className="fixed inset-0 z-80 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm">
+          <div
+            className="absolute inset-0"
+            onClick={() => !isSavingBoard && setIsSaveModalOpen(false)}
+          />
+
+          <div className="relative z-10 w-full max-w-lg bg-white dark:bg-[#181F30] border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-5 animate-in fade-in zoom-in-95 duration-200 text-gray-900 dark:text-white">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                    <Save size={18} />
+                  </div>
+                  <h3 className="text-base sm:text-lg font-black tracking-tight">
+                    Tahtayı Kaydet
+                  </h3>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Tahtadaki çizimler seçilen sınıflardaki tüm öğrencilerin profiline görsel olarak aktarılır.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                disabled={isSavingBoard}
+                onClick={() => setIsSaveModalOpen(false)}
+                className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Course Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
+                Ders Seçimi
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {ALL_COURSES.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setSelectedCourse(c)}
+                    className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all truncate border cursor-pointer ${
+                      selectedCourse === c
+                        ? 'bg-[#4B075F] text-white border-[#4B075F] shadow-xs'
+                        : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Classrooms Multi-Select */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  Gönderilecek Sınıf(lar) ({selectedClasses.length} Seçili)
+                </label>
+
+                <div className="flex items-center gap-2 text-[11px] font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedClasses([...ALL_SCHOOL_CLASSES])}
+                    className="text-[#8D49A6] dark:text-[#C58ADB] hover:underline cursor-pointer"
+                  >
+                    Tümünü Seç
+                  </button>
+                  <span className="text-gray-300 dark:text-gray-700">•</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedClasses([defaultClassCode])}
+                    className="text-gray-500 hover:underline cursor-pointer"
+                  >
+                    Sadece Mevcut
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-[160px] overflow-y-auto p-1 custom-scrollbar">
+                {ALL_SCHOOL_CLASSES.map((cls) => {
+                  const isChecked = selectedClasses.includes(cls)
+                  const isDefault = cls === defaultClassCode
+
+                  return (
+                    <button
+                      key={cls}
+                      type="button"
+                      onClick={() => {
+                        if (isChecked) {
+                          setSelectedClasses(selectedClasses.filter((c) => c !== cls))
+                        } else {
+                          setSelectedClasses([...selectedClasses, cls])
+                        }
+                      }}
+                      className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold transition-all cursor-pointer ${
+                        isChecked
+                          ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-800 dark:text-emerald-300'
+                          : 'bg-gray-50 dark:bg-gray-800/40 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>{cls}</span>
+                        {isDefault && (
+                          <span className="text-[9px] px-1 py-0.2 rounded bg-purple-100 dark:bg-purple-900/60 text-[#4B075F] dark:text-[#C58ADB]">
+                            Mevcut
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${
+                          isChecked ? 'bg-emerald-600 text-white' : 'border border-gray-300 dark:border-gray-600'
+                        }`}
+                      >
+                        {isChecked && <Check size={11} strokeWidth={3} />}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Note title preview */}
+            <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200/60 dark:border-gray-700/60 text-xs text-gray-600 dark:text-gray-300 space-y-1">
+              <div className="text-[11px] font-bold text-gray-400 uppercase">
+                Kayıt Başlığı Şablonu:
+              </div>
+              <div className="font-extrabold text-[#4B075F] dark:text-[#C58ADB]">
+                {selectedCourse} - {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                disabled={isSavingBoard}
+                onClick={() => setIsSaveModalOpen(false)}
+                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+              >
+                Vazgeç
+              </button>
+
+              <button
+                type="button"
+                disabled={isSavingBoard || selectedClasses.length === 0}
+                onClick={handleConfirmSaveBoard}
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-black flex items-center gap-2 shadow-md shadow-emerald-950/20 cursor-pointer"
+              >
+                {isSavingBoard ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Kaydediliyor...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={14} />
+                    <span>Öğrencilere Gönder & Kaydet</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

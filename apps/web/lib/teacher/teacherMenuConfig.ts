@@ -43,9 +43,11 @@ export interface TeacherMenuItem {
   children?: TeacherSubMenuItem[]
   openInNewTab?: boolean
   badge?: string
+  category?: 'DERSLER & YÖNETİM' | 'ÖLÇME & DEĞERLENDİRME' | 'KAYNAKLAR & İLETİŞİM' | 'DİĞER'
 }
 
 export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
+  // ── DERSLER & YÖNETİM ──
   {
     id: 'dashboard',
     label: 'Ana Sayfa',
@@ -53,28 +55,8 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     icon: LayoutDashboard,
     status: 'active',
     sortOrder: 1,
+    category: 'DERSLER & YÖNETİM',
     description: 'Günlük ders akışı, sıradaki ders, akıllı tahta bağlantısı ve hızlı öğretmen işlemleri.',
-  },
-  {
-    id: 'desktop-os',
-    label: 'Masaüstü OS',
-    path: '/teacher/desktop-os',
-    icon: Monitor,
-    status: 'active',
-    sortOrder: 1.2,
-    openInNewTab: true,
-    badge: 'Yeni',
-    description: 'Sürükle-bırak ikonlu, yaşlı dostu pencereli tam ekran masaüstü işletim sistemi.',
-  },
-  {
-    id: 'gamestudio',
-    label: 'Game Studio',
-    path: '/teacher/gamestudio',
-    icon: Gamepad2,
-    status: 'active',
-    sortOrder: 1.5,
-    badge: 'Oyunlar',
-    description: 'Öğrenciler ve sınıflar için eğitsel oyun kütüphanesi ve sınıf aktiviteleri.',
   },
   {
     id: 'schedule',
@@ -83,6 +65,7 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     icon: Calendar,
     status: 'active',
     sortOrder: 2,
+    category: 'DERSLER & YÖNETİM',
     description: 'Haftalık ve günlük ders programı, sınıf saatleri, ders kazanımları ve tahtayla başlatma.',
     children: [
       { id: 'schedule-daily', label: 'Günlük Program', path: '/teacher/schedule/daily', status: 'active', description: 'Bugünün ders saatleri ve sınıfları' },
@@ -96,7 +79,8 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     path: '/teacher/courses',
     icon: BookOpen,
     status: 'active',
-    sortOrder: 2.5,
+    sortOrder: 3,
+    category: 'DERSLER & YÖNETİM',
     description: 'Öğrencilerin Derslerim ekranını yönetme: Müfredat kitaplarını gizle/göster, materyal ve çalışma yükleme, sınav ve not ekleme.',
     children: [
       { id: 'teacher-courses-all', label: 'Ders İçerikleri & Kitaplar', path: '/teacher/courses', status: 'active', description: 'Müfredat kitapları görünürlüğü ve ders materyalleri' },
@@ -110,7 +94,8 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     path: '/teacher/classes',
     icon: Users,
     status: 'active',
-    sortOrder: 3,
+    sortOrder: 4,
+    category: 'DERSLER & YÖNETİM',
     description: 'Atanmış şubeler, sınıf listeleri, detaylı öğrenci profilleri ve veli iletişim bilgileri.',
     children: [
       { id: 'classes-list', label: 'Sınıf Listeleri', path: '/teacher/classes', status: 'active' },
@@ -123,7 +108,8 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     path: '/teacher/attendance',
     icon: CheckSquare,
     status: 'active',
-    sortOrder: 4,
+    sortOrder: 5,
+    category: 'DERSLER & YÖNETİM',
     description: 'Ders bazlı pratik dokunmatik yoklama, devam takibi ve sınıf mevcudu kaydı.',
     children: [
       { id: 'attendance-take', label: 'Yoklama Al', path: '/teacher/attendance/take', status: 'active', description: 'Aktif ders için yoklama girişi' },
@@ -131,13 +117,16 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
       { id: 'attendance-reports', label: 'e-Okul / Devam Raporları', path: '/teacher/attendance/reports', status: 'passive', description: 'Resmi MEB e-Okul devamsızlık aktarımı', missingDependency: 'MEB e-Okul resmi API entegrasyonu' },
     ],
   },
+
+  // ── ÖLÇME & DEĞERLENDİRME ──
   {
     id: 'assignments',
     label: 'Ödev ve Çalışmalar',
     path: '/teacher/assignments',
     icon: BookOpen,
     status: 'active',
-    sortOrder: 5,
+    sortOrder: 6,
+    category: 'ÖLÇME & DEĞERLENDİRME',
     description: 'Ödev oluşturma, yayınlama, öğrenci teslimlerini inceleme ve puanlama/geri bildirim.',
     children: [
       { id: 'assignments-list', label: 'Ödev Listesi', path: '/teacher/assignments', status: 'active' },
@@ -151,7 +140,8 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     path: '/teacher/agenda',
     icon: CalendarDays,
     status: 'active',
-    sortOrder: 5.5,
+    sortOrder: 7,
+    category: 'ÖLÇME & DEĞERLENDİRME',
     description: 'Renkli kategorize ders notları, zümre toplantıları ve öğrencilere canlı yansıyan sınav takvimi.',
     children: [
       { id: 'agenda-all', label: 'Tüm Ajanda', path: '/teacher/agenda', status: 'active' },
@@ -165,7 +155,8 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     path: '/teacher/academic-calendar',
     icon: CalendarDays,
     status: 'active',
-    sortOrder: 5.8,
+    sortOrder: 8,
+    category: 'ÖLÇME & DEĞERLENDİRME',
     description: 'MEB 2026-2027 resmi çalışma takvimi, ortak sınavlar, tatiller ve okul etkinlikleri.',
   },
   {
@@ -174,7 +165,8 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     path: '/teacher/assessments',
     icon: Award,
     status: 'active',
-    sortOrder: 6,
+    sortOrder: 9,
+    category: 'ÖLÇME & DEĞERLENDİRME',
     description: 'Soru bankası, sınıf içi quizler, sınav takvimi ve başarı değerlendirme kriterleri.',
     children: [
       { id: 'assessments-quizzes', label: 'Sınıf Quizleri', path: '/teacher/assessments/quizzes', status: 'active' },
@@ -184,21 +176,31 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     ],
   },
   {
-    id: 'ai-assistant',
-    label: 'Yapay Zekâ Öğretmen Asistanı',
-    path: '/teacher/ai-assistant',
-    icon: Sparkles,
+    id: 'student-progress',
+    label: 'Öğrenci Gelişimi ve Rehberlik',
+    path: '/teacher/student-progress',
+    icon: TrendingUp,
     status: 'active',
-    sortOrder: 8,
-    hidden: true,
-    description: 'MEB müfredatına uyumlu ders planı, çoktan seçmeli soru, çalışma kâğıdı ve materyal üretimi.',
+    sortOrder: 10,
+    category: 'ÖLÇME & DEĞERLENDİRME',
+    description: 'Öğrenci akademik gidişatı, ödev teslim oranları, devam durumu ve rehberlik görüşme kayıtları.',
     children: [
-      { id: 'ai-lesson-planner', label: 'Ders Planı Hazırlayıcı', path: '/teacher/ai-assistant/lesson-planner', status: 'active' },
-      { id: 'ai-question-generator', label: 'Soru & Quiz Üretici', path: '/teacher/ai-assistant/question-generator', status: 'active' },
-      { id: 'ai-worksheet-generator', label: 'Çalışma Kâğıdı Üretici', path: '/teacher/ai-assistant/worksheet-generator', status: 'active' },
-      { id: 'ai-rubric-generator', label: 'Rubrik & Değerlendirme Ölçeği', path: '/teacher/ai-assistant/rubric-generator', status: 'passive', description: 'Otomatik rubrik matrisi üretimi', missingDependency: 'Rubrik veri tablosu ve dışa aktarım API' },
-      { id: 'ai-parent-messages', label: 'Veli Bilgilendirme Taslağı', path: '/teacher/ai-assistant/parent-messages', status: 'passive', description: 'Kişiselleştirilmiş gelişim mesajları', missingDependency: 'SMS / Mesajlaşma entegrasyonu' },
+      { id: 'progress-overview', label: 'Sınıf Başarı Özeti', path: '/teacher/student-progress/overview', status: 'active' },
+      { id: 'progress-guidance', label: 'Rehberlik Servisi Kayıtları', path: '/teacher/student-progress/guidance', status: 'active' },
+      { id: 'progress-learning-gaps', label: 'Kazanım Eksiği Tespiti', path: '/teacher/student-progress/learning-gaps', status: 'passive', missingDependency: 'Kazanım bazlı otomatik analiz algoritması' },
     ],
+  },
+
+  // ── KAYNAKLAR & İLETİŞİM ──
+  {
+    id: 'files',
+    label: 'Dosyalarım ve Paylaşımlar',
+    path: '/teacher/files',
+    icon: FileText,
+    status: 'active',
+    sortOrder: 11,
+    category: 'KAYNAKLAR & İLETİŞİM',
+    description: 'Kişisel ders dosyaları, tahta çıktıları, paylaşılan çalışma kağıtları ve arşiv.',
   },
   {
     id: 'communication',
@@ -206,7 +208,8 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     path: '/teacher/communication',
     icon: MessageSquare,
     status: 'passive',
-    sortOrder: 10,
+    sortOrder: 12,
+    category: 'KAYNAKLAR & İLETİŞİM',
     description: 'Sınıf duyuruları, veli bilgilendirme mesajları ve toplantı planlama merkezi.',
     missingDependency: 'SMS Ağ Geçidi, E-posta Sunucusu ve Anlık Mesajlaşma Servisi',
     children: [
@@ -216,35 +219,13 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     ],
   },
   {
-    id: 'student-progress',
-    label: 'Öğrenci Gelişimi ve Rehberlik',
-    path: '/teacher/student-progress',
-    icon: TrendingUp,
-    status: 'active',
-    sortOrder: 11,
-    description: 'Öğrenci akademik gidişatı, ödev teslim oranları, devam durumu ve rehberlik görüşme kayıtları.',
-    children: [
-      { id: 'progress-overview', label: 'Sınıf Başarı Özeti', path: '/teacher/student-progress/overview', status: 'active' },
-      { id: 'progress-guidance', label: 'Rehberlik Servisi Kayıtları', path: '/teacher/student-progress/guidance', status: 'active' },
-      { id: 'progress-learning-gaps', label: 'Kazanım Eksiği Tespiti', path: '/teacher/student-progress/learning-gaps', status: 'passive', missingDependency: 'Kazanım bazlı otomatik analiz algoritması' },
-    ],
-  },
-  {
-    id: 'files',
-    label: 'Dosyalarım ve Paylaşımlar',
-    path: '/teacher/files',
-    icon: FileText,
-    status: 'active',
-    sortOrder: 12,
-    description: 'Kişisel ders dosyaları, tahta çıktıları, paylaşılan çalışma kağıtları ve arşiv.',
-  },
-  {
     id: 'reports',
     label: 'Raporlarım',
     path: '/teacher/reports',
     icon: BarChart3,
     status: 'active',
     sortOrder: 13,
+    category: 'KAYNAKLAR & İLETİŞİM',
     description: 'Yoklama istatistikleri, ödev teslim analizleri ve sınıf başarı karneleri.',
     children: [
       { id: 'reports-attendance', label: 'Yoklama Raporları', path: '/teacher/reports/attendance', status: 'active' },
@@ -252,6 +233,8 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
       { id: 'reports-official', label: 'Resmi Dönem Sonu Raporları', path: '/teacher/reports/official', status: 'passive', missingDependency: 'MEB Resmi Raporlama Formatı Entegrasyonu' },
     ],
   },
+
+  // ── DİĞER ──
   {
     id: 'settings',
     label: 'Profil ve Ayarlar',
@@ -259,12 +242,24 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     icon: Settings,
     status: 'active',
     sortOrder: 14,
+    category: 'DİĞER',
     description: 'Öğretmen kimlik bilgileri, branş ayarları, eşleştirilmiş akıllı tahtalar ve güvenlik.',
     children: [
       { id: 'settings-profile', label: 'Öğretmen Profili', path: '/teacher/settings/profile', status: 'active' },
       { id: 'settings-devices', label: 'Eşleştirilmiş Cihazlar', path: '/teacher/settings/devices', status: 'active' },
       { id: 'settings-security', label: 'Şifre & Güvenlik', path: '/teacher/settings/security', status: 'active' },
     ],
+  },
+  {
+    id: 'gamestudio',
+    label: 'Game Studio',
+    path: '/teacher/gamestudio',
+    icon: Gamepad2,
+    status: 'active',
+    sortOrder: 15,
+    badge: 'Çok Yakında',
+    category: 'DİĞER',
+    description: 'Öğrenciler ve sınıflar için eğitsel oyun kütüphanesi ve sınıf aktiviteleri.',
   },
 ]
 

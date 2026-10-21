@@ -1584,8 +1584,12 @@ export class Editor {
     let b = null
     const shapes = this.shapesSorted().filter((s) => !ids || ids.has(s.id))
     for (const s of shapes) b = boundsUnion(b, pageBounds(s))
-    if (!b) return null
-    b = boundsExpand(b, margin)
+    if (!b) {
+      const vp = typeof this.viewportPageBounds === 'function' ? this.viewportPageBounds() : { x: 0, y: 0, w: 1200, h: 800 }
+      b = { x: vp.x, y: vp.y, w: Math.max(800, vp.w), h: Math.max(600, vp.h) }
+    } else {
+      b = boundsExpand(b, margin)
+    }
     // stay under ~24MP however big the drawing is
     const cap = Math.sqrt(24e6 / (b.w * b.h))
     const k = Math.min(scale, cap)
