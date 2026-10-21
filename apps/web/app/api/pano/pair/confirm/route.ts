@@ -74,16 +74,21 @@ export async function POST(req: NextRequest) {
       // Demo: send ALL classrooms across all schools so teacher sees the full list (58 classes)
       const allOrgClassrooms = ALL_CLASSROOMS
       if (allOrgClassrooms.length > 0) {
-        teacherData.classrooms = allOrgClassrooms.map(c => ({
-          id: c.id,
-          name: c.name,
-          gradeLevel: c.grade_level,
-          studentCount: c.student_count || 30,
-          boardCount: c.boards_count || 0,
-          attendance: '%100',
-          teacherName: c.teacher_name,
-          subject: 'Sınıf Öğretmeni',
-        }))
+        teacherData.classrooms = allOrgClassrooms.map(c => {
+          const gradeNum = parseInt(c.grade_level || '', 10) || 1
+          return {
+            id: c.id,
+            name: c.name,
+            code: c.code,
+            gradeLevel: c.grade_level,
+            studentCount: typeof c.student_count === 'number' ? c.student_count : 0,
+            boardCount: c.boards_count || 0,
+            attendance: '%100',
+            teacherName: c.teacher_name,
+            subject: gradeNum <= 4 ? 'Sınıf Öğretmeni' : (c.subject || 'Branş Öğretmeni'),
+            schoolName: c.school_name,
+          }
+        })
       }
     }
 

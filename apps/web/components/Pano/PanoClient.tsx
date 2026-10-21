@@ -72,7 +72,9 @@ import {
   getSingleSourceOfTruthStudents,
   normalizeClassCode,
   getClassBoardIdentity,
+  TEACHER_ROSTER,
 } from '@services/demo/schoolDirectory'
+import { getAttendanceForClass, getTodayDateString } from '@services/demo/attendanceService'
 import { createBoard } from '@services/boards/boards'
 import toast from 'react-hot-toast'
 import PanoStandbyScreen from './PanoStandbyScreen'
@@ -171,24 +173,49 @@ export interface PanoSettings {
   quotes: QuoteItem[]
 }
 
-const INITIAL_CLASSROOMS: ClassroomItem[] = ALL_CLASSROOMS.map(c => ({
-  id: c.id,
-  name: c.name,
-  gradeLevel: c.grade_level,
-  studentCount: c.student_count || 30,
-  boardCount: c.boards_count || 0,
-  attendance: '%100',
-  teacherName: c.teacher_name,
-  subject: c.org_id === 10 ? 'Sınıf Öğretmeni' : 'Branş Öğretmeni',
-}))
+const buildPanoClassrooms = (studentList?: any[]): ClassroomItem[] => {
+  const students = studentList || (typeof window !== 'undefined' ? getSingleSourceOfTruthStudents(30) : [])
+  return ALL_CLASSROOMS.map(c => {
+    const norm = normalizeClassCode(c.code || c.name)
+    const gradeNum = parseInt(c.grade_level || '', 10) || 1
+    const isPrimary = gradeNum <= 4
 
-const DEFAULT_CLASSROOMS: ClassroomItem[] = INITIAL_CLASSROOMS.length > 0 ? INITIAL_CLASSROOMS : [
-  { id: 101, name: '1-A Şubesi', gradeLevel: '1. Sınıf', studentCount: 30, boardCount: 0, attendance: '%100', teacherName: 'Ahmet Hakan', subject: 'Matematik' },
-  { id: 102, name: '1-B Şubesi', gradeLevel: '1. Sınıf', studentCount: 28, boardCount: 0, attendance: '%96', teacherName: 'Ahmet Hakan', subject: 'Matematik' },
-  { id: 103, name: '2-A Şubesi', gradeLevel: '2. Sınıf', studentCount: 32, boardCount: 0, attendance: '%100', teacherName: 'Ayşe Öğretmen', subject: 'Sınıf Öğretmeni' },
-  { id: 104, name: '3-A Şubesi', gradeLevel: '3. Sınıf', studentCount: 29, boardCount: 0, attendance: '%98', teacherName: 'Ahmet Hakan', subject: 'Matematik' },
-  { id: 105, name: '4-B Şubesi', gradeLevel: '4. Sınıf', studentCount: 31, boardCount: 0, attendance: '%95', teacherName: 'Mehmet Öğretmen', subject: 'Fen Bilimleri' }
-]
+    const classStudents = students.filter((s: any) => {
+      const sNorm = normalizeClassCode(s.className || '')
+      return sNorm === norm || sNorm.replace('-', '/') === norm.replace('-', '/')
+    })
+
+    const rosterTeacher = TEACHER_ROSTER.find(t => t.name === c.teacher_name)
+    const subject = isPrimary ? 'Sınıf Öğretmeni' : (rosterTeacher?.branch || c.subject || 'Branş Öğretmeni')
+    const schoolName = isPrimary ? 'Necla Görer İlkokulu' : 'Şair Fevzi Kutlu Kalkancı Ortaokulu'
+
+    let attStr = classStudents.length > 0 ? 'Alınmadı' : '-'
+    if (typeof window !== 'undefined') {
+      try {
+        const att = getAttendanceForClass(c.code || c.name, getTodayDateString())
+        if (att && att.taken && att.totalCount > 0) {
+          attStr = `%${Math.round((att.presentCount / att.totalCount) * 100)}`
+        }
+      } catch (_) {}
+    }
+
+    return {
+      id: c.id,
+      name: c.name,
+      code: c.code,
+      gradeLevel: c.grade_level,
+      studentCount: classStudents.length,
+      boardCount: c.boards_count || 0,
+      attendance: attStr,
+      teacherName: c.teacher_name,
+      subject,
+      schoolName,
+    }
+  })
+}
+
+const INITIAL_CLASSROOMS: ClassroomItem[] = buildPanoClassrooms()
+const DEFAULT_CLASSROOMS: ClassroomItem[] = INITIAL_CLASSROOMS
 
 // Groups classrooms by grade level (numeric order) and sorts branches with Turkish collation,
 // so 28-31 branches stay readable and "10" never sorts before "9".
@@ -3016,6 +3043,15 @@ export default function PanoClient() {
   const isStudent = email.includes('ogrenci') || userRole === 'student' || roles.some((r: any) => r?.role?.name?.toLowerCase() === 'student')
   const isAdmin = (user?.is_superadmin || email.includes('idare') || email.includes('admin') || userRole === 'admin' || userRole === 'manager') && !email.includes('ogretmen')
 
+  const effectiveUser = pairedSession || user
+  const displayName =
+    (effectiveUser?.first_name ? `${effectiveUser.first_name} ${effectiveUser.last_name || ''}`.trim() : '') ||
+    effectiveUser?.full_name ||
+    effectiveUser?.name ||
+    (isAdmin ? 'Yönetici' : isStudent ? 'Öğrenci' : 'Öğretmen') ||
+    effectiveUser?.username ||
+    'Kullanıcı'
+
   // Settings State
   const [settings, setSettings] = useState<PanoSettings>(DEFAULT_SETTINGS)
   // Paired Session Management (Standby Screen & QR/OTP Pairing)
@@ -3201,6 +3237,27 @@ export default function PanoClient() {
       }
     }
   }, [selectedClass, boardIdentity.panoId, boardIdentity.boardNo])
+
+  // Keep selectedClass properties (studentCount, subject, schoolName, attendance) in sync with live classroom data
+  useEffect(() => {
+    if (!selectedClass) return
+    const norm = normalizeClassCode(selectedClass.code || selectedClass.name)
+    const liveCls = classrooms.find(c => normalizeClassCode(c.code || c.name) === norm)
+    if (liveCls && (
+      selectedClass.studentCount !== liveCls.studentCount ||
+      selectedClass.subject !== liveCls.subject ||
+      selectedClass.attendance !== liveCls.attendance ||
+      selectedClass.schoolName !== liveCls.schoolName
+    )) {
+      setSelectedClass(prev => prev ? {
+        ...prev,
+        studentCount: liveCls.studentCount,
+        subject: liveCls.subject,
+        attendance: liveCls.attendance,
+        schoolName: liveCls.schoolName,
+      } : prev)
+    }
+  }, [classrooms, selectedClass, setSelectedClass])
 
   // Board is always the board — no phone remote control mode
   const isPhone = false
@@ -3833,6 +3890,7 @@ export default function PanoClient() {
   useEffect(() => {
     const handleSync = () => {
       setDataSyncTrigger((prev) => prev + 1)
+      setClassrooms(buildPanoClassrooms())
     }
 
     // Custom App Events
@@ -3840,6 +3898,10 @@ export default function PanoClient() {
     window.addEventListener('oxonom_boards_updated', handleSync)
     window.addEventListener('oxonom_attendance_updated', handleSync)
     window.addEventListener('oxonom_pano_sync', handleSync)
+    window.addEventListener('oxonom_student_updated', handleSync)
+    window.addEventListener('oxonom_admin_students_updated', handleSync)
+    window.addEventListener('oxonom_school_updated', handleSync)
+    window.addEventListener('oxonom_principal_updated', handleSync)
 
     // Storage Event (catches changes made by child iframes or other tabs to localStorage)
     const handleStorage = (e: StorageEvent) => {
@@ -3848,6 +3910,9 @@ export default function PanoClient() {
         e.key.includes('board') ||
         e.key.includes('assignment') ||
         e.key.includes('attendance') ||
+        e.key.includes('student') ||
+        e.key.includes('school') ||
+        e.key.includes('principal') ||
         e.key.includes('pano')
       ) {
         handleSync()
@@ -3871,6 +3936,10 @@ export default function PanoClient() {
       window.removeEventListener('oxonom_boards_updated', handleSync)
       window.removeEventListener('oxonom_attendance_updated', handleSync)
       window.removeEventListener('oxonom_pano_sync', handleSync)
+      window.removeEventListener('oxonom_student_updated', handleSync)
+      window.removeEventListener('oxonom_admin_students_updated', handleSync)
+      window.removeEventListener('oxonom_school_updated', handleSync)
+      window.removeEventListener('oxonom_principal_updated', handleSync)
       window.removeEventListener('storage', handleStorage)
       window.removeEventListener('message', handleMessage)
       clearInterval(heartbeat)
@@ -3928,44 +3997,80 @@ export default function PanoClient() {
     return count
   }, [selectedClass, dataSyncTrigger])
 
-  const [savedAttendanceRate, setSavedAttendanceRate] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!selectedClass) return
-    const checkAttendance = () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const raw = localStorage.getItem(`oxonom_attendance_${selectedClass.id}`)
-          if (raw) {
-            const parsed = JSON.parse(raw)
-            if (parsed && parsed.rate !== undefined) {
-              setSavedAttendanceRate(`%${parsed.rate}`)
-              return
-            }
-          }
-        } catch (_) {}
-      }
-      setSavedAttendanceRate(null)
-    }
-    checkAttendance()
-  }, [selectedClass, dataSyncTrigger])
-
-  const liveAttendanceRate = useMemo(() => {
-    if (savedAttendanceRate) return savedAttendanceRate
-    if (selectedClass?.attendance) return selectedClass.attendance
-    return '%100'
-  }, [savedAttendanceRate, selectedClass])
-
   // Single Source of Truth Student Pool for selected class
   const candidateStudents = useMemo(() => {
     const allStudents = getSingleSourceOfTruthStudents(30)
-    const classCode = selectedClass ? normalizeClassCode(selectedClass.name.replace('Şubesi', '').trim()) : ''
-    const pool = allStudents.filter((s) => {
-      if (!classCode) return true
-      return normalizeClassCode(s.className) === classCode
+    const classCode = selectedClass ? normalizeClassCode(selectedClass.code || selectedClass.name.replace('Şubesi', '').trim()) : ''
+    return allStudents.filter((s: any) => {
+      if (!classCode) return false
+      const sNorm = normalizeClassCode(s.className || '')
+      return sNorm === classCode || sNorm.replace('-', '/') === classCode.replace('-', '/')
     })
-    return pool.length > 0 ? pool : allStudents
-  }, [selectedClass])
+  }, [selectedClass, dataSyncTrigger])
+
+  const liveStudentCount = candidateStudents.length
+
+  const liveAttendance = useMemo(() => {
+    if (!selectedClass) {
+      return { rateStr: '-', isTaken: false, presentCount: 0, totalCount: 0, detail: 'Sınıf seçilmedi' }
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        const classCode = selectedClass.code || selectedClass.name
+        const att = getAttendanceForClass(classCode, getTodayDateString())
+        if (att && att.taken) {
+          const rate = att.totalCount > 0 ? Math.round((att.presentCount / att.totalCount) * 100) : 100
+          return {
+            rateStr: `%${rate}`,
+            isTaken: true,
+            presentCount: att.presentCount,
+            totalCount: att.totalCount,
+            detail: `Bugün Alındı (${att.presentCount}/${att.totalCount})`,
+          }
+        }
+      } catch (_) {}
+    }
+    return {
+      rateStr: liveStudentCount > 0 ? 'Alınmadı' : '-',
+      isTaken: false,
+      presentCount: 0,
+      totalCount: liveStudentCount,
+      detail: liveStudentCount > 0 ? 'Bugünkü yoklama bekleniyor' : 'Kayıtlı öğrenci yok',
+    }
+  }, [selectedClass, liveStudentCount, dataSyncTrigger])
+
+  const currentSchoolName = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const rawInfo = localStorage.getItem('oxonom_school_info')
+        if (rawInfo) {
+          const parsed = JSON.parse(rawInfo)
+          if (parsed.officialName) return parsed.officialName
+        }
+        const rawProf = localStorage.getItem('oxonom_principal_profile')
+        if (rawProf) {
+          const parsed = JSON.parse(rawProf)
+          if (parsed.schoolName) return parsed.schoolName
+        }
+      } catch (_) {}
+    }
+    if (selectedClass?.schoolName) return selectedClass.schoolName
+    if (org?.name) return org.name
+    const gradeNum = parseInt(selectedClass?.gradeLevel || '', 10) || 1
+    return gradeNum <= 4 ? 'Necla Görer İlkokulu' : 'Şair Fevzi Kutlu Kalkancı Ortaokulu'
+  }, [org, selectedClass, dataSyncTrigger])
+
+  const teacherDisplayLabel = useMemo(() => {
+    const tName = selectedClass?.teacherName || displayName || 'Öğretmen'
+    const gradeNum = parseInt(selectedClass?.gradeLevel || '', 10) || 1
+    const isPrimary = gradeNum <= 4
+    const subj = selectedClass?.subject || (isPrimary ? 'Sınıf Öğretmeni' : 'Branş Öğretmeni')
+    
+    if (isPrimary || subj === 'Sınıf Öğretmeni') {
+      return { role: 'Sınıf Öğretmeni', name: tName, detail: '' }
+    }
+    return { role: 'Sınıf Rehber Öğretmeni', name: tName, detail: `(${subj})` }
+  }, [selectedClass, displayName])
 
   // Modal states for interactive animated windows
   const [isToolsModalOpen, setIsToolsModalOpen] = useState(false)
@@ -4514,15 +4619,6 @@ export default function PanoClient() {
   // 1. Akıllı Tahta Doğrudan Kullanım Modu:
   // Tüm kullanıcı profilleri (Öğretmen, İdare, Öğrenci, Misafir, Tahta) /pano ekranına doğrudan erişebilir.
 
-  const effectiveUser = pairedSession || user
-  const displayName =
-    (effectiveUser?.first_name ? `${effectiveUser.first_name} ${effectiveUser.last_name || ''}`.trim() : '') ||
-    effectiveUser?.full_name ||
-    effectiveUser?.name ||
-    (isAdmin ? 'Yönetici' : isStudent ? 'Öğrenci' : selectedClass?.teacherName || 'Öğretmen') ||
-    effectiveUser?.username ||
-    'Kullanıcı'
-
   // apps is already memoized above and ready for rendering and remote control
 
 
@@ -4855,11 +4951,11 @@ export default function PanoClient() {
                     </button>
                   </div>
                   <div className="flex items-center gap-2 mt-2 text-xs text-[#514458] dark:text-slate-400 font-medium flex-wrap">
-                    <span>Kurum: <strong className="text-[#241329] dark:text-slate-200">{org?.name || 'Necla Görer İlkokulu'}</strong></span>
+                    <span>Kurum: <strong className="text-[#241329] dark:text-slate-200">{currentSchoolName}</strong></span>
                     <span className="text-[#8D49A6]">•</span>
                     <span>Donanım No: <strong className="text-[#D914C8]">{boardIdentity.panoId}-{boardIdentity.boardNo}</strong></span>
                     <span className="text-[#8D49A6]">•</span>
-                    <span>Sınıf Öğretmeni: <strong className="text-[#4B075F] dark:text-[#E9D5FF]">{selectedClass.teacherName || displayName} ({selectedClass.subject || 'Matematik'})</strong></span>
+                    <span>{teacherDisplayLabel.role}: <strong className="text-[#4B075F] dark:text-[#E9D5FF]">{teacherDisplayLabel.name}</strong>{teacherDisplayLabel.detail ? <span className="text-[#8D49A6] dark:text-purple-300 font-normal"> {teacherDisplayLabel.detail}</span> : ''}</span>
                   </div>
                 </div>
               </div>
@@ -4884,18 +4980,18 @@ export default function PanoClient() {
                   </div>
                   <div>
                     <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">ÖĞRENCİ</span>
-                    <span className="text-base sm:text-lg font-black text-[#4B075F] dark:text-[#F0D8FA]">{selectedClass.studentCount} Kayıtlı</span>
+                    <span className="text-base sm:text-lg font-black text-[#4B075F] dark:text-[#F0D8FA]">{liveStudentCount} Kayıtlı</span>
                   </div>
                 </div>
 
                 {/* 3. GÜNLÜK DEVAM */}
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-emerald-500/60 shadow-2xs">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/40 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shrink-0">
+                  <div className={`w-12 h-12 rounded-2xl ${liveAttendance.isTaken ? 'bg-emerald-500/10 dark:bg-emerald-500/40 border border-emerald-500/20 text-emerald-600 dark:text-emerald-300' : 'bg-amber-500/10 dark:bg-amber-500/40 border border-amber-500/20 text-amber-600 dark:text-amber-400'} flex items-center justify-center shrink-0`}>
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <div>
                     <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">GÜNLÜK DEVAM</span>
-                    <span className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400">{liveAttendanceRate}</span>
+                    <span className={`text-base sm:text-lg font-black ${liveAttendance.isTaken ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>{liveAttendance.rateStr}</span>
                   </div>
                 </div>
               </div>

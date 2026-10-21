@@ -219,7 +219,7 @@ export default function ClassSelectorSheet({
                             <span>•</span>
                             <span className="flex items-center gap-1">
                               <Users size={12} className="text-gray-400 dark:text-gray-500" />
-                              {c.student_count || 30} Öğrenci
+                              {typeof c.student_count === 'number' ? c.student_count : 0} Öğrenci
                             </span>
                           </div>
                         </div>

@@ -143,7 +143,7 @@ export function getClassBoardIdentity(
 
 // 32 Classrooms: 1/A through 8/D (MEB İlkokul & Ortaokul)
 const BRANCHES = ['A', 'B', 'C', 'D']
-const TEACHER_ROSTER = [
+export const TEACHER_ROSTER = [
   { name: 'Özlem ZOR', branch: 'Sınıf Öğretmeni (1/A)', email: 'ozlemzor@oxonom.com' },
   { name: 'Beyzanur SALMANLI', branch: 'Sınıf Öğretmeni', email: 'beyzanur@oxonom.com' },
   { name: 'Özge KABA', branch: 'Sınıf Öğretmeni', email: 'ozgekaba@oxonom.com' },
@@ -171,6 +171,7 @@ function buildSchoolClassrooms(): ClassroomItem[] {
       const teacher = TEACHER_ROSTER[(id - 101) % TEACHER_ROSTER.length]
       // Only 1/A has 1 registered student (Erçil Uğurlu); all other classes start with 0
       const is1A = code === '1/A'
+      const isPrimary = g <= 4
       result.push({
         id,
         usergroup_uuid: `usergroup_${g}${b.toLowerCase()}_oxonom`,
@@ -179,18 +180,35 @@ function buildSchoolClassrooms(): ClassroomItem[] {
         join_code: `OKUL-${g}${b}`,
         grade_level: `${g}. Sınıf`,
         org_id: 30,
-        school_name: 'Oxonom Okulları',
+        school_name: isPrimary ? 'Necla Görer İlkokulu' : 'Şair Fevzi Kutlu Kalkancı Ortaokulu',
         school_slug: 'oxonom',
-        description: `Sınıf Rehber Öğretmeni: ${teacher.name} (${teacher.branch}) — Oxonom Okulları`,
+        description: `Sınıf Rehber Öğretmeni: ${is1A ? 'Özlem ZOR' : teacher.name} (${isPrimary ? 'Sınıf Öğretmeni' : teacher.branch}) — Oxonom Okulları`,
         teacher_name: is1A ? 'Özlem ZOR' : teacher.name,
         teacher_email: is1A ? 'ozlemzor@oxonom.com' : teacher.email,
         student_count: is1A ? 1 : 0,
         boards_count: 0,
+        subject: isPrimary ? 'Sınıf Öğretmeni' : teacher.branch,
       })
       id++
     }
   }
   return result
+}
+
+export function getClassroomLiveStudentCount(classCode: string, orgId: number = 30): number {
+  if (typeof window === 'undefined') {
+    return normalizeClassCode(classCode) === '1/A' ? 1 : 0
+  }
+  try {
+    const students = getSingleSourceOfTruthStudents(orgId)
+    const norm = normalizeClassCode(classCode)
+    return students.filter((s: any) => {
+      const sNorm = normalizeClassCode(s.className || '')
+      return sNorm === norm || sNorm.replace('-', '/') === norm.replace('-', '/')
+    }).length
+  } catch (_) {
+    return normalizeClassCode(classCode) === '1/A' ? 1 : 0
+  }
 }
 
 export const ALL_CLASSROOMS: ClassroomItem[] = buildSchoolClassrooms()

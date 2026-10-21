@@ -43,12 +43,14 @@ export interface WindowState {
 export interface ClassroomItem {
   id: number
   name: string
+  code?: string
   gradeLevel: string
   studentCount: number
   boardCount: number
   attendance: string
   teacherName: string
   subject: string
+  schoolName?: string
 }
 
 export type PanoConnectionStatus = 'connected' | 'connecting' | 'disconnected'
