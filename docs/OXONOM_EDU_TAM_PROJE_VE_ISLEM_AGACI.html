@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oxonom Edu — Tam Proje İşlem Ağacı, Ekranlar & Veri Modelleri</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --primary: #4B075F;
+      --primary-light: #8D49A6;
+      --accent: #D914C8;
+      --bg: #0D0914;
+      --card-bg: #161022;
+      --card-border: #2B1E3E;
+      --text-main: #F3EEF6;
+      --text-muted: #A396B2;
+      --pill-bg: #221435;
+      --success: #10B981;
+      --info: #3B82F6;
+      --warning: #F59E0B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #240530 0%, #4B075F 50%, #1A0424 100%);
+      border-bottom: 1px solid var(--card-border);
+      padding: 48px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(217, 20, 200, 0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #F8B4F3;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      background: linear-gradient(to right, #FFF, #F3C4F8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #DAC5E7;
+      max-width: 780px;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 16px 20px;
+      border-radius: 16px;
+    }
+
+    .stat-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: #FFF;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #CCAADF;
+    }
+
+    /* Controls Bar */
+    .controls-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(13, 9, 20, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 18px 0;
+      margin-bottom: 40px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 280px;
+      max-width: 480px;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: #FFF;
+      padding: 12px 18px 12px 42px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(217, 20, 200, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      width: 16px;
+      height: 16px;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      background: var(--pill-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .filter-pill:hover,
+    .filter-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #FFF;
+    }
+
+    /* Section Styling */
+    section {
+      margin-bottom: 48px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      color: #FFF;
+    }
+
+    .section-title span.badge {
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(217, 20, 200, 0.15);
+      border: 1px solid rgba(217, 20, 200, 0.3);
+      color: #F8B4F3;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    /* Mermaid Wrapper */
+    .diagram-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      overflow-x: auto;
+      margin-bottom: 32px;
+    }
+
+    /* Screen Grid */
+    .screens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    .screen-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 22px;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .screen-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary-light);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .screen-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: #FFF;
+    }
+
+    .role-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tag-pano { background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .tag-student { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-teacher { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-principal { background: rgba(168, 85, 247, 0.15); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .tag-superadmin { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .tag-games { background: rgba(236, 72, 153, 0.15); color: #F472B6; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+    .route-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #D914C8;
+      background: rgba(217, 20, 200, 0.08);
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .route-link:hover {
+      text-decoration: underline;
+    }
+
+    .screen-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      flex: 1;
+    }
+
+    .screen-meta {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .file-ref {
+      font-family: 'JetBrains Mono', monospace;
+      color: #9E8DB3;
+      font-size: 11px;
+      max-width: 250px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .file-ref:hover {
+      color: #FFF;
+      text-decoration: underline;
+    }
+
+    .open-btn {
+      color: #FFF;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .open-btn:hover {
+      background: var(--primary);
+    }
+
+    /* Model Cards */
+    .models-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 20px;
+    }
+
+    .model-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .model-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .model-title {
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: #38BDF8;
+    }
+
+    .model-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin-top: 10px;
+    }
+
+    .model-table th,
+    .model-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .model-table th {
+      color: #8D7A9E;
+      font-weight: 600;
+    }
+
+    .model-table td.field-name {
+      font-family: 'JetBrains Mono', monospace;
+      color: #F472B6;
+    }
+
+    .model-table td.field-type {
+      font-family: 'JetBrains Mono', monospace;
+      color: #A78BFA;
+    }
+
+    /* Toast Info */
+    .info-callout {
+      background: linear-gradient(135deg, rgba(75, 7, 95, 0.3) 0%, rgba(217, 20, 200, 0.1) 100%);
+      border: 1px solid var(--primary-light);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .info-callout .icon {
+      font-size: 28px;
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 28px; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .search-box { max-width: 100%; }
+      .screens-grid, .models-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <div class="brand-badge">⚡ Oxonom Edu Mimari & İşlem Atlası</div>
+      <h1>A'dan Z'ye Oxonom Edu Sistem Rehberi</h1>
+      <p class="subtitle">
+        Okul Yönetimi, Akıllı Tahta (Pano OS / Quickdraw Whiteboard), Öğretmen, Öğrenci, Müdür ve SuperAdmin portallarının eksiksiz işlem ağacı, ekran rotaları, kaynak kod bağlantıları ve veri modelleri.
+      </p>
+
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-val" id="totalScreensCount">60+</div>
+          <div class="stat-label">Toplam Ekran & Sayfa</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">32</div>
+          <div class="stat-label">Aktif Şube (1/A - 8/D)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">5</div>
+          <div class="stat-label">Kullanıcı Rolü</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">SSoT & LocalStorage</div>
+          <div class="stat-label">Canlı Senkron Veri</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sticky Controls -->
+  <div class="controls-wrapper">
+    <div class="container controls">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Ekran, rota, model veya anahtar kelime ara... (örn: tahta, yoklama, sınav)">
+      </div>
+
+      <div class="filter-pills" id="roleFilters">
+        <button class="filter-pill active" data-role="all">Tümü</button>
+        <button class="filter-pill" data-role="pano">🖥️ Pano & Tahta</button>
+        <button class="filter-pill" data-role="student">🎒 Öğrenci</button>
+        <button class="filter-pill" data-role="teacher">👩‍🏫 Öğretmen</button>
+        <button class="filter-pill" data-role="principal">🏫 Okul Müdürü</button>
+        <button class="filter-pill" data-role="superadmin">🛡️ SuperAdmin</button>
+        <button class="filter-pill" data-role="games">🎮 GameStudio</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Information Callout -->
+    <div class="info-callout">
+      <div class="icon">🚀</div>
+      <div>
+        <strong>Canlı Dağıtım Mimarisi:</strong> Oxonom Edu frontend arayüzü Vercel üzerinde <code>oxonomedu_v2</code> (örnek alan adı: <code>https://learnhouze.vercel.app</code> / <code>https://oxonom.com</code>), backend ve collab servisleri ise ilgili bulut altyapısında çalışır. GitHub <code>oxobee/oxonomedu_v2</code> deposunun <code>main</code> dalına yapılan her commit otomatik olarak canlıya yansır.
+      </div>
+    </div>
+
+    <!-- 1. Operasyonel İşlem Ağacı -->
+    <section>
+      <div class="section-title">
+        <span>🌳 Operasyonel İşlem Ağacı (Workflow Diagram)</span>
+        <span class="badge">Mermaid Interactive</span>
+      </div>
+
+      <div class="diagram-card">
+        <pre class="mermaid">
+flowchart LR
+    UserVisit(["Kullanıcı Ziyareti"]) --> RouteSwitch{"İstek Rotası"}
+    
+    RouteSwitch -->|"/" & "/loginv2"| Auth["🔐 Kimlik Doğrulama (Login V2)"]
+    Auth --> RoleSwitch{"Kullanıcı Rolü"}
+    
+    %% Roller
+    RoleSwitch -->|Öğrenci: Erçil UĞURLU| StudentPortal["🎒 Öğrenci Hub (/student)"]
+    RoleSwitch -->|Öğretmen: Ebru TEKNECİ| TeacherPortal["👩‍🏫 Öğretmen Hub (/teacher)"]
+    RoleSwitch -->|Müdür: Dr. Uğur UĞURLU| PrincipalPortal["🏫 Müdür Hub (/principal)"]
+    RoleSwitch -->|Sistem Yöneticisi| SuperPortal["🛡️ SuperAdmin Hub (/superadmin)"]
+    
+    %% Akıllı Tahta Akışı
+    RouteSwitch -->|"/pano"| PanoOS["🖥️ Akıllı Tahta Pano OS"]
+    PanoOS --> ClassSelector["32 Şube Seçimi (1/A - 8/D)"]
+    ClassSelector --> QuickdrawBoard["🎨 Quickdraw Vektörel Çizim (/pano/tahta)"]
+    QuickdrawBoard --> SaveAndPush["Tahtayı Kaydet & Sınıfa Gönder"]
+    SaveAndPush --> StudentBoardNotes["Öğrenci Tahta Notları Ekranı"]
+
+    %% Öğrenci Akışı
+    StudentPortal --> SNotes["Ajanda & Takvim (/student/notes)"]
+    StudentPortal --> SExams["Sınavlar & Sonuçlar (/student/assessments)"]
+    StudentPortal --> SBoardNotes["Akıllı Tahta Notları (/student/board-notes)"]
+    StudentPortal --> SGame["Eğitsel Oyunlar (/student/gamestudio)"]
+    
+    %% Öğretmen Akışı
+    TeacherPortal --> TAttendance["Canlı Yoklama (/teacher/attendance)"]
+    TeacherPortal --> TFiles["Materyal Yükleme & Tahtaya Canlı Aktarım"]
+    TFiles -. Canlı Aktar .-> QuickdrawBoard
+    TAttendance -. Anlık Yansıt .-> PanoOS
+        </pre>
+      </div>
+    </section>
+
+    <!-- 2. Tüm Ekranlar Kataloğu -->
+    <section>
+      <div class="section-title">
+        <span>📱 Tüm Ekranlar ve Rotalar Kataloğu</span>
+        <span class="badge" id="visibleScreensCount">Tümü Listeleniyor</span>
+      </div>
+
+      <div class="screens-grid" id="screensContainer">
+        <!-- Javascript dynamic rendering will populate here -->
+      </div>
+    </section>
+
+    <!-- 3. Veri Modelleri & SSoT -->
+    <section>
+      <div class="section-title">
+        <span>🗄️ Temel Veri Modelleri ve Varlık Yapısı (Data Schemas)</span>
+        <span class="badge">PostgreSQL & SSoT</span>
+      </div>
+
+      <div class="models-grid">
+        <!-- Model 1: SchoolOrg & Classroom -->
+        <div class="model-card">
+          <div class="model-header">
+            <div class="model-title">ClassroomItem (Şube Modeli)</div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+            Okulun 32 şubesinin (1/A'dan 8/D'ye) donanım kimliği, rehber öğretmeni ve canlı mevcudu.
+          </p>
+          <table class="model-table">
+            <thead>
+              <tr><th>Alan</th><th>Tip</th><th>Açıklama</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="field-name">id</td><td class="field-type">number</td><td>Şube tekil kimliği (1-32)</td></tr>
+              <tr><td class="field-name">name</td><td class="field-type">string</td><td>"1/A", "2/B", vb.</td></tr>
+              <tr><td class="field-name">code</td><td class="field-type">string</td><td>"1A", "2B" donanım kodu</td></tr>
+              <tr><td class="field-name">teacher_name</td><td class="field-type">string</td><td>Atanan rehber öğretmen adı</td></tr>
+              <tr><td class="field-name">student_count</td><td class="field-type">number</td><td>Canlı dinamik öğrenci sayısı</td></tr>
+              <tr><td class="field-name">school_name</td><td class="field-type">string</td><td>Necla Görer / Şair Fevzi</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Model 2: SavedBoardNote -->
+        <div class="model-card">
+          <div class="model-header">
+            <div class="model-title">SavedBoardNote (Tahta Notu)</div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+            Akıllı tahtadan öğrencilerin profillerine aktarılan vektörel çizimler ve kişisel notlar.
+          </p>
+          <table class="model-table">
+            <thead>
+              <tr><th>Alan</th><th>Tip</th><th>Açıklama</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="field-name">id</td><td class="field-type">string</td><td>Tekil not ID (note_timestamp)</td></tr>
+              <tr><td class="field-name">imageUrl</td><td class="field-type">string (Base64)</td><td>Tahtanın yüksek çözünürlüklü PNG'si</td></tr>
+              <tr><td class="field-name">classCodes</td><td class="field-type">string[]</td><td>Paylaşılan sınıflar (['1/A'])</td></tr>
+              <tr><td class="field-name">courseName</td><td class="field-type">string</td><td>Ders adı (Türkçe, Matematik)</td></tr>
+              <tr><td class="field-name">studentNote</td><td class="field-type">string?</td><td>Öğrencinin eklediği kişisel not</td></tr>
+              <tr><td class="field-name">createdAt</td><td class="field-type">string</td><td>Oluşturulma zamanı</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Model 3: Student & Attendance -->
+        <div class="model-card">
+          <div class="model-header">
+            <div class="model-title">Student (Öğrenci Kütüğü)</div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+            Öğrenci profili, veli bilgileri ve devamsızlık durumu.
+          </p>
+          <table class="model-table">
+            <thead>
+              <tr><th>Alan</th><th>Tip</th><th>Açıklama</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="field-name">id</td><td class="field-type">string</td><td>Öğrenci UUID</td></tr>
+              <tr><td class="field-name">full_name</td><td class="field-type">string</td><td>Örn: Erçil UĞURLU</td></tr>
+              <tr><td class="field-name">classroom</td><td class="field-type">string</td><td>Kayıtlı olduğu şube ("1/A")</td></tr>
+              <tr><td class="field-name">father_name</td><td class="field-type">string</td><td>Dr. Uğur UĞURLU (Okul Müdürü)</td></tr>
+              <tr><td class="field-name">mother_name</td><td class="field-type">string</td><td>Ebru UĞURLU</td></tr>
+              <tr><td class="field-name">attendance</td><td class="field-type">object</td><td>Günlük ve derslik katılım kaydı</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Model 4: Assessment & Exam -->
+        <div class="model-card">
+          <div class="model-header">
+            <div class="model-title">Exam & Assessment (Sınavlar)</div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+            Öğretmenin tanımladığı yazılılar, MEB ortak sınavları ve quizler.
+          </p>
+          <table class="model-table">
+            <thead>
+              <tr><th>Alan</th><th>Tip</th><th>Açıklama</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="field-name">id</td><td class="field-type">string</td><td>Sınav ID</td></tr>
+              <tr><td class="field-name">title</td><td class="field-type">string</td><td>Sınav başlığı (1. Dönem 1. Yazılı)</td></tr>
+              <tr><td class="field-name">courseName</td><td class="field-type">string</td><td>Ders adı</td></tr>
+              <tr><td class="field-name">examDate</td><td class="field-type">string</td><td>Sınav tarihi ve saati</td></tr>
+              <tr><td class="field-name">score</td><td class="field-type">number?</td><td>Öğrencinin aldığı not (0-100)</td></tr>
+              <tr><td class="field-name">classAvg</td><td class="field-type">number?</td><td>Sınıf başarı ortalaması</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+
+    // Screens Data Matrix
+    const SCREENS_DATA = [
+      // Pano
+      {
+        name: "Pano OS Akıllı Tahta Ana Ekranı",
+        role: "pano",
+        route: "/pano",
+        file: "apps/web/components/Pano/PanoClient.tsx",
+        desc: "32 Şube (1/A - 8/D) seçici, anlık öğrenci sayısı, canlı yoklama oranı, sınıf rehber öğretmeni, kronometre, rastgele öğrenci çarkı, dikkat zili ve telefon kumandası eşleştirme."
+      },
+      {
+        name: "Odaya Özel Akıllı Tahta Panosu",
+        role: "pano",
+        route: "/pano/[boardId]",
+        file: "apps/web/app/pano/[boardId]/page.tsx",
+        desc: "Sınıfın fiziksel akıllı tahtasına kilitlenmiş, donanım numarasıyla eşleşen izole Pano ekranı."
+      },
+      {
+        name: "Quickdraw Vektörel Çizim Tahtası",
+        role: "pano",
+        route: "/pano/[boardId]/tahta",
+        file: "apps/web/components/Whiteboard/WhiteboardClient.tsx",
+        desc: "Sonsuz yakınlaştırma, kalem, fosforlu, lazer işaretçi, geometrik şekiller, izgara arka planları (kareli/çizgili), çoklu tahta sayfaları ve tek tıkla öğrencilere tahta notu gönderme."
+      },
+
+      // Student
+      {
+        name: "Öğrenci Kontrol Paneli",
+        role: "student",
+        route: "/student/dashboard",
+        file: "apps/web/components/Student/views/StudentDashboardView.tsx",
+        desc: "Günlük ders programı, yaklaşan ödevler, sınavlar, tahta notu bildirimleri, devam durumu ve hızlı istatistikler."
+      },
+      {
+        name: "Akıllı Tahta Notları (Tahtalar)",
+        role: "student",
+        route: "/student/board-notes",
+        file: "apps/web/app/student/board-notes/page.tsx",
+        desc: "Öğretmenin akıllı tahtadan kaydettiği ders çizimlerinin mockup önizlemesi, tam ekran inceleme, yüksek çözünürlüklü indirme ve kişisel çalışma notu ekleme."
+      },
+      {
+        name: "Ajanda, Takvim & Kişisel Notlar",
+        role: "student",
+        route: "/student/notes",
+        file: "apps/web/app/student/notes/page.tsx",
+        desc: "%100 mobil uyumlu kişisel ders çalışma ajandası, takvimli not alma ve ders çalışma planlayıcısı."
+      },
+      {
+        name: "Sınavlar & Değerlendirme Takvimi",
+        role: "student",
+        route: "/student/assessments/exams",
+        file: "apps/web/components/Student/views/StudentAssessmentsView.tsx",
+        desc: "Yazılı yoklamalar, MEB ortak sınavları, yaklaşan sınav tarihleri ve sınav hazırlık durumları."
+      },
+      {
+        name: "Quizler & Konu Tarama Testleri",
+        role: "student",
+        route: "/student/assessments/quizzes",
+        file: "apps/web/app/student/assessments/quizzes/page.tsx",
+        desc: "Anlık geri bildirimli çevrimiçi testler ve mini sınavlar."
+      },
+      {
+        name: "Sınav Sonuçları & Karne",
+        role: "student",
+        route: "/student/assessments/results",
+        file: "apps/web/app/student/assessments/results/page.tsx",
+        desc: "Yazılı notları, sınıf ortalaması karşılaştırması ve gelişim karnesi."
+      },
+      {
+        name: "İnteraktif Sınav Çözücü",
+        role: "student",
+        route: "/student/assessments/[id]",
+        file: "apps/web/components/Student/views/StudentInteractiveQuizSolver.tsx",
+        desc: "Optik form destekli, süre sayaçlı tam ekran interaktif test çözme arayüzü."
+      },
+      {
+        name: "Ödevlerim Listesi",
+        role: "student",
+        route: "/student/assignments",
+        file: "apps/web/components/Student/views/StudentAssignmentsView.tsx",
+        desc: "Bekleyen, tamamlanan ve teslim tarihi geçen ev ödevleri listesi."
+      },
+      {
+        name: "Ödev Detay & Dosya Yükleme",
+        role: "student",
+        route: "/student/assignments/[id]",
+        file: "apps/web/components/Student/views/StudentAssignmentDetailView.tsx",
+        desc: "Öğretmen yönergesi, ek materyaller ve öğrenci ödev teslimi ekranı."
+      },
+      {
+        name: "Derslerim & Üniteler",
+        role: "student",
+        route: "/student/courses",
+        file: "apps/web/components/Student/views/StudentCoursesView.tsx",
+        desc: "Türkçe, Matematik, Fen Bilimleri gibi kayıtlı tüm dersler ve ilerleme yüzdeleri."
+      },
+      {
+        name: "MEB Dijital Kütüphane",
+        role: "student",
+        route: "/student/library",
+        file: "apps/web/components/Student/views/StudentLibraryView.tsx",
+        desc: "MEB ders kitapları, eğitici videolar, sesli kitaplar ve kaynak doküman arşivi."
+      },
+      {
+        name: "Canlı Ders Katılımı",
+        role: "student",
+        route: "/student/live-class",
+        file: "apps/web/app/student/live-class/page.tsx",
+        desc: "Öğretmenin başlattığı canlı uzaktan derse tek tıkla katılım."
+      },
+      {
+        name: "Gelişim & Başarı Rozetleri",
+        role: "student",
+        route: "/student/progress",
+        file: "apps/web/components/Student/views/StudentProgressView.tsx",
+        desc: "Akademik kazanım analizi, kazanılan rozetler ve seviye puanları."
+      },
+
+      // Teacher
+      {
+        name: "Öğretmen Kontrol Paneli",
+        role: "teacher",
+        route: "/teacher/dashboard",
+        file: "apps/web/app/teacher/dashboard/page.tsx",
+        desc: "1/A sınıfı özeti (Ebru TEKNECİ), günlük ders programı, bekleyen ödevler ve akıllı tahta hızlı kumandası."
+      },
+      {
+        name: "Sınıflarım & Öğrenci Listesi",
+        role: "teacher",
+        route: "/teacher/classes",
+        file: "apps/web/components/Teacher/views/TeacherClassesView.tsx",
+        desc: "Şubedeki öğrencilerin detaylı künyeleri, veli iletişim numaraları ve gelişim notları."
+      },
+      {
+        name: "Canlı Yoklama Yönetimi",
+        role: "teacher",
+        route: "/teacher/attendance",
+        file: "apps/web/components/Teacher/views/TeacherAttendanceView.tsx",
+        desc: "Derslik ve günlük yoklama alma (Geldi/Gelmedi/İzinli), anında akıllı tahta ekranına yansıtma."
+      },
+      {
+        name: "Ödev Dağıtımı & Notlandırma",
+        role: "teacher",
+        route: "/teacher/assignments",
+        file: "apps/web/app/teacher/assignments/[[...sub]]/page.tsx",
+        desc: "Yeni ödev oluşturma, şube seçimi, teslim edilen ödevleri inceleme ve not verme."
+      },
+      {
+        name: "Sınav & Değerlendirme Hazırlama",
+        role: "teacher",
+        route: "/teacher/assessments",
+        file: "apps/web/components/Teacher/views/TeacherAssessmentsView.tsx",
+        desc: "Yazılı sınav tarihleri girme, soru havuzundan sınav/quiz derleme ve optik form okutma."
+      },
+      {
+        name: "Öğretmen Ajandası & Takvim",
+        role: "teacher",
+        route: "/teacher/agenda",
+        file: "apps/web/components/Teacher/views/TeacherAgendaView.tsx",
+        desc: "Haftalık ders planları, zümre toplantıları ve veli görüşme takvimi."
+      },
+      {
+        name: "Dosya Yöneticisi & Tahtaya Canlı Aktarım",
+        role: "teacher",
+        route: "/teacher/files",
+        file: "apps/web/components/Teacher/views/TeacherFilesView.tsx",
+        desc: "Öğretmen materyal bulutu. Tek tıkla herhangi bir PDF/görseli sınıftaki akıllı tahtaya canlı aktarma."
+      },
+      {
+        name: "Yapay Zeka Eğitim Asistanı",
+        role: "teacher",
+        route: "/teacher/ai-assistant",
+        file: "apps/web/components/Teacher/views/TeacherAIAssistantView.tsx",
+        desc: "MEB kazanımlarına uygun haftalık ders planı, sınav sorusu ve etkinlik üreten yapay zeka."
+      },
+
+      // Principal
+      {
+        name: "Okul Müdürü Yönetim Paneli",
+        role: "principal",
+        route: "/principal/dashboard",
+        file: "apps/web/components/Principal/PrincipalLayout.tsx",
+        desc: "Okul geneli (Necla Görer İlkokulu / Fevzi Kutlu Kalkancı Ortaokulu) toplam öğrenci, öğretmen ve devam durumu."
+      },
+      {
+        name: "Öğrenci Kütüğü Yönetimi",
+        role: "principal",
+        route: "/principal/students",
+        file: "apps/web/app/principal/students/page.tsx",
+        desc: "Tüm kademelerdeki öğrencilerin kaydı, şube değişikliği ve veli bilgileri yönetimi."
+      },
+      {
+        name: "Öğretmen Kadrosu & Rehberlik",
+        role: "principal",
+        route: "/principal/teachers",
+        file: "apps/web/app/principal/teachers/page.tsx",
+        desc: "Öğretmen profilleri, branş tanımları, sınıf rehberlik atamaları ve ders yükü dağıtımı."
+      },
+      {
+        name: "32 Şube ve Kapasite Yönetimi",
+        role: "principal",
+        route: "/principal/classes",
+        file: "apps/web/app/principal/classes/page.tsx",
+        desc: "1/A'dan 8/D'ye 32 şubenin mevcudu, akıllı tahta eşleşmeleri ve sınıf öğretmenleri."
+      },
+      {
+        name: "Haftalık Ders Dağıtım Programı",
+        role: "principal",
+        route: "/principal/schedule",
+        file: "apps/web/app/principal/schedule/page.tsx",
+        desc: "Tüm okul için çakışmasız haftalık ders programı hazırlama ve yayınlama."
+      },
+      {
+        name: "Resmi Okul Duyuruları",
+        role: "principal",
+        route: "/principal/announcements",
+        file: "apps/web/components/Principal/views/PrincipalAnnouncementsView.tsx",
+        desc: "Tüm okula veya kademelere acil durum, genel kurul ve etkinlik duyuruları gönderme."
+      },
+      {
+        name: "İdari ve Akademik Raporlar",
+        role: "principal",
+        route: "/principal/reports",
+        file: "apps/web/app/principal/reports/page.tsx",
+        desc: "Devamsızlık istatistikleri, şube başarı karşılaştırmaları ve karne raporları."
+      },
+      {
+        name: "Okul Parametreleri & Ayarlar",
+        role: "principal",
+        route: "/principal/settings",
+        file: "apps/web/app/principal/settings/page.tsx",
+        desc: "Kurum kodu, okul adı, zil saatleri ve idari parametrelerin yönetimi."
+      },
+
+      // SuperAdmin
+      {
+        name: "SuperAdmin Dashboard",
+        role: "superadmin",
+        route: "/superadmin",
+        file: "apps/web/app/superadmin/page.tsx",
+        desc: "Çoklu okul (Multi-tenant) yönetimi, kullanıcı listesi, API anahtarları ve sistem logları."
+      },
+      {
+        name: "SuperAdmin GameStudio Yönetimi",
+        role: "superadmin",
+        route: "/superadmin/gamestudio",
+        file: "apps/web/app/superadmin/gamestudio/page.tsx",
+        desc: "Platform genelinde okullara sunulan eğitici oyun paketlerinin ve içeriklerinin yönetimi."
+      },
+
+      // Games
+      {
+        name: "Sayı Kaşifleri Matematik Oyunu",
+        role: "games",
+        route: "/games/sayi-kasifleri",
+        file: "apps/web/app/games/sayi-kasifleri/page.tsx",
+        desc: "1-4. sınıflar için dört işlem, geometri, sayı doğrusu ve zihinden işlem becerilerini geliştiren amiral gemisi eğitici oyun."
+      },
+      {
+        name: "GameStudio Oyun Mağazası",
+        role: "games",
+        route: "/student/gamestudio",
+        file: "apps/web/components/GameStudio/GameStoreHub.tsx",
+        desc: "MEB müfredatına uygun eğitici oyun vitrini, filtreler ve seviye seçimi."
+      },
+
+      // Auth
+      {
+        name: "Giriş Ekranı (Login V2)",
+        role: "all",
+        route: "/loginv2",
+        file: "apps/web/app/loginv2/page.tsx",
+        desc: "Rol tabanlı (Müdür, Öğretmen, Öğrenci, SuperAdmin) hızlı kimlik doğrulama kapısı."
+      }
+    ];
+
+    const screensContainer = document.getElementById('screensContainer');
+    const searchInput = document.getElementById('searchInput');
+    const roleFilters = document.getElementById('roleFilters');
+    const visibleScreensCount = document.getElementById('visibleScreensCount');
+    const totalScreensCount = document.getElementById('totalScreensCount');
+
+    totalScreensCount.textContent = SCREENS_DATA.length;
+
+    let currentRole = 'all';
+    let searchQuery = '';
+
+    function renderScreens() {
+      const filtered = SCREENS_DATA.filter(screen => {
+        const matchesRole = currentRole === 'all' || screen.role === currentRole;
+        const matchesSearch = !searchQuery || 
+          screen.name.toLowerCase().includes(searchQuery) ||
+          screen.route.toLowerCase().includes(searchQuery) ||
+          screen.desc.toLowerCase().includes(searchQuery) ||
+          screen.file.toLowerCase().includes(searchQuery);
+        return matchesRole && matchesSearch;
+      });
+
+      visibleScreensCount.textContent = `${filtered.length} Ekran Gösteriliyor`;
+
+      if (filtered.length === 0) {
+        screensContainer.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 48px; background: var(--card-bg); border-radius: 16px; border: 1px dashed var(--card-border);">
+            <p style="font-size: 16px; color: var(--text-muted);">Aramanıza uygun ekran bulunamadı.</p>
+          </div>
+        `;
+        return;
+      }
+
+      screensContainer.innerHTML = filtered.map(screen => {
+        const roleClass = `tag-${screen.role}`;
+        return `
+          <div class="screen-card">
+            <div>
+              <div class="screen-header">
+                <span class="role-tag ${roleClass}">${screen.role.toUpperCase()}</span>
+              </div>
+              <div class="screen-name">${screen.name}</div>
+              <a href="${screen.route}" class="route-link" target="_blank">
+                🌐 ${screen.route}
+              </a>
+              <div class="screen-desc">${screen.desc}</div>
+            </div>
+
+            <div class="screen-meta">
+              <a href="file:///${screen.file}" class="file-ref" title="${screen.file}">
+                📄 ${screen.file.split('/').slice(-2).join('/')}
+              </a>
+              <a href="${screen.route}" class="open-btn" target="_blank">Aç →</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Event Listeners
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      renderScreens();
+    });
+
+    roleFilters.addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-pill')) {
+        document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentRole = e.target.getAttribute('data-role');
+        renderScreens();
+      }
+    });
+
+    // Initial render
+    renderScreens();
+  </script>
+</body>
+</html>
