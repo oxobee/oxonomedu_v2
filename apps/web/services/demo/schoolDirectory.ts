@@ -95,6 +95,52 @@ export function normalizeClassCode(code?: string): string {
     .toUpperCase()
 }
 
+export function getClassBoardIdentity(
+  cls: { name?: string; code?: string; id?: number; grade_level?: string; gradeLevel?: string } | null | undefined
+): { panoId: string; boardNo: string } {
+  if (!cls) return { panoId: '1A', boardNo: '01' }
+
+  const str = `${cls.code || ''} ${cls.name || ''} ${cls.grade_level || ''} ${cls.gradeLevel || ''}`
+
+  // 1. Match patterns like "1/A", "2-B", "3. Sınıf A Şubesi", "8/D"
+  const slashOrHyphenMatch = str.match(/([1-9][0-9]?)\s*[\/\-._\s]\s*([A-Za-zĞİŞÖÜçğışöü])/i)
+  if (slashOrHyphenMatch) {
+    const grade = slashOrHyphenMatch[1]
+    const branch = slashOrHyphenMatch[2].toUpperCase()
+    const panoId = `${grade}${branch}`
+    let boardNo = '01'
+    if (typeof window !== 'undefined') {
+      try {
+        boardNo = localStorage.getItem(`oxonom_class_board_no_${panoId}`) || '01'
+      } catch (_) {}
+    }
+    return { panoId, boardNo }
+  }
+
+  // 2. Simple compact match like "1A", "2B"
+  const compactMatch = str.match(/\b([1-9][0-9]?)([A-Za-z])\b/i)
+  if (compactMatch) {
+    const panoId = `${compactMatch[1]}${compactMatch[2].toUpperCase()}`
+    let boardNo = '01'
+    if (typeof window !== 'undefined') {
+      try {
+        boardNo = localStorage.getItem(`oxonom_class_board_no_${panoId}`) || '01'
+      } catch (_) {}
+    }
+    return { panoId, boardNo }
+  }
+
+  // 3. Fallback using id
+  const panoId = cls.id ? `CLS${cls.id}` : '1A'
+  let boardNo = '01'
+  if (typeof window !== 'undefined') {
+    try {
+      boardNo = localStorage.getItem(`oxonom_class_board_no_${panoId}`) || '01'
+    } catch (_) {}
+  }
+  return { panoId, boardNo }
+}
+
 // 32 Classrooms: 1/A through 8/D (MEB İlkokul & Ortaokul)
 const BRANCHES = ['A', 'B', 'C', 'D']
 const TEACHER_ROSTER = [

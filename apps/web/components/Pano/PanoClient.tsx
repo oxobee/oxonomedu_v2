@@ -71,6 +71,7 @@ import {
   generateClassroomAssignments,
   getSingleSourceOfTruthStudents,
   normalizeClassCode,
+  getClassBoardIdentity,
 } from '@services/demo/schoolDirectory'
 import { createBoard } from '@services/boards/boards'
 import toast from 'react-hot-toast'
@@ -3081,12 +3082,15 @@ export default function PanoClient() {
   })
 
   useEffect(() => {
-    const resolved = resolveBoardIdentity(rawIdParam, panoIdParam, tahtaIdParam)
-    setBoardIdentity(resolved)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('oxonom_active_board_id', `${resolved.panoId}-${resolved.boardNo}`)
+    if (rawIdParam || panoIdParam || tahtaIdParam) {
+      const resolved = resolveBoardIdentity(rawIdParam, panoIdParam, tahtaIdParam)
+      setBoardIdentity(resolved)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('oxonom_active_board_id', `${resolved.panoId}-${resolved.boardNo}`)
+      }
     }
   }, [rawIdParam, panoIdParam, tahtaIdParam, resolveBoardIdentity])
+
 
   // Prevent any lingering dark mode class on document.documentElement from affecting the rest of the site
   useEffect(() => {
@@ -3163,6 +3167,25 @@ export default function PanoClient() {
     onSessionClosed: handleRemoteSessionClosed,
     onClassrooms: setClassrooms,
   })
+
+  // Synchronize boardIdentity strictly whenever selectedClass changes so that each class branch has its own isolated, persistent board
+  useEffect(() => {
+    if (!selectedClass) return
+    const targetBoard = getClassBoardIdentity(selectedClass)
+    if (boardIdentity.panoId !== targetBoard.panoId || boardIdentity.boardNo !== targetBoard.boardNo) {
+      setBoardIdentity(targetBoard)
+      if (typeof window !== 'undefined') {
+        const fullId = `${targetBoard.panoId}-${targetBoard.boardNo}`
+        localStorage.setItem('oxonom_active_board_id', fullId)
+        localStorage.setItem('oxonom_pano_selected_class_id', String(selectedClass.id))
+        // Silently update browser URL if on /pano/[boardId] or /pano without triggering a page reload
+        if (window.location.pathname.startsWith('/pano') && !window.location.pathname.endsWith('/tahta')) {
+          const currentUrl = new URL(window.location.href)
+          window.history.replaceState({}, '', `/pano/${encodeURIComponent(fullId)}${currentUrl.search}`)
+        }
+      }
+    }
+  }, [selectedClass, boardIdentity.panoId, boardIdentity.boardNo])
 
   // Board is always the board — no phone remote control mode
   const isPhone = false
@@ -3476,7 +3499,20 @@ export default function PanoClient() {
 
       const savedClassId = localStorage.getItem('oxonom_pano_selected_class_id')
       let foundClass: ClassroomItem | null = null
-      if (savedClassId) {
+
+      // Priority 1: If an explicit boardId is in the URL (e.g. /pano/2B-01), match that classroom first
+      if (rawIdParam) {
+        const resolved = resolveBoardIdentity(rawIdParam, panoIdParam, tahtaIdParam)
+        const normPano = resolved.panoId.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+        foundClass = classrooms.find((c) => {
+          const normName = c.name.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+          const normCode = (c.gradeLevel || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+          return normName.includes(normPano) || normPano.includes(normName) || normCode.includes(normPano)
+        }) || null
+      }
+
+      // Priority 2: Check saved selected class ID
+      if (!foundClass && savedClassId) {
         let teacherClasses = classrooms
         if (savedPair) {
           try {
@@ -3488,6 +3524,8 @@ export default function PanoClient() {
         }
         foundClass = teacherClasses.find((c: ClassroomItem) => c.id === Number(savedClassId)) || null
       }
+
+      // Priority 3: Check global selected class
       if (!foundClass) {
         try {
           const globalSaved = localStorage.getItem('oxonom_selected_class')
@@ -3497,6 +3535,8 @@ export default function PanoClient() {
           }
         } catch (_) {}
       }
+
+      // Priority 4: Fallback match with boardIdentity
       if (!foundClass && boardIdentity?.panoId) {
         const normPano = boardIdentity.panoId.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
         foundClass = classrooms.find((c) => {
@@ -3504,9 +3544,19 @@ export default function PanoClient() {
           return normName.includes(normPano) || normPano.includes(normName)
         }) || null
       }
-      setSelectedClass(foundClass || classrooms[0] || null)
+
+      const initialClass = foundClass || classrooms[0] || null
+      setSelectedClass(initialClass)
+      if (initialClass) {
+        const targetBoard = getClassBoardIdentity(initialClass)
+        setBoardIdentity(targetBoard)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('oxonom_active_board_id', `${targetBoard.panoId}-${targetBoard.boardNo}`)
+          localStorage.setItem('oxonom_pano_selected_class_id', String(initialClass.id))
+        }
+      }
     }
-  }, [boardIdentity?.panoId])
+  }, [boardIdentity?.panoId, classrooms, rawIdParam, panoIdParam, tahtaIdParam, resolveBoardIdentity, selectedClass, setSelectedClass])
 
   const saveSettings = (newSettings: PanoSettings) => {
     setSettings(newSettings)

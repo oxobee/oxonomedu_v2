@@ -823,11 +823,13 @@ export default function WhiteboardClient() {
             <Plus size={17} strokeWidth={2.4} />
           </button>
 
-          {/* Board ID Badge */}
+          {/* Class & Board ID Badge */}
           <div
-            title={`Tahta ID: #${currentFile()?.boardNumber ?? 1}`}
-            className="px-2 py-0.5 rounded-lg text-[11px] font-black bg-gradient-to-r from-purple-100 to-fuchsia-100 dark:from-purple-950/70 dark:to-fuchsia-950/50 text-[#4B075F] dark:text-[#F17AE6] border border-purple-200/70 dark:border-purple-800/60 select-none shrink-0 flex items-center gap-1"
+            title={`Sınıf: ${defaultClassCode} • Tahta ID: #${currentFile()?.boardNumber ?? 1}`}
+            className="px-2.5 py-0.5 rounded-lg text-[11px] font-black bg-gradient-to-r from-purple-100 to-fuchsia-100 dark:from-purple-950/70 dark:to-fuchsia-950/50 text-[#4B075F] dark:text-[#F17AE6] border border-purple-200/70 dark:border-purple-800/60 select-none shrink-0 flex items-center gap-1.5"
           >
+            <span className="font-extrabold text-[#8D49A6] dark:text-[#E9D5FF]">{defaultClassCode}</span>
+            <span className="text-purple-300 dark:text-purple-700">|</span>
             <span className="text-[9.5px] opacity-70">ID:</span>
             <span>#{currentFile()?.boardNumber ?? 1}</span>
           </div>

@@ -25,7 +25,6 @@ import {
   type SavedBoardNote,
 } from '@/lib/board/boardNotesStorage'
 import { getSynchronizedStudentProfile } from '@/lib/student/studentData'
-import SmartBoardMockup from '@/components/Student/board/SmartBoardMockup'
 import toast from 'react-hot-toast'
 
 export default function StudentBoardNotesPage() {
@@ -274,7 +273,7 @@ export default function StudentBoardNotesPage() {
         )}
       </div>
 
-      {/* ── NOTES GRID (AUTHENTIC SMART BOARD MOCKUP CARDS) ── */}
+      {/* ── NOTES GRID (CLEAN AESTHETIC CARDS) ── */}
       {filteredNotes.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredNotes.map((note) => (
@@ -285,47 +284,73 @@ export default function StudentBoardNotesPage() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="flex flex-col space-y-3"
+              className="bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xs hover:shadow-xl transition-all flex flex-col group"
             >
-              {/* Realistic Interactive Smart Board Frame Mockup */}
-              <SmartBoardMockup
-                imageUrl={note.imageUrl}
-                title={note.title}
-                courseName={note.courseName}
-                dateStr={note.dateStr}
-                studentNote={note.studentNote}
-                onExpand={() => setActiveModalNote(note)}
-                onAddNote={() => {
-                  setNoteToEdit(note)
-                  setNoteInputText(note.studentNote || '')
-                }}
-                onDownload={() => handleDownload(note)}
-                onDelete={() => setNoteToDelete(note)}
-              />
+              {/* Image Preview Area */}
+              <div
+                onClick={() => setActiveModalNote(note)}
+                className="relative aspect-[16/10] bg-slate-900 overflow-hidden flex items-center justify-center cursor-pointer select-none"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={note.imageUrl}
+                  alt={note.title}
+                  className="w-full h-full object-contain group-hover:scale-102 transition-transform duration-300"
+                  loading="lazy"
+                />
+
+                {/* Hover overlay hint */}
+                <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <span className="px-3.5 py-1.5 rounded-xl bg-white/95 text-slate-900 text-xs font-black flex items-center gap-1.5 shadow-md">
+                    <Maximize2 size={13} />
+                    <span>Tam Ekran Aç</span>
+                  </span>
+                </div>
+
+                {/* Badge: Course tag */}
+                <div className="absolute top-3 left-3 z-10">
+                  <span className="px-2.5 py-1 rounded-lg bg-black/65 backdrop-blur-md text-white text-[10px] font-extrabold border border-white/10 shadow-sm">
+                    {note.courseName}
+                  </span>
+                </div>
+
+                {/* Badge: Date tag */}
+                {note.dateStr && (
+                  <div className="absolute top-3 right-3 z-10">
+                    <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-slate-200 text-[10px] font-semibold border border-white/5">
+                      {note.dateStr}
+                    </span>
+                  </div>
+                )}
+              </div>
 
               {/* Card Meta & Personal Note Box */}
-              <div className="bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-2xl p-4 shadow-xs space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-black text-gray-900 dark:text-white line-clamp-1">
+              <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3
+                      onClick={() => setActiveModalNote(note)}
+                      className="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white group-hover:text-[#8D49A6] transition-colors line-clamp-1 cursor-pointer"
+                    >
                       {note.title}
                     </h3>
-                    <div className="flex items-center gap-2.5 text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-                      <span className="flex items-center gap-1">
-                        <Calendar size={12} className="text-[#8D49A6]" />
-                        <span>{note.dateStr}</span>
-                      </span>
-                      {note.teacherName && (
-                        <span className="flex items-center gap-1 truncate">
-                          <User size={12} className="text-gray-400" />
-                          <span className="truncate">{note.teacherName}</span>
-                        </span>
-                      )}
-                    </div>
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/60 text-[#4B075F] dark:text-[#C58ADB] shrink-0">
+                      {note.classCodes?.join(', ') || '1/A'}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/60 text-[#4B075F] dark:text-[#C58ADB] shrink-0">
-                    {note.classCodes?.join(', ') || '1/A'}
-                  </span>
+
+                  <div className="flex items-center gap-2.5 text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                    <span className="flex items-center gap-1">
+                      <Calendar size={12} className="text-[#8D49A6]" />
+                      <span>{note.dateStr}</span>
+                    </span>
+                    {note.teacherName && (
+                      <span className="flex items-center gap-1 truncate">
+                        <User size={12} className="text-gray-400" />
+                        <span className="truncate">{note.teacherName}</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Personal Study Note Sticky Preview */}
