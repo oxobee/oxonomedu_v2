@@ -519,24 +519,13 @@ export function getAvailableGamesForRole(
     // Principal sees all games that are not globally disabled
     if (role === 'principal' || role === 'teacher') return true
 
-    // 3. For student: Check grade accessibility
-    if (role === 'student' && studentGrade) {
-      // Check if principal set specific class restrictions
-      if (pConf && pConf.assignedGrades && pConf.assignedGrades.length > 0) {
-        if (pConf.assignedGrades.includes('Tüm Sınıflar')) return true
+    // 3. For student: Only filter out if school principal explicitly restricted to other classes
+    if (role === 'student' && studentGrade && pConf && pConf.assignedGrades && pConf.assignedGrades.length > 0) {
+      if (!pConf.assignedGrades.includes('Tüm Sınıflar')) {
         const matchPrincipalGrade = pConf.assignedGrades.some((grade) =>
           studentGrade.includes(grade) || grade.includes(studentGrade)
         )
         if (!matchPrincipalGrade) return false
-      }
-
-      // Check default target grades of the game
-      if (g.targetGrades && g.targetGrades.length > 0) {
-        const matchesTarget = g.targetGrades.some((tg) =>
-          studentGrade.includes(tg) || tg.includes(studentGrade) || tg === 'Tüm Sınıflar'
-        )
-        // If not explicit match, allow if student grade is compatible or general
-        return matchesTarget || g.targetGrades.includes('9. Sınıf') || studentGrade.includes('9')
       }
     }
 
