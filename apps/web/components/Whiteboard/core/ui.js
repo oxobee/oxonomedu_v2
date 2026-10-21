@@ -331,6 +331,7 @@ export function buildUI(editor, { hidden = false, onSave, onSaveBoard, themeTogg
   // ---- menu ----------------------------------------------------------------
   function buildMenu(p) {
     p.classList.add('qd-menu-pop')
+    const hasSel = editor.selection.size > 0
     const item = (icon, label, key, fn) => {
       const b = el('button', 'qd-menu-item')
       b.innerHTML = `<span class="qd-mi-ico">${ICONS[icon] || ''}</span><span class="qd-mi-label"></span>`
