@@ -145,11 +145,90 @@ export default function FullscreenGamePlayer({ gameId, returnPath }: FullscreenG
     router.push(returnPath)
   }
 
-  // Sayı Kaşifleri - Kayıp Kristaller dedicated game engine
+  // 1. Sayı Kaşifleri - Kayıp Kristaller dedicated React engine
   if (gameId === 'sayi-kasifleri' || gameId === 'game-sayi-kasifleri') {
     return (
       <div className="fixed inset-0 z-50 bg-[#070D18] text-white flex flex-col overflow-hidden select-none">
         <SayiKasifleriGame onExit={handleExit} />
+      </div>
+    )
+  }
+
+  // 2. Interactive HTML5 & Web-based Games (e.g. 2048, Orbit, Hafıza Kartları, Kelime Avcısı, Uzay Roketi)
+  const isHtmlOrWebGame =
+    game?.gameUrl &&
+    (game.gameUrl.includes('.html') ||
+      game.gameUrl.startsWith('/games/') ||
+      game.gameUrl.startsWith('http://') ||
+      game.gameUrl.startsWith('https://'))
+
+  if (isHtmlOrWebGame && game) {
+    return (
+      <div className="fixed inset-0 z-50 bg-[#070D18] text-white flex flex-col overflow-hidden select-none font-jakarta">
+        {/* Sleek Top Control Bar */}
+        <header className="relative z-40 bg-[#161224] border-b border-white/10 px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-lg">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#D914C8] to-[#4B075F] flex items-center justify-center text-white shadow-md shadow-[#D914C8]/30 shrink-0">
+              <Gamepad2 size={18} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-xs sm:text-sm text-white truncate">
+                  {game.title}
+                </span>
+                {game.category && (
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#D914C8]/25 text-[#FCE8FA] border border-[#D914C8]/40 shrink-0 hidden sm:inline-block">
+                    {game.category}
+                  </span>
+                )}
+              </div>
+              <div className="text-[10px] text-gray-400 truncate">
+                Oxonom Game Studio • İnteraktif Eğitici Oyun
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => {
+                const iframe = document.getElementById('oxonom-game-frame') as HTMLIFrameElement
+                if (iframe) iframe.src = iframe.src
+              }}
+              title="Oyunu Yeniden Başlat"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <RotateCcw size={16} />
+            </button>
+
+            <button
+              onClick={handleToggleFullscreen}
+              title={isFullscreen ? 'Tam Ekrandan Çık' : 'Tam Ekran'}
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-300 hover:text-white transition-colors cursor-pointer"
+            >
+              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
+
+            <button
+              onClick={handleExit}
+              title="Çıkış"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2E1829] hover:bg-[#431B38] text-[#FFA8D8] border border-[#8D2B60]/40 text-xs font-bold transition-all cursor-pointer ml-1"
+            >
+              <X size={15} />
+              <span className="hidden sm:inline">Çıkış</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Game Iframe */}
+        <div className="flex-1 w-full h-full relative bg-[#070D18]">
+          <iframe
+            id="oxonom-game-frame"
+            src={game.gameUrl}
+            className="w-full h-full border-0"
+            allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+            title={game.title}
+          />
+        </div>
       </div>
     )
   }

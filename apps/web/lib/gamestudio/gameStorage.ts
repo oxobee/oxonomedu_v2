@@ -76,6 +76,16 @@ export const ALL_CATEGORIES = [
   'Zeka & Mantık',
 ] as const
 
+export const OBSOLETE_MOCKUP_IDS = [
+  'game-math-champion',
+  'game-science-galaxy',
+  'game-code-quest',
+  'game-word-voyager',
+  'game-lingua-island',
+  'game-history-chronos',
+  'game-brain-matrix',
+]
+
 export const DEFAULT_GAMES: EducationalGame[] = [
   {
     id: 'sayi-kasifleri',
@@ -103,232 +113,171 @@ export const DEFAULT_GAMES: EducationalGame[] = [
       'Görsel modeller ve sayı doğrusuyla toplama ve çıkarma yapabilme',
       'Sayı örüntülerindeki eksik terimi kurala uygun bulma',
     ],
-    badge: 'Yeni & Öne Çıkan',
-    developer: 'Oxonom Game Studio & Nintendo Pedagogy',
+    badge: 'Editörün Seçimi',
+    developer: 'Oxonom Game Studio (Yerleşik Motor)',
     version: '1.0.0',
     createdAt: '2026-10-21',
     updatedAt: '2026-10-21',
   },
   {
-    id: 'game-math-champion',
-    title: 'Oxonom Matematik Şampiyonu: Sayı Avcıları',
-    slug: 'matematik-sampiyonu',
-    coverImage: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80',
-    bannerImage: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?auto=format&fit=crop&w=1600&q=80',
-    description: 'Eğlenceli uzay macerasında asteroitleri doğru matematik formülleri ve hızlı zihinsel işlemlerle parçala. Oyuncular işlem hızını artırırken analitik düşünme yetilerini güçlendirir.',
-    shortDescription: 'Uzay arenasında zihinsel matematik ve hızlı işlem turnuvası.',
-    category: 'Matematik',
-    gameType: '2D Arcade',
-    targetGrades: ['3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf'],
-    subjects: ['Matematik'],
-    topics: ['Dört İşlem', 'Kesirler', 'Çarpım Tablosu', 'Zihinden Hesap'],
-    ageRange: '8 - 14 Yaş',
-    difficulty: 'Dinamik Adaptif',
-    rating: 4.9,
-    reviewCount: 342,
-    playsCount: 14820,
-    isActive: true,
-    gameUrl: '/student/gamestudio/play/game-math-champion',
-    learningObjectives: [
-      'Zihinden dört işlem yapabilme refleksini 2 kat hızlandırma',
-      'Kesirli ve ondalık sayılar arasında mantıksal bağlantı kurma',
-      'Zaman kısıtı altında stratejik karar verme yeteneği',
-    ],
-    badge: 'Editörün Seçimi',
-    developer: 'Oxonom Game Studio',
-    version: '1.4.0',
-    createdAt: '2026-09-15',
-    updatedAt: '2026-10-20',
-  },
-  {
-    id: 'game-science-galaxy',
-    title: 'Uzay Laboratuvarı: Elementler & Evren',
-    slug: 'uzay-laboratuvari',
-    coverImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
-    bannerImage: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80',
-    description: 'Mikro alemden makro evrene uzanan interaktif bilim simülasyonu. Periyodik tablodaki atomları birleştir, kimyasal bileşikleri keşfet ve yerçekimi yasalarını test et.',
-    shortDescription: 'Elementleri birleştir, kimyasal bağlar kur ve gezegenleri keşfet.',
-    category: 'Fen Bilimleri',
-    gameType: 'Simülasyon',
-    targetGrades: ['6. Sınıf', '7. Sınıf', '8. Sınıf', '9. Sınıf', '10. Sınıf'],
-    subjects: ['Fen Bilimleri', 'Fizik', 'Kimya'],
-    topics: ['Atomun Yapısı', 'Periyodik Sistem', 'Kuvvet ve Hareket', 'Güneş Sistemi'],
-    ageRange: '11 - 16 Yaş',
-    difficulty: 'Orta',
-    rating: 4.8,
-    reviewCount: 289,
-    playsCount: 9430,
-    isActive: true,
-    gameUrl: '/student/gamestudio/play/game-science-galaxy',
-    learningObjectives: [
-      'Kimyasal bağların oluşum mekanizmasını görselleştirme',
-      'Yerçekimi ve kütle çekim yasalarının etkileşimini kavrama',
-      'Bilimsel sorgulama ve hipotez kurma becerisi geliştirme',
-    ],
-    badge: 'Popüler',
-    developer: 'Oxonom STEM Labs',
-    version: '2.1.0',
-    createdAt: '2026-08-10',
-    updatedAt: '2026-10-18',
-  },
-  {
-    id: 'game-code-quest',
-    title: 'Siber Labirent: Algoritma & Python Görevi',
-    slug: 'siber-labirent-kodlama',
-    coverImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
-    bannerImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1600&q=80',
-    description: 'Görsel bloklardan gerçek Python kod bloklarına geçiş yapan eğitici bulmaca oyunu. Siber güvenlik robotunu labirentten çıkarmak için döngüleri, şart bloklarını ve fonksiyonları kullan.',
-    shortDescription: 'Blok ve metin tabanlı kodlama ile robotunu siber labirentten çıkar.',
-    category: 'Bilişim & Kodlama',
-    gameType: 'Bulmaca',
-    targetGrades: ['4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf', '9. Sınıf'],
-    subjects: ['Bilişim & Kodlama'],
-    topics: ['Algoritmik Düşünme', 'Döngüler (Loops)', 'Koşullu İfadeler (If/Else)', 'Değişkenler'],
-    ageRange: '9 - 16 Yaş',
-    difficulty: 'Dinamik Adaptif',
-    rating: 4.95,
-    reviewCount: 512,
-    playsCount: 21300,
-    isActive: true,
-    gameUrl: '/student/gamestudio/play/game-code-quest',
-    learningObjectives: [
-      'Problem parçalama ve algoritmik akış oluşturma',
-      'Mantıksal hata (bug) ayıklama becerisi kazanma',
-      'Hesaplamalı düşünme vizyonunu pekiştirme',
-    ],
-    badge: 'Trend #1',
-    developer: 'Oxonom AI & Code',
-    version: '3.0.2',
-    createdAt: '2026-07-20',
-    updatedAt: '2026-10-19',
-  },
-  {
-    id: 'game-word-voyager',
-    title: 'Kelime Gezgini: Edebiyat & Türkçe Krallığı',
-    slug: 'kelime-gezgini',
-    coverImage: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80',
-    bannerImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1600&q=80',
-    description: 'Türkçenin zengin söz dağarcığını, atasözlerini, deyimleri ve imla kurallarını keşfedeceğin büyülü bir macera. Karakterini geliştirmek için anagramları çöz ve eksik harfleri tamamla.',
-    shortDescription: 'Sözcük avı, deyimler ve dil bilgisi bulmacalarıyla kelime dağarcığını katla.',
-    category: 'Türkçe',
-    gameType: 'Bulmaca',
-    targetGrades: ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf'],
-    subjects: ['Türkçe'],
-    topics: ['Sözcükte Anlam', 'Eş Anlamlı / Zıt Anlamlılar', 'Yazım Kuralları', 'Deyimler'],
-    ageRange: '7 - 12 Yaş',
-    difficulty: 'Başlangıç',
-    rating: 4.75,
-    reviewCount: 198,
-    playsCount: 8120,
-    isActive: true,
-    gameUrl: '/student/gamestudio/play/game-word-voyager',
-    learningObjectives: [
-      'Kelime dağarcığını %40 oranında genişletme',
-      'Hızlı okuma ve metin kavrama reflekslerini geliştirme',
-      'Doğru yazım ve noktalama kurallarını pekiştirme',
-    ],
-    badge: 'Yeni',
-    developer: 'Oxonom Dil Enstitüsü',
-    version: '1.2.0',
-    createdAt: '2026-10-01',
-    updatedAt: '2026-10-15',
-  },
-  {
-    id: 'game-lingua-island',
-    title: 'Lingua Island: English Speaking & Vocab Safari',
-    slug: 'lingua-island-english',
-    coverImage: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&w=800&q=80',
-    bannerImage: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80',
-    description: 'Adadaki sevimli hayvan rehberlerle interaktif İngilizce diyaloglar kur, kelime safari görevlerini tamamla ve telaffuzunu yapay zekâ ses analiziyle puanla.',
-    shortDescription: 'Yapay zekâ ses motoruyla eğlenceli İngilizce kelime ve konuşma safarisi.',
-    category: 'Yabancı Dil',
-    gameType: 'Macera',
-    targetGrades: ['2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
-    subjects: ['İngilizce'],
-    topics: ['Günlük Konuşmalar', 'A1-B1 Kelime Haznesi', 'Dinleme & Telaffuz', 'Gramer Oyunları'],
-    ageRange: '8 - 15 Yaş',
-    difficulty: 'Dinamik Adaptif',
-    rating: 4.88,
-    reviewCount: 420,
-    playsCount: 16750,
-    isActive: true,
-    gameUrl: '/student/gamestudio/play/game-lingua-island',
-    learningObjectives: [
-      'İngilizce konuşma özgüvenini artırma',
-      '500+ temel kelimeyi işitsel ve görsel hafızaya kalıcı kaydetme',
-      'Aksan ve telaffuz netliğini anlık geri bildirimle iyileştirme',
-    ],
-    badge: 'Çok Sevilen',
-    developer: 'Oxonom Global English',
-    version: '2.0.4',
-    createdAt: '2026-09-05',
-    updatedAt: '2026-10-16',
-  },
-  {
-    id: 'game-history-chronos',
-    title: 'Zaman Çarkı: Tarih & Medeniyetler Stratejisi',
-    slug: 'zaman-carki-tarih',
-    coverImage: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=800&q=80',
-    bannerImage: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=1600&q=80',
-    description: 'İlk Çağ medeniyetlerinden Cumhuriyet dönemine kadar uzanan stratejik zaman yolculuğu. Tarihi olayları kronolojik sıraya diz, medeniyetlerin icatlarını keşfet ve tarihi simülasyonları yönet.',
-    shortDescription: 'Tarihi çağlar boyunca medeniyet kur, kronolojik bulmacaları çöz.',
-    category: 'Sosyal Bilgiler',
-    gameType: 'Strateji',
-    targetGrades: ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf', '9. Sınıf', '10. Sınıf', '11. Sınıf'],
-    subjects: ['Sosyal Bilgiler', 'Tarih'],
-    topics: ['İlk Çağ Uygarlıkları', 'Türk Tarihi', 'Cumhuriyet Dönemi', 'Kültür ve Miras'],
-    ageRange: '10 - 17 Yaş',
-    difficulty: 'Orta',
-    rating: 4.82,
-    reviewCount: 165,
-    playsCount: 6540,
-    isActive: true,
-    gameUrl: '/student/gamestudio/play/game-history-chronos',
-    learningObjectives: [
-      'Tarihsel kronoloji ve neden-sonuç ilişkilerini çözümleme',
-      'Kültürel miras bilincini interaktif hikâyelerle pekiştirme',
-      'Harita ve coğrafi mekân algısını geliştirme',
-    ],
-    badge: 'Strateji',
-    developer: 'Oxonom Tarih & Kültür Lab',
-    version: '1.1.0',
-    createdAt: '2026-08-28',
-    updatedAt: '2026-10-10',
-  },
-  {
-    id: 'game-brain-matrix',
-    title: 'NöroMatris: Hafıza, Dikkat & Zeka Akıl Oyunları',
-    slug: 'noromatris-zeka-oyunlari',
-    coverImage: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80',
-    bannerImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80',
-    description: 'Bilişsel esneklik, uzamsal zeka, görsel hafıza ve odaklanma süresini artıran nörobilim destekli 12 farklı mini zeka oyunu paketi. Günlük beyin antrenmanı için idealdir.',
-    shortDescription: 'Bilişsel hafıza, uzamsal algı ve odaklanma için nörobilimsel mini oyunlar.',
+    id: '2048-sayi-mantik-bulmacasi',
+    title: '2048: Sayı & Mantık Bulmacası',
+    slug: '2048-sayi-mantik-bulmacasi',
+    coverImage: '/games/2048-sayi-mantik-bulmacasi.png',
+    bannerImage: '/games/2048-sayi-mantik-bulmacasi.png',
+    description: 'Sayıları kaydırarak birbirinin katı olan karoları birleştir, zihinsel strateji kur ve 2048 karosuna ulaş! Matematiksel güç, odaklanma ve stratejik planlama becerilerini geliştirir.',
+    shortDescription: 'Sayıları kaydır, katları birleştir ve 2048 hedefine ulaş.',
     category: 'Zeka & Mantık',
     gameType: 'Bulmaca',
-    targetGrades: ['Okul Öncesi', '1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
-    subjects: ['Mantık & Zeka'],
-    topics: ['Uzamsal Algı', 'Görsel Hafıza', 'Akıl Yürütme', 'Odak & Dikkat'],
-    ageRange: '6 - 18 Yaş',
+    targetGrades: ['3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf'],
+    subjects: ['Matematik', 'Mantık & Zeka'],
+    topics: ['Üslü Sayılar', '2\'nin Katları', 'Stratejik Planlama', 'Görsel Odak'],
+    ageRange: '8 - 18 Yaş',
     difficulty: 'Dinamik Adaptif',
-    rating: 4.97,
-    reviewCount: 680,
+    rating: 4.95,
+    reviewCount: 420,
     playsCount: 31200,
     isActive: true,
-    gameUrl: '/student/gamestudio/play/game-brain-matrix',
+    gameUrl: '/games/2048-sayi-mantik-bulmacasi.html',
     learningObjectives: [
-      'Çalışma belleği (working memory) kapasitesini artırma',
-      'Görsel dikkat ve konsantrasyon süresini uzatma',
-      'Stres altında analitik strateji geliştirme',
+      'Sayısal örüntüleri ve katları zihinden hesaplama',
+      'Stratejik karar verme ve ileri hamle planlama',
+      'Uzamsal dikkat ve konsantrasyon becerisi',
     ],
-    badge: 'En Çok Oynanan',
-    developer: 'Oxonom Bilişsel Gelişim Laboratuvarı',
-    version: '4.0.0',
-    createdAt: '2026-06-12',
+    badge: 'Popüler & Zeka',
+    developer: 'Oxonom Mantık & Bulmaca (HTML5)',
+    version: '2.0.0',
+    createdAt: '2026-10-01',
+    updatedAt: '2026-10-21',
+  },
+  {
+    id: 'hafiza-kartlari-ciftini-bul',
+    title: 'Hafıza Kartları: Çiftini Bul',
+    slug: 'hafiza-kartlari-ciftini-bul',
+    coverImage: '/games/hafiza-kartlari-ciftini-bul.png',
+    bannerImage: '/games/hafiza-kartlari-ciftini-bul.png',
+    description: 'Farklı eğitici sembol ve ikonlardan oluşan gizli kartları çevirerek eşlerini bul. Kısa süreli görsel hafızayı, görsel dikkati ve odaklanmayı artıran etkileşimli nöro-hafıza oyunu.',
+    shortDescription: 'Gizli kartları çevir, eşlerini bul ve hafıza rekoru kır.',
+    category: 'Zeka & Mantık',
+    gameType: 'Bulmaca',
+    targetGrades: ['Okul Öncesi', '1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf'],
+    subjects: ['Mantık & Zeka'],
+    topics: ['Görsel Hafıza', 'Eşleştirme', 'Dikkat & Odak', 'Çalışma Belleği'],
+    ageRange: '5 - 12 Yaş',
+    difficulty: 'Başlangıç',
+    rating: 4.92,
+    reviewCount: 380,
+    playsCount: 22400,
+    isActive: true,
+    gameUrl: '/games/hafiza-kartlari-ciftini-bul.html',
+    learningObjectives: [
+      'Çalışma belleği (working memory) kapasitesini güçlendirme',
+      'Görsel sembolleri hızlı tanıma ve eşleştirme',
+      'Dikkat dağınıklığını azaltıcı odaklanma antrenmanı',
+    ],
+    badge: 'Çok Sevilen',
+    developer: 'Oxonom Bilişsel Gelişim (HTML5)',
+    version: '1.5.0',
+    createdAt: '2026-09-15',
+    updatedAt: '2026-10-21',
+  },
+  {
+    id: 'kelime-avcisi-harf-cozucu',
+    title: 'Kelime Avcısı: Harf & Sözcük Çözücü',
+    slug: 'kelime-avcisi-harf-cozucu',
+    coverImage: '/games/kelime-avcisi-harf-cozucu.png',
+    bannerImage: '/games/kelime-avcisi-harf-cozucu.png',
+    description: 'Harf çarkındaki harfleri birleştirerek gizli Türkçe kelimeleri ortaya çıkar. Sözcük dağarcığını zenginleştiren, imla ve hızlı düşünme becerilerini pekiştiren eğlenceli Türkçe oyunu.',
+    shortDescription: 'Harfleri birleştir, gizli kelimeleri bul ve sözcük avını tamamla.',
+    category: 'Türkçe',
+    gameType: 'Bulmaca',
+    targetGrades: ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf'],
+    subjects: ['Türkçe'],
+    topics: ['Kelime Dağarcığı', 'Harf Bilgisi', 'Hızlı Düşünme', 'Anlam Bilgisi'],
+    ageRange: '7 - 14 Yaş',
+    difficulty: 'Orta',
+    rating: 4.88,
+    reviewCount: 295,
+    playsCount: 18900,
+    isActive: true,
+    gameUrl: '/games/kelime-avcisi-harf-cozucu.html',
+    learningObjectives: [
+      'Türkçe kelime haznesini %40 oranında genişletme',
+      'Harflerden anlamlı kök ve türemiş sözcükler üretme',
+      'Hızlı okuma ve sözcük tanıma reflekslerini geliştirme',
+    ],
+    badge: 'Türkçe & Dil',
+    developer: 'Oxonom Dil Enstitüsü (HTML5)',
+    version: '2.1.0',
+    createdAt: '2026-09-20',
+    updatedAt: '2026-10-21',
+  },
+  {
+    id: 'orbit',
+    title: 'Orbit: Yerçekimi & Gezegen Fiziği',
+    slug: 'orbit',
+    coverImage: '/games/orbit.png',
+    bannerImage: '/games/orbit.png',
+    description: 'Uzayda gezegenlerin yörüngelerini, kütle çekim kuvvetini ve Newton fiziğini interaktif olarak keşfet. Doğru açı ve hız ile uydunu yörüngeye oturt!',
+    shortDescription: 'Yerçekimi ve kütle çekim fiziğini keşfet, uyduları yörüngeye oturt.',
+    category: 'Fen Bilimleri',
+    gameType: 'Simülasyon',
+    targetGrades: ['5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf', '9. Sınıf', '10. Sınıf', '11. Sınıf'],
+    subjects: ['Fen Bilimleri', 'Fizik'],
+    topics: ['Kütle Çekim', 'Yörünge Hareketi', 'Kuvvet ve Hareket', 'Uzay Fiziği'],
+    ageRange: '10 - 17 Yaş',
+    difficulty: 'Dinamik Adaptif',
+    rating: 4.89,
+    reviewCount: 310,
+    playsCount: 16400,
+    isActive: true,
+    gameUrl: '/games/orbit.html',
+    learningObjectives: [
+      'Kütle çekim kuvveti ile merkezkaç kuvveti dengesini kavrama',
+      'Yörünge simülasyonları üzerinden hipotez geliştirme',
+      'Fizik formüllerini sezgisel olarak deneyimleme',
+    ],
+    badge: 'Fizik & Uzay',
+    developer: 'Oxonom STEM Labs (HTML5)',
+    version: '3.0.0',
+    createdAt: '2026-08-25',
+    updatedAt: '2026-10-21',
+  },
+  {
+    id: 'uzay-roket-matematik-gorevi',
+    title: 'Uzay Roketi: Hızlı Matematik Görevi',
+    slug: 'uzay-roket-matematik-gorevi',
+    coverImage: 'https://images.unsplash.com/photo-1517976487548-d363590059b0?auto=format&fit=crop&w=800&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80',
+    description: 'Roketini uzayda doğru matematiksel kapılardan geçirerek hedefe ulaştır. Dört işlem ve hızlı zihinden hesaplama reflekslerini test eden heyecan verici roket yarışı.',
+    shortDescription: 'Matematik işlemlerini doğru yanıtla, roketini fırlat ve hedefe var.',
+    category: 'Matematik',
+    gameType: '2D Arcade',
+    targetGrades: ['2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf'],
+    subjects: ['Matematik'],
+    topics: ['Dört İşlem', 'Hızlı Zihinsel Hesap', 'Refleks & Zamanlama'],
+    ageRange: '7 - 13 Yaş',
+    difficulty: 'Orta',
+    rating: 4.91,
+    reviewCount: 260,
+    playsCount: 15200,
+    isActive: true,
+    gameUrl: '/games/uzay-roket-matematik-gorevi.html',
+    learningObjectives: [
+      'Zihinden dört işlem reflekslerini hızlandırma',
+      'Zaman baskısı altında odaklanma ve doğru karar verme',
+      'Matematiksel özgüven kazanımı',
+    ],
+    badge: 'Hızlı Refleks',
+    developer: 'Oxonom Math Games (HTML5)',
+    version: '1.2.0',
+    createdAt: '2026-09-10',
     updatedAt: '2026-10-21',
   },
 ]
 
 const STORAGE_KEY_GAMES = 'oxonom_gamestudio_games_v2'
+const STORAGE_KEY_DELETED = 'oxonom_gamestudio_deleted_games_v2'
 const STORAGE_KEY_PRINCIPAL_CONFIG = 'oxonom_gamestudio_principal_config_v2'
 
 /**
@@ -337,28 +286,50 @@ const STORAGE_KEY_PRINCIPAL_CONFIG = 'oxonom_gamestudio_principal_config_v2'
 export function getAllGames(): EducationalGame[] {
   if (typeof window === 'undefined') return DEFAULT_GAMES
   try {
+    const rawDeleted = localStorage.getItem(STORAGE_KEY_DELETED)
+    const deletedSet = new Set<string>(rawDeleted ? JSON.parse(rawDeleted) : [])
+
     const raw = localStorage.getItem(STORAGE_KEY_GAMES)
     if (!raw) {
-      localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(DEFAULT_GAMES))
-      return DEFAULT_GAMES
+      const initial = DEFAULT_GAMES.filter((g) => !deletedSet.has(g.id) && !deletedSet.has(g.slug))
+      localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(initial))
+      return initial
     }
-    const parsed = JSON.parse(raw)
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      // Ensure any newly added default games (like sayi-kasifleri) are present
-      let updated = false
+
+    let parsed: EducationalGame[] = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      const originalCount = parsed.length
+
+      // Filter out obsolete mockups and deleted games
+      parsed = parsed.filter(
+        (g) =>
+          !OBSOLETE_MOCKUP_IDS.includes(g.id) &&
+          !deletedSet.has(g.id) &&
+          !deletedSet.has(g.slug)
+      )
+
+      // Ensure verified default games are present unless explicitly deleted
+      let updated = parsed.length !== originalCount
       DEFAULT_GAMES.forEach((defGame) => {
-        if (!parsed.some((g: EducationalGame) => g.id === defGame.id || g.slug === defGame.slug)) {
-          parsed.unshift(defGame)
+        if (
+          !deletedSet.has(defGame.id) &&
+          !deletedSet.has(defGame.slug) &&
+          !parsed.some((g: EducationalGame) => g.id === defGame.id || g.slug === defGame.slug)
+        ) {
+          parsed.push(defGame)
           updated = true
         }
       })
+
       if (updated) {
         localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(parsed))
       }
       return parsed
     }
-    localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(DEFAULT_GAMES))
-    return DEFAULT_GAMES
+
+    const fallback = DEFAULT_GAMES.filter((g) => !deletedSet.has(g.id) && !deletedSet.has(g.slug))
+    localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(fallback))
+    return fallback
   } catch (e) {
     console.error('Error reading games storage:', e)
     return DEFAULT_GAMES
@@ -434,12 +405,65 @@ export function upsertGame(game: Partial<EducationalGame> & { title: string }): 
 }
 
 /**
- * Superadmin: Delete a game
+ * Superadmin: Delete a game permanently
  */
 export function deleteGame(id: string): void {
-  const current = getAllGames()
-  const filtered = current.filter((g) => g.id !== id)
-  saveAllGames(filtered)
+  if (typeof window === 'undefined') return
+  try {
+    // 1. Record ID in deleted set
+    const rawDeleted = localStorage.getItem(STORAGE_KEY_DELETED)
+    const deletedSet = new Set<string>(rawDeleted ? JSON.parse(rawDeleted) : [])
+    deletedSet.add(id)
+    localStorage.setItem(STORAGE_KEY_DELETED, JSON.stringify(Array.from(deletedSet)))
+
+    // 2. Remove from active games list
+    const current = getAllGames()
+    const filtered = current.filter((g) => g.id !== id && g.slug !== id)
+    localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(filtered))
+
+    // 3. Dispatch global sync event
+    window.dispatchEvent(new CustomEvent('oxonom_games_updated', { detail: { games: filtered } }))
+  } catch (e) {
+    console.error('Error deleting game:', e)
+  }
+}
+
+/**
+ * Purge all obsolete/non-working mockup games in one click
+ */
+export function purgeMockupGames(): number {
+  if (typeof window === 'undefined') return 0
+  try {
+    const rawDeleted = localStorage.getItem(STORAGE_KEY_DELETED)
+    const deletedSet = new Set<string>(rawDeleted ? JSON.parse(rawDeleted) : [])
+    OBSOLETE_MOCKUP_IDS.forEach((id) => deletedSet.add(id))
+    localStorage.setItem(STORAGE_KEY_DELETED, JSON.stringify(Array.from(deletedSet)))
+
+    const raw = localStorage.getItem(STORAGE_KEY_GAMES)
+    const current: EducationalGame[] = raw ? JSON.parse(raw) : DEFAULT_GAMES
+    const filtered = current.filter((g) => !OBSOLETE_MOCKUP_IDS.includes(g.id))
+    const removedCount = current.length - filtered.length
+    localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(filtered))
+    window.dispatchEvent(new CustomEvent('oxonom_games_updated', { detail: { games: filtered } }))
+    return removedCount
+  } catch (e) {
+    console.error('Error purging mockup games:', e)
+    return 0
+  }
+}
+
+/**
+ * Reset catalog to verified working games
+ */
+export function resetToDefaultGames(): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem(STORAGE_KEY_DELETED)
+    localStorage.setItem(STORAGE_KEY_GAMES, JSON.stringify(DEFAULT_GAMES))
+    window.dispatchEvent(new CustomEvent('oxonom_games_updated', { detail: { games: DEFAULT_GAMES } }))
+  } catch (e) {
+    console.error('Error resetting games:', e)
+  }
 }
 
 /**
