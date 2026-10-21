@@ -281,4 +281,264 @@ export const SchoolService = {
       }
     }
   },
+
+  /**
+   * Dynamically create a new classroom in Supabase
+   */
+  async createClass(classData: { name: string; grade: number; branch: string; student_count?: number; classroom?: string }): Promise<any> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('classes').insert([classData]).select().single()
+        if (!error) return data
+      } catch (err) {
+        console.warn('[SchoolService] createClass error:', err)
+      }
+    }
+    return null
+  },
+
+  /**
+   * Dynamically update an existing classroom
+   */
+  async updateClass(id: string, updates: Partial<{ name: string; grade: number; branch: string; student_count: number; classroom: string }>): Promise<any> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('classes').update(updates).eq('id', id).select().single()
+        if (!error) return data
+      } catch (err) {
+        console.warn('[SchoolService] updateClass error:', err)
+      }
+    }
+    return null
+  },
+
+  /**
+   * Dynamically delete a classroom
+   */
+  async deleteClass(id: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { error } = await client.from('classes').delete().eq('id', id)
+        return !error
+      } catch (err) {
+        console.warn('[SchoolService] deleteClass error:', err)
+      }
+    }
+    return false
+  },
+
+  /**
+   * Dynamically create a new student
+   */
+  async createStudent(studentData: { full_name: string; student_number: string; class_name: string; parent_name?: string; parent_phone?: string }): Promise<any> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('students').insert([studentData]).select().single()
+        if (!error) return data
+      } catch (err) {
+        console.warn('[SchoolService] createStudent error:', err)
+      }
+    }
+    return null
+  },
+
+  /**
+   * Dynamically update student record
+   */
+  async updateStudent(id: string, updates: Partial<{ full_name: string; student_number: string; class_name: string; parent_name: string; parent_phone: string; attendance_status: string }>): Promise<any> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('students').update(updates).eq('id', id).select().single()
+        if (!error) return data
+      } catch (err) {
+        console.warn('[SchoolService] updateStudent error:', err)
+      }
+    }
+    return null
+  },
+
+  /**
+   * Dynamically delete student record
+   */
+  async deleteStudent(id: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { error } = await client.from('students').delete().eq('id', id)
+        return !error
+      } catch (err) {
+        console.warn('[SchoolService] deleteStudent error:', err)
+      }
+    }
+    return false
+  },
+
+  /**
+   * Fetch dynamic teachers list
+   */
+  async getTeachers(): Promise<SchoolTeacher[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('teachers').select('*').order('full_name', { ascending: true })
+        if (!error && Array.isArray(data)) return data
+      } catch (err) {
+        console.warn('[SchoolService] getTeachers error:', err)
+      }
+    }
+    return []
+  },
+
+  /**
+   * Dynamically create a teacher
+   */
+  async createTeacher(teacherData: { full_name: string; branch: string; email?: string; phone?: string; assigned_classes?: string[]; weekly_hours?: number }): Promise<any> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('teachers').insert([teacherData]).select().single()
+        if (!error) return data
+      } catch (err) {
+        console.warn('[SchoolService] createTeacher error:', err)
+      }
+    }
+    return null
+  },
+
+  /**
+   * Dynamically update a teacher
+   */
+  async updateTeacher(id: string, updates: Partial<{ full_name: string; branch: string; email: string; phone: string; assigned_classes: string[]; weekly_hours: number }>): Promise<any> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('teachers').update(updates).eq('id', id).select().single()
+        if (!error) return data
+      } catch (err) {
+        console.warn('[SchoolService] updateTeacher error:', err)
+      }
+    }
+    return null
+  },
+
+  /**
+   * Dynamically delete a teacher
+   */
+  async deleteTeacher(id: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { error } = await client.from('teachers').delete().eq('id', id)
+        return !error
+      } catch (err) {
+        console.warn('[SchoolService] deleteTeacher error:', err)
+      }
+    }
+    return false
+  },
+
+  /**
+   * Fetch dynamic schools list
+   */
+  async getSchools(): Promise<any[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('schools').select('*').order('name', { ascending: true })
+        if (!error && Array.isArray(data)) return data
+      } catch (err) {
+        console.warn('[SchoolService] getSchools error:', err)
+      }
+    }
+    return []
+  },
+
+  /**
+   * Dynamically create a school
+   */
+  async createSchool(schoolData: { name: string; code: string; city: string; district: string; total_classes?: number }): Promise<any> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('schools').insert([schoolData]).select().single()
+        if (!error) return data
+      } catch (err) {
+        console.warn('[SchoolService] createSchool error:', err)
+      }
+    }
+    return null
+  },
+
+  /**
+   * Dynamically update a school
+   */
+  async updateSchool(id: string, updates: Partial<{ name: string; code: string; city: string; district: string; total_classes: number }>): Promise<any> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('schools').update(updates).eq('id', id).select().single()
+        if (!error) return data
+      } catch (err) {
+        console.warn('[SchoolService] updateSchool error:', err)
+      }
+    }
+    return null
+  },
+
+  /**
+   * Dynamically delete a school
+   */
+  async deleteSchool(id: string): Promise<boolean> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { error } = await client.from('schools').delete().eq('id', id)
+        return !error
+      } catch (err) {
+        console.warn('[SchoolService] deleteSchool error:', err)
+      }
+    }
+    return false
+  },
+
+  /**
+   * Fetch dynamic user profiles
+   */
+  async getProfiles(role?: string): Promise<any[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        let query = client.from('profiles').select('*').order('full_name', { ascending: true })
+        if (role) {
+          query = query.eq('role', role)
+        }
+        const { data, error } = await query
+        if (!error && Array.isArray(data)) return data
+      } catch (err) {
+        console.warn('[SchoolService] getProfiles error:', err)
+      }
+    }
+    return []
+  },
+
+  /**
+   * Dynamically update a profile
+   */
+  async updateProfile(id: string, updates: Partial<{ full_name: string; phone: string; tc_no: string; school_name: string; avatar_url: string }>): Promise<any> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        const { data, error } = await client.from('profiles').update(updates).eq('id', id).select().single()
+        if (!error) return data
+      } catch (err) {
+        console.warn('[SchoolService] updateProfile error:', err)
+      }
+    }
+    return null
+  },
 }

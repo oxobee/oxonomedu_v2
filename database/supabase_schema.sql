@@ -46,14 +46,14 @@ ALTER TABLE public.profiles
   ADD CONSTRAINT fk_profiles_school FOREIGN KEY (school_id) REFERENCES public.schools(id) ON DELETE SET NULL;
 
 -- ----------------------------------------------------------------------------
--- 3. CLASSES (32 Branches: 1/A - 8/D)
+-- 3. CLASSES (Dynamic Classrooms & Branches)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.classes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   school_id UUID REFERENCES public.schools(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,          -- e.g. '1/A'
-  grade INT NOT NULL CHECK (grade BETWEEN 1 AND 8),
-  branch TEXT NOT NULL CHECK (branch IN ('A', 'B', 'C', 'D')),
+  name TEXT NOT NULL,          -- e.g. '1/A', '9/B', 'Anasınıfı-A'
+  grade INT NOT NULL,          -- 0 (kindergarten), 1-12 (elementary, middle, high)
+  branch TEXT NOT NULL,        -- Any branch letter or name (A, B, C, D, E, etc.)
   advisor_teacher_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   student_count INT NOT NULL DEFAULT 0,
   classroom TEXT,
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS public.courses (
   school_id UUID REFERENCES public.schools(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   code TEXT NOT NULL,
-  grade INT NOT NULL CHECK (grade BETWEEN 1 AND 8),
+  grade INT NOT NULL,
   curriculum_topics JSONB NOT NULL DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -127,8 +127,8 @@ CREATE TABLE IF NOT EXISTS public.schedules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   school_id UUID REFERENCES public.schools(id) ON DELETE CASCADE,
   class_name TEXT NOT NULL,
-  day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 1 AND 5), -- 1: Mon, 5: Fri
-  period INT NOT NULL CHECK (period BETWEEN 1 AND 8),
+  day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 1 AND 7), -- 1: Mon, 7: Sun
+  period INT NOT NULL,
   subject TEXT NOT NULL,
   teacher_name TEXT NOT NULL,
   classroom TEXT NOT NULL,
@@ -297,7 +297,13 @@ CREATE POLICY "Public all for board_notes" ON public.board_notes FOR ALL USING (
 CREATE POLICY "Public all for pano_pairing" ON public.pano_pairing_sessions FOR ALL USING (true);
 CREATE POLICY "Public all for daily_attendance" ON public.daily_attendance FOR ALL USING (true);
 
--- Insert / Update policies for authenticated users
+-- Insert / Update / Delete policies for full dynamic management
+CREATE POLICY "Manage classes" ON public.classes FOR ALL USING (true);
+CREATE POLICY "Manage schools" ON public.schools FOR ALL USING (true);
+CREATE POLICY "Manage teachers" ON public.teachers FOR ALL USING (true);
+CREATE POLICY "Manage students" ON public.students FOR ALL USING (true);
+CREATE POLICY "Manage profiles" ON public.profiles FOR ALL USING (true);
+
 CREATE POLICY "Auth users insert profiles" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Auth users update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 

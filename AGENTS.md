@@ -6,29 +6,32 @@
 ## 1. 🎯 Proje Kimliği ve Marka
 - **Proje Adı:** Oxonom Edu (LearnHouze v2.0)
 - **Kapsam:** K-12 Akıllı Okul Yönetim Platformu ve Akıllı Tahta (Pano OS & Quickdraw Whiteboard).
-- **Okul Yapısı:** Necla Görer İlkokulu & Şair Fevzi Kutlu Kalkancı Ortaokulu.
-- **Şubeler:** 32 Şube (1/A'dan 8/D'ye kadar).
-- **Amiral Gemisi Şube & Öğrenci:** 1/A Sınıfı, Öğrenci: **Erçil UĞURLU** (No: 101), Baba: **Dr. Uğur UĞURLU** (Okul Müdürü), Anne: **Ebru UĞURLU**, Sınıf Rehber Öğretmeni: **Ebru TEKNECİ**.
+- **%100 Dinamik Varlık Kuralı:** Okul adı, kurum bilgisi, şubeler, sınıflar, öğretmenler, öğrenciler, veliler ve profiller **KESİNLİKLE SABİT (HARDCODED) DEĞİLDİR**. 
+  - Kullanıcı (Müdür / Yönetici) panelden dilediği zaman yeni okul oluşturabilir, yeni sınıf/şube açabilir (Örn: 9/A, Anaokulu, 5/F vb.), öğrenci ekleyebilir, güncelleyebilir veya silebilir.
+  - Kod tabanında görünen mevcut isimler (Necla Görer, Erçil Uğurlu, Ebru Tekneci, 32 şube vb.) sadece sistem ilk kurulduğunda veritabanı boş kalmasın diye konulan **başlangıç tohum verisidir (seed data)**. Kod hiçbir zaman bu verilere bağımlı veya sabit kalamaz.
 - **ASLA YAPILMAYACAK:** Bu proje bir POS / restoran sistemi değildir! AgenaPOS ile veya başka projelerle kesinlikle karıştırılamaz.
 
 ---
 
 ## 2. 🗄️ Veritabanı Mimarisi (TEK VE RESMİ VERİTABANI: SUPABASE)
 - **Tek Veritabanı Kuralı:** Projede tek bir veritabanı vardır, o da **Supabase (PostgreSQL)**'dir.
+- **Tüm Varlıklar Dinamik CRUD:** Okul listesi, sınıflar, öğrenciler, yoklamalar, tahta notları doğrudan Supabase'den okunur ve yazılır (`SchoolService` üzerinden).
 - **Supabase Proje Bilgisi:**
   - Proje: `Oxonom Edu`
   - Ref ID: `crkoeptnoheiqxukxpig`
   - URL: `https://crkoeptnoheiqxukxpig.supabase.co`
-- **Tablolar:**
-  - `classes` (32 Şube)
-  - `students` (Öğrenci Kütüğü)
-  - `teachers` (Öğretmen Kadrosu)
+- **Tablolar (Kullanıcı Tarafından Yönetilen Dinamik Tablolar):**
+  - `schools` (Dinamik Okul Tanımları)
+  - `classes` (Dinamik Sınıflar & Şubeler)
+  - `students` (Dinamik Öğrenci Kütüğü)
+  - `teachers` (Dinamik Öğretmen Kadrosu)
+  - `profiles` (Dinamik Kullanıcı Profilleri)
   - `announcements` (Okul Duyuruları)
   - `board_notes` (Akıllı Tahta Notları)
   - `daily_attendance` (Canlı Yoklama)
   - `pano_pairing_sessions` (Pano QR / OTP Kumanda Oturumları)
   - `exams_and_tests` & `student_test_results` (Sınavlar ve Sonuçlar)
-- **MongoDB veya Diğerleri:** MongoDB veya harici DB kullanılmaz; tüm yeni veri ihtiyaçları Supabase tablolarına eklenir.
+- **MongoDB veya Diğerleri:** MongoDB veya harici DB kullanılmaz; tüm dinamik veri ihtiyaçları Supabase tablolarında yaşar.
 
 ---
 
