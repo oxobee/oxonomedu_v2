@@ -513,7 +513,7 @@ export default function TeacherAssessmentsView() {
           </div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-              Sınavlar ve Notlar
+              Sınavlar ve Değerlendirme
             </h1>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">

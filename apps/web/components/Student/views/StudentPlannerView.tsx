@@ -14,6 +14,10 @@ import {
   AlertCircle,
   Tag,
   BookOpen,
+  Tv,
+  Presentation,
+  StickyNote,
+  ArrowRight,
 } from 'lucide-react'
 import {
   getStoredPlannerTasks,
@@ -24,12 +28,16 @@ import {
   getSynchronizedStudentProfile,
   type StudentAssessment,
 } from '@/lib/student/studentData'
+import {
+  getSavedBoardNotes,
+  type SavedBoardNote,
+} from '@/lib/board/boardNotesStorage'
 import toast from 'react-hot-toast'
 import MockBadge from '@components/Common/MockBadge'
 import CalendarReminderWidget from '@components/Common/CalendarReminderWidget'
 
 interface StudentPlannerViewProps {
-  initialTab?: 'all' | 'calendar' | 'notes' | 'tasks'
+  initialTab?: 'all' | 'calendar' | 'notes' | 'tasks' | 'board-notes'
 }
 
 export interface StudentNote {
@@ -69,7 +77,7 @@ const INITIAL_NOTES: StudentNote[] = [
 ]
 
 export default function StudentPlannerView({ initialTab = 'all' }: StudentPlannerViewProps) {
-  const [activeTab, setActiveTab] = useState<'all' | 'calendar' | 'notes' | 'tasks'>(initialTab)
+  const [activeTab, setActiveTab] = useState<'all' | 'calendar' | 'notes' | 'tasks' | 'board-notes'>(initialTab)
   const [tasks, setTasks] = useState<PlannerTask[]>([])
   const [assessments, setAssessments] = useState<StudentAssessment[]>(() => {
     if (typeof window !== 'undefined') {
@@ -78,6 +86,7 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
     return []
   })
   const [notes, setNotes] = useState<StudentNote[]>(INITIAL_NOTES)
+  const [boardNotes, setBoardNotes] = useState<SavedBoardNote[]>([])
   const [examFilter, setExamFilter] = useState<'all' | 'upcoming' | 'completed'>('all')
 
   // New task form state
@@ -94,6 +103,8 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
     if (typeof window !== 'undefined') {
       setTasks(getStoredPlannerTasks())
       setAssessments(getSynchronizedStudentAssessments())
+      const prof = getSynchronizedStudentProfile()
+      setBoardNotes(getSavedBoardNotes(prof?.className || '1/A'))
       try {
         const rawNotes = localStorage.getItem('oxonom_student_notes_ercil')
         if (rawNotes) setNotes(JSON.parse(rawNotes))
@@ -117,6 +128,8 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
 
       const sync = () => {
         setAssessments(getSynchronizedStudentAssessments())
+        const p = getSynchronizedStudentProfile()
+        setBoardNotes(getSavedBoardNotes(p?.className || '1/A'))
       }
       const syncNotesAndTasks = () => {
         try {
@@ -128,6 +141,7 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
       window.addEventListener('oxonom_student_updated', sync)
       window.addEventListener('oxonom_teacher_profile_updated', sync)
       window.addEventListener('oxonom_exam_calendar_updated', sync)
+      window.addEventListener('oxonom_board_notes_updated', sync)
       window.addEventListener('oxonom_student_notes_updated', syncNotesAndTasks)
       window.addEventListener('oxonom_student_planner_tasks_updated', syncNotesAndTasks)
       window.addEventListener('storage', sync)
@@ -135,6 +149,7 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
         window.removeEventListener('oxonom_student_updated', sync)
         window.removeEventListener('oxonom_teacher_profile_updated', sync)
         window.removeEventListener('oxonom_exam_calendar_updated', sync)
+        window.removeEventListener('oxonom_board_notes_updated', sync)
         window.removeEventListener('oxonom_student_notes_updated', syncNotesAndTasks)
         window.removeEventListener('oxonom_student_planner_tasks_updated', syncNotesAndTasks)
         window.removeEventListener('storage', sync)
@@ -208,30 +223,30 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
   }
 
   return (
-    <div className="p-4 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-3.5 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 font-jakarta w-full min-w-0 overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm w-full min-w-0 overflow-hidden">
+        <div className="min-w-0 flex-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-bold mb-2">
             <CalendarIcon size={14} />
-            <span>Kişisel Çalışma Alanı</span>
+            <span>Kişisel Ders Notları & Planlama</span>
           </div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-              Defterim ve Planlayıcım
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight truncate">
+              Notlarım & Ajanda
             </h1>
           </div>
           <p className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Kişisel yapılacaklar listesi, ders not defteri ve haftalık akademik çalışma takvimi.
+            Kişisel çalışma ajandası, ders not defteri, akıllı tahta çizimleri ve sesli hatırlatıcı takvimi.
           </p>
         </div>
 
         {/* Tab switcher */}
-        <div className="flex items-center p-1 rounded-2xl bg-gray-100 dark:bg-[#131C31] border border-gray-200/80 dark:border-gray-800/80">
+        <div className="w-full md:w-auto max-w-full min-w-0 overflow-x-auto flex items-center p-1 rounded-2xl bg-gray-100 dark:bg-[#131C31] border border-gray-200/80 dark:border-gray-800/80 no-scrollbar gap-1 shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('all')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'all'
                 ? 'bg-white dark:bg-[#0E1526] text-cyan-600 dark:text-cyan-400 shadow-xs'
                 : 'text-gray-600 dark:text-gray-400'
@@ -241,8 +256,41 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
           </button>
           <button
             type="button"
+            onClick={() => setActiveTab('notes')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              activeTab === 'notes'
+                ? 'bg-white dark:bg-[#0E1526] text-cyan-600 dark:text-cyan-400 shadow-xs'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            Ders Notlarım ({notes.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('board-notes')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              activeTab === 'board-notes'
+                ? 'bg-white dark:bg-[#0E1526] text-[#8D49A6] dark:text-[#D914C8] shadow-xs'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            Akıllı Tahta Notları ({boardNotes.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('calendar')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              activeTab === 'calendar'
+                ? 'bg-white dark:bg-[#0E1526] text-cyan-600 dark:text-cyan-400 shadow-xs'
+                : 'text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            Çalışma Takvimi
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('tasks')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeTab === 'tasks'
                 ? 'bg-white dark:bg-[#0E1526] text-cyan-600 dark:text-cyan-400 shadow-xs'
                 : 'text-gray-600 dark:text-gray-400'
@@ -250,38 +298,105 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
           >
             Görevlerim ({tasks.length})
           </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('notes')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'notes'
-                ? 'bg-white dark:bg-[#0E1526] text-cyan-600 dark:text-cyan-400 shadow-xs'
-                : 'text-gray-600 dark:text-gray-400'
-            }`}
-          >
-            Not Defterim ({notes.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('calendar')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'calendar'
-                ? 'bg-white dark:bg-[#0E1526] text-cyan-600 dark:text-cyan-400 shadow-xs'
-                : 'text-gray-600 dark:text-gray-400'
-            }`}
-          >
-            Sınav Takvimi
-          </button>
         </div>
       </div>
 
       {/* ── İNTERAKTİF ÇALIŞMA & HATIRLATICI TAKVİMİ ── */}
-      <CalendarReminderWidget
-        storageKey="oxonom_student_calendar_reminders"
-        role="student"
-        title="Defterim ve Planlayıcı Takvimi"
-        description="Günlere özel ders çalışma hedefleri ve notlar ekleyebilir, belirlediğiniz tarih ve saatte sesli pop-up hatırlatıcılar kurabilirsiniz."
-      />
+      {(activeTab === 'all' || activeTab === 'calendar') && (
+        <CalendarReminderWidget
+          storageKey="oxonom_student_calendar_reminders"
+          role="student"
+          title="Notlarım & Çalışma Takvimi"
+          description="Günlere özel ders/çalışma notları ve belirlediğiniz tarih ve saatte sesli hatırlatıcılar kurabilirsiniz."
+        />
+      )}
+
+      {/* ── AKILLI TAHTA NOTLARI BÖLÜMÜ ── */}
+      {(activeTab === 'all' || activeTab === 'board-notes') && (
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4 w-full min-w-0 overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-[#8D49A6] dark:text-[#D914C8] flex items-center justify-center shrink-0">
+                <Tv size={18} />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">
+                    Akıllı Tahta Ders Notlarım
+                  </h2>
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-[#4B075F] dark:text-[#C58ADB] shrink-0">
+                    {boardNotes.length} Not
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-400 truncate">
+                  Öğretmenlerinizin akıllı tahtadan gönderdiği ders çizimleri ve formüller
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/student/board-notes"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-[#4B075F] dark:text-[#D914C8] hover:bg-purple-100 text-xs font-bold transition-colors shrink-0 self-start sm:self-auto cursor-pointer"
+            >
+              <span>Tüm Tahta Arşivini Aç</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
+
+          {boardNotes.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 w-full min-w-0">
+              {boardNotes.slice(0, 3).map((bn) => (
+                <div
+                  key={bn.id}
+                  className="p-3.5 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/60 dark:border-gray-800/60 flex flex-col justify-between space-y-3 group hover:border-[#8D49A6]/40 transition-colors"
+                >
+                  <div className="space-y-2">
+                    {/* Thumbnail preview */}
+                    <div className="relative aspect-video rounded-xl overflow-hidden bg-black/60 border border-slate-700/60">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={bn.imageUrl}
+                        alt={bn.title}
+                        className="w-full h-full object-contain"
+                      />
+                      <span className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-md bg-black/70 text-[9px] font-bold text-white backdrop-blur-xs">
+                        {bn.courseName}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                        {bn.title}
+                      </h4>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                        {bn.teacherName || 'Ders Öğretmeni'} • {bn.dateStr}
+                      </p>
+                    </div>
+
+                    {bn.studentNote && (
+                      <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[10px] text-amber-900 dark:text-amber-200 truncate flex items-center gap-1">
+                        <StickyNote size={11} className="text-amber-600 shrink-0" />
+                        <span className="truncate">{bn.studentNote}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <Link
+                    href="/student/board-notes"
+                    className="w-full py-1.5 text-center rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200 dark:border-gray-700 text-[11px] font-bold text-gray-700 dark:text-gray-300 hover:text-[#4B075F] hover:border-[#8D49A6] transition-colors block"
+                  >
+                    Tahtayı Görüntüle →
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 text-center rounded-2xl bg-gray-50/50 dark:bg-gray-800/20 text-xs text-gray-400">
+              Henüz kaydedilmiş bir akıllı tahta notu bulunmuyor.
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* LEFT COLUMN: Yapılacaklar & Kişisel Görevler */}
@@ -479,28 +594,37 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
           </div>
         )}
 
-        {/* BOTTOM FULL-WIDTH: Sınav Takvimi */}
+        {/* BOTTOM FULL-WIDTH: Sınav Takvimi & Hatırlatıcı Yönlendirme */}
         {(activeTab === 'all' || activeTab === 'calendar') && (
-          <div className="lg:col-span-2 p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+          <div className="lg:col-span-2 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4 w-full min-w-0 overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                   <CalendarIcon size={18} />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base font-extrabold text-gray-900 dark:text-white">
-                      Sınav Takvimi
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h2 className="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white truncate">
+                      Sınav Takvimi &amp; Çalışma Hatırlatıcıları
                     </h2>
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                      Öğretmenle Canlı Senkronize
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                      Öğretmenle Canlı
                     </span>
                   </div>
-                  <p className="text-[11px] text-gray-400">
-                    Öğretmenler tarafından 9-A sınıfı için planlanan yazılı sınavlar, ortak sınavlar ve quizler
+                  <p className="text-[11px] text-gray-400 truncate">
+                    Öğretmenler tarafından planlanan yazılı sınavlar, ortak sınavlar ve quizler
                   </p>
                 </div>
               </div>
+
+              <Link
+                href="/student/assessments"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 text-xs font-bold transition-colors shrink-0 self-start sm:self-auto cursor-pointer"
+              >
+                <span>Tüm Sınavlarımı Aç</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
 
               {/* Filter Tabs */}
               <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800/80 p-1 rounded-xl self-start sm:self-auto">
@@ -538,10 +662,9 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
                   Tamamlananlar ({assessments.filter((a) => a.status === 'completed').length})
                 </button>
               </div>
-            </div>
 
             {/* Clear, Intuitive Exam Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 w-full min-w-0">
               {assessments
                 .filter((exam) => {
                   if (examFilter === 'upcoming') return exam.status !== 'completed'
@@ -555,7 +678,7 @@ export default function StudentPlannerView({ initialTab = 'all' }: StudentPlanne
                   return (
                     <div
                       key={exam.id}
-                      className={`p-4.5 rounded-2xl border transition-all space-y-3 flex flex-col justify-between ${
+                      className={`p-4 sm:p-4.5 rounded-2xl border transition-all space-y-3 flex flex-col justify-between w-full min-w-0 overflow-hidden ${
                         isCompleted
                           ? 'bg-gray-50/70 dark:bg-[#131C31]/70 border-gray-200/60 dark:border-gray-800/60'
                           : 'bg-white dark:bg-[#131C31] border-amber-200/80 dark:border-amber-900/40 shadow-xs hover:border-amber-400'

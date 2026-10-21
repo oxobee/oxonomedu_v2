@@ -148,7 +148,7 @@ export default function StudentBoardNotesPage() {
       })
     }
 
-    toast.success('Harika! Notunuz kaydedildi ve Sınavlar ve Notlar ekranına eklendi ✨', {
+    toast.success('Harika! Notunuz kaydedildi ve Notlarım & Ajanda ekranına eklendi ✨', {
       icon: '📝',
       duration: 3500,
     })
@@ -597,7 +597,7 @@ export default function StudentBoardNotesPage() {
                     autoFocus
                   />
                   <div className="flex items-center justify-between text-[11px] text-gray-400 mt-1">
-                    <span>💡 Eklediğin not &quot;Sınavlar ve Notlar&quot; ekranında da otomatik listelenir.</span>
+                    <span>💡 Eklediğin not &quot;Notlarım &amp; Ajanda&quot; ekranında da otomatik listelenir.</span>
                     <span>{noteInputText.length} karakter</span>
                   </div>
                 </div>

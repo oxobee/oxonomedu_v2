@@ -60,6 +60,7 @@ const MONTH_NAMES = [
 ]
 
 const DAY_NAMES = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
+const DAY_NAMES_SHORT = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz']
 
 export default function AcademicCalendarView({
   role = 'student',
@@ -440,26 +441,26 @@ export default function AcademicCalendarView({
 
       {/* ── 1. TAKVİM GÖRÜNÜMÜ (MONTHLY INTERACTIVE CALENDAR) ── */}
       {viewMode === 'calendar' && (
-        <div className="bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+        <div className="bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 lg:p-6 shadow-sm space-y-4 w-full max-w-full min-w-0 overflow-hidden">
           {/* Month Navigation */}
-          <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-            <div className="flex items-center gap-3">
-              <h3 className="text-lg font-black text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800 gap-2 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <h3 className="text-base sm:text-lg font-black text-gray-900 dark:text-white truncate">
                 {MONTH_NAMES[currentMonth]} {currentYear}
               </h3>
-              <span className="text-xs font-semibold text-gray-400 hidden sm:inline-block">
+              <span className="text-xs font-semibold text-gray-400 hidden sm:inline-block truncate">
                 • MEB 2026-2027 Dönemi
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   setCurrentYear(2026)
                   setCurrentMonth(9) // Ekim 2026
                 }}
-                className="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-xs font-bold text-gray-700 dark:text-gray-300 transition-colors cursor-pointer mr-1"
+                className="px-2.5 sm:px-3 py-1 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-xs font-bold text-gray-700 dark:text-gray-300 transition-colors cursor-pointer mr-0.5 sm:mr-1"
               >
                 Bugün
               </button>
@@ -467,41 +468,44 @@ export default function AcademicCalendarView({
               <button
                 type="button"
                 onClick={handlePrevMonth}
-                className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-600 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-600 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer"
+                title="Önceki Ay"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={15} />
               </button>
 
               <button
                 type="button"
                 onClick={handleNextMonth}
-                className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-600 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-600 dark:text-gray-300 flex items-center justify-center transition-colors cursor-pointer"
+                title="Sonraki Ay"
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={15} />
               </button>
             </div>
           </div>
 
           {/* Calendar Grid Header: Weekdays */}
-          <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs font-bold text-gray-400 pb-1">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-[10px] sm:text-xs font-bold text-gray-400 pb-1 min-w-0 w-full">
             {DAY_NAMES.map((name, i) => (
               <div
                 key={name}
-                className={`py-1.5 ${i >= 5 ? 'text-rose-500/80 font-black' : ''}`}
+                className={`py-1 truncate min-w-0 ${i >= 5 ? 'text-rose-500/80 font-black' : ''}`}
               >
-                {name}
+                <span className="hidden sm:inline">{name}</span>
+                <span className="sm:hidden">{DAY_NAMES_SHORT[i]}</span>
               </div>
             ))}
           </div>
 
           {/* Calendar Grid Cells */}
-          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 w-full min-w-0">
             {calendarDays.map((cell, idx) => {
               if (cell.dayNumber === null) {
                 return (
                   <div
                     key={`empty-${idx}`}
-                    className="min-h-[90px] sm:min-h-[105px] rounded-2xl bg-gray-50/40 dark:bg-gray-800/20 border border-transparent opacity-30"
+                    className="min-w-0 w-full min-h-[55px] sm:min-h-[85px] md:min-h-[105px] rounded-xl sm:rounded-2xl bg-gray-50/40 dark:bg-gray-800/20 border border-transparent opacity-30"
                   />
                 )
               }
@@ -509,16 +513,16 @@ export default function AcademicCalendarView({
               return (
                 <div
                   key={`day-${cell.dateString}`}
-                  className={`min-h-[90px] sm:min-h-[105px] p-1.5 sm:p-2 rounded-2xl border transition-all flex flex-col justify-between ${
+                  className={`min-w-0 w-full overflow-hidden min-h-[55px] sm:min-h-[85px] md:min-h-[105px] p-1 sm:p-1.5 md:p-2 rounded-xl sm:rounded-2xl border transition-all flex flex-col justify-between ${
                     cell.isToday
-                      ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-400 dark:border-indigo-600 shadow-xs ring-2 ring-indigo-500/20'
+                      ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-400 dark:border-indigo-600 shadow-xs ring-1.5 sm:ring-2 ring-indigo-500/20'
                       : 'bg-white dark:bg-[#161D2E] border-gray-200/60 dark:border-gray-800/60 hover:border-indigo-300 dark:hover:border-indigo-700'
                   }`}
                 >
                   {/* Day Number Header */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between min-w-0 w-full">
                     <span
-                      className={`text-xs font-extrabold w-6 h-6 rounded-full flex items-center justify-center ${
+                      className={`text-[10px] sm:text-xs font-extrabold w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center shrink-0 ${
                         cell.isToday
                           ? 'bg-indigo-600 text-white'
                           : 'text-gray-700 dark:text-gray-300'
@@ -528,14 +532,33 @@ export default function AcademicCalendarView({
                     </span>
 
                     {cell.events.length > 0 && (
-                      <span className="text-[10px] font-bold text-gray-400">
+                      <span className="text-[9px] sm:text-[10px] font-bold text-gray-400 hidden sm:inline">
                         {cell.events.length}
                       </span>
                     )}
                   </div>
 
-                  {/* Day Events Chips (Clickable -> Opens Modal) */}
-                  <div className="space-y-1 mt-1 overflow-hidden">
+                  {/* Mobile: Colored Category Dot Indicators */}
+                  <div className="flex sm:hidden items-center justify-center gap-1 flex-wrap pt-0.5 min-w-0 w-full">
+                    {cell.events.slice(0, 3).map((ev) => {
+                      const cat = ACADEMIC_CATEGORIES.find((c) => c.id === ev.category)
+                      return (
+                        <button
+                          key={ev.id}
+                          type="button"
+                          onClick={() => setSelectedEvent(ev)}
+                          className={`w-2 h-2 rounded-full ${cat?.dot || 'bg-gray-400'} cursor-pointer shrink-0`}
+                          title={ev.title}
+                        />
+                      )
+                    })}
+                    {cell.events.length > 3 && (
+                      <span className="text-[8px] font-bold text-gray-400 leading-none">+{cell.events.length - 3}</span>
+                    )}
+                  </div>
+
+                  {/* Desktop: Day Events Chips (Clickable -> Opens Modal) */}
+                  <div className="hidden sm:block space-y-1 mt-1 overflow-hidden min-w-0 w-full">
                     {cell.events.slice(0, 2).map((ev) => {
                       const cat = ACADEMIC_CATEGORIES.find((c) => c.id === ev.category)
                       return (
@@ -544,14 +567,14 @@ export default function AcademicCalendarView({
                           type="button"
                           onClick={() => setSelectedEvent(ev)}
                           title={`${ev.title} (${ev.categoryLabel})`}
-                          className={`w-full text-left px-1.5 py-1 rounded-lg text-[10px] font-bold truncate flex items-center gap-1 transition-all cursor-pointer ${
+                          className={`w-full text-left px-1.5 py-1 rounded-lg text-[10px] font-bold truncate flex items-center gap-1 transition-all cursor-pointer min-w-0 ${
                             cat?.badgeBg || 'bg-gray-100 text-gray-700'
                           }`}
                         >
                           <span
                             className={`w-1.5 h-1.5 rounded-full shrink-0 ${cat?.dot || 'bg-gray-400'}`}
                           />
-                          <span className="truncate">{ev.title}</span>
+                          <span className="truncate min-w-0">{ev.title}</span>
                         </button>
                       )
                     })}
@@ -560,7 +583,7 @@ export default function AcademicCalendarView({
                       <button
                         type="button"
                         onClick={() => setSelectedEvent(cell.events[0])}
-                        className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 hover:underline block text-center cursor-pointer"
+                        className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 hover:underline block text-center cursor-pointer truncate"
                       >
                         +{cell.events.length - 2} daha...
                       </button>

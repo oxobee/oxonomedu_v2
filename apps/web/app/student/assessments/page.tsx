@@ -5,7 +5,7 @@ import StudentAssessmentsView from '@components/Student/views/StudentAssessments
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Sınavlar ve Notlar — Öğrenci Portalı | Oxonom EDU',
+  title: 'Sınavlarım — Öğrenci Portalı | Oxonom EDU',
   description: 'Yazılı sınavlar, mini testler ve yayımlanan sınav sonuçları.',
 }
 

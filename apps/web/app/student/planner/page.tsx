@@ -5,8 +5,8 @@ import StudentPlannerView from '@components/Student/views/StudentPlannerView'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Defterim ve Planlayıcım — Öğrenci Portalı | Oxonom EDU',
-  description: 'Kişisel çalışma ajandası, ders notları ve görevler.',
+  title: 'Notlarım & Ajanda — Öğrenci Portalı | Oxonom EDU',
+  description: 'Kişisel ders notları, çalışma ajandası ve görevler.',
 }
 
 export default function StudentPlannerPage() {

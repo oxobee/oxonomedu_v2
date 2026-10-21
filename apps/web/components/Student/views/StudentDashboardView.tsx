@@ -1209,13 +1209,13 @@ export default function StudentDashboardView() {
             </div>
           </div>
 
-          {/* ── 2. DEFTERİM & PLANLAYICI HATIRLATICI TAKVİMİ ── */}
+          {/* ── 2. NOTLARIM & AJANDA HATIRLATICI TAKVİMİ ── */}
           <div>
             <CalendarReminderWidget
               storageKey="oxonom_student_calendar_reminders"
               role="student"
               compactMode={true}
-              title="Defterim ve Planlayıcı Takvimi"
+              title="Notlarım & Ajanda Takvimi"
               description="Ders çalışma günlerine özel notlar ekleyebilir, sesli pop-up hatırlatıcılar kurabilirsiniz."
             />
           </div>

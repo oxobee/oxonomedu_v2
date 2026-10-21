@@ -161,7 +161,7 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
   },
   {
     id: 'assessments',
-    label: 'Sınavlar ve Notlar',
+    label: 'Sınavlar ve Değerlendirme',
     path: '/teacher/assessments',
     icon: Award,
     status: 'active',

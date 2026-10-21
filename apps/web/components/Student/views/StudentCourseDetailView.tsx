@@ -756,7 +756,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            Sınavlar ve Notlar ({courseExams.length})
+            Sınavlar & Sonuçlar ({courseExams.length})
           </button>
 
           <button

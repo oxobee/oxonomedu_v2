@@ -63,6 +63,7 @@ const MONTH_NAMES = [
   'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
 ]
 const DAY_NAMES = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
+const DAY_NAMES_SHORT = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz']
 
 function formatDateKey(year: number, month: number, day: number): string {
   const m = String(month + 1).padStart(2, '0')
@@ -274,20 +275,20 @@ export default function CalendarReminderWidget({
   }, [entries, todayKey])
 
   return (
-    <div className={`w-full rounded-3xl bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-sm overflow-hidden flex flex-col transition-all ${compactMode ? 'p-4 sm:p-5' : 'p-5 sm:p-6'}`}>
+    <div className={`w-full max-w-full rounded-2xl sm:rounded-3xl bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-sm overflow-hidden flex flex-col transition-all min-w-0 ${compactMode ? 'p-3 sm:p-4' : 'p-3.5 sm:p-5 lg:p-6'}`}>
       {/* Header Area */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E8DFEB]/80 dark:border-[#49364F]/80">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-[#8D49A6] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
-              <CalendarIcon size={18} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-[#E8DFEB]/80 dark:border-[#49364F]/80 min-w-0">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-500/10 text-[#8D49A6] dark:text-[#C58ADB] flex items-center justify-center shrink-0">
+              <CalendarIcon size={16} />
             </div>
-            <div>
-              <h3 className="text-sm sm:text-base font-black text-[#241329] dark:text-white leading-tight">
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-base font-black text-[#241329] dark:text-white leading-tight truncate">
                 {title}
               </h3>
               {!compactMode && (
-                <p className="text-[11px] text-[#716779] dark:text-[#B5A5BD] mt-0.5">
+                <p className="text-[10px] sm:text-[11px] text-[#716779] dark:text-[#B5A5BD] mt-0.5 truncate hidden sm:block">
                   {description}
                 </p>
               )}
@@ -296,59 +297,62 @@ export default function CalendarReminderWidget({
         </div>
 
         {/* Month Switcher & Today button */}
-        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+        <div className="flex items-center justify-between sm:justify-end gap-1.5 w-full sm:w-auto shrink-0">
           <button
             type="button"
             onClick={jumpToToday}
-            className="px-2.5 py-1 text-xs font-bold rounded-lg bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#4B075F] dark:text-[#F0D8FA] transition-colors cursor-pointer mr-1"
+            className="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#4B075F] dark:text-[#F0D8FA] transition-colors cursor-pointer"
           >
             Bugün
           </button>
-          <button
-            type="button"
-            onClick={prevMonth}
-            className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#514458] dark:text-[#D2C5D8] cursor-pointer"
-            title="Önceki Ay"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <span className="text-xs sm:text-sm font-black text-[#241329] dark:text-white min-w-[110px] text-center">
-            {MONTH_NAMES[month]} {year}
-          </span>
-          <button
-            type="button"
-            onClick={nextMonth}
-            className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#514458] dark:text-[#D2C5D8] cursor-pointer"
-            title="Sonraki Ay"
-          >
-            <ChevronRight size={16} />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={prevMonth}
+              className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#514458] dark:text-[#D2C5D8] cursor-pointer"
+              title="Önceki Ay"
+            >
+              <ChevronLeft size={15} />
+            </button>
+            <span className="text-xs sm:text-sm font-black text-[#241329] dark:text-white min-w-[85px] sm:min-w-[110px] text-center">
+              {MONTH_NAMES[month]} {year}
+            </span>
+            <button
+              type="button"
+              onClick={nextMonth}
+              className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#514458] dark:text-[#D2C5D8] cursor-pointer"
+              title="Sonraki Ay"
+            >
+              <ChevronRight size={15} />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Main Content Layout */}
-      <div className={`pt-4 ${compactMode ? 'flex flex-col gap-4' : 'grid grid-cols-1 lg:grid-cols-12 gap-6'}`}>
+      <div className={`pt-3 sm:pt-4 min-w-0 w-full ${compactMode ? 'flex flex-col gap-4' : 'grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6'}`}>
         {/* Left: Interactive Calendar Grid */}
-        <div className={compactMode ? 'w-full' : 'lg:col-span-8'}>
+        <div className={`w-full min-w-0 ${compactMode ? '' : 'lg:col-span-8'}`}>
           {/* Weekday Labels */}
-          <div className="grid grid-cols-7 gap-1 text-center mb-2">
+          <div className="grid grid-cols-7 gap-1 text-center mb-1.5 w-full min-w-0">
             {DAY_NAMES.map((name, i) => (
               <div
                 key={name}
-                className={`text-[10px] font-black uppercase tracking-wider py-1 ${
+                className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider py-1 truncate min-w-0 ${
                   i >= 5 ? 'text-[#D914C8] dark:text-[#F0D8FA]' : 'text-[#716779] dark:text-[#B5A5BD]'
                 }`}
               >
-                {name}
+                <span className="hidden sm:inline">{name}</span>
+                <span className="sm:hidden">{DAY_NAMES_SHORT[i]}</span>
               </div>
             ))}
           </div>
 
           {/* Days Grid */}
-          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 w-full min-w-0">
             {/* Empty prefix cells */}
             {Array.from({ length: firstDayIndex }).map((_, i) => (
-              <div key={`empty-${i}`} className="h-11 sm:h-14 rounded-2xl bg-[#FCF9FD]/40 dark:bg-black/10 border border-transparent opacity-30" />
+              <div key={`empty-${i}`} className="min-w-0 w-full h-11 sm:h-13 md:h-15 rounded-xl sm:rounded-2xl bg-[#FCF9FD]/40 dark:bg-black/10 border border-transparent opacity-30" />
             ))}
 
             {/* Days of current month */}
@@ -366,9 +370,9 @@ export default function CalendarReminderWidget({
                   key={dateKey}
                   type="button"
                   onClick={() => openEditModal(dateKey)}
-                  className={`relative group h-12 sm:h-15 p-1 sm:p-1.5 rounded-2xl flex flex-col justify-between items-start text-left transition-all cursor-pointer border ${
+                  className={`relative group min-w-0 w-full overflow-hidden h-11 sm:h-13 md:h-15 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl flex flex-col justify-between items-start text-left transition-all cursor-pointer border ${
                     hasReminder
-                      ? 'bg-gradient-to-br from-[#FDF2FF] via-[#FAF0FC] to-[#F3D5FA] dark:from-[#381045] dark:via-[#2b0c36] dark:to-[#4a145c] border-[#D914C8] dark:border-[#D914C8] shadow-[0_0_12px_rgba(217,20,200,0.22)] ring-2 ring-[#D914C8]/30 dark:ring-[#D914C8]/40 animate-pulse'
+                      ? 'bg-gradient-to-br from-[#FDF2FF] via-[#FAF0FC] to-[#F3D5FA] dark:from-[#381045] dark:via-[#2b0c36] dark:to-[#4a145c] border-[#D914C8] dark:border-[#D914C8] shadow-[0_0_12px_rgba(217,20,200,0.22)] ring-1.5 sm:ring-2 ring-[#D914C8]/30 dark:ring-[#D914C8]/40 animate-pulse'
                       : isSelected
                       ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/50 border-[#8D49A6] dark:border-[#8D49A6] shadow-xs'
                       : isToday
@@ -377,11 +381,11 @@ export default function CalendarReminderWidget({
                   }`}
                 >
                   {/* Top Bar: Date Number + Indicators */}
-                  <div className="w-full flex items-center justify-between">
+                  <div className="w-full flex items-center justify-between min-w-0">
                     <span
-                      className={`text-xs sm:text-sm font-black leading-none ${
+                      className={`text-[11px] sm:text-xs md:text-sm font-black leading-none truncate ${
                         hasReminder
-                          ? 'text-[#D914C8] dark:text-[#FF84F5] scale-105'
+                          ? 'text-[#D914C8] dark:text-[#FF84F5]'
                           : isToday
                           ? 'text-[#8D49A6] dark:text-[#E8A5FF]'
                           : 'text-[#241329] dark:text-white'
@@ -392,27 +396,28 @@ export default function CalendarReminderWidget({
 
                     {/* Attention-grabbing reminder bell */}
                     {hasReminder && (
-                      <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#D914C8] text-white flex items-center justify-center shadow-xs">
-                        <Bell size={10} className="fill-white animate-bounce" />
+                      <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#D914C8] text-white flex items-center justify-center shadow-xs shrink-0">
+                        <Bell size={8} className="fill-white animate-bounce" />
                       </span>
                     )}
                   </div>
 
                   {/* Bottom: Note teaser or reminder label */}
-                  <div className="w-full truncate">
+                  <div className="w-full truncate min-w-0 mt-0.5">
                     {hasReminder ? (
-                      <span className="text-[9px] sm:text-[10px] font-black text-[#8D49A6] dark:text-[#F0D8FA] truncate block leading-tight">
-                        ⏰ {entry.reminderTime}
+                      <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-[#8D49A6] dark:text-[#F0D8FA] truncate block leading-tight">
+                        <span className="sm:hidden">⏰</span>
+                        <span className="hidden sm:inline">⏰ {entry.reminderTime}</span>
                       </span>
                     ) : hasNote ? (
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 min-w-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#8D49A6] shrink-0" />
-                        <span className="text-[9px] text-[#716779] dark:text-[#B5A5BD] truncate hidden sm:inline">
+                        <span className="text-[8px] sm:text-[9px] text-[#716779] dark:text-[#B5A5BD] truncate hidden sm:inline">
                           {entry.note}
                         </span>
                       </div>
                     ) : (
-                      <span className="opacity-0 group-hover:opacity-100 text-[8px] text-[#8D49A6] transition-opacity">
+                      <span className="opacity-0 group-hover:opacity-100 text-[8px] text-[#8D49A6] transition-opacity hidden sm:inline">
                         + Ekle
                       </span>
                     )}
@@ -424,7 +429,7 @@ export default function CalendarReminderWidget({
         </div>
 
         {/* Right / Bottom: Selected Day Detail & Active Reminders */}
-        <div className={compactMode ? 'w-full pt-2 border-t border-[#E8DFEB] dark:border-[#49364F]' : 'lg:col-span-4 flex flex-col gap-4'}>
+        <div className={`w-full min-w-0 ${compactMode ? 'pt-2 border-t border-[#E8DFEB] dark:border-[#49364F]' : 'lg:col-span-4 flex flex-col gap-4'}`}>
           {/* Quick Active Reminders Pill Box */}
           <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-[#FAF7FC] to-[#F5ECF8] dark:from-[#261B30] dark:to-[#1F1426] border border-[#E8DFEB] dark:border-[#49364F]">
             <div className="flex items-center justify-between mb-2.5">
@@ -494,7 +499,7 @@ export default function CalendarReminderWidget({
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.85, opacity: 0, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="w-full max-w-md rounded-3xl bg-white dark:bg-[#211729] border-2 border-[#D914C8] shadow-[0_20px_60px_rgba(217,20,200,0.35)] p-6 relative overflow-hidden text-center"
+              className="w-full max-w-md rounded-2xl sm:rounded-3xl bg-white dark:bg-[#211729] border-2 border-[#D914C8] shadow-[0_20px_60px_rgba(217,20,200,0.35)] p-5 sm:p-6 relative overflow-hidden text-center max-h-[92vh] overflow-y-auto"
             >
               <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] text-white mx-auto flex items-center justify-center shadow-lg shadow-[#D914C8]/30 mb-4 animate-bounce">
                 <Bell size={32} className="fill-white" />
@@ -546,7 +551,7 @@ export default function CalendarReminderWidget({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-2xl p-5 sm:p-6 overflow-hidden"
+              className="w-full max-w-lg rounded-2xl sm:rounded-3xl bg-white dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#49364F] shadow-2xl p-4 sm:p-6 overflow-hidden max-h-[92vh] overflow-y-auto"
             >
               {/* Modal Header */}
               <div className="flex items-center justify-between pb-4 border-b border-[#E8DFEB] dark:border-[#49364F] mb-4">
