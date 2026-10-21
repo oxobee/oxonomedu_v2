@@ -1,5 +1,6 @@
 // Oxonom Edu — Akıllı Tahta Notları (Saved Board Notes Storage)
 // Allows saving smart board captures to designated student classrooms
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 
 export interface SavedBoardNote {
   id: string
@@ -512,6 +513,28 @@ export function saveBoardNote(noteData: {
     const updated = [newNote, ...current]
     localStorage.setItem(BOARD_NOTES_STORAGE_KEY, JSON.stringify(updated))
     window.dispatchEvent(new CustomEvent('oxonom_board_notes_updated', { detail: newNote }))
+
+    // Async sync to Supabase (Single Source of Truth Database)
+    if (typeof window !== 'undefined' && isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseBrowserClient()
+        supabase
+          .from('board_notes')
+          .upsert({
+            id: newNote.id,
+            board_info: newNote.boardInfo || '1A-01',
+            class_codes: newNote.classCodes,
+            course_name: newNote.courseName,
+            teacher_name: newNote.teacherName || 'Ders Öğretmeni',
+            image_url: newNote.imageUrl,
+            student_notes: newNote.studentNote ? { note: newNote.studentNote } : {},
+            created_at: new Date(newNote.timestamp).toISOString(),
+          })
+          .then((res: any) => {
+            if (res?.error) console.warn('[Supabase board_notes] upsert failed:', res.error)
+          })
+      } catch (_) {}
+    }
   } catch (err) {
     console.error('Failed to save board note:', err)
     throw err
@@ -534,6 +557,22 @@ export function updateStudentBoardNote(noteId: string, studentNote: string): Sav
 
     localStorage.setItem(BOARD_NOTES_STORAGE_KEY, JSON.stringify(current))
     window.dispatchEvent(new CustomEvent('oxonom_board_notes_updated', { detail: current[index] }))
+
+    // Sync update to Supabase
+    if (typeof window !== 'undefined' && isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseBrowserClient()
+        supabase
+          .from('board_notes')
+          .update({
+            student_notes: { note: studentNote.trim(), updatedAt: Date.now() },
+          })
+          .eq('id', noteId)
+          .then((res: any) => {
+            if (res?.error) console.warn('[Supabase board_notes] update failed:', res.error)
+          })
+      } catch (_) {}
+    }
     return current[index]
   } catch (err) {
     console.error('Failed to update student board note:', err)
@@ -547,6 +586,20 @@ export function deleteBoardNote(noteId: string): void {
     const filtered = current.filter((n) => n.id !== noteId)
     localStorage.setItem(BOARD_NOTES_STORAGE_KEY, JSON.stringify(filtered))
     window.dispatchEvent(new CustomEvent('oxonom_board_notes_updated', { detail: { deletedId: noteId } }))
+
+    // Sync delete to Supabase
+    if (typeof window !== 'undefined' && isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseBrowserClient()
+        supabase
+          .from('board_notes')
+          .delete()
+          .eq('id', noteId)
+          .then((res: any) => {
+            if (res?.error) console.warn('[Supabase board_notes] delete failed:', res.error)
+          })
+      } catch (_) {}
+    }
   } catch (e) {
     console.error('Failed to delete board note:', e)
   }

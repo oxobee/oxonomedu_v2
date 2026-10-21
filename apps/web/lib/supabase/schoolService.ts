@@ -260,4 +260,25 @@ export const SchoolService = {
       } catch (_) {}
     }
   },
+
+  /**
+   * Save and sync classroom attendance to Supabase
+   */
+  async saveAttendance(className: string, records: Record<string, string>, presentCount: number, absentCount: number): Promise<void> {
+    if (isSupabaseConfigured()) {
+      try {
+        const client = getSupabaseBrowserClient()
+        await client.from('daily_attendance').upsert({
+          class_name: className,
+          date: new Date().toISOString().split('T')[0],
+          records,
+          present_count: presentCount,
+          absent_count: absentCount,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'class_name,date' })
+      } catch (err) {
+        console.warn('[SchoolService] Supabase attendance save failed:', err)
+      }
+    }
+  },
 }

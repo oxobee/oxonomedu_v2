@@ -215,6 +215,49 @@ CREATE TABLE IF NOT EXISTS public.student_test_results (
   completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- ----------------------------------------------------------------------------
+-- 14. SAVED SMART BOARD NOTES (Akıllı Tahta Notları)
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.board_notes (
+  id TEXT PRIMARY KEY,
+  board_info TEXT NOT NULL,
+  class_codes TEXT[] NOT NULL DEFAULT '{"1/A"}',
+  course_name TEXT NOT NULL,
+  teacher_name TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  student_notes JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ----------------------------------------------------------------------------
+-- 15. PANO PAIRING SESSIONS (QR / OTP Akıllı Tahta Kumanda Oturumları)
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.pano_pairing_sessions (
+  id TEXT PRIMARY KEY,
+  otp_code TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  teacher_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  teacher_data JSONB DEFAULT '{}'::jsonb,
+  selected_class_id INT,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ----------------------------------------------------------------------------
+-- 16. DAILY ATTENDANCE (Canlı Yoklama)
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.daily_attendance (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_name TEXT NOT NULL,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  records JSONB NOT NULL DEFAULT '{}'::jsonb,
+  present_count INT NOT NULL DEFAULT 0,
+  absent_count INT NOT NULL DEFAULT 0,
+  late_count INT NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (class_name, date)
+);
+
 -- ============================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================================
@@ -231,6 +274,9 @@ ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.assignment_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.exams_and_tests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.student_test_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.board_notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pano_pairing_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.daily_attendance ENABLE ROW LEVEL SECURITY;
 
 -- Read policies (Allow authenticated users and anon read for demo)
 CREATE POLICY "Public read for profiles" ON public.profiles FOR SELECT USING (true);
@@ -246,6 +292,10 @@ CREATE POLICY "Public read for assignments" ON public.assignments FOR SELECT USI
 CREATE POLICY "Public read for submissions" ON public.assignment_submissions FOR SELECT USING (true);
 CREATE POLICY "Public read for tests" ON public.exams_and_tests FOR SELECT USING (true);
 CREATE POLICY "Public read for test_results" ON public.student_test_results FOR SELECT USING (true);
+CREATE POLICY "Public read for board_notes" ON public.board_notes FOR SELECT USING (true);
+CREATE POLICY "Public all for board_notes" ON public.board_notes FOR ALL USING (true);
+CREATE POLICY "Public all for pano_pairing" ON public.pano_pairing_sessions FOR ALL USING (true);
+CREATE POLICY "Public all for daily_attendance" ON public.daily_attendance FOR ALL USING (true);
 
 -- Insert / Update policies for authenticated users
 CREATE POLICY "Auth users insert profiles" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
