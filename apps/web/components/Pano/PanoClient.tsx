@@ -1328,8 +1328,23 @@ const ClassSelectionModal = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[240] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in-50 duration-200 select-none">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-xl flex flex-col overflow-hidden text-slate-800 dark:text-white">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
+      className="fixed inset-0 z-[240] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in-50 duration-200 select-none"
+    >
+      <div className="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-xl flex flex-col overflow-hidden text-slate-800 dark:text-white">
+        {/* Touch Friendly Close Button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer"
+          title="Kapat"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 text-center">
           <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-600/30">
             <School className="w-6 h-6" />
@@ -3446,8 +3461,12 @@ export default function PanoClient() {
   }
 
 
-  // Load Saved Settings & Selected Class from localStorage
+  // Load Saved Settings & Selected Class from localStorage (strictly ONCE on initial mount)
+  const initialMountHydratedRef = useRef(false)
   useEffect(() => {
+    if (initialMountHydratedRef.current) return
+    initialMountHydratedRef.current = true
+
     if (typeof window !== 'undefined') {
       const savedPair = localStorage.getItem('oxonom_pano_paired_session')
       if (savedPair) {
@@ -3556,7 +3575,7 @@ export default function PanoClient() {
         }
       }
     }
-  }, [boardIdentity?.panoId, classrooms, rawIdParam, panoIdParam, tahtaIdParam, resolveBoardIdentity, selectedClass, setSelectedClass])
+  }, [])
 
   const saveSettings = (newSettings: PanoSettings) => {
     setSettings(newSettings)
@@ -4640,7 +4659,7 @@ export default function PanoClient() {
                       <span>Pano Donanım Ayarları</span>
                     </button>
                     <button
-                      onClick={() => { dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' }); setIsProfileOpen(false); }}
+                      onClick={() => { setIsClassModalOpen(true); dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' }); setIsProfileOpen(false); }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] text-[#514458] dark:text-slate-200 hover:text-[#4B075F] text-xs font-semibold transition-colors cursor-pointer text-left"
                     >
                       <School className="w-3.5 h-3.5 text-[#8D49A6]" />
@@ -4825,7 +4844,10 @@ export default function PanoClient() {
                     </div>
 
                     <button
-                      onClick={() => dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' })}
+                      onClick={() => {
+                        setIsClassModalOpen(true)
+                        dispatch({ type: 'OPEN_MODAL', modalId: 'class_selection' })
+                      }}
                       className="px-3.5 py-1.5 rounded-xl bg-[#FAF5FC] hover:bg-[#F0D8FA] dark:bg-[#2A1833] dark:hover:bg-[#350444] text-[#4B075F] dark:text-[#E9D5FF] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs group"
                     >
                       <span>Şube Değiştir</span>
@@ -4984,10 +5006,17 @@ export default function PanoClient() {
       {/* 4. INITIAL & ON-DEMAND CLASS SELECTION MODAL */}
       <ClassSelectionModal
         isOpen={isClassModalOpen}
-        onClose={() => dispatch({ type: 'CLOSE_MODAL' })}
-        classrooms={classrooms}
+        onClose={() => {
+          setIsClassModalOpen(false)
+          dispatch({ type: 'CLOSE_MODAL' })
+        }}
+        classrooms={classrooms && classrooms.length > 0 ? classrooms : DEFAULT_CLASSROOMS}
         selectedClassId={selectedClass?.id || 0}
-        onSelect={handleSelectClass}
+        onSelect={(c) => {
+          handleSelectClass(c)
+          setIsClassModalOpen(false)
+          toast.success(`${c.name} seçildi! 📚`)
+        }}
       />
 
       {/* NEW BLANK BOARD MODAL */}
