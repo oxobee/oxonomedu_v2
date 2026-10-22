@@ -50,7 +50,7 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('oxonom_superadmin_session')
       localStorage.removeItem('oxonom_current_role')
-      window.location.href = '/loginv2'
+      window.location.href = '/login'
     }
   }
 

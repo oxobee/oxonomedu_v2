@@ -38,6 +38,7 @@ import {
   type StudentProfile,
 } from '@/lib/student/studentData'
 import HeaderLiveClock from '@components/Common/HeaderLiveClock'
+import HeaderNotificationDropdown from '@components/Notifications/HeaderNotificationDropdown'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import OxonomPlusModal from '@components/Student/modals/OxonomPlusModal'
 
@@ -152,7 +153,7 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
       {/* ── DESKTOP SIDEBAR (lg+) — Lingora Claymorphic SaaS Style ── */}
       <aside className="hidden lg:flex flex-col fixed top-0 left-0 w-[270px] xl:w-[280px] h-screen shrink-0 bg-white dark:bg-[#211729] border-r border-[#E8DFEB] dark:border-[#49364F] z-30 select-none shadow-[2px_0_24px_rgba(75,7,95,0.03)]">
         {/* Brand Header with Oxonom EDU Official Logo/Icon */}
-        <div className="p-5 pb-4 flex items-center justify-between border-b border-[#E8DFEB] dark:border-[#49364F]">
+        <div className="p-5 pb-4 flex items-center justify-start border-b border-[#E8DFEB] dark:border-[#49364F]">
           <Link href="/student/dashboard" className="flex items-center gap-2.5 group">
             <div className="w-10 h-10 flex items-center justify-center shrink-0">
               <img
@@ -170,15 +171,6 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
               </div>
             </div>
           </Link>
-
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="w-8 h-8 rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#716779] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer"
-            title="Temayı Değiştir"
-          >
-            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
         </div>
 
         {/* Navigation Items — Grouped by Category without scrollbar */}
@@ -318,7 +310,7 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
                     } catch (_) {}
                   }
                   await signOut()
-                  window.location.href = '/loginv2'
+                  window.location.href = '/login'
                 }}
                 className="w-7 h-7 rounded-lg hover:bg-[#FCE8ED] dark:hover:bg-[#C62848]/20 text-[#716779] hover:text-[#C62848] dark:hover:text-[#F17AE6] flex items-center justify-center transition-colors cursor-pointer"
                 title="Oturumu Kapat"
@@ -350,15 +342,8 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
           <div className="flex items-center gap-2.5">
             <HeaderLiveClock theme="oxonom" variant="desktop" />
 
-            {/* Notification Bell */}
-            <Link
-              href="/student/communication"
-              className="relative w-9 h-9 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] border border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-center text-[#716779] dark:text-[#D2C5D8] hover:text-[#4B075F] dark:hover:text-[#F17AE6] transition-colors"
-              title="Duyurular & Bildirimler"
-            >
-              <Bell size={16} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#D914C8] ring-2 ring-white dark:ring-[#211729]" />
-            </Link>
+            {/* Notification Dropdown with Elastic Popup & Audio */}
+            <HeaderNotificationDropdown communicationRoute="/student/communication" />
 
             {/* Quick Theme Switch */}
             <button
@@ -375,14 +360,16 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
         {/* ── MOBILE HEADER (<lg) — Sleek, Minimal, Notch Safe ── */}
         <header
           className="lg:hidden sticky top-0 z-30 bg-white/90 dark:bg-[#211729]/90 backdrop-blur-xl border-b border-[#E8DFEB] dark:border-[#49364F] px-4 pb-2.5 flex items-center justify-between select-none"
-          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.65rem)' }}
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)' }}
         >
-          <div className="flex items-center gap-2">
-            <img
-              src={theme === 'dark' ? '/oxonom-icon-white.png' : '/oxonom-icon-colored.png'}
-              alt="Oxonom EDU"
-              className="w-7 h-7 object-contain select-none"
-            />
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 flex items-center justify-center shrink-0">
+              <img
+                src={theme === 'dark' ? '/oxonom-icon-white.png' : '/oxonom-icon-colored.png'}
+                alt="Oxonom EDU"
+                className="w-10 h-10 object-contain select-none"
+              />
+            </div>
             <div className="text-xs font-black text-[#241329] dark:text-white leading-none">
               Oxonom EDU
             </div>
@@ -391,13 +378,8 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
           <div className="flex items-center gap-2">
             <HeaderLiveClock theme="oxonom" variant="mobile" />
 
-            <Link
-              href="/student/communication"
-              className="w-8 h-8 rounded-full bg-[#F7F0FA] dark:bg-[#2D2035] text-[#716779] dark:text-[#D2C5D8] flex items-center justify-center"
-              title="Bildirimler"
-            >
-              <Bell size={14} />
-            </Link>
+            {/* Notification Dropdown with Elastic Popup & Audio */}
+            <HeaderNotificationDropdown communicationRoute="/student/communication" />
 
             <button
               type="button"
@@ -601,7 +583,7 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
                       } catch (_) {}
                     }
                     await signOut()
-                    window.location.href = '/loginv2'
+                    window.location.href = '/login'
                   }}
                   className="text-xs font-black text-[#C62848] dark:text-[#F17AE6] flex items-center gap-1.5 cursor-pointer"
                 >

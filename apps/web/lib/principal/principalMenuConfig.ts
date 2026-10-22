@@ -174,13 +174,13 @@ export const PRINCIPAL_MENU_CONFIG: PrincipalMenuItem[] = [
   {
     id: 'pano',
     label: 'Dijital Okul Panosu',
-    path: '/pano',
+    path: '/principal/boards',
     icon: Tv,
     status: 'active',
     sortOrder: 9,
     category: 'hardware',
     badge: 'Canlı',
-    description: 'Derslik ve okul koridorlarında yayınlanan dijital nöbetçi, ders saati ve duyuru panosu.',
+    description: 'Derslik ve okul koridorlarında yayınlanan dijital nöbetçi, ders saati ve duyuru panosu yönetimi.',
   },
 
   // ── 6. DİĞER İDARİ MODÜLLER (08 — 14) ──

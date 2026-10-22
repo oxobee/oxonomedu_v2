@@ -109,7 +109,7 @@ export default function StudentAuthorization({ children }: StudentAuthorizationP
             )}
 
             <Link
-              href="/loginv2"
+              href="/login"
               className="w-full h-10 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
             >
               <LogOut size={15} />

@@ -134,7 +134,7 @@ export default function PrincipalSettingsPage() {
     }
     toast.success('Yönetici oturumu kapatıldı.')
     await signOut()
-    window.location.href = '/loginv2'
+    window.location.href = '/login'
   }
 
   return (

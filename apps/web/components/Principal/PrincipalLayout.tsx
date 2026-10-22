@@ -37,6 +37,7 @@ import { signOut } from '@components/Contexts/AuthContext'
 import toast from 'react-hot-toast'
 import { getStoredPrincipalProfile, getPrincipalInitials } from '@/lib/principal/principalProfileStorage'
 import HeaderLiveClock from '@components/Common/HeaderLiveClock'
+import HeaderNotificationDropdown from '@components/Notifications/HeaderNotificationDropdown'
 
 interface PrincipalLayoutProps {
   children: React.ReactNode
@@ -179,7 +180,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
     }
     toast.success('Yönetici oturumu güvenle kapatıldı.')
     await signOut()
-    window.location.href = '/loginv2'
+    window.location.href = '/login'
   }
 
   return (
@@ -187,7 +188,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
       {/* ── DESKTOP SIDEBAR (lg+) ── */}
       <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 shrink-0 bg-white dark:bg-[#211729] border-r border-[#E8DFEB] dark:border-[#49364F] z-30 select-none">
         {/* Brand Header */}
-        <div className="p-5 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
+        <div className="p-5 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-start">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0">
               <img
@@ -206,14 +207,6 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="w-8 h-8 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#350444] text-[#514458] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F]"
-            title="Temayı Değiştir"
-          >
-            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
         </div>
 
         {/* Principal Executive Pass / Identity Badge - Clean & Minimalist */}
@@ -399,6 +392,9 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
               <span>Görevlendir</span>
             </Link>
 
+            {/* Notification Dropdown with Elastic Popup & Audio */}
+            <HeaderNotificationDropdown communicationRoute="/principal/announcements" />
+
             <button
               type="button"
               onClick={toggleTheme}
@@ -410,24 +406,24 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           </div>
         </header>
 
-        {/* Mobile Header Bar (<lg) — Sleek, Minimal & Notch Safe */}
+        {/* Mobile Header Bar (<lg) — Sleek, Minimal, Larger Logo & 100% Notch Safe */}
         <header
-          className="lg:hidden flex items-center justify-between px-4 pb-2.5 bg-white/95 dark:bg-[#211729]/95 border-b border-[#E8DFEB] dark:border-[#49364F] sticky top-0 z-30 backdrop-blur-md"
-          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.65rem)' }}
+          className="lg:hidden flex items-center justify-between px-4 pb-3 bg-white/95 dark:bg-[#211729]/95 border-b border-[#E8DFEB] dark:border-[#49364F] sticky top-0 z-30 backdrop-blur-md"
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)' }}
         >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 flex items-center justify-center shrink-0">
               <img
                 src={theme === 'dark' ? '/oxonom-icon-white.png' : '/oxonom-icon-colored.png'}
                 alt="Oxonom EDU"
-                className="w-7 h-7 object-contain select-none"
+                className="w-10 h-10 object-contain select-none"
               />
             </div>
             <div>
-              <div className="text-xs font-black text-[#241329] dark:text-white leading-tight">
+              <div className="text-sm font-black text-[#241329] dark:text-white leading-tight">
                 Oxonom EDU
               </div>
-              <div className="text-[9px] font-bold text-[#4B075F] dark:text-[#C58ADB]">
+              <div className="text-[10px] font-bold text-[#4B075F] dark:text-[#C58ADB]">
                 {adminProfile.name}
               </div>
             </div>
@@ -435,6 +431,9 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
 
           <div className="flex items-center gap-2">
             <HeaderLiveClock theme="oxonom" variant="mobile" />
+
+            {/* Mobile Notification Dropdown */}
+            <HeaderNotificationDropdown communicationRoute="/principal/announcements" />
 
             <button
               type="button"

@@ -944,16 +944,6 @@ export default function PrincipalAnnouncementsView() {
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() => handleToggleBoard(ann.id)}
-                      className="px-2.5 py-1 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-[11px] font-bold cursor-pointer transition-colors"
-                      title="Akıllı Tahtaya Yansıt / Gizle"
-                    >
-                      <Tv size={12} className="inline mr-1" />
-                      <span>{ann.displayOnBoards ? 'Tahtadan Al' : 'Tahtaya Ver'}</span>
-                    </button>
-
-                    <button
-                      type="button"
                       onClick={() => handleDeleteAnnouncement(ann.id)}
                       className="w-7 h-7 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center cursor-pointer transition-colors"
                       title="Duyuruyu Sil"

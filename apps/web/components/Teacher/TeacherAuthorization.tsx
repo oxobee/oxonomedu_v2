@@ -136,7 +136,7 @@ export default function TeacherAuthorization({ children }: TeacherAuthorizationP
               <span>Öğrenci Paneline Git</span>
             </Link>
             <Link
-              href="/loginv2"
+              href="/login"
               className="w-full h-10 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
             >
               <LogOut size={15} />

@@ -376,14 +376,14 @@ export default async function proxy(req: NextRequest) {
   const isMobileUA = /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(userAgent)
   const cleanAuthPath = pathname.toLowerCase().replace(/\/+$/, '')
 
-  // Redirect all login routes and legacy /m-login to universal /loginv2
+  // Redirect legacy auth and /loginv2 routes to canonical /login
   if (
-    cleanAuthPath === '/login' ||
     cleanAuthPath === '/auth/login' ||
     cleanAuthPath === '/auth' ||
-    cleanAuthPath === '/m-login'
+    cleanAuthPath === '/m-login' ||
+    cleanAuthPath === '/loginv2'
   ) {
-    return NextResponse.redirect(new URL(`/loginv2${search}`, req.url), 307)
+    return NextResponse.redirect(new URL(`/login${search}`, req.url), 307)
   }
 
   // Redirect legacy admin routes to professional /principal/* tree
@@ -517,6 +517,8 @@ export default async function proxy(req: NextRequest) {
     pathname.startsWith('/gamestudio/') ||
     pathname === '/games' ||
     pathname.startsWith('/games/') ||
+    pathname === '/login' ||
+    pathname.startsWith('/login/') ||
     pathname === '/loginv2' ||
     pathname.startsWith('/loginv2/') ||
     pathname === '/pano' ||
@@ -613,10 +615,10 @@ export default async function proxy(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
-  // 10. Apex root & fallback: Redirect directly to /loginv2
+  // 10. Apex root & fallback: Redirect directly to /login
   // -------------------------------------------------------------------------
   if (pathname === '/' || !pathname.startsWith('/api')) {
-    return NextResponse.redirect(new URL(`/loginv2${search}`, req.url), 307)
+    return NextResponse.redirect(new URL(`/login${search}`, req.url), 307)
   }
 
   return NextResponse.next()

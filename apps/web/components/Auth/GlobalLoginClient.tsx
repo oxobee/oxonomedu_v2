@@ -7,7 +7,6 @@ import { motion } from 'framer-motion'
 import {
   GraduationCap,
   Briefcase,
-  Tv,
   ArrowRight,
   Eye,
   EyeOff,
@@ -16,7 +15,7 @@ import {
   User,
   Sparkles,
   ShieldCheck,
-  CheckCircle2,
+  UserPlus,
 } from 'lucide-react'
 import { useAuth } from '@components/Contexts/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
@@ -35,10 +34,9 @@ interface RoleConfig {
   targetRoute: string
   identifierLabel: string
   identifierPlaceholder: string
-  badge: string
 }
 
-// SADECE MÜDÜR, ÖĞRETMEN, ÖĞRENCİ (Veli kaldırıldı)
+// SADECE MÜDÜR, ÖĞRETMEN, ÖĞRENCİ (Veli ve Hızlı Demo Girişi kaldırıldı)
 const ROLES: RoleConfig[] = [
   {
     id: 'principal',
@@ -47,11 +45,10 @@ const ROLES: RoleConfig[] = [
     icon: Briefcase,
     defaultEmail: 'mudur@oxonom.com',
     defaultPass: 'mudur123',
-    defaultName: 'Dr. Uğur UĞURLU',
+    defaultName: 'Okul Müdürü',
     targetRoute: '/principal/dashboard',
     identifierLabel: 'E-Posta veya T.C. No',
     identifierPlaceholder: 'mudur@oxonom.com',
-    badge: 'İdare',
   },
   {
     id: 'teacher',
@@ -64,7 +61,6 @@ const ROLES: RoleConfig[] = [
     targetRoute: '/teacher/dashboard',
     identifierLabel: 'E-Posta veya T.C. No',
     identifierPlaceholder: 'ogretmen@oxonom.com',
-    badge: 'Eğitim',
   },
   {
     id: 'student',
@@ -77,7 +73,6 @@ const ROLES: RoleConfig[] = [
     targetRoute: '/student/dashboard',
     identifierLabel: 'Öğrenci No (101) veya E-Posta',
     identifierPlaceholder: '101 veya ogrenci@oxonom.com',
-    badge: '9-A',
   },
 ]
 
@@ -92,26 +87,30 @@ export default function GlobalLoginClient() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
+  const [principalDisplayName, setPrincipalDisplayName] = useState('Okul Müdürü')
+
+  useEffect(() => {
+    try {
+      const p = getStoredPrincipalProfile()
+      if (p && p.name) {
+        setPrincipalDisplayName(p.name)
+      }
+    } catch (_) {}
+  }, [])
 
   const activeRoleConfig = ROLES.find((r) => r.id === selectedRole) || ROLES[0]
 
   // Role switcher handler
-  const handleRoleSelect = (roleId: RoleType, showFeedback = false) => {
+  const handleRoleSelect = (roleId: RoleType) => {
     setSelectedRole(roleId)
     const conf = ROLES.find((r) => r.id === roleId)
     if (conf) {
       setIdentifier(conf.defaultEmail)
       setPassword(conf.defaultPass)
-      if (showFeedback) {
-        toast.success(`${conf.label} hesabı seçildi`, {
-          icon: conf.id === 'student' ? '🎒' : conf.id === 'principal' ? '👔' : '🎓',
-          duration: 2200,
-        })
-      }
     }
   }
 
-  // Handle URL query param: e.g. /loginv2?role=student
+  // Handle URL query param: e.g. /login?role=student
   useEffect(() => {
     const roleParam = searchParams.get('role') as RoleType | null
     if (roleParam && ROLES.some((r) => r.id === roleParam)) {
@@ -119,7 +118,7 @@ export default function GlobalLoginClient() {
     }
   }, [searchParams])
 
-  // Auto-detect role as user types (also keeps superadmin compatibility)
+  // Auto-detect role as user types
   const handleIdentifierChange = (val: string) => {
     setIdentifier(val)
     const lower = val.toLowerCase().trim()
@@ -259,7 +258,7 @@ export default function GlobalLoginClient() {
               className: '9-A',
               gradeLevel: '9. Sınıf',
               mentorTeacher: 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)',
-              schoolName: 'Oxonom Okulları',
+              schoolName: 'Necla Görer İlkokulu',
               gpa: currentGpa,
               classRank: currentRank,
               attendanceRate: 100,
@@ -346,24 +345,16 @@ export default function GlobalLoginClient() {
         />
       </div>
 
-      {/* ── SOL TARAF: GİRİŞ YAPMA FORMU & ÜSTTE LOGO (SCROLLSUZ TAM SIĞAN ALAN) ── */}
-      <div className="w-full lg:w-[48%] xl:w-[44%] 2xl:w-[40%] h-full flex flex-col justify-between p-5 sm:p-7 lg:p-9 z-10 relative overflow-y-auto lg:overflow-hidden border-r border-white/5 bg-[#0A0512]/60 backdrop-blur-xl">
-        {/* Üst Kısım: Resmi Logo ve Pano Butonu */}
-        <header className="w-full flex items-center justify-between pb-2 shrink-0">
-          <Link href="/loginv2" className="group flex items-center gap-2 cursor-pointer">
+      {/* ── SOL TARAF: GİRİŞ YAPMA FORMU (PANO BUTONU YOK, HIZLI DEMO YOK, KAYIT OL BUTONU VAR) ── */}
+      <div className="w-full lg:w-[48%] xl:w-[44%] 2xl:w-[40%] h-full flex flex-col justify-between p-5 sm:p-7 lg:p-10 z-10 relative overflow-y-auto lg:overflow-hidden border-r border-white/5 bg-[#0A0512]/60 backdrop-blur-xl">
+        {/* Üst Kısım: Sadece Resmi Logo (Pano butonu kaldırıldı) */}
+        <header className="w-full flex items-center justify-start pb-2 shrink-0">
+          <Link href="/login" className="group flex items-center gap-2 cursor-pointer">
             <img
               src="/oxonom-logo-dark.png"
               alt="Oxonom EDU"
               className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-[1.02]"
             />
-          </Link>
-
-          <Link
-            href="/pano"
-            className="h-8 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] text-[#D2C5D8] hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors border border-white/10"
-          >
-            <Tv size={13} className="text-[#D914C8]" />
-            <span>Pano</span>
           </Link>
         </header>
 
@@ -379,11 +370,13 @@ export default function GlobalLoginClient() {
               Hesabınıza Giriş Yapın
             </h1>
             <p className="text-xs text-[#A998B3] mt-0.5">
-              {activeRoleConfig.defaultName} · {activeRoleConfig.subtitle}
+              {selectedRole === 'principal'
+                ? `${principalDisplayName} · Kurum Yönetimi`
+                : `${activeRoleConfig.defaultName} · ${activeRoleConfig.subtitle}`}
             </p>
           </div>
 
-          {/* SADECE MÜDÜR, ÖĞRETMEN, ÖĞRENCİ SEÇİM BUTONLARI (VELİ YOK) */}
+          {/* SADECE MÜDÜR, ÖĞRETMEN, ÖĞRENCİ SEÇİM BUTONLARI */}
           <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#130B1B] rounded-2xl border border-white/10 mb-4 relative shadow-inner">
             {ROLES.map((r) => {
               const Icon = r.icon
@@ -491,7 +484,7 @@ export default function GlobalLoginClient() {
               </span>
             </div>
 
-            {/* Submit Button */}
+            {/* Giriş Yap Butonu */}
             <motion.button
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
@@ -510,32 +503,23 @@ export default function GlobalLoginClient() {
             </motion.button>
           </form>
 
-          {/* SADECE MÜDÜR, ÖĞRENCİ, ÖĞRETMEN HIZLI GİRİŞ KISAYOLLARI */}
-          <div className="mt-4 pt-3.5 border-t border-white/10 flex flex-col items-center">
-            <span className="text-[10px] font-semibold text-[#8E7E97] uppercase tracking-wider mb-2">
-              Hızlı Demo Girişi
-            </span>
-            <div className="grid grid-cols-3 gap-1.5 w-full">
-              {ROLES.map((r) => {
-                const Icon = r.icon
-                const isActive = selectedRole === r.id
-                return (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => handleRoleSelect(r.id, true)}
-                    className={`py-1.5 px-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      isActive
-                        ? 'bg-[#4B075F]/70 text-[#FCE8FA] border border-[#8D49A6]/70 shadow-sm'
-                        : 'bg-white/[0.04] hover:bg-white/[0.08] text-[#C2B4C8] hover:text-white border border-white/10'
-                    }`}
-                  >
-                    <Icon size={12} className={isActive ? 'text-[#D914C8]' : 'text-[#8E7E97]'} />
-                    <span>{r.label}</span>
-                  </button>
-                )
-              })}
+          {/* SEPERATÖR VE KAYIT OL BUTONU (HIZLI DEMO GİRİŞİ KALDIRILDI) */}
+          <div className="mt-5">
+            <div className="relative flex items-center justify-center mb-4">
+              <div className="w-full border-t border-white/10" />
+              <span className="absolute px-3 bg-[#0A0512] text-[11px] font-semibold text-[#8E7E97]">
+                veya
+              </span>
             </div>
+
+            <button
+              type="button"
+              onClick={() => toast('Kayıt olma ekranı çok yakında hizmete açılacaktır.', { icon: '✨' })}
+              className="w-full h-11 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:bg-[#4B075F]/30 text-[#D2C5D8] hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border border-white/10 hover:border-[#8D49A6]/50 transition-all cursor-pointer"
+            >
+              <UserPlus size={15} className="text-[#D914C8]" />
+              <span>Yeni Hesap Oluştur / Kayıt Ol</span>
+            </button>
           </div>
         </div>
 
@@ -545,10 +529,10 @@ export default function GlobalLoginClient() {
         </footer>
       </div>
 
-      {/* ── SAĞ TARAF (MASAÜSTÜ): BÜYÜK LOGO VE AMBİYANS ALANI ── */}
+      {/* ── SAĞ TARAF: BÜYÜK LOGO (KUTU KALDIRILDI, LOGO DOĞRUDAN AURADA PARLIYOR) ── */}
       <div className="hidden lg:flex flex-1 h-full items-center justify-center relative p-8 xl:p-12 overflow-hidden bg-gradient-to-br from-[#12081C]/90 via-[#0A0512] to-[#050208] z-10">
         {/* Sağ Alan Merkez Işık Küresi */}
-        <div className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-[#D914C8]/20 via-[#8D49A6]/15 to-[#4B075F]/20 blur-[110px] pointer-events-none" />
+        <div className="absolute w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-[#D914C8]/25 via-[#8D49A6]/20 to-[#4B075F]/25 blur-[120px] pointer-events-none" />
 
         {/* Dekoratif Yavaş Dönen Yörünge Çizgileri */}
         <motion.div
@@ -563,23 +547,20 @@ export default function GlobalLoginClient() {
           </svg>
         </motion.div>
 
-        {/* Ekrana Uyumlu Büyük Logo Bloğu */}
+        {/* Ekrana Uyumlu Büyük Logo (Arkasında dikdörtgen kutu olmadan serbest parıldayan yapı) */}
         <motion.div
           animate={{
             y: [-6, 6, -6],
-            scale: [1, 1.012, 1],
+            scale: [1, 1.015, 1],
           }}
           transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
           className="relative z-20 flex flex-col items-center justify-center max-w-xl w-full text-center px-4"
         >
-          {/* Logo Görseli (Koyu zemine uyumlu beyaz logo) */}
-          <div className="relative group p-6 sm:p-8 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-md shadow-2xl shadow-black/80">
-            <img
-              src="/oxonom-logo-dark.png"
-              alt="Oxonom EDU"
-              className="w-full max-w-[420px] xl:max-w-[480px] 2xl:max-w-[540px] h-auto object-contain drop-shadow-[0_15px_40px_rgba(217,20,200,0.35)]"
-            />
-          </div>
+          <img
+            src="/oxonom-logo-dark.png"
+            alt="Oxonom EDU"
+            className="w-full max-w-[460px] xl:max-w-[520px] 2xl:max-w-[580px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(217,20,200,0.4)]"
+          />
 
           {/* Alt Rozet Bilgileri */}
           <div className="mt-8 flex items-center gap-3">

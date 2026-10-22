@@ -33,6 +33,7 @@ import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { signOut } from '@components/Contexts/AuthContext'
 import HeaderLiveClock from '@components/Common/HeaderLiveClock'
+import HeaderNotificationDropdown from '@components/Notifications/HeaderNotificationDropdown'
 
 interface TeacherLayoutProps {
   children: React.ReactNode
@@ -142,7 +143,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
       {/* ── DESKTOP SIDEBAR (lg+) ── */}
       <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 shrink-0 bg-white dark:bg-[#211729] border-r border-[#E8DFEB] dark:border-[#49364F] z-30 select-none">
         {/* Brand Header */}
-        <div className="p-5 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
+        <div className="p-5 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-start">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0">
               <img
@@ -160,14 +161,6 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="w-8 h-8 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#716779] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer"
-            title="Temayı Değiştir"
-          >
-            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
         </div>
 
         {/* Teacher Identity Box */}
@@ -267,7 +260,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                 } catch (_) {}
               }
               await signOut()
-              window.location.href = '/loginv2'
+              window.location.href = '/login'
             }}
             className="w-full h-9 px-3 rounded-xl hover:bg-[#FCE8ED] dark:hover:bg-[#C62848]/20 text-[#716779] hover:text-[#C62848] dark:hover:text-[#F17AE6] font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
@@ -303,6 +296,9 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
               <span>Program</span>
             </Link>
 
+            {/* Notification Dropdown with Elastic Popup & Audio */}
+            <HeaderNotificationDropdown communicationRoute="/teacher/communication" />
+
             <button
               type="button"
               onClick={toggleTheme}
@@ -317,14 +313,14 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
         {/* ── MOBILE HEADER (<lg) — Sleek, Minimal & Notch Safe ── */}
         <header
           className="lg:hidden sticky top-0 z-30 bg-white/95 dark:bg-[#211729]/95 backdrop-blur-md border-b border-[#E8DFEB] dark:border-[#49364F] px-4 pb-2.5 flex items-center justify-between"
-          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.65rem)' }}
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)' }}
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 flex items-center justify-center shrink-0">
               <img
                 src={theme === 'dark' ? '/oxonom-icon-white.png' : '/oxonom-icon-colored.png'}
                 alt="Oxonom EDU"
-                className="w-7 h-7 object-contain select-none"
+                className="w-10 h-10 object-contain select-none"
               />
             </div>
             <div>
@@ -339,6 +335,9 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
 
           <div className="flex items-center gap-1.5">
             <HeaderLiveClock theme="oxonom" variant="mobile" />
+
+            {/* Notification Dropdown with Elastic Popup & Audio */}
+            <HeaderNotificationDropdown communicationRoute="/teacher/communication" />
 
             <button
               type="button"
@@ -519,7 +518,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
                       } catch (_) {}
                     }
                     await signOut()
-                    window.location.href = '/loginv2'
+                    window.location.href = '/login'
                   }}
                   className="text-xs font-bold text-[#C62848] dark:text-[#F17AE6] flex items-center gap-1.5 cursor-pointer"
                 >

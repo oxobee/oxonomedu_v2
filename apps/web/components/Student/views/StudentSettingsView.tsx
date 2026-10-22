@@ -75,7 +75,7 @@ export default function StudentSettingsView({
       } catch (_) {}
     }
     await signOut()
-    window.location.href = '/loginv2'
+    window.location.href = '/login'
   }
 
   return (
