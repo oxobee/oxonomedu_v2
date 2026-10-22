@@ -2,14 +2,13 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { getPanoDb } from '@/lib/pano-pair/store'
-import type { SchoolAssignmentItem, QuizQuestion } from '@/services/school_assignments/school_assignments'
+import type { SchoolAssignmentItem } from '@/services/school_assignments/school_assignments'
 
-const TEMP_STORAGE_FILE = path.join('/tmp', 'oxonom_school_assignments.json')
-const BACKUP_STORAGE_FILE = path.join(process.cwd(), 'oxonom_school_assignments_backup.json')
-const DELETED_IDS_FILE = path.join('/tmp', 'oxonom_deleted_assignment_ids.json')
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://crkoeptnoheiqxukxpig.supabase.co'
+const SERVICE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNya29lcHRub2hlaXF4dWt4cGlnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MjYxNjU2MCwiZXhwIjoyMTA4MTkyNTYwfQ.GyBCPOX4Zhp9hyhic2a8RtZU34eY21JOZGF9ZX40_7g'
 
 export const CANONICAL_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
   {
@@ -22,7 +21,7 @@ export const CANONICAL_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     subject: 'Türk Dili ve Edebiyatı',
     tool_type: 'READING',
     classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-    due_date: '2026-10-18T23:59:00',
+    due_date: '2026-10-30T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Ebru TEKNECİ',
@@ -44,7 +43,7 @@ export const CANONICAL_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     tool_type: 'WHITEBOARD',
     board_uuid: 'board_edebi_sanatlar_9a',
     classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-    due_date: '2026-10-20T23:59:00',
+    due_date: '2026-11-02T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Ebru TEKNECİ',
@@ -58,231 +57,95 @@ export const CANONICAL_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     id: 1003,
     assignment_uuid: 'asg_paragraf_anlam_test',
     title: 'Sözcükte Anlam & Paragrafta Ana Düşünce Değerlendirme Quiz',
-    description: 'Çoktan seçmeli, doğru-yanlış, eşleştirme ve kısa cevaplı sorular içeren interaktif tarama testi.',
+    description: 'ÖSYM ve MEB soru havuzuna uyumlu 10 soruluk paragraf yapısı ve cümlede anlam pekiştirme sınavı.',
     grade_level: '9. Sınıf',
     grade_category: 'Lise (9-12)',
     subject: 'Türk Dili ve Edebiyatı',
     tool_type: 'QUIZ',
     classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-    due_date: '2026-10-22T23:59:00',
+    due_date: '2026-11-05T23:59:00',
     max_score: 100,
     published: true,
     teacher_name: 'Ebru TEKNECİ',
-    creation_date: '2026-10-09T11:00:00',
-    quiz_questions: [
-      {
-        id: 'q-1',
-        questionNumber: 1,
-        type: 'multiple_choice',
-        prompt: '“Yazar, olayları bir kamera sessizliğiyle aktarmak yerine karakterlerinin iç dünyasındaki fırtınaları kelimelere dökmüştür.” Bu cümlede yazarın öne çıkan özelliği aşağıdakilerden hangisidir?',
-        points: 25,
-        options: [
-          { id: 'A', label: 'A', text: 'Olayları kronolojik sırayla belgesel gibi aktarması' },
-          { id: 'B', label: 'B', text: 'Ruhsal tahlil ve iç çatışmaları derinlemesine işlemesi' },
-          { id: 'C', label: 'C', text: 'Sadece dış gözleme dayalı betimlemeler yapması' },
-          { id: 'D', label: 'D', text: 'Mekân tasvirlerine odaklanıp insanı arka plana atması' },
-        ],
-        correctOptionId: 'B',
-        explanation: 'Karakterlerin iç dünyasındaki fırtınalar, bireyin psikolojik ve ruhsal boyutunu derinlemesine ele almayı ifade eder.',
-      },
-      {
-        id: 'q-2',
-        questionNumber: 2,
-        type: 'true_false',
-        prompt: 'Dede Korkut Hikâyelerinde olağanüstü mitolojik motifler ile gerçekçi tarihsel unsurlar bir arada bulunur ve eser nazım-nesir (şiir-düzyazı) karışık olarak kaleme alınmıştır.',
-        points: 25,
-        correctBoolean: true,
-        explanation: 'Dede Korkut destansı anlatılarında olaylar düzyazı, kahramanların duyguları ve yakarışları ise şiir biçimindedir.',
-      },
-      {
-        id: 'q-3',
-        questionNumber: 3,
-        type: 'matching',
-        prompt: 'Aşağıdaki edebi sanatları uygun şiir dizeleriyle eşleştiriniz.',
-        points: 25,
-        matchingPairs: [
-          { id: 'm-1', left: 'Teşbih (Benzetme)', right: 'Kükremiş sel gibiyim, bendimi çiğner aşarım.' },
-          { id: 'm-2', left: 'Teşhis (Kişileştirme)', right: 'Rüzgâr hüzünle fısıldıyordu kırık penceremde.' },
-          { id: 'm-3', left: 'Tezat (Karşıtlık)', right: 'Ağlarım çağlar gibi, gülerim güller gibi.' },
-        ],
-        explanation: 'Kükremiş sel benzetme (teşbih), rüzgârın fısıldaması kişileştirme (teşhis), ağlamak-gülmek karşıtlık (tezat) sanatıdır.',
-      },
-      {
-        id: 'q-4',
-        questionNumber: 4,
-        type: 'short_answer',
-        prompt: 'Bir edebi metinde anlatıcının olayları her şeyi bilen, kahramanların geçmişini, geleceğini ve gizli düşüncelerini sezen bakış açısına ne ad verilir?',
-        points: 25,
-        sampleAnswer: 'İlahi (Hakim / Tanrısal) Bakış Açısı',
-        explanation: 'Kahramanların aklından geçenleri ve geleceği bilen anlatıcı ilahi (tanrısal / hakim) bakış açısına sahiptir.',
-      },
-    ],
+    creation_date: '2026-10-10T11:00:00',
     tool_data: {
-      quizQuestionCount: 4,
-      quizDifficulty: 'Orta',
       quizQuestions: [
         {
-          id: 'q-1',
-          questionNumber: 1,
-          type: 'multiple_choice',
-          prompt: '“Yazar, olayları bir kamera sessizliğiyle aktarmak yerine karakterlerinin iç dünyasındaki fırtınaları kelimelere dökmüştür.” Bu cümlede yazarın öne çıkan özelliği aşağıdakilerden hangisidir?',
-          points: 25,
-          options: [
-            { id: 'A', label: 'A', text: 'Olayları kronolojik sırayla belgesel gibi aktarması' },
-            { id: 'B', label: 'B', text: 'Ruhsal tahlil ve iç çatışmaları derinlemesine işlemesi' },
-            { id: 'C', label: 'C', text: 'Sadece dış gözleme dayalı betimlemeler yapması' },
-            { id: 'D', label: 'D', text: 'Mekân tasvirlerine odaklanıp insanı arka plana atması' },
-          ],
-          correctOptionId: 'B',
-          explanation: 'Karakterlerin iç dünyasındaki fırtınalar, bireyin psikolojik boyutunu ele almayı ifade eder.',
-        },
-        {
-          id: 'q-2',
-          questionNumber: 2,
-          type: 'true_false',
-          prompt: 'Dede Korkut Hikâyelerinde olağanüstü mitolojik motifler ile gerçekçi tarihsel unsurlar bir arada bulunur ve eser nazım-nesir (şiir-düzyazı) karışık olarak kaleme alınmıştır.',
-          points: 25,
-          correctBoolean: true,
-          explanation: 'Dede Korkut anlatılarında olaylar düzyazı, duygular şiir biçimindedir.',
-        },
-        {
-          id: 'q-3',
-          questionNumber: 3,
-          type: 'matching',
-          prompt: 'Aşağıdaki edebi sanatları uygun şiir dizeleriyle eşleştiriniz.',
-          points: 25,
-          matchingPairs: [
-            { id: 'm-1', left: 'Teşbih (Benzetme)', right: 'Kükremiş sel gibiyim, bendimi çiğner aşarım.' },
-            { id: 'm-2', left: 'Teşhis (Kişileştirme)', right: 'Rüzgâr hüzünle fısıldıyordu kırık penceremde.' },
-            { id: 'm-3', left: 'Tezat (Karşıtlık)', right: 'Ağlarım çağlar gibi, gülerim güller gibi.' },
-          ],
-          explanation: 'Kükremiş sel benzetme, rüzgârın fısıldaması kişileştirme, ağlamak-gülmek tezattır.',
-        },
-        {
-          id: 'q-4',
-          questionNumber: 4,
-          type: 'short_answer',
-          prompt: 'Bir edebi metinde anlatıcının olayları her şeyi bilen, kahramanların geçmişini, geleceğini ve gizli düşüncelerini sezen bakış açısına ne ad verilir?',
-          points: 25,
-          sampleAnswer: 'İlahi (Hakim / Tanrısal) Bakış Açısı',
-          explanation: 'Kahramanların gizli düşüncelerini bilen anlatıcı ilahi bakış açısına sahiptir.',
+          id: 1,
+          question: '"Gözlerini ufuktan bir an olsun ayırmıyordu." cümlesindeki edebi sanat hangisidir?',
+          options: ['Teşbih', 'Mecaz-ı Mürsel', 'Kinaye', 'Tezat'],
+          correctIndex: 1,
+          points: 10,
         },
       ],
     },
   },
-  {
-    id: 1004,
-    assignment_uuid: 'asg_kumeler_mantik_calisma',
-    title: 'Kümeler, Önermeler ve Mantık Çalışma Föyü',
-    description: 'Doğruluk tabloları ve küme işlemleri içeren analitik matematik çalışma föyü.',
-    grade_level: '9. Sınıf',
-    grade_category: 'Lise (9-12)',
-    subject: 'Matematik',
-    tool_type: 'WORKSHEET',
-    classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-    due_date: '2026-10-24T23:59:00',
-    max_score: 100,
-    published: true,
-    teacher_name: 'Ebru TEKNECİ',
-    creation_date: '2026-10-10T14:00:00',
-    tool_data: {
-      attachedFileName: '9A_Matematik_Mantık_ve_Kümeler_Çalışma_Föyü.pdf',
-    },
-  },
 ]
 
-function getLocalDeletedIds(): string[] {
+// In-memory cache for fast read within the same serverless instance
+let memoryAssignmentsCache: SchoolAssignmentItem[] | null = null
+
+async function getAssignmentsFromSupabase(): Promise<SchoolAssignmentItem[]> {
   try {
-    if (fs.existsSync(DELETED_IDS_FILE)) {
-      const data = fs.readFileSync(DELETED_IDS_FILE, 'utf-8')
-      const parsed = JSON.parse(data)
-      if (Array.isArray(parsed)) return parsed
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/assignments?select=*&order=created_at.desc`, {
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+      },
+      cache: 'no-store',
+    })
+
+    if (res.ok) {
+      const rows = await res.json()
+      if (Array.isArray(rows) && rows.length > 0) {
+        const mapped: SchoolAssignmentItem[] = rows.map((r: any, idx: number) => ({
+          id: r.id,
+          assignment_uuid: r.id,
+          title: r.title,
+          description: r.description || '',
+          grade_level: '9. Sınıf',
+          grade_category: 'Lise (9-12)',
+          subject: r.course_name || 'Türk Dili ve Edebiyatı',
+          tool_type: 'READING',
+          classes: [{ id: 101, name: `${r.class_name || '9-A'} Şubesi`, code: r.class_name || '9/A' }],
+          due_date: r.due_date || new Date().toISOString(),
+          max_score: 100,
+          published: true,
+          teacher_name: r.teacher_name || 'Ebru TEKNECİ',
+          creation_date: r.created_at || new Date().toISOString(),
+          tool_data: {},
+        }))
+        memoryAssignmentsCache = mapped
+        return mapped
+      }
     }
-  } catch (_) {}
-  return []
-}
+  } catch (err) {
+    console.error('[api/assignments] Supabase fetch error:', err)
+  }
 
-function saveLocalDeletedIds(ids: string[]) {
-  try {
-    fs.writeFileSync(DELETED_IDS_FILE, JSON.stringify(ids), 'utf-8')
-  } catch (_) {}
-}
-
-function loadFromFile(): SchoolAssignmentItem[] | null {
-  try {
-    if (fs.existsSync(TEMP_STORAGE_FILE)) {
-      const data = fs.readFileSync(TEMP_STORAGE_FILE, 'utf-8')
-      const parsed = JSON.parse(data)
-      if (Array.isArray(parsed)) return parsed
-    }
-    if (fs.existsSync(BACKUP_STORAGE_FILE)) {
-      const data = fs.readFileSync(BACKUP_STORAGE_FILE, 'utf-8')
-      const parsed = JSON.parse(data)
-      if (Array.isArray(parsed)) return parsed
-    }
-  } catch (_) {}
-  return null
-}
-
-function saveToFile(data: SchoolAssignmentItem[]) {
-  try {
-    fs.writeFileSync(TEMP_STORAGE_FILE, JSON.stringify(data), 'utf-8')
-  } catch (_) {}
-  try {
-    fs.writeFileSync(BACKUP_STORAGE_FILE, JSON.stringify(data), 'utf-8')
-  } catch (_) {}
-}
-
-async function getAssignmentsFromDatabase(): Promise<SchoolAssignmentItem[]> {
+  // Also check MongoDB if available
   try {
     const db = await getPanoDb()
     if (db) {
       const col = db.collection('school_assignments')
-      const deletedCol = db.collection('deleted_assignment_ids')
-
-      const [deletedDocs, count] = await Promise.all([
-        deletedCol.find({}).toArray(),
-        col.countDocuments(),
-      ])
-
-      const deletedIds = new Set(deletedDocs.map((d: any) => String(d.id)))
-
-      // Seed canonically once if database has zero assignments AND zero deletions
-      if (count === 0 && deletedDocs.length === 0) {
-        await col.insertMany(CANONICAL_SCHOOL_ASSIGNMENTS.map((a) => ({ ...a })))
-        saveToFile(CANONICAL_SCHOOL_ASSIGNMENTS)
-        return CANONICAL_SCHOOL_ASSIGNMENTS
-      }
-
       const docs = await col.find({}).toArray()
-      const assignments: SchoolAssignmentItem[] = docs
-        .filter((d: any) => !deletedIds.has(String(d.id)) && !deletedIds.has(String(d.assignment_uuid)))
-        .map((d: any) => {
+      if (docs && docs.length > 0) {
+        const mapped = docs.map((d: any) => {
           const { _id, ...rest } = d
           return rest as SchoolAssignmentItem
         })
-
-      saveToFile(assignments)
-      return assignments
+        memoryAssignmentsCache = mapped
+        return mapped
+      }
     }
-  } catch (err: any) {
-    console.warn('[api/assignments] MongoDB load error, fallback to file storage:', err?.message || err)
-  }
+  } catch (_) {}
 
-  // File fallback
-  const fileData = loadFromFile()
-  const deletedIds = new Set(getLocalDeletedIds())
-  if (fileData && fileData.length > 0) {
-    return fileData.filter((a) => !deletedIds.has(String(a.id)) && !deletedIds.has(String(a.assignment_uuid)))
-  }
-
-  return CANONICAL_SCHOOL_ASSIGNMENTS.filter(
-    (a) => !deletedIds.has(String(a.id)) && !deletedIds.has(String(a.assignment_uuid))
-  )
+  // Fallback to canonical sample assignments
+  return memoryAssignmentsCache || CANONICAL_SCHOOL_ASSIGNMENTS
 }
 
 export async function GET(request: Request) {
-  const assignments = await getAssignmentsFromDatabase()
+  const assignments = await getAssignmentsFromSupabase()
 
   const { searchParams } = new URL(request.url)
   const subject = searchParams.get('subject')
@@ -332,43 +195,58 @@ export async function POST(request: Request) {
       )
     }
 
+    // 1. Save directly into Supabase PostgreSQL database
+    for (const item of itemsToSave) {
+      const className = Array.isArray(item.classes) && item.classes[0]?.name
+        ? item.classes[0].name.replace(' Şubesi', '')
+        : '9-A'
+
+      const supabasePayload = {
+        title: item.title,
+        description: item.description || '',
+        class_name: className,
+        course_name: item.subject || 'Türk Dili ve Edebiyatı',
+        teacher_name: item.teacher_name || 'Ebru TEKNECİ',
+        due_date: item.due_date || new Date().toISOString(),
+      }
+
+      await fetch(`${SUPABASE_URL}/rest/v1/assignments`, {
+        method: 'POST',
+        headers: {
+          apikey: SERVICE_KEY,
+          Authorization: `Bearer ${SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(supabasePayload),
+      })
+    }
+
+    // 2. Also mirror into MongoDB if connected
     try {
       const db = await getPanoDb()
       if (db) {
         const col = db.collection('school_assignments')
-        const deletedCol = db.collection('deleted_assignment_ids')
-
         for (const item of itemsToSave) {
           const { _id, ...cleanItem } = item as any
           const searchKey = item.assignment_uuid
             ? { assignment_uuid: item.assignment_uuid }
             : { id: item.id }
-
           await col.updateOne(searchKey, { $set: cleanItem }, { upsert: true })
-          if (item.id) await deletedCol.deleteOne({ id: String(item.id) })
-          if (item.assignment_uuid) await deletedCol.deleteOne({ id: String(item.assignment_uuid) })
         }
       }
-    } catch (dbErr: any) {
-      console.warn('[api/assignments] MongoDB save error, fallback to file:', dbErr?.message || dbErr)
-    }
+    } catch (_) {}
 
-    // Update local file storage
-    const current = (loadFromFile() || []).filter(
+    // Refresh memory cache
+    const current = (memoryAssignmentsCache || CANONICAL_SCHOOL_ASSIGNMENTS).filter(
       (e) => !itemsToSave.some((it) => it.id === e.id || it.assignment_uuid === e.assignment_uuid)
     )
     const updated = [...itemsToSave, ...current]
-    saveToFile(updated)
-
-    // Unmark from local deleted ids
-    const localDeleted = getLocalDeletedIds().filter(
-      (id) => !itemsToSave.some((it) => String(it.id) === id || it.assignment_uuid === id)
-    )
-    saveLocalDeletedIds(localDeleted)
+    memoryAssignmentsCache = updated
 
     return NextResponse.json({
       success: true,
-      message: 'Ödev veritabanına başarıyla kaydedildi ve tüm öğrencilerin ekranlarına yansıtıldı.',
+      message: 'Ödev Supabase kalıcı veritabanına başarıyla kaydedildi.',
       assignment: itemsToSave[0],
       assignments: updated,
       totalCount: updated.length,
@@ -390,40 +268,34 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'Ödev ID belirtilmedi' }, { status: 400 })
     }
 
+    // 1. Delete from Supabase
+    await fetch(`${SUPABASE_URL}/rest/v1/assignments?id=eq.${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+      },
+    })
+
+    // 2. Delete from MongoDB if available
     try {
       const db = await getPanoDb()
       if (db) {
         const col = db.collection('school_assignments')
-        const deletedCol = db.collection('deleted_assignment_ids')
-
         await col.deleteMany({
           $or: [{ id: isNaN(Number(id)) ? -1 : Number(id) }, { assignment_uuid: id }],
         })
-        await deletedCol.updateOne(
-          { id },
-          { $set: { id, deletedAt: new Date().toISOString() } },
-          { upsert: true }
-        )
       }
-    } catch (dbErr: any) {
-      console.warn('[api/assignments] MongoDB delete error, fallback to file:', dbErr?.message || dbErr)
-    }
+    } catch (_) {}
 
-    // Update local deleted IDs
-    const localDeleted = getLocalDeletedIds()
-    if (!localDeleted.includes(id)) {
-      localDeleted.push(id)
-      saveLocalDeletedIds(localDeleted)
-    }
-
-    // Update local file storage
-    const current = loadFromFile() || []
+    // Update memory cache
+    const current = memoryAssignmentsCache || CANONICAL_SCHOOL_ASSIGNMENTS
     const updated = current.filter((e) => String(e.id) !== id && e.assignment_uuid !== id)
-    saveToFile(updated)
+    memoryAssignmentsCache = updated
 
     return NextResponse.json({
       success: true,
-      message: 'Ödev veritabanından kalıcı olarak silindi ve öğrenci ekranlarından kaldırıldı.',
+      message: 'Ödev Supabase veritabanından kalıcı olarak silindi.',
       deletedId: id,
       totalCount: updated.length,
     })

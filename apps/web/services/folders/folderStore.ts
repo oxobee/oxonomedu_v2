@@ -41,27 +41,14 @@ export interface FolderStoreData {
   media: MediaItem[]
 }
 
-const STORE_DISK_PATH = '/tmp/lh_folders_store.json'
+let memoryFolderStore: FolderStoreData | null = null
 
 function loadStoreFromDisk(): FolderStoreData | null {
-  try {
-    const fs = require('fs')
-    if (fs.existsSync(STORE_DISK_PATH)) {
-      const raw = fs.readFileSync(STORE_DISK_PATH, 'utf8')
-      const data = JSON.parse(raw)
-      if (data && Array.isArray(data.folders)) {
-        return data
-      }
-    }
-  } catch {}
-  return null
+  return memoryFolderStore
 }
 
 function saveStoreToDisk(store: FolderStoreData) {
-  try {
-    const fs = require('fs')
-    fs.writeFileSync(STORE_DISK_PATH, JSON.stringify(store))
-  } catch {}
+  memoryFolderStore = store
 }
 
 const INITIAL_MEDIA: MediaItem[] = [

@@ -21,27 +21,14 @@ const DEFAULT_DEMO_AUTHOR: PodcastAuthor = {
   update_date: '2026-10-01 10:00:00',
 }
 
-const STORE_DISK_PATH = '/tmp/lh_podcasts_store.json'
+let memoryStore: PodcastStoreData | null = null
 
 function loadStoreFromDisk(): PodcastStoreData | null {
-  try {
-    const fs = require('fs')
-    if (fs.existsSync(STORE_DISK_PATH)) {
-      const raw = fs.readFileSync(STORE_DISK_PATH, 'utf8')
-      const data = JSON.parse(raw)
-      if (data && Array.isArray(data.podcasts)) {
-        return data
-      }
-    }
-  } catch {}
-  return null
+  return memoryStore
 }
 
 function saveStoreToDisk(store: PodcastStoreData) {
-  try {
-    const fs = require('fs')
-    fs.writeFileSync(STORE_DISK_PATH, JSON.stringify(store))
-  } catch {}
+  memoryStore = store
 }
 
 const INITIAL_TURKISH_PODCASTS: Array<Omit<PodcastWithEpisodeCount, 'episode_count'> & { episodes: Partial<PodcastEpisode>[] }> = [

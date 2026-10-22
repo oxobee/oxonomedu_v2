@@ -2,8 +2,6 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 
 // Canonical 30-hour (6 periods/day x 5 days) MEB schedule for 9-A as authentic initial dataset
 export const CANONICAL_9A_SCHEDULE = [
@@ -57,52 +55,122 @@ export const CANONICAL_6_PERIODS = [
   { periodNumber: 6, time: '13:40 - 14:20' },
 ]
 
-// Server-side state
-let globalScheduleState: {
-  schedule: any[]
-  periods: any[]
-  publishedAt: string
-  publishedBy: string
-} = {
-  schedule: CANONICAL_9A_SCHEDULE,
-  periods: CANONICAL_6_PERIODS,
-  publishedAt: new Date().toISOString(),
-  publishedBy: 'Dr. Uğur UĞURLU (Okul Müdürü)',
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://crkoeptnoheiqxukxpig.supabase.co'
+const SERVICE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNya29lcHRub2hlaXF4dWt4cGlnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MjYxNjU2MCwiZXhwIjoyMTA4MTkyNTYwfQ.GyBCPOX4Zhp9hyhic2a8RtZU34eY21JOZGF9ZX40_7g'
+
+const DAY_CODE_TO_INT: Record<string, number> = {
+  mon: 1,
+  tue: 2,
+  wed: 3,
+  thu: 4,
+  fri: 5,
 }
 
-const TEMP_STORAGE_FILE = path.join('/tmp', 'oxonom_active_schedule.json')
+const INT_TO_DAY_CODE: Record<number, string> = {
+  1: 'mon',
+  2: 'tue',
+  3: 'wed',
+  4: 'thu',
+  5: 'fri',
+}
 
-function loadFromTempFile() {
+function getSubjectColor(subject: string): string {
+  const s = (subject || '').toLowerCase()
+  if (s.includes('türk') || s.includes('edebiyat')) return 'blue'
+  if (s.includes('matematik')) return 'indigo'
+  if (s.includes('fizik') || s.includes('fen')) return 'emerald'
+  if (s.includes('bilişim') || s.includes('yazılım')) return 'cyan'
+  if (s.includes('yabancı') || s.includes('ingilizce')) return 'purple'
+  if (s.includes('tarih')) return 'amber'
+  if (s.includes('coğrafya')) return 'teal'
+  if (s.includes('beden') || s.includes('spor')) return 'orange'
+  if (s.includes('müzik') || s.includes('görsel')) return 'pink'
+  return 'slate'
+}
+
+async function fetchScheduleFromSupabase(): Promise<{ schedule: any[]; periods: any[] } | null> {
   try {
-    if (fs.existsSync(TEMP_STORAGE_FILE)) {
-      const data = fs.readFileSync(TEMP_STORAGE_FILE, 'utf-8')
-      const parsed = JSON.parse(data)
-      if (parsed && Array.isArray(parsed.schedule) && parsed.schedule.length > 0) {
-        globalScheduleState = parsed
-      }
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/schedules?select=*&order=day_of_week.asc,period.asc`, {
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+      },
+      cache: 'no-store',
+    })
+
+    if (!res.ok) return null
+    const rows = await res.json()
+
+    if (Array.isArray(rows) && rows.length > 0) {
+      const schedule = rows.map((r: any) => ({
+        id: r.id,
+        orgId: 30,
+        day: INT_TO_DAY_CODE[r.day_of_week] || 'mon',
+        period: r.period,
+        classCode: r.class_name || '9-A',
+        subject: r.subject,
+        teacherName: r.teacher_name,
+        roomName: r.classroom || 'Derslik 9-A',
+        color: getSubjectColor(r.subject),
+        isSmartBoardActive: true,
+      }))
+      return { schedule, periods: CANONICAL_6_PERIODS }
     }
-  } catch (_) {}
+
+    // Auto-seed canonical schedule to Supabase if empty
+    await seedCanonicalToSupabase()
+    return { schedule: CANONICAL_9A_SCHEDULE, periods: CANONICAL_6_PERIODS }
+  } catch (err) {
+    console.error('[api/schedule] Supabase fetch error:', err)
+    return null
+  }
 }
 
-function saveToTempFile(data: any) {
+async function seedCanonicalToSupabase() {
   try {
-    fs.writeFileSync(TEMP_STORAGE_FILE, JSON.stringify(data), 'utf-8')
-  } catch (_) {}
+    const payload = CANONICAL_9A_SCHEDULE.map((item) => {
+      const periodInfo = CANONICAL_6_PERIODS.find((p) => p.periodNumber === item.period)
+      const times = (periodInfo?.time || '08:30 - 09:10').split('-').map((s) => s.trim())
+      return {
+        class_name: item.classCode || '9-A',
+        day_of_week: DAY_CODE_TO_INT[item.day] || 1,
+        period: item.period,
+        subject: item.subject,
+        teacher_name: item.teacherName,
+        classroom: item.roomName,
+        start_time: times[0] || '08:30',
+        end_time: times[1] || '09:10',
+      }
+    })
+
+    await fetch(`${SUPABASE_URL}/rest/v1/schedules`, {
+      method: 'POST',
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+  } catch (err) {
+    console.warn('[api/schedule] Failed to seed canonical rows:', err)
+  }
 }
 
-// Initial load on server module initialization
-loadFromTempFile()
-
-export async function GET(request: Request) {
-  loadFromTempFile()
+export async function GET() {
+  const dbData = await fetchScheduleFromSupabase()
+  const activeSchedule = dbData?.schedule || CANONICAL_9A_SCHEDULE
+  const activePeriods = dbData?.periods || CANONICAL_6_PERIODS
 
   return NextResponse.json(
     {
       success: true,
-      schedule: globalScheduleState.schedule,
-      periods: globalScheduleState.periods,
-      publishedAt: globalScheduleState.publishedAt,
-      publishedBy: globalScheduleState.publishedBy,
+      schedule: activeSchedule,
+      periods: activePeriods,
+      publishedAt: new Date().toISOString(),
+      publishedBy: 'Dr. Uğur UĞURLU (Okul Müdürü)',
     },
     {
       status: 200,
@@ -124,6 +192,49 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Geçersiz program verisi' }, { status: 400 })
     }
 
+    const effectivePeriods =
+      Array.isArray(periods) && periods.length > 0 ? periods : CANONICAL_6_PERIODS
+
+    // Delete existing rows for 9-A in Supabase
+    await fetch(`${SUPABASE_URL}/rest/v1/schedules?class_name=eq.9-A`, {
+      method: 'DELETE',
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+      },
+    })
+
+    // Prepare batch insert rows for Supabase
+    const rowsToInsert = schedule.map((item: any) => {
+      const periodInfo = effectivePeriods.find((p: any) => p.periodNumber === item.period)
+      const times = (periodInfo?.time || '08:30 - 09:10').split('-').map((s: string) => s.trim())
+      return {
+        class_name: item.classCode || '9-A',
+        day_of_week: typeof item.day === 'number' ? item.day : (DAY_CODE_TO_INT[item.day] || 1),
+        period: item.period,
+        subject: item.subject,
+        teacher_name: item.teacherName || 'Öğretmen',
+        classroom: item.roomName || 'Derslik 9-A',
+        start_time: times[0] || '08:30',
+        end_time: times[1] || '09:10',
+      }
+    })
+
+    const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/schedules`, {
+      method: 'POST',
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(rowsToInsert),
+    })
+
+    if (!insertRes.ok) {
+      const errText = await insertRes.text()
+      console.error('[api/schedule] Supabase batch insert error:', errText)
+    }
+
     const nowStr = new Date().toLocaleString('tr-TR', {
       day: 'numeric',
       month: 'long',
@@ -131,21 +242,9 @@ export async function POST(request: Request) {
       minute: '2-digit',
     })
 
-    const effectivePeriods =
-      Array.isArray(periods) && periods.length > 0 ? periods : CANONICAL_6_PERIODS
-
-    globalScheduleState = {
-      schedule,
-      periods: effectivePeriods,
-      publishedAt: nowStr,
-      publishedBy: publishedBy || 'Dr. Uğur UĞURLU (Okul Müdürü)',
-    }
-
-    saveToTempFile(globalScheduleState)
-
     return NextResponse.json({
       success: true,
-      message: 'Ders programı başarıyla kaydedildi ve tüm kullanıcılara yayınlandı.',
+      message: 'Ders programı başarıyla Supabase kalıcı veritabanına kaydedildi ve yayınlandı.',
       totalHours: schedule.length,
       publishedAt: nowStr,
     })

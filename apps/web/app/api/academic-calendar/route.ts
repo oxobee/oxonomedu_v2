@@ -2,36 +2,54 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import {
   CANONICAL_ACADEMIC_EVENTS,
   AcademicCalendarEvent,
 } from '@/lib/calendar/academicCalendarStorage'
+import { getPanoDb } from '@/lib/pano-pair/store'
 
-const STORAGE_FILE = path.join('/tmp', 'oxonom_academic_calendar.json')
+let memoryEventsCache: AcademicCalendarEvent[] | null = null
 
-function loadEvents(): AcademicCalendarEvent[] {
+async function loadEvents(): Promise<AcademicCalendarEvent[]> {
   try {
-    if (fs.existsSync(STORAGE_FILE)) {
-      const content = fs.readFileSync(STORAGE_FILE, 'utf-8')
-      const parsed = JSON.parse(content)
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed
+    const db = await getPanoDb()
+    if (db) {
+      const col = db.collection('academic_calendar')
+      const docs = await col.find({}).sort({ startDate: 1 }).toArray()
+      if (docs && docs.length > 0) {
+        const events = docs.map((d: any) => {
+          const { _id, ...rest } = d
+          return rest as AcademicCalendarEvent
+        })
+        memoryEventsCache = events
+        return events
       }
     }
-  } catch (_) {}
-  return CANONICAL_ACADEMIC_EVENTS
+  } catch (err) {
+    console.warn('[academic-calendar] MongoDB fetch error:', err)
+  }
+
+  return memoryEventsCache || CANONICAL_ACADEMIC_EVENTS
 }
 
-function saveEvents(events: AcademicCalendarEvent[]) {
+async function persistEvents(events: AcademicCalendarEvent[]) {
+  memoryEventsCache = events
   try {
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(events, null, 2), 'utf-8')
-  } catch (_) {}
+    const db = await getPanoDb()
+    if (db) {
+      const col = db.collection('academic_calendar')
+      await col.deleteMany({})
+      if (events.length > 0) {
+        await col.insertMany(events.map((e) => ({ ...e })))
+      }
+    }
+  } catch (err) {
+    console.warn('[academic-calendar] MongoDB persist error:', err)
+  }
 }
 
 export async function GET() {
-  const events = loadEvents()
+  const events = await loadEvents()
   return NextResponse.json(
     { success: true, events },
     {
@@ -55,9 +73,9 @@ export async function POST(request: Request) {
       )
     }
 
-    const current = loadEvents()
+    const current = await loadEvents()
     const updated = [newEvent, ...current.filter((e) => e.id !== newEvent.id)]
-    saveEvents(updated)
+    await persistEvents(updated)
 
     return NextResponse.json({
       success: true,
@@ -84,11 +102,11 @@ export async function PUT(request: Request) {
       )
     }
 
-    const current = loadEvents()
+    const current = await loadEvents()
     const updated = current.map((ev) =>
       ev.id === id ? { ...ev, ...updates, updatedAt: new Date().toISOString() } : ev
     )
-    saveEvents(updated)
+    await persistEvents(updated)
 
     return NextResponse.json({
       success: true,
@@ -115,9 +133,9 @@ export async function DELETE(request: Request) {
       )
     }
 
-    const current = loadEvents()
+    const current = await loadEvents()
     const updated = current.filter((e) => e.id !== id)
-    saveEvents(updated)
+    await persistEvents(updated)
 
     return NextResponse.json({
       success: true,

@@ -2,122 +2,77 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import { CANONICAL_SCHOOL_EXAMS, SchoolExamItem } from '@/lib/teacher/teacherAgendaStorage'
 import { getPanoDb } from '@/lib/pano-pair/store'
 
-const TEMP_STORAGE_FILE = path.join('/tmp', 'oxonom_school_exams.json')
-const BACKUP_STORAGE_FILE = path.join(process.cwd(), 'oxonom_school_exams_backup.json')
-const DELETED_IDS_FILE = path.join('/tmp', 'oxonom_deleted_exam_ids.json')
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://crkoeptnoheiqxukxpig.supabase.co'
+const SERVICE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNya29lcHRub2hlaXF4dWt4cGlnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MjYxNjU2MCwiZXhwIjoyMTA4MTkyNTYwfQ.GyBCPOX4Zhp9hyhic2a8RtZU34eY21JOZGF9ZX40_7g'
 
 let memoryExamsCache: SchoolExamItem[] | null = null
 
-function getLocalDeletedIds(): string[] {
+async function getExamsFromSupabase(): Promise<SchoolExamItem[]> {
   try {
-    if (fs.existsSync(DELETED_IDS_FILE)) {
-      const data = fs.readFileSync(DELETED_IDS_FILE, 'utf-8')
-      const parsed = JSON.parse(data)
-      if (Array.isArray(parsed)) return parsed
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/exams_and_tests?select=*&order=created_at.desc`, {
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+      },
+      cache: 'no-store',
+    })
+
+    if (res.ok) {
+      const rows = await res.json()
+      if (Array.isArray(rows) && rows.length > 0) {
+        const exams: SchoolExamItem[] = rows.map((r: any) => {
+          const extra = typeof r.questions === 'object' && r.questions ? r.questions : {}
+          return {
+            id: r.id,
+            title: r.topic || extra.title || `${r.course_name} Yazılı Sınavı`,
+            courseName: r.course_name || 'Türk Dili ve Edebiyatı',
+            className: r.class_name || '9-A',
+            type: extra.type || 'exam',
+            date: extra.date || '2026-11-10',
+            time: extra.time || '09:30',
+            durationMinutes: extra.durationMinutes || 40,
+            location: extra.location || 'Derslik 9-A',
+            teacherName: extra.teacherName || 'Ebru TEKNECİ',
+            isPublished: extra.isPublished !== undefined ? !!extra.isPublished : true,
+            status: extra.status || 'upcoming',
+            scores: extra.scores || {},
+          }
+        })
+        memoryExamsCache = exams
+        return exams
+      }
     }
-  } catch (_) {}
-  return []
-}
+  } catch (err) {
+    console.error('[api/exams] Supabase fetch error:', err)
+  }
 
-function saveLocalDeletedIds(ids: string[]) {
-  try {
-    fs.writeFileSync(DELETED_IDS_FILE, JSON.stringify(ids), 'utf-8')
-  } catch (_) {}
-}
-
-function loadFromFile(): SchoolExamItem[] | null {
-  try {
-    if (fs.existsSync(TEMP_STORAGE_FILE)) {
-      const data = fs.readFileSync(TEMP_STORAGE_FILE, 'utf-8')
-      const parsed = JSON.parse(data)
-      if (Array.isArray(parsed)) return parsed
-    }
-    if (fs.existsSync(BACKUP_STORAGE_FILE)) {
-      const data = fs.readFileSync(BACKUP_STORAGE_FILE, 'utf-8')
-      const parsed = JSON.parse(data)
-      if (Array.isArray(parsed)) return parsed
-    }
-  } catch (_) {}
-  return null
-}
-
-function saveToFile(data: SchoolExamItem[]) {
-  try {
-    fs.writeFileSync(TEMP_STORAGE_FILE, JSON.stringify(data), 'utf-8')
-  } catch (_) {}
-  try {
-    fs.writeFileSync(BACKUP_STORAGE_FILE, JSON.stringify(data), 'utf-8')
-  } catch (_) {}
-  memoryExamsCache = data
-}
-
-async function getExamsFromDatabase(): Promise<SchoolExamItem[]> {
+  // Also check MongoDB if available
   try {
     const db = await getPanoDb()
     if (db) {
       const examsCol = db.collection('school_exams')
-      const deletedCol = db.collection('deleted_exam_ids')
-
-      const [deletedDocs, count] = await Promise.all([
-        deletedCol.find({}).toArray(),
-        examsCol.countDocuments(),
-      ])
-
-      const deletedIds = new Set(deletedDocs.map((d: any) => d.id))
-
-      // Only seed canonically once if database has ZERO exams AND ZERO deletions
-      if (count === 0 && deletedDocs.length === 0) {
-        const initialExams = CANONICAL_SCHOOL_EXAMS.map((e) => ({
-          ...e,
-          scores: {},
-          status: 'upcoming' as const,
-        }))
-        await examsCol.insertMany(initialExams.map((e) => ({ ...e })))
-        saveToFile(initialExams)
-        return initialExams
-      }
-
       const docs = await examsCol.find({}).toArray()
-      const exams: SchoolExamItem[] = docs
-        .filter((d: any) => !deletedIds.has(d.id))
-        .map((d: any) => {
+      if (docs && docs.length > 0) {
+        const exams = docs.map((d: any) => {
           const { _id, ...rest } = d
           return rest as SchoolExamItem
         })
-
-      saveToFile(exams)
-      return exams
+        memoryExamsCache = exams
+        return exams
+      }
     }
-  } catch (err: any) {
-    console.warn('[api/exams] MongoDB load error, fallback to file storage:', err?.message || err)
-  }
+  } catch (_) {}
 
-  // File fallback
-  const fileExams = loadFromFile()
-  const deletedIds = getLocalDeletedIds()
-  if (fileExams !== null) {
-    const filtered = fileExams.filter((e) => !deletedIds.includes(e.id))
-    memoryExamsCache = filtered
-    return filtered
-  }
-
-  // Initial fallback
-  const initial = CANONICAL_SCHOOL_EXAMS.filter((e) => !deletedIds.includes(e.id)).map((e) => ({
-    ...e,
-    scores: {},
-    status: 'upcoming' as const,
-  }))
-  saveToFile(initial)
-  return initial
+  return memoryExamsCache || CANONICAL_SCHOOL_EXAMS
 }
 
 export async function GET(request: Request) {
-  const exams = await getExamsFromDatabase()
+  const exams = await getExamsFromSupabase()
 
   const { searchParams } = new URL(request.url)
   const className = searchParams.get('className')
@@ -161,38 +116,60 @@ export async function POST(request: Request) {
       )
     }
 
+    // 1. Save directly into Supabase PostgreSQL database
+    for (const item of itemsToSave) {
+      const supabasePayload = {
+        course_name: item.courseName || 'Türk Dili ve Edebiyatı',
+        class_name: item.className || '9-A',
+        topic: item.title,
+        questions: {
+          title: item.title,
+          type: item.type || 'exam',
+          date: item.date,
+          time: item.time,
+          durationMinutes: item.durationMinutes,
+          location: item.location,
+          teacherName: item.teacherName,
+          isPublished: item.isPublished,
+          status: item.status,
+          scores: item.scores || {},
+        },
+      }
+
+      await fetch(`${SUPABASE_URL}/rest/v1/exams_and_tests`, {
+        method: 'POST',
+        headers: {
+          apikey: SERVICE_KEY,
+          Authorization: `Bearer ${SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(supabasePayload),
+      })
+    }
+
+    // 2. Also mirror into MongoDB if connected
     try {
       const db = await getPanoDb()
       if (db) {
         const examsCol = db.collection('school_exams')
-        const deletedCol = db.collection('deleted_exam_ids')
-
         for (const item of itemsToSave) {
           const { _id, ...cleanItem } = item as any
-          await examsCol.updateOne(
-            { id: item.id },
-            { $set: cleanItem },
-            { upsert: true }
-          )
-          await deletedCol.deleteOne({ id: item.id })
+          await examsCol.updateOne({ id: item.id }, { $set: cleanItem }, { upsert: true })
         }
       }
-    } catch (dbErr: any) {
-      console.warn('[api/exams] MongoDB save error, fallback to file:', dbErr?.message || dbErr)
-    }
+    } catch (_) {}
 
-    // Update local file storage
-    const current = (loadFromFile() || []).filter((e) => !itemsToSave.some((it) => it.id === e.id))
+    // Refresh memory cache
+    const current = (memoryExamsCache || CANONICAL_SCHOOL_EXAMS).filter(
+      (e) => !itemsToSave.some((it) => it.id === e.id)
+    )
     const updated = [...itemsToSave, ...current]
-    saveToFile(updated)
-
-    // Unmark from local deleted ids
-    const localDeleted = getLocalDeletedIds().filter((id) => !itemsToSave.some((it) => it.id === id))
-    saveLocalDeletedIds(localDeleted)
+    memoryExamsCache = updated
 
     return NextResponse.json({
       success: true,
-      message: 'Sınav veritabanına başarıyla kaydedildi ve tüm öğrencilerin ekranlarına yansıtıldı.',
+      message: 'Sınav Supabase kalıcı veritabanına başarıyla kaydedildi.',
       exam: itemsToSave[0],
       exams: updated,
       totalCount: updated.length,
@@ -214,38 +191,32 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'Sınav ID belirtilmedi' }, { status: 400 })
     }
 
+    // 1. Delete from Supabase
+    await fetch(`${SUPABASE_URL}/rest/v1/exams_and_tests?id=eq.${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+      },
+    })
+
+    // 2. Delete from MongoDB if available
     try {
       const db = await getPanoDb()
       if (db) {
         const examsCol = db.collection('school_exams')
-        const deletedCol = db.collection('deleted_exam_ids')
-
-        await examsCol.deleteOne({ id })
-        await deletedCol.updateOne(
-          { id },
-          { $set: { id, deletedAt: new Date().toISOString() } },
-          { upsert: true }
-        )
+        await examsCol.deleteMany({ id })
       }
-    } catch (dbErr: any) {
-      console.warn('[api/exams] MongoDB delete error, fallback to file:', dbErr?.message || dbErr)
-    }
+    } catch (_) {}
 
-    // Update local deleted IDs
-    const localDeleted = getLocalDeletedIds()
-    if (!localDeleted.includes(id)) {
-      localDeleted.push(id)
-      saveLocalDeletedIds(localDeleted)
-    }
-
-    // Update local file storage
-    const current = loadFromFile() || []
-    const updated = current.filter((e) => e.id !== id)
-    saveToFile(updated)
+    // Update memory cache
+    const current = memoryExamsCache || CANONICAL_SCHOOL_EXAMS
+    const updated = current.filter((e) => String(e.id) !== id)
+    memoryExamsCache = updated
 
     return NextResponse.json({
       success: true,
-      message: 'Sınav veritabanından kalıcı olarak silindi.',
+      message: 'Sınav Supabase veritabanından kalıcı olarak silindi.',
       deletedId: id,
       totalCount: updated.length,
     })

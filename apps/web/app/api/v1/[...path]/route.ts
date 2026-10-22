@@ -33,10 +33,6 @@ import {
 
 import { MongoClient } from 'mongodb'
 
-const GAMES_CACHE_FILE = '/tmp/oxonom_admin_games.json'
-const CATEGORIES_CACHE_FILE = '/tmp/oxonom_admin_categories.json'
-const GAMES_DELETED_FILE = '/tmp/oxonom_deleted_games.json'
-
 const MONGODB_URI = process.env.MONGODB_URI || ''
 let _gamesMongoClient: MongoClient | null = null
 
@@ -63,14 +59,6 @@ async function loadDeletedGameUuids(req?: NextRequest): Promise<Set<string>> {
     ...SERVER_DELETED_GAMES,
     ...Array.from(PERMANENTLY_REMOVED_GAMES),
   ])
-  try {
-    if (fs.existsSync(GAMES_DELETED_FILE)) {
-      const data = JSON.parse(fs.readFileSync(GAMES_DELETED_FILE, 'utf8'))
-      if (Array.isArray(data)) {
-        data.forEach((id: any) => id && set.add(String(id)))
-      }
-    }
-  } catch (_) {}
 
   // Check MongoDB
   try {
@@ -111,9 +99,6 @@ async function loadDeletedGameUuids(req?: NextRequest): Promise<Set<string>> {
 async function saveDeletedGameUuids(deletedSet: Set<string>) {
   SERVER_DELETED_GAMES = new Set(deletedSet)
   try {
-    fs.writeFileSync(GAMES_DELETED_FILE, JSON.stringify(Array.from(deletedSet)), 'utf8')
-  } catch (_) {}
-  try {
     const db = await getGamesMongoDb()
     if (db) {
       await db.collection('oxonom_deleted_games').updateOne(
@@ -137,28 +122,17 @@ async function loadLiveGames(req?: NextRequest): Promise<any[]> {
   }
 
   let list: any[] = []
+
+  // Load from MongoDB
   try {
-    if (fs.existsSync(GAMES_CACHE_FILE)) {
-      const data = JSON.parse(fs.readFileSync(GAMES_CACHE_FILE, 'utf8'))
-      if (Array.isArray(data) && data.length > 0) list = data
+    const db = await getGamesMongoDb()
+    if (db) {
+      const doc = await db.collection('oxonom_admin_games').findOne({ _id: 'live_games' as any })
+      if (doc && Array.isArray((doc as any).games) && (doc as any).games.length > 0) {
+        list = (doc as any).games
+      }
     }
   } catch (_) {}
-
-  // Fallback to MongoDB
-  if (list.length === 0) {
-    try {
-      const db = await getGamesMongoDb()
-      if (db) {
-        const doc = await db.collection('oxonom_admin_games').findOne({ _id: 'live_games' as any })
-        if (doc && Array.isArray((doc as any).games) && (doc as any).games.length > 0) {
-          list = (doc as any).games
-          try {
-            fs.writeFileSync(GAMES_CACHE_FILE, JSON.stringify(list), 'utf8')
-          } catch (_) {}
-        }
-      }
-    } catch (_) {}
-  }
 
   if (list.length === 0) {
     list = [...SYNCED_GAMES]
@@ -177,9 +151,6 @@ async function loadLiveGames(req?: NextRequest): Promise<any[]> {
 async function saveLiveGames(games: any[]) {
   IN_MEMORY_GAMES_CACHE = games
   try {
-    fs.writeFileSync(GAMES_CACHE_FILE, JSON.stringify(games), 'utf8')
-  } catch (_) {}
-  try {
     const db = await getGamesMongoDb()
     if (db) {
       await db.collection('oxonom_admin_games').updateOne(
@@ -195,15 +166,6 @@ async function loadLiveCategories(): Promise<any[]> {
   if (IN_MEMORY_CATEGORIES_CACHE && IN_MEMORY_CATEGORIES_CACHE.length > 0) {
     return IN_MEMORY_CATEGORIES_CACHE
   }
-  try {
-    if (fs.existsSync(CATEGORIES_CACHE_FILE)) {
-      const data = JSON.parse(fs.readFileSync(CATEGORIES_CACHE_FILE, 'utf8'))
-      if (Array.isArray(data) && data.length > 0) {
-        IN_MEMORY_CATEGORIES_CACHE = data
-        return data
-      }
-    }
-  } catch (_) {}
 
   // Fallback to MongoDB
   try {
@@ -223,9 +185,6 @@ async function loadLiveCategories(): Promise<any[]> {
 
 async function saveLiveCategories(categories: any[]) {
   IN_MEMORY_CATEGORIES_CACHE = categories
-  try {
-    fs.writeFileSync(CATEGORIES_CACHE_FILE, JSON.stringify(categories), 'utf8')
-  } catch (_) {}
   try {
     const db = await getGamesMongoDb()
     if (db) {
@@ -1219,10 +1178,6 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
             updated.html_content = body.html_content
             updated.has_html_content = true
             updated.has_custom_html = true
-            try {
-              if (updated.game_uuid) fs.writeFileSync(`/tmp/game_${updated.game_uuid}.html`, body.html_content, 'utf8')
-              if (updated.slug) fs.writeFileSync(`/tmp/game_${updated.slug}.html`, body.html_content, 'utf8')
-            } catch (_) {}
           }
           currentGames[idx] = updated
           await saveLiveGames(currentGames)
@@ -1341,19 +1296,6 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
       let html = (game.html_content && game.html_content.trim().length > 0)
         ? game.html_content
         : ''
-
-      // Check if custom uploaded html was written to disk
-      if (!html) {
-        try {
-          const customTmp1 = `/tmp/game_${game.game_uuid}.html`
-          const customTmp2 = game.slug ? `/tmp/game_${game.slug}.html` : ''
-          if (fs.existsSync(customTmp1)) {
-            html = fs.readFileSync(customTmp1, 'utf8')
-          } else if (customTmp2 && fs.existsSync(customTmp2)) {
-            html = fs.readFileSync(customTmp2, 'utf8')
-          }
-        } catch (_) {}
-      }
 
       // Attempt to read the actual static game file (e.g. public/games/orbit.html, 2048-..., etc.)
       if (!html && game.slug) {

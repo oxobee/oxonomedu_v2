@@ -1,272 +1,51 @@
-import { getAPIUrl } from './services/config/config'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { isLocalhost as isLocalhostCheck } from './services/utils/ts/hostUtils'
 
 // =============================================================================
-// Tenancy
+// Oxonom EDU Unified Edge Router (proxy.ts)
 // =============================================================================
-//
-// Three runtime behaviors selected by `instance.tenancy`:
-//
-//   1. multi (EE-only):   slug.{LEARNHOUSE_DOMAIN} subdomain detection +
-//                         per-org custom domains. The detection logic lives in
-//                         `./ee/services/tenancy/...` and is dynamic-imported
-//                         here — OSS proxy.ts never references subdomain or
-//                         custom-domain helpers directly.
-//   2. single (localhost): always serves the default org. Host-only cookies.
-//   3. single (VPS):       any domain on a self-hosted VPS. Same as #2 — we
-//                         trust the incoming Host header.
-//
-// Modes 2 and 3 share `tenancy === "single"`. The OSS code path returns the
-// default org without ever calling subdomain extraction.
 
 interface InstanceInfo {
   multi_org_enabled: boolean
   default_org_slug: string
   mode: 'saas' | 'oss' | 'ee'
-  tenancy: 'multi' | 'single'
+  tenancy: 'single'
   frontend_domain: string
   top_domain: string
 }
 
-// Cached instance info from backend (30-second TTL)
-let _instanceCache: { data: InstanceInfo; ts: number } | null = null
-const INSTANCE_CACHE_TTL = 30 * 1000
-
-async function getInstanceInfo(): Promise<InstanceInfo> {
-  if (_instanceCache && Date.now() - _instanceCache.ts < INSTANCE_CACHE_TTL) {
-    return _instanceCache.data
-  }
-
-  try {
-    const apiUrl = getAPIUrl()
-    const res = await fetch(`${apiUrl}instance/info`, { signal: AbortSignal.timeout(3000) })
-    if (res.ok) {
-      const raw = await res.json()
-      // Older backends only return `multi_org_enabled`; derive `tenancy`.
-      const tenancy: 'multi' | 'single' =
-        raw.tenancy === 'multi' || raw.multi_org_enabled ? 'multi' : 'single'
-      _instanceCache = { data: { ...raw, tenancy }, ts: Date.now() }
-      return _instanceCache.data
-    }
-  } catch {
-    // Backend unavailable — use safe defaults
-  }
-  return {
-    multi_org_enabled: false,
-    default_org_slug: 'demo',
-    mode: 'saas' as const,
-    tenancy: 'single',
-    frontend_domain: 'learnhouze.vercel.app',
-    top_domain: 'learnhouze.vercel.app',
-  }
+const DEFAULT_INSTANCE: InstanceInfo = {
+  multi_org_enabled: false,
+  default_org_slug: 'demo',
+  mode: 'saas',
+  tenancy: 'single',
+  frontend_domain: 'edu.oxonom.com',
+  top_domain: 'oxonom.com',
 }
 
-// =============================================================================
-// Resolver
-// =============================================================================
-
-interface ResolvedTenant {
-  slug: string
-  customDomain?: string
-  source: 'custom-domain' | 'subdomain' | 'cookie' | 'default'
-}
-
-/**
- * Resolve the active tenant for this request.
- *
- * In `single` tenancy this is unconditionally the default org — no EE code
- * loaded, no custom-domain lookup, no subdomain extraction. In `multi`
- * tenancy we delegate to the EE resolver via dynamic import; if the import
- * or resolver throws (e.g. EE folder removed at deploy time), we log and
- * fall back to the default org so the site stays up.
- */
-async function resolveTenant(req: NextRequest, instance: InstanceInfo): Promise<ResolvedTenant> {
-  if (instance.tenancy === 'single') {
-    return { slug: instance.default_org_slug, source: 'default' }
-  }
-
-  try {
-    const mod = await import('./ee/services/tenancy/resolveMulti.middleware')
-    return await mod.resolveMultiFromRequest(req, instance)
-  } catch (err) {
-    console.warn('[proxy] EE multi-tenant resolver unavailable; falling back to default org', err)
-    return { slug: instance.default_org_slug, source: 'default' }
-  }
-}
-
-/**
- * In `multi` tenancy, ask the EE module whether this Host is a custom domain
- * (used by the `/redirect_from_auth` handler). Always false in `single`.
- */
-async function hostIsCustomDomain(host: string | null, instance: InstanceInfo): Promise<boolean> {
-  if (instance.tenancy === 'single' || !host) return false
-  try {
-    const mod = await import('./ee/services/tenancy/resolveMulti.middleware')
-    return mod.isCustomDomain(host, instance.frontend_domain)
-  } catch {
-    return false
-  }
-}
-
-/**
- * Detect the admin subdomain (multi tenancy only). In single mode there is no
- * admin subdomain — operators reach admin via /admin path.
- */
-async function isAdminSubdomain(host: string | null, instance: InstanceInfo): Promise<boolean> {
-  if (instance.tenancy === 'single' || !host) return false
-  try {
-    const mod = await import('./ee/services/tenancy/resolveMulti.middleware')
-    return mod.extractOrgSubdomain(host, instance.frontend_domain) === 'admin'
-      // The EE helper filters out reserved subdomains; check raw too:
-      || host.split(':')[0] === `admin.${instance.frontend_domain.split(':')[0]}`
-      || host.startsWith('admin.')
-  } catch {
-    return host.startsWith('admin.')
-  }
-}
-
-// =============================================================================
-// Cookies
-// =============================================================================
-
-/**
- * Compute the cookie `domain` attribute given the current tenant.
- * - single tenancy → '' (host-only cookie)
- * - multi tenancy + custom domain → '' (host-only cookie)
- * - multi tenancy + apex/subdomain → '.{top_domain}' (cross-subdomain auth)
- * - localhost in either mode → '' (browsers refuse `Domain=.localhost`)
- */
-function cookieDomainFor(instance: InstanceInfo, customDomain?: string, host?: string | null): string {
-  if (instance.tenancy === 'single') return ''
-  if (customDomain) return ''
-  if (instance.top_domain === 'localhost') return ''
-  if (host && !host.split(':')[0].endsWith(instance.top_domain)) return ''
-  return `.${instance.top_domain}`
-}
-
-function setOrgCookies(
-  response: NextResponse,
-  resolved: ResolvedTenant,
-  instance: InstanceInfo,
-  host?: string | null,
-) {
-  const domain = cookieDomainFor(instance, resolved.customDomain, host)
-  response.cookies.set({
-    name: 'LH_org',
-    value: resolved.slug,
-    domain,
-    path: '/',
-  })
-  if (resolved.customDomain) {
-    response.cookies.set({
-      name: 'LH_custom_domain',
-      value: resolved.customDomain,
-      path: '/',
-    })
-    response.headers.set('x-custom-domain', resolved.customDomain)
-  }
-}
-
-function setInstanceCookies(response: NextResponse, info: InstanceInfo) {
-  response.cookies.set({ name: 'LH_tenancy', value: info.tenancy, path: '/' })
-  response.cookies.set({ name: 'LH_default_org', value: info.default_org_slug, path: '/' })
-  response.cookies.set({ name: 'LH_frontend_domain', value: info.frontend_domain, path: '/' })
-  response.cookies.set({ name: 'LH_top_domain', value: info.top_domain, path: '/' })
-  response.cookies.set({ name: 'LH_mode', value: info.mode, path: '/' })
-  return response
-}
-
-/**
- * Build a request-header bag that propagates tenancy context to downstream
- * Server Components on THIS request. Cookies set in the response only become
- * visible to RSC on the *next* request, so server-side helpers like
- * `getCanonicalUrl` can't rely on them on the first cold load. Reading the
- * `x-lh-*` headers via `next/headers` gives them an immediately-available
- * source of truth.
- */
-function tenantRequestHeaders(
-  req: NextRequest,
-  resolved: ResolvedTenant,
-  instance: InstanceInfo,
-): Headers {
-  const headers = new Headers(req.headers)
-  headers.set('x-lh-tenancy', instance.tenancy)
-  headers.set('x-lh-org', resolved.slug)
-  headers.set('x-lh-top-domain', instance.top_domain)
-  headers.set('x-lh-frontend-domain', instance.frontend_domain)
-  headers.set('x-lh-mode', instance.mode)
-  if (resolved.customDomain) {
-    headers.set('x-lh-custom-domain', resolved.customDomain)
-  }
-  return headers
-}
-
-// =============================================================================
-// Middleware
-// =============================================================================
-
-export const config = {
-  matcher: [
-    /*
-     * Match all paths except for:
-     * 1. /api routes
-     * 2. /_next (Next.js internals)
-     * 3. /fonts (inside /public)
-     * 4. Umami Analytics
-     * 5. /examples (inside /public)
-     * 6. all root files inside /public (e.g. /favicon.ico)
-     * 7. /embed (activity embeds)
-     * 8. /ingest (PostHog reverse proxy — must reach the next.config rewrite
-     *    untouched; otherwise the middleware mis-routes it and ingestion 404s)
-     * 9. /games (inside /public)
-     * 10. /brand (brand logos & icons)
-     */
-    '/((?!api|_next|fonts|games|brand|content|umami|ingest|examples|embed|monitoring|[\\w-]+\\.\\w+).*)',
-    '/sitemap.xml',
-    '/robots.txt',
-    '/payments/stripe/connect/oauth',
-    '/podcast/:path*/feed',
-  ],
-}
-
-export default async function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl
+  const fullhost = req.headers.get('host') || 'edu.oxonom.com'
 
-  // Pass-through static brand assets in /public/brand/
-  if (pathname.startsWith('/brand/')) {
+  // -------------------------------------------------------------------------
+  // 1. Static asset bypass
+  // -------------------------------------------------------------------------
+  if (
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/static/') ||
+    pathname.startsWith('/assets/') ||
+    pathname.startsWith('/games/') ||
+    pathname.startsWith('/fonts/') ||
+    pathname.startsWith('/images/') ||
+    pathname.includes('.') // file extension like favicon.ico, images, manifest
+  ) {
     return NextResponse.next()
-  }
-
-  // Pass-through static content files in /public/content/
-  if (pathname.startsWith('/content/')) {
-    return NextResponse.next()
-  }
-
-  // Pass-through static games files in /public/games/
-  if (pathname.startsWith('/games/') && pathname.includes('.')) {
-    return NextResponse.next()
-  }
-
-  const instance = await getInstanceInfo()
-  const fullhost = req.headers.get('host')
-
-  // SEO: canonicalize mixed-case top-level route names (/Login → /login). Scoped
-  // to KNOWN static routes only so it never lowercases data-bearing segments
-  // (org slugs, course/activity UUIDs, media paths).
-  const CANONICAL_LOWER = new Set([
-    '/login', '/signup', '/forgot', '/reset', '/verify-email',
-    '/home', '/billing', '/new', '/account', '/organizations', '/subscriptions',
-  ])
-  if (pathname !== pathname.toLowerCase() && CANONICAL_LOWER.has(pathname.toLowerCase())) {
-    return NextResponse.redirect(new URL(`${pathname.toLowerCase()}${search}`, req.url), 308)
   }
 
   // -------------------------------------------------------------------------
-  // Hidden / disabled routes: /communities, /developers, /podcasts, /analytics
+  // 2. Blocked obsolete endpoints
   // -------------------------------------------------------------------------
-  const cleanPath = pathname.replace(/^\/orgs\/[^/]+/, '').toLowerCase()
+  const cleanPath = pathname.toLowerCase().replace(/\/+$/, '')
   const blockedPrefixes = [
     '/communities',
     '/dash/communities',
@@ -276,140 +55,14 @@ export default async function proxy(req: NextRequest) {
     '/dash/podcasts',
     '/analytics',
     '/dash/analytics',
-    '/admin/analytics',
-    '/admin/developers',
   ]
-  if (blockedPrefixes.some(prefix => cleanPath === prefix || cleanPath.startsWith(`${prefix}/`))) {
+  if (blockedPrefixes.some((prefix) => cleanPath === prefix || cleanPath.startsWith(`${prefix}/`))) {
     return new NextResponse('Not Found', { status: 404 })
   }
 
   // -------------------------------------------------------------------------
-  // 1. Admin subdomain (multi only) → rewrite to /admin route group.
-  //    Idempotent: if the path already starts with /admin (e.g. internal nav
-  //    uses /admin/organizations so it works in both subdomain and path mode),
-  //    don't double-prefix.
+  // 3. Smartboard shortcuts (/1-A, /9-A, /tahta/...)
   // -------------------------------------------------------------------------
-  if (await isAdminSubdomain(fullhost, instance)) {
-    const target = pathname === '/admin' || pathname.startsWith('/admin/')
-      ? pathname
-      : `/admin${pathname}`
-    const response = NextResponse.rewrite(new URL(`${target}${search}`, req.url))
-    setInstanceCookies(response, instance)
-    return response
-  }
-
-  // -------------------------------------------------------------------------
-  // 1b. Admin path — direct /admin access works in any tenancy mode.
-  //     In single mode this is the only way to reach the admin panel; in
-  //     multi mode it's an alternative to the admin.{domain} subdomain.
-  // -------------------------------------------------------------------------
-  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-    const response = NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
-    setInstanceCookies(response, instance)
-    return response
-  }
-
-  // -------------------------------------------------------------------------
-  // 1b. Legacy /dashboard/* → hub redirects
-  //
-  //    The old platform (learnhouse.app) used /dashboard/{slug}/plan, /dashboard/
-  //    new, /dashboard/account, etc. Those paths do NOT exist on .io and would
-  //    404. Old bookmarks, emails, and — critically — URLs Stripe has already
-  //    stored on live checkout sessions can still point here, so permanently map
-  //    them onto the hub instead of dead-ending. SaaS/multi only.
-  // -------------------------------------------------------------------------
-  if (instance.tenancy === 'multi' && pathname.startsWith('/dashboard')) {
-    let dest = '/home'
-    const planMatch = pathname.match(/^\/dashboard\/([^/]+)\/plan\/?$/)
-    if (planMatch && planMatch[1] !== 'new') {
-      dest = `/billing?org=${planMatch[1]}`
-    } else if (pathname === '/dashboard/new' || pathname.startsWith('/dashboard/new/')) {
-      dest = '/new'
-    } else if (pathname === '/dashboard/subscriptions') {
-      dest = '/subscriptions'
-    } else if (pathname === '/dashboard/account' || pathname.startsWith('/dashboard/account/')) {
-      dest = '/account'
-    }
-    // Preserve query markers (checkout=cancelled, session_id, …). /billing?org=
-    // already carries a query, so merge with & in that case.
-    const extraQuery = search ? (dest.includes('?') ? `&${search.slice(1)}` : search) : ''
-    return NextResponse.redirect(new URL(`${dest}${extraQuery}`, req.url), 308)
-  }
-
-  // -------------------------------------------------------------------------
-  // 2. Standard out-of-org paths (root hub)
-  //
-  //    These render at the apex/root and must NEVER fall into the tenant
-  //    catch-all (which would rewrite them to /orgs/{slug}/...). `/home` is the
-  //    org picker and works in every tenancy. The rest form the central
-  //    account + org-management hub (create / upgrade / delete an org, billing,
-  //    account) and only exist in `multi` tenancy (SaaS); the (hub) route-group
-  //    layout additionally enforces SaaS gating. We set instance cookies so the
-  //    hub's client components can read tenancy/mode/top-domain.
-  // -------------------------------------------------------------------------
-  const HUB_ROOT_PATHS = ['/home', '/organizations', '/account', '/billing', '/subscriptions', '/new', '/m-login']
-  const isHubRoot = HUB_ROOT_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`),
-  )
-  if (pathname === '/home' || (instance.tenancy === 'multi' && isHubRoot)) {
-    // `/account/*` ALSO exists as an org-scoped dashboard route
-    // (/orgs/{slug}/account/[subpage] — general/security/purchases). On an org
-    // subdomain or custom domain it must resolve there, NOT the apex hub (which
-    // has no /account subpages), so let it fall through to the tenant catch-all.
-    let onOrgHost = false
-    if ((pathname === '/account' || pathname.startsWith('/account/')) && instance.tenancy === 'multi') {
-      const resolved = await resolveTenant(req, instance)
-      onOrgHost = resolved.source === 'subdomain' || resolved.source === 'custom-domain'
-    }
-    if (!onOrgHost) {
-      const response = NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
-      setInstanceCookies(response, instance)
-      return response
-    }
-    // account on an org host → fall through to the tenant-scoped rewrite below.
-  }
-
-  // -------------------------------------------------------------------------
-  // 2b. Legacy or explicit /auth/* routes — redirect to canonical routes
-  // -------------------------------------------------------------------------
-  const userAgent = req.headers.get('user-agent') || ''
-  const isMobileUA = /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(userAgent)
-  const cleanAuthPath = pathname.toLowerCase().replace(/\/+$/, '')
-
-  // Redirect legacy auth and /loginv2 routes to canonical /login
-  if (
-    cleanAuthPath === '/auth/login' ||
-    cleanAuthPath === '/auth' ||
-    cleanAuthPath === '/m-login' ||
-    cleanAuthPath === '/loginv2'
-  ) {
-    return NextResponse.redirect(new URL(`/login${search}`, req.url), 307)
-  }
-
-  // Redirect legacy admin routes to professional /principal/* tree
-  const PRINCIPAL_LEGACY_MAP: Record<string, string> = {
-    '/dashv2': '/principal/dashboard',
-    '/m-dashv2': '/principal/dashboard',
-    '/m-admin': '/principal/dashboard',
-    '/m-admin-teachers': '/principal/teachers',
-    '/m-admin-students': '/principal/students',
-    '/m-admin-classes': '/principal/classes',
-    '/m-admin-schedule': '/principal/schedule',
-    '/m-admin-boards': '/pano',
-    '/m-admin-reports': '/principal/reports',
-    '/m-admin-curriculum': '/principal/curriculum',
-    '/m-student': '/student/dashboard',
-  }
-  if (PRINCIPAL_LEGACY_MAP[cleanAuthPath]) {
-    return NextResponse.redirect(new URL(`${PRINCIPAL_LEGACY_MAP[cleanAuthPath]}${search}`, req.url), 307)
-  }
-
-  // Redirect mobile users from /dash to /principal/dashboard
-  if (cleanAuthPath === '/dash' && isMobileUA) {
-    return NextResponse.redirect(new URL(`/principal/dashboard${search}`, req.url), 307)
-  }
-
-  // Fast shortcuts for smartboard & classroom URLs (e.g. /1A-01, /1A, /1a, /tahta/1A-01)
   if (pathname.startsWith('/tahta/')) {
     const rawBoard = pathname.replace(/^\/tahta\//, '').trim()
     if (rawBoard) {
@@ -423,28 +76,42 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL(`/pano/${encodeURIComponent(code)}${search}`, req.url), 307)
   }
 
-  const AUTH_PREFIX_MAP: Record<string, string> = {
-    '/auth': '/login',
-    '/auth/': '/login',
-    '/auth/login': '/login',
-    '/auth/signup': '/signup',
-    '/auth/reset': '/reset',
-    '/auth/forgot': '/forgot',
-    '/auth/verify-email': '/verify-email',
+  // -------------------------------------------------------------------------
+  // 4. Legacy auth & dashboard redirects to Oxonom EDU canonical paths
+  // -------------------------------------------------------------------------
+  if (
+    cleanPath === '/auth/login' ||
+    cleanPath === '/auth' ||
+    cleanPath === '/m-login' ||
+    cleanPath === '/loginv2'
+  ) {
+    return NextResponse.redirect(new URL(`/login${search}`, req.url), 307)
   }
-  if (AUTH_PREFIX_MAP[cleanAuthPath] || AUTH_PREFIX_MAP[pathname.toLowerCase()]) {
-    const target = AUTH_PREFIX_MAP[cleanAuthPath] || AUTH_PREFIX_MAP[pathname.toLowerCase()]
-    return NextResponse.redirect(new URL(`${target}${search}`, req.url), 308)
+
+  const PRINCIPAL_LEGACY_MAP: Record<string, string> = {
+    '/dash': '/principal/dashboard',
+    '/dashv2': '/principal/dashboard',
+    '/m-dashv2': '/principal/dashboard',
+    '/m-admin': '/principal/dashboard',
+    '/m-admin-teachers': '/principal/teachers',
+    '/m-admin-students': '/principal/students',
+    '/m-admin-classes': '/principal/classes',
+    '/m-admin-schedule': '/principal/schedule',
+    '/m-admin-boards': '/principal/boards',
+    '/m-admin-reports': '/principal/reports',
+    '/m-admin-curriculum': '/principal/curriculum',
+    '/m-student': '/student/dashboard',
+  }
+  if (PRINCIPAL_LEGACY_MAP[cleanPath]) {
+    return NextResponse.redirect(new URL(`${PRINCIPAL_LEGACY_MAP[cleanPath]}${search}`, req.url), 307)
   }
 
   // -------------------------------------------------------------------------
-  // 3. Oxonom EDU Core Routes: /login, /loginv2, /student, /teacher, /principal, etc.
+  // 5. Oxonom EDU Core Routes: /login, /student, /teacher, /principal, etc.
   // -------------------------------------------------------------------------
   if (
     pathname === '/login' ||
     pathname.startsWith('/login/') ||
-    pathname === '/loginv2' ||
-    pathname.startsWith('/loginv2/') ||
     pathname === '/student' ||
     pathname.startsWith('/student/') ||
     pathname === '/teacher' ||
@@ -455,179 +122,38 @@ export default async function proxy(req: NextRequest) {
     pathname.startsWith('/superadmin/') ||
     pathname === '/gamestudio' ||
     pathname.startsWith('/gamestudio/') ||
-    pathname === '/games' ||
-    pathname.startsWith('/games/') ||
     pathname === '/pano' ||
     pathname.startsWith('/pano/')
   ) {
-    const resolved = await resolveTenant(req, instance)
-    const requestHeaders = tenantRequestHeaders(req, resolved, instance)
-    const response = NextResponse.rewrite(new URL(pathname + search, req.url), {
-      request: { headers: requestHeaders },
-    })
-    setOrgCookies(response, resolved, instance, fullhost)
-    setInstanceCookies(response, instance)
+    const response = NextResponse.rewrite(new URL(pathname + search, req.url))
+    response.cookies.set({ name: 'LH_org', value: 'demo', path: '/' })
+    response.cookies.set({ name: 'LH_tenancy', value: 'single', path: '/' })
     return response
   }
 
   // -------------------------------------------------------------------------
-  // 4. Legacy Auth pages — resolve tenant for cookie context, rewrite to /auth
+  // 6. Direct API and Health Pass-through
   // -------------------------------------------------------------------------
-  const authPaths = ['/signup', '/reset', '/forgot', '/verify-email']
-  if (authPaths.includes(pathname)) {
-    const hasSession = !!req.cookies.get('LH_session')?.value
-
-    const resolved = await resolveTenant(req, instance)
-
-    // `/signup` is NOT only a signup page: for a signed-in user on an org host
-    // it is the JOIN screen (the "Join this organization" banner and every
-    // invite link point at it). Bouncing them to /home dropped them on the org
-    // picker instead — and silently threw away any ?inviteCode. So only send a
-    // signed-in visitor to the hub when there is genuinely no org to join here:
-    // the org-less apex, with no invite code in hand.
-    if (pathname === '/signup' && hasSession) {
-      const onOrgHost =
-        instance.tenancy === 'single'
-        || resolved.source === 'subdomain'
-        || resolved.source === 'custom-domain'
-      const hasInviteCode = !!req.nextUrl.searchParams.get('inviteCode')
-      if (!onOrgHost && !hasInviteCode) {
-        return NextResponse.redirect(new URL('/home', req.url))
-      }
-    }
-
-    const requestHeaders = tenantRequestHeaders(req, resolved, instance)
-    const response = NextResponse.rewrite(
-      new URL(`/auth${pathname}${search}`, req.url),
-      { request: { headers: requestHeaders } },
-    )
-    setOrgCookies(response, resolved, instance, fullhost)
-    setInstanceCookies(response, instance)
-    return response
+  if (pathname.startsWith('/api/') || pathname === '/api') {
+    return NextResponse.next()
   }
 
-  // -------------------------------------------------------------------------
-  // 5. Auth callbacks — pass through without org rewrite
-  // -------------------------------------------------------------------------
-  if (
-    pathname.startsWith('/auth/sso/')
-    || pathname.startsWith('/auth/callback/')
-    || pathname.startsWith('/auth/token-exchange')
-  ) {
-    const response = NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
-    setInstanceCookies(response, instance)
-    return response
-  }
-
-  // Magic login links are emailed as /auth/magic?token=… — already the internal
-  // path, so it needs a pass-through of its own. Without one it fell to the
-  // tenant catch-all, was rewritten to /orgs/{slug}/auth/magic, and every
-  // emailed link 404'd. Tenant is resolved (unlike the callbacks above) because
-  // the page finishes through /redirect_from_auth, which reads the org cookies
-  // to know which host to land on.
-  if (pathname === '/auth/magic') {
-    const resolved = await resolveTenant(req, instance)
-    const requestHeaders = tenantRequestHeaders(req, resolved, instance)
-    const response = NextResponse.rewrite(
-      new URL(`${pathname}${search}`, req.url),
-      { request: { headers: requestHeaders } },
-    )
-    setOrgCookies(response, resolved, instance, fullhost)
-    setInstanceCookies(response, instance)
-    return response
-  }
-
-  // -------------------------------------------------------------------------
-  // 6. Stripe Connect OAuth callback — served as-is on every host, never
-  //    rewritten into an org route. The page reads code/state itself.
-  // -------------------------------------------------------------------------
-  if (req.nextUrl.pathname.startsWith('/payments/stripe/connect/oauth')) {
-    return NextResponse.rewrite(new URL(pathname + search, req.url))
-  }
-
-  // -------------------------------------------------------------------------
-  // 7. Health check
-  // -------------------------------------------------------------------------
   if (pathname.startsWith('/health')) {
     return NextResponse.rewrite(new URL(`/api/health`, req.url))
   }
 
   // -------------------------------------------------------------------------
-  // 8. Auth redirect bridge (cross-domain return path)
+  // 7. Apex Root & Default Fallback: Always serve /login
   // -------------------------------------------------------------------------
-  if (pathname === '/redirect_from_auth') {
-    const params = new URLSearchParams(req.nextUrl.searchParams)
-
-    const rawNext = params.get('next')
-    params.delete('next')
-
-    const customDomain = req.cookies.get('LH_custom_domain')?.value
-    const base = customDomain
-      ? `${req.nextUrl.protocol}//${customDomain}`
-      : req.url
-    const baseOrigin = new URL(base).origin
-
-    // Every auth flow forwards where the user was headed as ?next. Landing them
-    // on "/" instead threw that away, so a deep link that prompted a sign-in
-    // always returned to the org picker.
-    //
-    // Resolve the candidate and compare origins rather than pattern-matching the
-    // raw string: this is an open-redirect sink, and a prefix test lets through
-    // anything the URL parser later normalises into another origin ("//evil",
-    // "/\evil", encoded control characters). Only the path survives.
-    let dest = '/'
-    if (rawNext) {
-      try {
-        const candidate = new URL(rawNext, baseOrigin)
-        if (candidate.origin === baseOrigin) {
-          dest = `${candidate.pathname}${candidate.search}${candidate.hash}`
-        }
-      } catch {
-        // Unparseable — fall back to the root.
-      }
-    }
-
-    const redirectUrl = new URL(dest, base)
-    const remaining = params.toString()
-    if (remaining) {
-      redirectUrl.search = redirectUrl.search
-        ? `${redirectUrl.search}&${remaining}`
-        : remaining
-    }
-    return NextResponse.redirect(redirectUrl)
-  }
-
-  // -------------------------------------------------------------------------
-  // 9. Per-org metadata endpoints (sitemap, robots, podcast feed)
-  // -------------------------------------------------------------------------
-  if (pathname.match(/^\/podcast\/([^/]+)\/feed$/)) {
-    const resolved = await resolveTenant(req, instance)
-    const feedUrl = new URL(`/api${pathname}`, req.url)
-    const response = NextResponse.rewrite(feedUrl)
-    response.headers.set('X-Feed-Orgslug', resolved.slug)
-    return response
-  }
-  if (pathname.startsWith('/sitemap.xml')) {
-    const resolved = await resolveTenant(req, instance)
-    const sitemapUrl = new URL(`/api/sitemap`, req.url)
-    const response = NextResponse.rewrite(sitemapUrl)
-    response.headers.set('X-Sitemap-Orgslug', resolved.slug)
-    return response
-  }
-  if (pathname === '/robots.txt') {
-    const resolved = await resolveTenant(req, instance)
-    const robotsUrl = new URL(`/api/robots`, req.url)
-    const response = NextResponse.rewrite(robotsUrl)
-    response.headers.set('X-Robots-Orgslug', resolved.slug)
-    return response
-  }
-
-  // -------------------------------------------------------------------------
-  // 10. Apex root & fallback: Redirect directly to /login
-  // -------------------------------------------------------------------------
-  if (pathname === '/' || !pathname.startsWith('/api')) {
+  if (pathname === '/') {
     return NextResponse.redirect(new URL(`/login${search}`, req.url), 307)
   }
 
   return NextResponse.next()
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
 }
