@@ -347,29 +347,19 @@ export default function GlobalLoginClient() {
 
       {/* ── SOL TARAF: GİRİŞ YAPMA FORMU (PANO BUTONU YOK, HIZLI DEMO YOK, KAYIT OL BUTONU VAR) ── */}
       <div className="w-full lg:w-[48%] xl:w-[44%] 2xl:w-[40%] h-full flex flex-col justify-between p-5 sm:p-7 lg:p-10 z-10 relative overflow-y-auto lg:overflow-hidden border-r border-white/5 bg-[#0A0512]/60 backdrop-blur-xl">
-        {/* Masaüstünde sol üstte logo (mobilde formun üstünde ortalı gösterilir) */}
-        <header className="w-full hidden lg:flex items-center justify-start pb-2 shrink-0">
-          <Link href="/login" className="group flex items-center gap-2 cursor-pointer">
+        {/* Üst Logo: Masaüstünde sol üstte, mobilde ise en üstte ortalı ve 3x büyük */}
+        <header className="w-full flex items-center justify-center lg:justify-start pt-2 lg:pt-0 pb-1 lg:pb-2 shrink-0">
+          <Link href="/login" className="group flex items-center justify-center gap-2 cursor-pointer">
             <img
               src="/oxonom-logo-dark.png"
               alt="Oxonom EDU"
-              className="h-9 w-auto object-contain transition-transform group-hover:scale-[1.02]"
+              className="h-20 sm:h-24 lg:h-9 w-auto max-w-[85vw] sm:max-w-[340px] lg:max-w-none object-contain transition-transform group-hover:scale-[1.02] drop-shadow-xl lg:drop-shadow-none"
             />
           </Link>
         </header>
 
         {/* Orta Kısım: Giriş Formu ve Rol Seçici */}
         <div className="flex-1 flex flex-col justify-center max-w-sm sm:max-w-md w-full mx-auto py-2">
-          {/* Mobilde Formun Tam Üstünde Ortalı ve Belirgin Büyük Logo */}
-          <div className="flex lg:hidden justify-center items-center mb-5 pt-1">
-            <Link href="/login" className="flex items-center justify-center cursor-pointer">
-              <img
-                src="/oxonom-logo-dark.png"
-                alt="Oxonom EDU"
-                className="h-11 sm:h-12 w-auto max-w-[260px] object-contain drop-shadow-md"
-              />
-            </Link>
-          </div>
           {/* Başlık */}
           <div className="mb-4">
             <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#D914C8] mb-1">
