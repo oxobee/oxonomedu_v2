@@ -331,7 +331,7 @@ export default function PanoStandbyScreen({ onPaired }: PanoStandbyScreenProps) 
         >
           <div className="relative flex items-center justify-center drop-shadow-[0_10px_35px_rgba(244,63,94,0.35)]">
             <img
-              src="/oxonom_edu_logo_white.png"
+              src="/brand/logo-dark-tight.png"
               alt="Oxonom Edu Logo"
               className="h-14 sm:h-18 md:h-20 w-auto object-contain select-none"
             />

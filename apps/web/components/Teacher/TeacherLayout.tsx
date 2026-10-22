@@ -144,8 +144,12 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
         {/* Brand Header */}
         <div className="p-5 border-b border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-brand-gradient flex items-center justify-center text-white shadow-md font-black text-lg">
-              OX
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0">
+              <img
+                src={theme === 'dark' ? '/brand/icon-white-tight.png' : '/brand/icon-colored.png'}
+                alt="Oxonom EDU"
+                className="w-9 h-9 object-contain select-none"
+              />
             </div>
             <div>
               <div className="text-sm font-extrabold tracking-tight text-[#241329] dark:text-white leading-tight">
@@ -316,8 +320,12 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.65rem)' }}
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-brand-gradient flex items-center justify-center text-white shadow-xs font-black text-xs">
-              OX
+            <div className="w-7 h-7 flex items-center justify-center shrink-0">
+              <img
+                src={theme === 'dark' ? '/brand/icon-white-tight.png' : '/brand/icon-colored.png'}
+                alt="Oxonom EDU"
+                className="w-7 h-7 object-contain select-none"
+              />
             </div>
             <div>
               <div className="text-xs font-extrabold text-[#241329] dark:text-white leading-tight">

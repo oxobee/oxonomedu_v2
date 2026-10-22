@@ -41,8 +41,12 @@ export default function SuperadminNavbar() {
             href="/superadmin"
             className="flex items-center gap-2.5 group cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] flex items-center justify-center text-white font-black text-sm shadow-lg shadow-[#D914C8]/25 group-hover:scale-105 transition-transform">
-              SA
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <img
+                src="/brand/icon-white-tight.png"
+                alt="Oxonom EDU"
+                className="w-8 h-8 object-contain select-none"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">

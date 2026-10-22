@@ -5,10 +5,8 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
-  ShieldCheck,
   GraduationCap,
   Briefcase,
-  Users,
   Tv,
   ArrowRight,
   Eye,
@@ -17,12 +15,14 @@ import {
   Mail,
   User,
   Sparkles,
+  ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react'
 import { useAuth } from '@components/Contexts/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
 import { getStoredPrincipalProfile, savePrincipalProfile } from '@/lib/principal/principalProfileStorage'
 
-type RoleType = 'superadmin' | 'principal' | 'teacher' | 'student' | 'parent'
+type RoleType = 'principal' | 'teacher' | 'student' | 'superadmin'
 
 interface RoleConfig {
   id: RoleType
@@ -35,13 +35,15 @@ interface RoleConfig {
   targetRoute: string
   identifierLabel: string
   identifierPlaceholder: string
+  badge: string
 }
 
+// SADECE MÜDÜR, ÖĞRETMEN, ÖĞRENCİ (Veli kaldırıldı)
 const ROLES: RoleConfig[] = [
   {
     id: 'principal',
     label: 'Müdür',
-    subtitle: 'Kurum Yönetimi',
+    subtitle: 'Kurum Yönetimi & İdare',
     icon: Briefcase,
     defaultEmail: 'mudur@oxonom.com',
     defaultPass: 'mudur123',
@@ -49,11 +51,12 @@ const ROLES: RoleConfig[] = [
     targetRoute: '/principal/dashboard',
     identifierLabel: 'E-Posta veya T.C. No',
     identifierPlaceholder: 'mudur@oxonom.com',
+    badge: 'İdare',
   },
   {
     id: 'teacher',
     label: 'Öğretmen',
-    subtitle: 'Eğitim & Sınıf',
+    subtitle: 'Ders, Sınıf & Tahta',
     icon: GraduationCap,
     defaultEmail: 'ogretmen@oxonom.com',
     defaultPass: 'ogretmen123',
@@ -61,11 +64,12 @@ const ROLES: RoleConfig[] = [
     targetRoute: '/teacher/dashboard',
     identifierLabel: 'E-Posta veya T.C. No',
     identifierPlaceholder: 'ogretmen@oxonom.com',
+    badge: 'Eğitim',
   },
   {
     id: 'student',
     label: 'Öğrenci',
-    subtitle: '9-A · No: 101',
+    subtitle: '9-A Şubesi · No: 101',
     icon: User,
     defaultEmail: '101',
     defaultPass: 'ogrenci123',
@@ -73,30 +77,7 @@ const ROLES: RoleConfig[] = [
     targetRoute: '/student/dashboard',
     identifierLabel: 'Öğrenci No (101) veya E-Posta',
     identifierPlaceholder: '101 veya ogrenci@oxonom.com',
-  },
-  {
-    id: 'superadmin',
-    label: 'Admin',
-    subtitle: 'Sistem Yönetimi',
-    icon: ShieldCheck,
-    defaultEmail: 'ugurxugurlu',
-    defaultPass: 'Ugur2803*',
-    defaultName: 'Uğur UĞURLU',
-    targetRoute: '/superadmin/gamestudio',
-    identifierLabel: 'Kullanıcı Adı',
-    identifierPlaceholder: 'ugurxugurlu',
-  },
-  {
-    id: 'parent',
-    label: 'Veli',
-    subtitle: 'Gelişim & Devam',
-    icon: Users,
-    defaultEmail: 'veli@oxonom.com',
-    defaultPass: 'veli123',
-    defaultName: 'Ayşe UĞURLU',
-    targetRoute: '/m-student',
-    identifierLabel: 'E-Posta veya T.C. No',
-    identifierPlaceholder: 'veli@oxonom.com',
+    badge: '9-A',
   },
 ]
 
@@ -123,7 +104,7 @@ export default function GlobalLoginClient() {
       setPassword(conf.defaultPass)
       if (showFeedback) {
         toast.success(`${conf.label} hesabı seçildi`, {
-          icon: conf.id === 'student' ? '🎒' : conf.id === 'principal' ? '👔' : conf.id === 'teacher' ? '🎓' : '⚡',
+          icon: conf.id === 'student' ? '🎒' : conf.id === 'principal' ? '👔' : '🎓',
           duration: 2200,
         })
       }
@@ -138,7 +119,7 @@ export default function GlobalLoginClient() {
     }
   }, [searchParams])
 
-  // Auto-detect role as user types
+  // Auto-detect role as user types (also keeps superadmin compatibility)
   const handleIdentifierChange = (val: string) => {
     setIdentifier(val)
     const lower = val.toLowerCase().trim()
@@ -148,10 +129,8 @@ export default function GlobalLoginClient() {
       setSelectedRole('principal')
     } else if (lower.includes('ogretmen') || lower.includes('teacher') || lower === '2') {
       setSelectedRole('teacher')
-    } else if (lower === '101' || lower.includes('ercil') || lower.includes('ogrenci')) {
+    } else if (lower === '101' || lower.includes('ercil') || lower.includes('ogrenci') || lower === '3') {
       setSelectedRole('student')
-    } else if (lower.includes('veli') || lower.includes('parent')) {
-      setSelectedRole('parent')
     }
   }
 
@@ -189,7 +168,7 @@ export default function GlobalLoginClient() {
       targetRoute = '/student/dashboard'
     }
 
-    // Explicit Session Isolation: Clear conflicting accounts on device
+    // Explicit Session Isolation
     if (typeof window !== 'undefined') {
       try {
         if (isSuperadmin) {
@@ -326,58 +305,39 @@ export default function GlobalLoginClient() {
   }
 
   return (
-    <div className="min-h-[100dvh] w-full bg-[#08050D] text-[#FCF9FD] flex flex-col justify-between relative overflow-x-hidden select-none selection:bg-[#D914C8]/30 selection:text-white">
+    <div className="h-screen max-h-screen w-full bg-[#08050D] text-[#FCF9FD] flex flex-col lg:flex-row overflow-hidden select-none selection:bg-[#D914C8]/30 selection:text-white">
       <Toaster position="top-center" />
 
-      {/* ── SMOOTH AMBIENT BACKGROUND GLOW ANIMATIONS ── */}
+      {/* ── AMBIENT BACKGROUND GLOW ANIMATIONS ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Floating Orb 1: Deep Violet */}
         <motion.div
           animate={{
-            x: [0, 50, -30, 0],
-            y: [0, -40, 30, 0],
+            x: [0, 40, -30, 0],
+            y: [0, -30, 20, 0],
             scale: [1, 1.15, 0.95, 1],
           }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
           className="absolute -top-32 -left-32 w-[520px] h-[520px] rounded-full bg-[#4B075F]/35 blur-[130px]"
         />
-
-        {/* Floating Orb 2: Electric Magenta */}
         <motion.div
           animate={{
-            x: [0, -60, 40, 0],
-            y: [0, 50, -40, 0],
+            x: [0, -50, 30, 0],
+            y: [0, 40, -30, 0],
             scale: [1, 1.2, 0.9, 1],
           }}
           transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
           className="absolute -bottom-32 -right-32 w-[560px] h-[560px] rounded-full bg-[#D914C8]/25 blur-[140px]"
         />
-
-        {/* Floating Orb 3: Center Ambient Purple */}
         <motion.div
           animate={{
-            opacity: [0.15, 0.3, 0.15],
-            scale: [0.95, 1.1, 0.95],
+            opacity: [0.12, 0.25, 0.12],
+            scale: [0.95, 1.08, 0.95],
           }}
           transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#8D49A6]/15 blur-[150px]"
+          className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#8D49A6]/15 blur-[150px]"
         />
-
-        {/* Slow Rotating Orbit Wireframe */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 180, repeat: Infinity, ease: 'linear' }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[720px] opacity-[0.08]"
-        >
-          <svg viewBox="0 0 720 720" fill="none" className="w-full h-full">
-            <circle cx="360" cy="360" r="340" stroke="#D914C8" strokeWidth="1" strokeDasharray="6 10" />
-            <circle cx="360" cy="360" r="260" stroke="#8D49A6" strokeWidth="0.8" strokeDasharray="3 8" />
-          </svg>
-        </motion.div>
-
-        {/* Minimal Grid Pattern */}
         <div
-          className="absolute inset-0 opacity-[0.02]"
+          className="absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage:
               'linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)',
@@ -386,50 +346,45 @@ export default function GlobalLoginClient() {
         />
       </div>
 
-      {/* ── MINIMAL TOP BAR ── */}
-      <header className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#8D49A6] via-[#D914C8] to-[#4B075F] flex items-center justify-center text-white font-black text-sm shadow-md shadow-[#D914C8]/20">
-            OX
-          </div>
-          <span className="text-sm font-black tracking-tight text-white">Oxonom EDU</span>
-        </div>
+      {/* ── SOL TARAF: GİRİŞ YAPMA FORMU & ÜSTTE LOGO (SCROLLSUZ TAM SIĞAN ALAN) ── */}
+      <div className="w-full lg:w-[48%] xl:w-[44%] 2xl:w-[40%] h-full flex flex-col justify-between p-5 sm:p-7 lg:p-9 z-10 relative overflow-y-auto lg:overflow-hidden border-r border-white/5 bg-[#0A0512]/60 backdrop-blur-xl">
+        {/* Üst Kısım: Resmi Logo ve Pano Butonu */}
+        <header className="w-full flex items-center justify-between pb-2 shrink-0">
+          <Link href="/loginv2" className="group flex items-center gap-2 cursor-pointer">
+            <img
+              src="/brand/logo-dark-tight.png"
+              alt="Oxonom EDU"
+              className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-[1.02]"
+            />
+          </Link>
 
-        <Link
-          href="/pano"
-          className="h-8 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[#D2C5D8] hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors border border-white/10"
-        >
-          <Tv size={13} className="text-[#D914C8]" />
-          <span>Pano</span>
-        </Link>
-      </header>
+          <Link
+            href="/pano"
+            className="h-8 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] text-[#D2C5D8] hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors border border-white/10"
+          >
+            <Tv size={13} className="text-[#D914C8]" />
+            <span>Pano</span>
+          </Link>
+        </header>
 
-      {/* ── MAIN CENTERED LOGIN CARD (100% MOBILE RESPONSIVE) ── */}
-      <main className="relative z-10 w-full max-w-md mx-auto px-4 py-4 sm:py-6 flex-1 flex flex-col items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: 'easeOut' }}
-          className="w-full bg-[#130B1B]/85 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80 relative overflow-hidden"
-        >
-          {/* Subtle top edge glow */}
-          <div className="absolute top-0 inset-x-12 h-px bg-gradient-to-r from-transparent via-[#D914C8]/60 to-transparent" />
-
-          {/* Minimal Brand Header */}
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8D49A6] via-[#D914C8] to-[#4B075F] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-[#D914C8]/25 ring-1 ring-white/20 mx-auto mb-3">
-              OX
+        {/* Orta Kısım: Giriş Formu ve Rol Seçici */}
+        <div className="flex-1 flex flex-col justify-center max-w-sm sm:max-w-md w-full mx-auto py-2">
+          {/* Başlık */}
+          <div className="mb-4">
+            <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#D914C8] mb-1">
+              <Sparkles size={13} />
+              <span>Giriş Portalı</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Giriş Yap
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+              Hesabınıza Giriş Yapın
             </h1>
-            <p className="text-xs text-[#A998B3] mt-1">
+            <p className="text-xs text-[#A998B3] mt-0.5">
               {activeRoleConfig.defaultName} · {activeRoleConfig.subtitle}
             </p>
           </div>
 
-          {/* ── COMPACT ROLE SELECTOR TABS ── */}
-          <div className="grid grid-cols-5 gap-1 p-1 bg-[#0B0612]/80 rounded-2xl border border-white/10 mb-5 relative">
+          {/* SADECE MÜDÜR, ÖĞRETMEN, ÖĞRENCİ SEÇİM BUTONLARI (VELİ YOK) */}
+          <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#130B1B] rounded-2xl border border-white/10 mb-4 relative shadow-inner">
             {ROLES.map((r) => {
               const Icon = r.icon
               const isSelected = selectedRole === r.id
@@ -438,7 +393,7 @@ export default function GlobalLoginClient() {
                   key={r.id}
                   type="button"
                   onClick={() => handleRoleSelect(r.id)}
-                  className="relative z-10 py-2 px-1 rounded-xl text-center cursor-pointer transition-colors"
+                  className="relative z-10 py-2.5 px-2 rounded-xl text-center cursor-pointer transition-colors"
                 >
                   {isSelected && (
                     <motion.div
@@ -449,11 +404,11 @@ export default function GlobalLoginClient() {
                   )}
                   <div className="relative z-20 flex flex-col items-center gap-1">
                     <Icon
-                      size={15}
+                      size={16}
                       className={isSelected ? 'text-[#FCE8FA]' : 'text-[#7D6E87]'}
                     />
                     <span
-                      className={`text-[11px] font-bold truncate max-w-full ${
+                      className={`text-xs font-bold truncate max-w-full ${
                         isSelected ? 'text-white' : 'text-[#9A8C9E]'
                       }`}
                     >
@@ -465,11 +420,11 @@ export default function GlobalLoginClient() {
             })}
           </div>
 
-          {/* ── FORM ── */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* FORM */}
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             {/* Identifier Input */}
             <div>
-              <label className="text-xs font-semibold text-[#D2C5D8] block mb-1.5">
+              <label className="text-xs font-semibold text-[#D2C5D8] block mb-1">
                 {activeRoleConfig.identifierLabel}
               </label>
               <div className="relative">
@@ -480,19 +435,19 @@ export default function GlobalLoginClient() {
                   placeholder={activeRoleConfig.identifierPlaceholder}
                   value={identifier}
                   onChange={(e) => handleIdentifierChange(e.target.value)}
-                  className="w-full h-11 pl-10 pr-3.5 text-xs sm:text-sm bg-[#0B0612]/90 border border-white/10 rounded-xl focus:outline-none focus:border-[#D914C8] focus:ring-1 focus:ring-[#D914C8] text-white placeholder-[#685970] transition-colors"
+                  className="w-full h-11 pl-10 pr-3.5 text-xs sm:text-sm bg-[#12081C] border border-white/10 rounded-xl focus:outline-none focus:border-[#D914C8] focus:ring-1 focus:ring-[#D914C8] text-white placeholder-[#685970] transition-colors"
                 />
               </div>
             </div>
 
             {/* Password Input */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-1">
                 <label className="text-xs font-semibold text-[#D2C5D8]">Şifre</label>
                 <button
                   type="button"
-                  onClick={() => toast('Şifre sıfırlama bağlantısı kurum yöneticinize iletilir.', { icon: 'ℹ️' })}
-                  className="text-[11px] text-[#A998B3] hover:text-[#D914C8] transition-colors"
+                  onClick={() => toast('Şifre sıfırlama talebiniz kurum yöneticisine iletilir.', { icon: 'ℹ️' })}
+                  className="text-[11px] text-[#A998B3] hover:text-[#D914C8] transition-colors cursor-pointer"
                 >
                   Şifremi unuttum?
                 </button>
@@ -505,7 +460,7 @@ export default function GlobalLoginClient() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-11 pl-10 pr-10 text-xs sm:text-sm bg-[#0B0612]/90 border border-white/10 rounded-xl focus:outline-none focus:border-[#D914C8] focus:ring-1 focus:ring-[#D914C8] text-white placeholder-[#685970] transition-colors"
+                  className="w-full h-11 pl-10 pr-10 text-xs sm:text-sm bg-[#12081C] border border-white/10 rounded-xl focus:outline-none focus:border-[#D914C8] focus:ring-1 focus:ring-[#D914C8] text-white placeholder-[#685970] transition-colors"
                 />
                 <button
                   type="button"
@@ -525,14 +480,14 @@ export default function GlobalLoginClient() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded bg-[#0B0612] border-white/20 text-[#8D49A6] focus:ring-[#8D49A6]"
+                  className="w-4 h-4 rounded bg-[#12081C] border-white/20 text-[#8D49A6] focus:ring-[#8D49A6]"
                 />
                 <span className="text-xs text-[#A998B3]">Beni hatırla</span>
               </label>
 
               <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Güvenli Oturum
+                <ShieldCheck size={12} />
+                <span>SSL 256-Bit</span>
               </span>
             </div>
 
@@ -542,7 +497,7 @@ export default function GlobalLoginClient() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isLoading}
-              className="w-full h-11 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#4B075F]/35 transition-all cursor-pointer"
+              className="w-full h-11 rounded-xl bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#4B075F]/35 transition-all cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -555,13 +510,13 @@ export default function GlobalLoginClient() {
             </motion.button>
           </form>
 
-          {/* ── ALTTAN SADE & GÖZE BATMAYAN HIZLI DEMO BUTONLARI ── */}
-          <div className="mt-5 pt-4 border-t border-white/10 flex flex-col items-center">
+          {/* SADECE MÜDÜR, ÖĞRENCİ, ÖĞRETMEN HIZLI GİRİŞ KISAYOLLARI */}
+          <div className="mt-4 pt-3.5 border-t border-white/10 flex flex-col items-center">
             <span className="text-[10px] font-semibold text-[#8E7E97] uppercase tracking-wider mb-2">
               Hızlı Demo Girişi
             </span>
-            <div className="flex flex-wrap items-center justify-center gap-1.5 w-full">
-              {ROLES.slice(0, 4).map((r) => {
+            <div className="grid grid-cols-3 gap-1.5 w-full">
+              {ROLES.map((r) => {
                 const Icon = r.icon
                 const isActive = selectedRole === r.id
                 return (
@@ -569,9 +524,9 @@ export default function GlobalLoginClient() {
                     key={r.id}
                     type="button"
                     onClick={() => handleRoleSelect(r.id, true)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`py-1.5 px-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       isActive
-                        ? 'bg-[#4B075F]/70 text-[#FCE8FA] border border-[#8D49A6]/60 shadow-sm'
+                        ? 'bg-[#4B075F]/70 text-[#FCE8FA] border border-[#8D49A6]/70 shadow-sm'
                         : 'bg-white/[0.04] hover:bg-white/[0.08] text-[#C2B4C8] hover:text-white border border-white/10'
                     }`}
                   >
@@ -582,13 +537,62 @@ export default function GlobalLoginClient() {
               })}
             </div>
           </div>
-        </motion.div>
-      </main>
+        </div>
 
-      {/* ── MINIMAL FOOTER ── */}
-      <footer className="relative z-10 w-full py-4 text-center text-[11px] text-[#7D6E87]">
-        Oxonom EDU v2.0 · Güvenli Eğitim Yönetim Ekosistemi
-      </footer>
+        {/* Alt Kısım: Minimal Telif Yazısı */}
+        <footer className="w-full text-center text-[10px] text-[#7D6E87] pt-2 shrink-0">
+          Oxonom EDU v2.0 · Güvenli Eğitim Yönetim Ekosistemi
+        </footer>
+      </div>
+
+      {/* ── SAĞ TARAF (MASAÜSTÜ): BÜYÜK LOGO VE AMBİYANS ALANI ── */}
+      <div className="hidden lg:flex flex-1 h-full items-center justify-center relative p-8 xl:p-12 overflow-hidden bg-gradient-to-br from-[#12081C]/90 via-[#0A0512] to-[#050208] z-10">
+        {/* Sağ Alan Merkez Işık Küresi */}
+        <div className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-[#D914C8]/20 via-[#8D49A6]/15 to-[#4B075F]/20 blur-[110px] pointer-events-none" />
+
+        {/* Dekoratif Yavaş Dönen Yörünge Çizgileri */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 160, repeat: Infinity, ease: 'linear' }}
+          className="absolute w-[680px] h-[680px] pointer-events-none opacity-20"
+        >
+          <svg viewBox="0 0 680 680" fill="none" className="w-full h-full">
+            <circle cx="340" cy="340" r="320" stroke="#D914C8" strokeWidth="1" strokeDasharray="6 12" />
+            <circle cx="340" cy="340" r="240" stroke="#8D49A6" strokeWidth="0.8" strokeDasharray="4 8" />
+            <circle cx="340" cy="340" r="160" stroke="#F0D8FA" strokeWidth="0.5" strokeOpacity="0.4" />
+          </svg>
+        </motion.div>
+
+        {/* Ekrana Uyumlu Büyük Logo Bloğu */}
+        <motion.div
+          animate={{
+            y: [-6, 6, -6],
+            scale: [1, 1.012, 1],
+          }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+          className="relative z-20 flex flex-col items-center justify-center max-w-xl w-full text-center px-4"
+        >
+          {/* Logo Görseli (Koyu zemine uyumlu beyaz logo) */}
+          <div className="relative group p-6 sm:p-8 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-md shadow-2xl shadow-black/80">
+            <img
+              src="/brand/logo-dark-tight.png"
+              alt="Oxonom EDU"
+              className="w-full max-w-[420px] xl:max-w-[480px] 2xl:max-w-[540px] h-auto object-contain drop-shadow-[0_15px_40px_rgba(217,20,200,0.35)]"
+            />
+          </div>
+
+          {/* Alt Rozet Bilgileri */}
+          <div className="mt-8 flex items-center gap-3">
+            <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#4B075F]/50 text-[#FCE8FA] border border-[#8D49A6]/40 shadow-sm flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#D914C8] animate-pulse" />
+              <span>Geleceğin Akıllı Okul Ekosistemi</span>
+            </span>
+            <span className="text-xs text-[#A998B3] font-medium hidden xl:inline-block">
+              İdare · Öğretmen · Öğrenci · Akıllı Pano
+            </span>
+          </div>
+        </motion.div>
+      </div>
     </div>
   )
 }
