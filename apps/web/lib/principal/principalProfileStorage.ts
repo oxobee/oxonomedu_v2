@@ -36,7 +36,7 @@ export const DEFAULT_PRINCIPAL_PROFILE: PrincipalProfile = {
   name: 'Dr. Uğur UĞURLU',
   title: 'Okul Müdürü · Kurum Yetkilisi',
   email: 'mudur@oxonom.com',
-  tcNo: '10000000146',
+  tcNo: '10000000001',
   phone: '+90 532 999 2200',
   twoFactorActive: true,
   schoolName: 'Necla Görer İlkokulu',

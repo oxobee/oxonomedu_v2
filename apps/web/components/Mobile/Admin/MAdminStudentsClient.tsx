@@ -350,23 +350,22 @@ export default function MAdminStudentsClient({
     setEditMotherLivingStatus(student.motherLivingStatus || 'Hayatta')
     setEditMotherIsLegalGuardian(student.motherIsLegalGuardian ?? false)
 
-    const storedPrincipal = getStoredPrincipalProfile()
-    setEditFatherName(student.fatherName || `${storedPrincipal.name} (Okul Müdürü)`)
-    setEditFatherTc(student.fatherTc || storedPrincipal.tcNo || '19482019482')
-    setEditFatherPhone(student.fatherPhone || storedPrincipal.phone || '+90 532 999 2200')
-    setEditFatherEmail(student.fatherEmail || storedPrincipal.email || 'mudur@oxonom.com')
-    setEditFatherJob(student.fatherJob || `${storedPrincipal.title || 'Okul Müdürü'} · Kurum Yetkilisi`)
+    setEditFatherName(student.fatherName || '')
+    setEditFatherTc(student.fatherTc || '')
+    setEditFatherPhone(student.fatherPhone || '')
+    setEditFatherEmail(student.fatherEmail || '')
+    setEditFatherJob(student.fatherJob || '')
     setEditFatherLivingStatus(student.fatherLivingStatus || 'Hayatta')
     setEditFatherIsLegalGuardian(student.fatherIsLegalGuardian ?? true)
 
-    setEditAddress(student.address || 'Caddebostan Mah. Bağdat Cad. No: 142/5 Kadıköy / İstanbul')
-    setEditCityDistrict(student.cityDistrict || 'İstanbul / Kadıköy')
-    setEditEmergency1Name(student.emergency1Name || storedPrincipal.name)
-    setEditEmergency1Relation(student.emergency1Relation || 'Baba (Okul Müdürü)')
-    setEditEmergency1Phone(student.emergency1Phone || storedPrincipal.phone || '+90 532 999 2200')
-    setEditEmergency2Name(student.emergency2Name || 'Ebru UĞURLU')
-    setEditEmergency2Relation(student.emergency2Relation || 'Anne')
-    setEditEmergency2Phone(student.emergency2Phone || '+90 532 999 1100')
+    setEditAddress(student.address || '')
+    setEditCityDistrict(student.cityDistrict || '')
+    setEditEmergency1Name(student.emergency1Name || '')
+    setEditEmergency1Relation(student.emergency1Relation || '')
+    setEditEmergency1Phone(student.emergency1Phone || '')
+    setEditEmergency2Name(student.emergency2Name || '')
+    setEditEmergency2Relation(student.emergency2Relation || '')
+    setEditEmergency2Phone(student.emergency2Phone || '')
 
     setEditDocIdCard(student.docIdCard ?? true)
     setEditDocResidence(student.docResidence ?? true)
@@ -892,10 +891,10 @@ export default function MAdminStudentsClient({
                     {/* Parent Info Strip */}
                     <div className="flex items-center gap-1.5 text-[10.5px] text-gray-600 dark:text-gray-400 mt-1.5 bg-gray-50 dark:bg-gray-800/60 px-2 py-1 rounded-lg truncate">
                       <User size={11} className="text-gray-400 shrink-0" />
-                      <span className="truncate">Veli: {student.parentName || student.motherName || 'Uğur UĞURLU'}</span>
+                      <span className="truncate">Veli: {student.parentName || student.fatherName || student.motherName || 'Veli Belirtilmedi'}</span>
                       <span className="text-gray-400">·</span>
                       <Phone size={11} className="text-gray-400 shrink-0" />
-                      <span className="truncate">{student.parentPhone || student.fatherPhone || '+90 532 999 2200'}</span>
+                      <span className="truncate">{student.parentPhone || student.fatherPhone || student.motherPhone || '—'}</span>
                     </div>
                   </div>
                 </div>
@@ -1864,35 +1863,39 @@ export default function MAdminStudentsClient({
                             <div className="flex justify-between">
                               <span className="text-gray-400">Ad Soyad:</span>
                               <span className="font-black text-gray-900 dark:text-white">
-                                {selectedStudentForDetail.fatherName || `${getStoredPrincipalProfile().name} (Okul Müdürü)`}
+                                {selectedStudentForDetail.fatherName || 'Belirtilmedi'}
                               </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">T.C. Kimlik:</span>
                               <span className="font-mono font-bold text-gray-800 dark:text-gray-200">
-                                {selectedStudentForDetail.fatherTc || getStoredPrincipalProfile().tcNo || '19482019482'}
+                                {selectedStudentForDetail.fatherTc || '—'}
                               </span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-gray-400">Telefon:</span>
-                              <a
-                                href={`tel:${selectedStudentForDetail.fatherPhone || getStoredPrincipalProfile().phone || '+905329992200'}`}
-                                className="font-mono text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1"
-                              >
-                                <Phone size={11} />
-                                <span>{selectedStudentForDetail.fatherPhone || getStoredPrincipalProfile().phone || '+90 532 999 2200'}</span>
-                              </a>
+                              {selectedStudentForDetail.fatherPhone ? (
+                                <a
+                                  href={`tel:${selectedStudentForDetail.fatherPhone}`}
+                                  className="font-mono text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1"
+                                >
+                                  <Phone size={11} />
+                                  <span>{selectedStudentForDetail.fatherPhone}</span>
+                                </a>
+                              ) : (
+                                <span className="font-mono text-gray-400">—</span>
+                              )}
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-gray-400">E-Posta:</span>
                               <span className="font-medium text-gray-800 dark:text-gray-200">
-                                {selectedStudentForDetail.fatherEmail || getStoredPrincipalProfile().email || 'mudur@oxonom.com'}
+                                {selectedStudentForDetail.fatherEmail || '—'}
                               </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">Meslek:</span>
                               <span className="font-medium text-gray-800 dark:text-gray-200">
-                                {selectedStudentForDetail.fatherJob || `${getStoredPrincipalProfile().title || 'Okul Müdürü'} · Kurum Yetkilisi`}
+                                {selectedStudentForDetail.fatherJob || '—'}
                               </span>
                             </div>
                             <div className="flex justify-between">
@@ -1924,10 +1927,10 @@ export default function MAdminStudentsClient({
                           <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 space-y-1.5">
                             <div className="text-[10px] text-gray-400 font-bold uppercase">1. Acil Durum İrtibatı</div>
                             <div className="text-sm font-black text-gray-900 dark:text-white">
-                              {selectedStudentForDetail.emergency1Name || getStoredPrincipalProfile().name} ({selectedStudentForDetail.emergency1Relation || 'Baba - Okul Müdürü'})
+                              {selectedStudentForDetail.emergency1Name || 'Belirtilmedi'} {selectedStudentForDetail.emergency1Relation ? `(${selectedStudentForDetail.emergency1Relation})` : ''}
                             </div>
                             <div className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                              {selectedStudentForDetail.emergency1Phone || getStoredPrincipalProfile().phone || '+90 532 999 2200'}
+                              {selectedStudentForDetail.emergency1Phone || '—'}
                             </div>
                           </div>
 
