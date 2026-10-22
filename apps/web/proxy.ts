@@ -438,9 +438,42 @@ export default async function proxy(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
-  // 3. Auth pages — resolve tenant for cookie context, rewrite to /auth
+  // 3. Oxonom EDU Core Routes: /login, /loginv2, /student, /teacher, /principal, etc.
   // -------------------------------------------------------------------------
-  const authPaths = ['/login', '/signup', '/reset', '/forgot', '/verify-email']
+  if (
+    pathname === '/login' ||
+    pathname.startsWith('/login/') ||
+    pathname === '/loginv2' ||
+    pathname.startsWith('/loginv2/') ||
+    pathname === '/student' ||
+    pathname.startsWith('/student/') ||
+    pathname === '/teacher' ||
+    pathname.startsWith('/teacher/') ||
+    pathname === '/principal' ||
+    pathname.startsWith('/principal/') ||
+    pathname === '/superadmin' ||
+    pathname.startsWith('/superadmin/') ||
+    pathname === '/gamestudio' ||
+    pathname.startsWith('/gamestudio/') ||
+    pathname === '/games' ||
+    pathname.startsWith('/games/') ||
+    pathname === '/pano' ||
+    pathname.startsWith('/pano/')
+  ) {
+    const resolved = await resolveTenant(req, instance)
+    const requestHeaders = tenantRequestHeaders(req, resolved, instance)
+    const response = NextResponse.rewrite(new URL(pathname + search, req.url), {
+      request: { headers: requestHeaders },
+    })
+    setOrgCookies(response, resolved, instance, fullhost)
+    setInstanceCookies(response, instance)
+    return response
+  }
+
+  // -------------------------------------------------------------------------
+  // 4. Legacy Auth pages — resolve tenant for cookie context, rewrite to /auth
+  // -------------------------------------------------------------------------
+  const authPaths = ['/signup', '/reset', '/forgot', '/verify-email']
   if (authPaths.includes(pathname)) {
     const hasSession = !!req.cookies.get('LH_session')?.value
 
@@ -474,7 +507,7 @@ export default async function proxy(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
-  // 4. Auth callbacks — pass through without org rewrite
+  // 5. Auth callbacks — pass through without org rewrite
   // -------------------------------------------------------------------------
   if (
     pathname.startsWith('/auth/sso/')
@@ -500,31 +533,6 @@ export default async function proxy(req: NextRequest) {
       { request: { headers: requestHeaders } },
     )
     setOrgCookies(response, resolved, instance, fullhost)
-    setInstanceCookies(response, instance)
-    return response
-  }
-
-  if (
-    pathname === '/student' ||
-    pathname.startsWith('/student/') ||
-    pathname === '/teacher' ||
-    pathname.startsWith('/teacher/') ||
-    pathname === '/principal' ||
-    pathname.startsWith('/principal/') ||
-    pathname === '/superadmin' ||
-    pathname.startsWith('/superadmin/') ||
-    pathname === '/gamestudio' ||
-    pathname.startsWith('/gamestudio/') ||
-    pathname === '/games' ||
-    pathname.startsWith('/games/') ||
-    pathname === '/login' ||
-    pathname.startsWith('/login/') ||
-    pathname === '/loginv2' ||
-    pathname.startsWith('/loginv2/') ||
-    pathname === '/pano' ||
-    pathname.startsWith('/pano/')
-  ) {
-    const response = NextResponse.rewrite(new URL(pathname + search, req.url))
     setInstanceCookies(response, instance)
     return response
   }
