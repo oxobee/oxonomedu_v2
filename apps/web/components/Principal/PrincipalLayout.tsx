@@ -191,7 +191,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0">
               <img
-                src={theme === 'dark' ? '/brand/icon-white-tight.png' : '/brand/icon-colored.png'}
+                src={theme === 'dark' ? '/oxonom-icon-white.png' : '/oxonom-icon-colored.png'}
                 alt="Oxonom EDU"
                 className="w-9 h-9 object-contain select-none"
               />
@@ -418,7 +418,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 flex items-center justify-center shrink-0">
               <img
-                src={theme === 'dark' ? '/brand/icon-white-tight.png' : '/brand/icon-colored.png'}
+                src={theme === 'dark' ? '/oxonom-icon-white.png' : '/oxonom-icon-colored.png'}
                 alt="Oxonom EDU"
                 className="w-7 h-7 object-contain select-none"
               />

@@ -43,7 +43,7 @@ export default function SuperadminNavbar() {
           >
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               <img
-                src="/brand/icon-white-tight.png"
+                src="/oxonom-icon-white.png"
                 alt="Oxonom EDU"
                 className="w-8 h-8 object-contain select-none"
               />

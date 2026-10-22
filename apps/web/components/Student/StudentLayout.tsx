@@ -151,17 +151,22 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
     >
       {/* ── DESKTOP SIDEBAR (lg+) — Lingora Claymorphic SaaS Style ── */}
       <aside className="hidden lg:flex flex-col fixed top-0 left-0 w-[270px] xl:w-[280px] h-screen shrink-0 bg-white dark:bg-[#211729] border-r border-[#E8DFEB] dark:border-[#49364F] z-30 select-none shadow-[2px_0_24px_rgba(75,7,95,0.03)]">
-        {/* Brand Header with Oxo Mascot */}
+        {/* Brand Header with Oxonom EDU Official Logo/Icon */}
         <div className="p-5 pb-4 flex items-center justify-between border-b border-[#E8DFEB] dark:border-[#49364F]">
-          <Link href="/student/dashboard" className="flex items-center gap-3 group">
-            <OxoMascotIcon className="w-10 h-10 group-hover:scale-105 transition-transform" />
+          <Link href="/student/dashboard" className="flex items-center gap-2.5 group">
+            <div className="w-10 h-10 flex items-center justify-center shrink-0">
+              <img
+                src={theme === 'dark' ? '/oxonom-icon-white.png' : '/oxonom-icon-colored.png'}
+                alt="Oxonom EDU"
+                className="w-9 h-9 object-contain select-none group-hover:scale-105 transition-transform"
+              />
+            </div>
             <div>
-              <div className="text-lg font-black tracking-tight text-[#241329] dark:text-white leading-none flex items-center gap-1">
-                <span>Oxonom</span>
-                <span className="text-[#D914C8]">.</span>
+              <div className="text-base font-black tracking-tight text-[#241329] dark:text-white leading-tight">
+                Oxonom EDU
               </div>
-              <div className="text-[10px] font-bold text-[#8D49A6] dark:text-[#C58ADB] tracking-wide mt-1">
-                Learn • Practice • Excel
+              <div className="text-[10px] font-bold text-[#8D49A6] dark:text-[#C58ADB] tracking-wide">
+                Öğrenci Portalı
               </div>
             </div>
           </Link>
@@ -373,9 +378,13 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.65rem)' }}
         >
           <div className="flex items-center gap-2">
-            <OxoMascotIcon className="w-7 h-7" />
+            <img
+              src={theme === 'dark' ? '/oxonom-icon-white.png' : '/oxonom-icon-colored.png'}
+              alt="Oxonom EDU"
+              className="w-7 h-7 object-contain select-none"
+            />
             <div className="text-xs font-black text-[#241329] dark:text-white leading-none">
-              Oxonom Edu
+              Oxonom EDU
             </div>
           </div>
 

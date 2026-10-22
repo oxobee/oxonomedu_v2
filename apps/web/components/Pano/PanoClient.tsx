@@ -4705,12 +4705,12 @@ export default function PanoClient() {
         <Link href={getUriWithOrg(orgslug, '/')} className="flex items-center group cursor-pointer" title="Ana Sayfaya Dön">
           <div className="h-10 sm:h-12 flex items-center group-hover:scale-105 transition-transform">
             <img
-              src="/brand/logo-light-tight.png"
+              src="/oxonom-logo-light.png"
               alt="Oxonom Edu"
               className="h-8 sm:h-10 md:h-11 w-auto object-contain dark:hidden transition-all drop-shadow-xs"
             />
             <img
-              src="/brand/logo-dark-tight.png"
+              src="/oxonom-logo-dark.png"
               alt="Oxonom Edu"
               className="h-8 sm:h-10 md:h-11 w-auto object-contain hidden dark:block transition-all drop-shadow-xs"
             />

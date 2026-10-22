@@ -352,7 +352,7 @@ export default function GlobalLoginClient() {
         <header className="w-full flex items-center justify-between pb-2 shrink-0">
           <Link href="/loginv2" className="group flex items-center gap-2 cursor-pointer">
             <img
-              src="/brand/logo-dark-tight.png"
+              src="/oxonom-logo-dark.png"
               alt="Oxonom EDU"
               className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-[1.02]"
             />
@@ -575,7 +575,7 @@ export default function GlobalLoginClient() {
           {/* Logo Görseli (Koyu zemine uyumlu beyaz logo) */}
           <div className="relative group p-6 sm:p-8 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-md shadow-2xl shadow-black/80">
             <img
-              src="/brand/logo-dark-tight.png"
+              src="/oxonom-logo-dark.png"
               alt="Oxonom EDU"
               className="w-full max-w-[420px] xl:max-w-[480px] 2xl:max-w-[540px] h-auto object-contain drop-shadow-[0_15px_40px_rgba(217,20,200,0.35)]"
             />

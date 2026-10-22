@@ -60,7 +60,7 @@ export default function MobileHeader({
           className="flex items-center active:scale-95 transition-transform py-0.5"
         >
           <img
-            src={theme === 'dark' ? '/brand/logo-dark-tight.png' : '/brand/logo-light-tight.png'}
+            src={theme === 'dark' ? '/oxonom-logo-dark.png' : '/oxonom-logo-light.png'}
             alt="OXONOM edu."
             className="h-11 sm:h-12 max-h-[46px] w-auto object-contain drop-shadow-xs"
           />

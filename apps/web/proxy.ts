@@ -221,8 +221,9 @@ export const config = {
      * 8. /ingest (PostHog reverse proxy — must reach the next.config rewrite
      *    untouched; otherwise the middleware mis-routes it and ingestion 404s)
      * 9. /games (inside /public)
+     * 10. /brand (brand logos & icons)
      */
-    '/((?!api|_next|fonts|games|content|umami|ingest|examples|embed|monitoring|[\\w-]+\\.\\w+).*)',
+    '/((?!api|_next|fonts|games|brand|content|umami|ingest|examples|embed|monitoring|[\\w-]+\\.\\w+).*)',
     '/sitemap.xml',
     '/robots.txt',
     '/payments/stripe/connect/oauth',
@@ -232,6 +233,11 @@ export const config = {
 
 export default async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl
+
+  // Pass-through static brand assets in /public/brand/
+  if (pathname.startsWith('/brand/')) {
+    return NextResponse.next()
+  }
 
   // Pass-through static content files in /public/content/
   if (pathname.startsWith('/content/')) {

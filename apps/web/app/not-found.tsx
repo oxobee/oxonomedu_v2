@@ -9,7 +9,7 @@ export default function NotFound() {
         <img
           width={280}
           height={100}
-          src="/brand/logo-light-tight.png"
+          src="/oxonom-logo-light.png"
           alt="Oxonom EDU"
           className="h-16 w-auto object-contain drop-shadow-sm"
         />
