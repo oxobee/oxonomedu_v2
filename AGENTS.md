@@ -35,10 +35,12 @@
 
 ---
 
-## 3. 🌐 Dağıtım ve Git Altyapısı
+## 3. 🌐 Dağıtım ve Domain Kuralları (RESMİ DOMAIN: edu.oxonom.com)
+- **Birincil ve Resmi Canlı Domain:** `https://edu.oxonom.com` (Tüm güncel geliştirmeler ve canlı bağlantılar doğrudan bu domain altında çalışır).
 - **GitHub Reposu:** `oxobee/oxonomedu_v2` (ve `oxobee/oxonom`) — `main` dalı.
-- **Frontend Barındırma:** Vercel projesi `oxonomedu_v2` (`https://learnhouze.vercel.app` / `https://oxonom.com`).
-- **Canlıya Dağıtım:** `main` dalına git push yapıldığında Vercel otomatik olarak derler ve canlıya alır.
+- **Frontend Barındırma:** Vercel projesi `oxonomedu_v2` (oxobee-studio ekibi altında).
+- **Yedek / Dahili Domainler:** `https://oxonomeduv2.vercel.app`, `https://oxonomedu-v2.vercel.app`.
+- **Canlıya Dağıtım:** `main` dalına git push yapıldığında Vercel otomatik olarak derler veya `vercel --prod --yes` ile anında canlıya alınır.
 
 ---
 
