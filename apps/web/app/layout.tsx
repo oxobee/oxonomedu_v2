@@ -1,5 +1,5 @@
 import '../styles/globals.css'
-import React from 'react'
+import React, { Suspense } from 'react'
 import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
 import PwaRegister from '@components/Mobile/PwaRegister'
@@ -114,7 +114,9 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <Providers>
           <AppleSplashScreen />
-          <GlobalOperationLoader />
+          <Suspense fallback={null}>
+            <GlobalOperationLoader />
+          </Suspense>
           <main className="animate-fade-in">
             {children}
           </main>

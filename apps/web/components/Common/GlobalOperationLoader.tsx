@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useRef, useCallback } from 'react'
+import React, { useEffect, useState, useRef, useCallback, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname, useSearchParams } from 'next/navigation'
 
@@ -35,7 +35,7 @@ export function stopGlobalLoader() {
   }
 }
 
-export default function GlobalOperationLoader() {
+function GlobalOperationLoaderInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -271,5 +271,13 @@ export default function GlobalOperationLoader() {
         </motion.div>
       )}
     </AnimatePresence>
+  )
+}
+
+export default function GlobalOperationLoader() {
+  return (
+    <Suspense fallback={null}>
+      <GlobalOperationLoaderInner />
+    </Suspense>
   )
 }
