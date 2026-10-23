@@ -1051,6 +1051,24 @@ export const MASTER_EXAMS = [
     status: 'upcoming' as const,
     scores: {},
   },
+  {
+    id: 'exam-ing-1a',
+    className: '1/A',
+    courseName: 'Yabancı Dil (İngilizce)',
+    title: 'Colors, Numbers & Basic Dialogs Quiz',
+    type: 'quiz',
+    examTypeLabel: 'Quiz',
+    date: '10 Kasım 2026',
+    time: '13:30 - 14:00',
+    period: 6,
+    durationMinutes: 30,
+    location: 'Derslik 101 (1/A)',
+    teacherName: 'Selin YILDIRIM',
+    scope: 'Colors (Red, Blue, Yellow), Numbers 1-10, Greetings',
+    isPublished: true,
+    status: 'upcoming' as const,
+    scores: {},
+  },
 
   // Geçmiş Değerlendirmeler ve Notlar
   {

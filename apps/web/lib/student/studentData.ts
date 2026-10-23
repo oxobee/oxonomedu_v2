@@ -587,6 +587,99 @@ export const STUDENT_ASSESSMENTS: StudentAssessment[] = [
     isGraded: false,
     isPublished: true,
     status: 'upcoming',
+    scope: 'Colors (Red, Blue, Yellow), Numbers 1-10, Greetings',
+    teacherName: 'Selin YILDIRIM',
+    className: '1/A',
+  },
+  {
+    id: 'as-5',
+    title: '1. Dönem 1. Okuma-Yazma Süreç Değerlendirmesi',
+    courseName: 'Türkçe',
+    type: 'exam',
+    date: '30 Ekim 2026',
+    time: '09:25',
+    durationMinutes: 40,
+    location: '1. Kat · Derslik 101 (1/A)',
+    maxScore: 100,
+    score: undefined,
+    isGraded: false,
+    isPublished: true,
+    status: 'upcoming',
+    scope: '1. Ses Grubu (A-N-E-T), Ses Tanıma, Hece ve Kelime Oluşturma',
+    teacherName: 'Bahar ÇETİN',
+    className: '1/A',
+  },
+  {
+    id: 'as-6',
+    title: '1-20 Doğal Sayılar ve Ritmik Sayma Etkinliği',
+    courseName: 'Matematik',
+    type: 'exam',
+    date: '02 Kasım 2026',
+    time: '10:20',
+    durationMinutes: 40,
+    location: '1. Kat · Derslik 101 (1/A)',
+    maxScore: 100,
+    score: undefined,
+    isGraded: false,
+    isPublished: true,
+    status: 'upcoming',
+    scope: '1-20 Arası Sayıları Tanıma, Ritmik Sayma ve Nesne Eşleme',
+    teacherName: 'Bahar ÇETİN',
+    className: '1/A',
+  },
+  {
+    id: 'as-7',
+    title: 'Okulumuzda Hayat ve Güvenli Yaşam Değerlendirmesi',
+    courseName: 'Hayat Bilgisi',
+    type: 'performance',
+    date: '06 Kasım 2026',
+    time: '11:15',
+    durationMinutes: 40,
+    location: '1. Kat · Derslik 101 (1/A)',
+    maxScore: 100,
+    score: undefined,
+    isGraded: false,
+    isPublished: true,
+    status: 'upcoming',
+    scope: 'Okulumuzdaki Bölümler, Sınıf Kuralları, Nezaket İfadeleri',
+    teacherName: 'Bahar ÇETİN',
+    className: '1/A',
+  },
+  {
+    id: 'as-8',
+    title: '1. Sınıflar Kurumsal Genel Kazanım Değerlendirmesi',
+    courseName: 'Tüm Dersler',
+    type: 'exam',
+    date: '15 Kasım 2026',
+    time: '09:00',
+    durationMinutes: 60,
+    location: 'Okul Konferans Salonu',
+    maxScore: 100,
+    score: undefined,
+    isGraded: false,
+    isPublished: true,
+    status: 'upcoming',
+    scope: '1. Sınıf 1. Çeyrek Tüm Temel Kazanımlar',
+    teacherName: 'Ölçme & Değerlendirme Zümresi',
+    className: '1/A',
+  },
+  {
+    id: 'as-9',
+    title: 'Blok Tabanlı Kodlama & Mantık Değerlendirmesi',
+    courseName: 'Bilişim & Kodlama',
+    type: 'exam',
+    date: '24 Kasım 2026',
+    time: '13:30',
+    durationMinutes: 40,
+    location: 'Bilgisayar Laboratuvarı 1',
+    maxScore: 100,
+    score: undefined,
+    isGraded: false,
+    isPublished: true,
+    status: 'upcoming',
+    scope: 'Yön algoritmaları, labirent tamamlama ve karakter blokları',
+    teacherName: 'Bahar ÇETİN',
+    className: '1/A',
   },
 ]
 
@@ -1300,6 +1393,17 @@ export function getSynchronizedStudentAssessments(): StudentAssessment[] {
     })
   } catch (err) {
     console.warn('Error in getSynchronizedStudentAssessments:', err)
+  }
+
+  if (assessments.length === 0) {
+    return STUDENT_ASSESSMENTS
+  }
+
+  // Ensure upcoming assessments are always available for the student dashboard & planner
+  const hasUpcoming = assessments.some((a) => a.status === 'upcoming')
+  if (!hasUpcoming) {
+    const fallbackUpcoming = STUDENT_ASSESSMENTS.filter((a) => a.status === 'upcoming')
+    assessments.push(...fallbackUpcoming)
   }
 
   return assessments

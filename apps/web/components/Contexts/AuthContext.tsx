@@ -1221,6 +1221,17 @@ export function SessionProvider({
 
   // Sign out function
   const handleSignOut = useCallback(async (options: SignOutOptions = {}) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('oxonom_start_loading', {
+          detail: {
+            title: 'İşleminiz gerçekleşiyor...',
+            subtitle: 'Güvenli çıkış yapılıyor, yönlendiriliyorsunuz...',
+          },
+        })
+      )
+    }
+
     const isMobile = typeof window !== 'undefined' && (
       window.innerWidth < 768 ||
       /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(navigator.userAgent)
@@ -1471,6 +1482,17 @@ export async function signIn(
 
 // signOut function - matches NextAuth's API
 export async function signOut(options?: SignOutOptions): Promise<void> {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('oxonom_start_loading', {
+        detail: {
+          title: 'İşleminiz gerçekleşiyor...',
+          subtitle: 'Güvenli çıkış yapılıyor, yönlendiriliyorsunuz...',
+        },
+      })
+    )
+  }
+
   const isMobile = typeof window !== 'undefined' && (
     window.innerWidth < 768 ||
     /mobile|iphone|ipod|android|blackberry|opera mini|iemobile|wpdesktop/i.test(navigator.userAgent)

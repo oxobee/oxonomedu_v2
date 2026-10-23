@@ -283,6 +283,17 @@ export default function GlobalLoginClient() {
     }
 
     try {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('oxonom_start_loading', {
+            detail: {
+              title: 'İşleminiz gerçekleşiyor...',
+              subtitle: 'Giriş doğrulanıyor, profiliniz yükleniyor...',
+            },
+          })
+        )
+      }
+
       const res = await signIn('credentials', {
         redirect: false,
         email: identifier,
@@ -300,7 +311,7 @@ export default function GlobalLoginClient() {
 
       setTimeout(() => {
         window.location.href = targetRoute
-      }, 350)
+      }, 300)
     } catch (err) {
       console.error('Login error:', err)
       window.location.href = targetRoute

@@ -206,6 +206,17 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
         } catch (_) {}
       }
 
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('oxonom_start_loading', {
+            detail: {
+              title: 'İşleminiz gerçekleşiyor...',
+              subtitle: 'Giriş doğrulanıyor, profiliniz yükleniyor...',
+            },
+          })
+        )
+      }
+
       const res = await signIn('credentials', {
         redirect: false,
         email: rawIdent,

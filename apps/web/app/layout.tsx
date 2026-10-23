@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
 import PwaRegister from '@components/Mobile/PwaRegister'
 import AppleSplashScreen from '@components/Mobile/AppleSplashScreen'
+import GlobalOperationLoader from '@components/Common/GlobalOperationLoader'
 import { Wix_Madefor_Text, Tajawal, Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google'
 
 export const viewport: Viewport = {
@@ -113,6 +114,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <Providers>
           <AppleSplashScreen />
+          <GlobalOperationLoader />
           <main className="animate-fade-in">
             {children}
           </main>
