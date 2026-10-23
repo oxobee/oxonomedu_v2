@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { EducationalGame, getAllGames } from '@/lib/gamestudio/gameStorage'
 import SayiKasifleriGame from '@/components/GameStudio/SayiKasifleri/SayiKasifleriGame'
+import UzaySeruveniGame from '@/components/GameStudio/UzaySeruveni/UzaySeruveniGame'
 
 interface FullscreenGamePlayerProps {
   gameId: string
@@ -150,6 +151,15 @@ export default function FullscreenGamePlayer({ gameId, returnPath }: FullscreenG
     return (
       <div className="fixed inset-0 z-50 bg-[#070D18] text-white flex flex-col overflow-hidden select-none">
         <SayiKasifleriGame onExit={handleExit} />
+      </div>
+    )
+  }
+
+  // 1b. Uzay Serüveni: Matematik Roketi (1. ve 2. Sınıf Uzay Macerası)
+  if (gameId === 'uzay-seruveni' || gameId === 'game-uzay-seruveni') {
+    return (
+      <div className="fixed inset-0 z-50 bg-[#0E0620] text-white flex flex-col overflow-hidden select-none">
+        <UzaySeruveniGame onExit={handleExit} />
       </div>
     )
   }
