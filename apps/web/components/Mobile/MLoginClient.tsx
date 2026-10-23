@@ -273,16 +273,16 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
           className="px-4 pb-2 flex items-center justify-between gap-2"
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}
         >
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-xl bg-[#34D399] flex items-center justify-center text-[#0A0D15] font-black text-base shadow-sm p-1.5">
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="w-9 h-9 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-sm p-1.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/pwa-icon.svg" alt="Oxonom" className="w-full h-full object-contain invert brightness-0" />
+              <img src="/oxonom-icon-colored.png" alt="Oxonom" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-[16px] tracking-tight leading-none text-white">
-                OXONOM <span className="text-[#34D399]">EDU</span>
+              <span className="font-extrabold text-[16px] tracking-tight leading-none bg-gradient-to-r from-white via-[#FCE8FA] to-[#D914C8] bg-clip-text text-transparent">
+                OXONOM <span className="text-[#D914C8]">EDU</span>
               </span>
-              <span className="text-[9.5px] text-gray-400 font-medium tracking-wide">
+              <span className="text-[9.5px] text-[#A998B3] font-medium tracking-wide">
                 Akıllı Okul Portalı
               </span>
             </div>

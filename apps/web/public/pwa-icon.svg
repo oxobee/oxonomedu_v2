@@ -1,11 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none">
   <defs>
-    <mask id="cross-cut">
-      <rect width="256" height="256" fill="#fff" />
-      <rect x="-60" y="114.5" width="376" height="27" fill="#000" transform="rotate(45 128 128)" rx="2" />
-      <rect x="-60" y="114.5" width="376" height="27" fill="#000" transform="rotate(-45 128 128)" rx="2" />
-    </mask>
+    <linearGradient id="oxonomGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D914C8" />
+      <stop offset="100%" stop-color="#600A5B" />
+    </linearGradient>
   </defs>
-  <path d="M 128 24 A 104 104 0 1 0 128 232 A 104 104 0 1 0 128 24 Z M 128 72 A 56 56 0 1 1 128 184 A 56 56 0 1 1 128 72 Z" fill="#FFFFFF" fill-rule="evenodd" mask="url(#cross-cut)" />
-  <rect x="113" y="113" width="30" height="30" rx="3.5" transform="rotate(45 128 128)" fill="#FFFFFF" />
+  <rect width="256" height="256" rx="56" fill="#08050D" />
+  <g transform="translate(18, 18) scale(0.859375)" fill="url(#oxonomGrad)">
+    <path d="M 118 30 A 102 102 0 0 0 32 116 L 76 116 A 58 58 0 0 1 118 74 Z" />
+    <path d="M 138 30 A 102 102 0 0 1 224 116 L 180 116 A 58 58 0 0 0 138 74 Z" />
+    <path d="M 32 140 A 102 102 0 0 0 118 226 L 118 182 A 58 58 0 0 1 76 140 Z" />
+    <path d="M 224 140 A 102 102 0 0 1 138 226 L 138 182 A 58 58 0 0 0 180 140 Z" />
+    <polygon points="128,104 152,128 128,152 104,128" fill="#FFFFFF" />
+  </g>
 </svg>

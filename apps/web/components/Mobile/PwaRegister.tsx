@@ -142,7 +142,7 @@ export default function PwaRegister() {
             <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0 border border-indigo-400/30 overflow-hidden p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/pwa-icon.svg"
+                src="/oxonom-icon-colored.png"
                 alt="Oxonom EDU"
                 className="w-full h-full object-contain drop-shadow-sm"
                 onError={(e) => {
