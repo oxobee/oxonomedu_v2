@@ -66,6 +66,15 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
   )
   const { theme, toggleTheme } = useMobileTheme()
 
+  const isPricingPage = pathname === '/student/pricing' || pathname.startsWith('/student/pricing')
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(isPricingPage)
+
+  useEffect(() => {
+    if (pathname === '/student/pricing' || pathname.startsWith('/student/pricing')) {
+      setIsSidebarCollapsed(true)
+    }
+  }, [pathname])
+
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
   const [isPlusModalOpen, setIsPlusModalOpen] = useState(false)
   const [profile, setProfile] = useState<StudentProfile>(DEFAULT_STUDENT_PROFILE)
@@ -150,10 +159,32 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
     <div
       className={`${theme} min-h-screen w-full max-w-full overflow-x-hidden bg-[#FCF9FD] dark:bg-[#17101C] text-[#241329] dark:text-[#FCF9FD] font-jakarta flex flex-col lg:flex-row transition-colors duration-200 antialiased`}
     >
-      {/* ── DESKTOP SIDEBAR (lg+) — Lingora Claymorphic SaaS Style ── */}
-      <aside className="hidden lg:flex flex-col fixed top-0 left-0 w-[270px] xl:w-[280px] h-screen shrink-0 bg-white dark:bg-[#211729] border-r border-[#E8DFEB] dark:border-[#49364F] z-30 select-none shadow-[2px_0_24px_rgba(75,7,95,0.03)]">
+      {/* ── DESKTOP SIDEBAR (lg+) — Lingora Claymorphic SaaS Style (Collapsible with Elastic Animation) ── */}
+      <aside
+        className={`hidden lg:flex flex-col fixed top-0 left-0 h-screen shrink-0 bg-white dark:bg-[#211729] border-r border-[#E8DFEB] dark:border-[#49364F] z-30 select-none shadow-[2px_0_24px_rgba(75,7,95,0.03)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          isSidebarCollapsed ? 'w-[76px]' : 'w-[270px] xl:w-[280px]'
+        }`}
+      >
+        {/* Elastic Expand/Collapse Toggle Pill on Right Edge */}
+        <button
+          type="button"
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-white dark:bg-[#2D2035] border border-[#E8DFEB] dark:border-[#49364F] shadow-md flex items-center justify-center text-[#4B075F] dark:text-[#F17AE6] hover:scale-110 active:scale-95 transition-all z-40 cursor-pointer"
+          title={isSidebarCollapsed ? 'Menüyü Genişlet' : 'Menüyü Daralt'}
+        >
+          <ChevronRight
+            size={14}
+            strokeWidth={2.8}
+            className={`transition-transform duration-300 ${isSidebarCollapsed ? '' : 'rotate-180'}`}
+          />
+        </button>
+
         {/* Brand Header with Oxonom EDU Official Logo/Icon */}
-        <div className="p-5 pb-4 flex items-center justify-start border-b border-[#E8DFEB] dark:border-[#49364F]">
+        <div
+          className={`p-4 flex items-center border-b border-[#E8DFEB] dark:border-[#49364F] transition-all ${
+            isSidebarCollapsed ? 'justify-center' : 'justify-start gap-2.5 px-5'
+          }`}
+        >
           <Link href="/student/dashboard" className="flex items-center gap-2.5 group">
             <div className="w-10 h-10 flex items-center justify-center shrink-0">
               <img
@@ -162,28 +193,34 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
                 className="w-9 h-9 object-contain select-none group-hover:scale-105 transition-transform"
               />
             </div>
-            <div>
-              <div className="text-base font-black tracking-tight text-[#241329] dark:text-white leading-tight">
-                Oxonom EDU
+            {!isSidebarCollapsed && (
+              <div className="overflow-hidden whitespace-nowrap animate-fade-in">
+                <div className="text-base font-black tracking-tight text-[#241329] dark:text-white leading-tight">
+                  Oxonom EDU
+                </div>
+                <div className="text-[10px] font-bold text-[#8D49A6] dark:text-[#C58ADB] tracking-wide">
+                  Öğrenci Portalı
+                </div>
               </div>
-              <div className="text-[10px] font-bold text-[#8D49A6] dark:text-[#C58ADB] tracking-wide">
-                Öğrenci Portalı
-              </div>
-            </div>
+            )}
           </Link>
         </div>
 
         {/* Navigation Items — Grouped by Category without scrollbar */}
-        <nav className="flex-1 overflow-y-auto px-3.5 py-2.5 space-y-3.5 scrollbar-none">
+        <nav className="flex-1 overflow-y-auto px-2.5 py-2.5 space-y-3 scrollbar-none">
           {(['DERSLERİM & ÇALIŞMALAR', 'PLANLAMA & GELİŞİM', 'KAYNAKLAR & İLETİŞİM', 'DİĞER'] as const).map((cat) => {
             const catItems = STUDENT_MENU_CONFIG.filter((item) => (item.category || 'DERSLERİM & ÇALIŞMALAR') === cat)
             if (catItems.length === 0) return null
 
             return (
               <div key={cat} className="space-y-1">
-                <div className="px-3 pt-1 pb-1 text-[9.5px] font-black tracking-wider text-[#8D49A6] dark:text-[#C58ADB] uppercase">
-                  {cat}
-                </div>
+                {isSidebarCollapsed ? (
+                  <div className="my-2 mx-auto w-6 h-[1px] bg-[#E8DFEB]/80 dark:bg-[#49364F]/80" />
+                ) : (
+                  <div className="px-3 pt-1 pb-1 text-[9.5px] font-black tracking-wider text-[#8D49A6] dark:text-[#C58ADB] uppercase">
+                    {cat}
+                  </div>
+                )}
                 {catItems.map((item) => {
                   const Icon = item.icon
                   const active = isCurrentPathActive(item.path)
@@ -193,7 +230,10 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
                     <Link
                       key={item.id}
                       href={item.path}
-                      className={`group flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                      title={item.label}
+                      className={`group flex items-center ${
+                        isSidebarCollapsed ? 'justify-center px-2 py-2.5' : 'justify-between px-3 py-2'
+                      } rounded-xl text-xs font-bold transition-all ${
                         active
                           ? 'bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#4B075F] dark:text-[#FCF9FD] shadow-xs'
                           : isPassive
@@ -201,7 +241,7 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
                           : 'text-[#514458] dark:text-[#D2C5D8] hover:bg-[#F7F0FA] dark:hover:bg-[#2D2035] hover:text-[#241329] dark:hover:text-white'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-2.5 min-w-0'}`}>
                         <div
                           className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                             active
@@ -211,21 +251,23 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
                         >
                           <Icon size={16} strokeWidth={active ? 2.5 : 2} />
                         </div>
-                        <span className="truncate">{item.label}</span>
+                        {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
                       </div>
 
-                      <div className="flex items-center gap-1 shrink-0">
-                        {item.badge && (
-                          <span className="text-[8.5px] px-1.5 py-0.5 rounded-md font-bold bg-purple-500/15 text-[#8D49A6] dark:text-[#F0D8FA]">
-                            {item.badge}
-                          </span>
-                        )}
-                        {isPassive && !item.badge && (
-                          <span className="text-[8.5px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-semibold">
-                            Yakında
-                          </span>
-                        )}
-                      </div>
+                      {!isSidebarCollapsed && (
+                        <div className="flex items-center gap-1 shrink-0">
+                          {item.badge && (
+                            <span className="text-[8.5px] px-1.5 py-0.5 rounded-md font-bold bg-purple-500/15 text-[#8D49A6] dark:text-[#F0D8FA]">
+                              {item.badge}
+                            </span>
+                          )}
+                          {isPassive && !item.badge && (
+                            <span className="text-[8.5px] px-1.5 py-0.5 rounded-md bg-[#FFF3D9] dark:bg-[#B86B00]/20 text-[#B86B00] dark:text-[#F5C542] font-semibold">
+                              Yakında
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </Link>
                   )
                 })}
@@ -235,95 +277,123 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
         </nav>
 
         {/* Oxonom Plus / PRO Promo Card (Opens Animated Modal) */}
-        <div className="px-4 pb-2">
-          <div
-            onClick={() => setIsPlusModalOpen(true)}
-            className="p-3.5 rounded-3xl bg-gradient-to-b from-[#FCF9FD] via-[#F7F0FA] to-[#F0D8FA] dark:from-[#211729] dark:via-[#2D2035] dark:to-[#350444] border border-[#8D49A6]/40 dark:border-[#49364F] relative overflow-hidden shadow-xs cursor-pointer hover:border-[#D914C8] transition-all group"
-          >
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#D914C8] flex items-center justify-center shrink-0">
-                  <Crown size={14} className="fill-[#D914C8] text-[#D914C8]" />
+        <div className={isSidebarCollapsed ? 'px-2 pb-2 flex justify-center' : 'px-4 pb-2'}>
+          {isSidebarCollapsed ? (
+            <div
+              onClick={() => setIsPlusModalOpen(true)}
+              title="Oxonom Plus Kampanyası"
+              className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center cursor-pointer shadow-md shadow-[#4B075F]/30 hover:scale-105 active:scale-95 transition-all text-white"
+            >
+              <Crown size={18} className="fill-white" />
+            </div>
+          ) : (
+            <div
+              onClick={() => setIsPlusModalOpen(true)}
+              className="p-3.5 rounded-3xl bg-gradient-to-b from-[#FCF9FD] via-[#F7F0FA] to-[#F0D8FA] dark:from-[#211729] dark:via-[#2D2035] dark:to-[#350444] border border-[#8D49A6]/40 dark:border-[#49364F] relative overflow-hidden shadow-xs cursor-pointer hover:border-[#D914C8] transition-all group"
+            >
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-[#F0D8FA] dark:bg-[#4B075F]/40 text-[#D914C8] flex items-center justify-center shrink-0">
+                    <Crown size={14} className="fill-[#D914C8] text-[#D914C8]" />
+                  </div>
+                  <span className="text-xs font-black text-[#241329] dark:text-white">
+                    Oxonom Plus
+                  </span>
                 </div>
-                <span className="text-xs font-black text-[#241329] dark:text-white">
-                  Oxonom Plus
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-brand-gradient text-white font-black shadow-xs">
+                  200 ₺/ay
                 </span>
               </div>
-              <span className="text-[9px] px-2 py-0.5 rounded-full bg-brand-gradient text-white font-black shadow-xs">
-                199 ₺
-              </span>
+              <p className="text-[10px] text-[#514458] dark:text-[#D2C5D8] leading-snug mb-2.5">
+                9 ay öde, 12 ay kesintisiz kullan! 3 ay hediye ile tüm MEB kitapları ve yapay zekâ cebinde.
+              </p>
+              <button
+                type="button"
+                className="w-full py-2 rounded-xl bg-brand-gradient text-white font-extrabold text-[11px] text-center block shadow-sm shadow-[#4B075F]/20 transition-all group-hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
+              >
+                Planları İncele
+              </button>
             </div>
-            <p className="text-[10px] text-[#514458] dark:text-[#D2C5D8] leading-snug mb-2.5">
-              <span className="line-through text-[#716779]">899 ₺</span> yerine tüm ders kitapları, yapay zekâ ve soru havuzu elinin altında!
-            </p>
-            <button
-              type="button"
-              className="w-full py-2 rounded-xl bg-brand-gradient text-white font-extrabold text-[11px] text-center block shadow-sm shadow-[#4B075F]/20 transition-all group-hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
-            >
-              Plus&apos;ı Keşfet
-            </button>
-          </div>
+          )}
         </div>
 
         {/* User Profile Pill at Bottom (Alex Level 12 style) */}
-        <div className="p-3 border-t border-[#E8DFEB] dark:border-[#49364F]">
-          <div className="p-2 rounded-2xl bg-[#F7F0FA] dark:bg-[#2D2035] border border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between gap-2.5">
+        <div className={`p-3 border-t border-[#E8DFEB] dark:border-[#49364F] ${isSidebarCollapsed ? 'flex justify-center' : ''}`}>
+          {isSidebarCollapsed ? (
             <Link
               href="/student/settings"
-              className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-90 transition-opacity"
+              title={`${profile.name} (${profile.className})`}
+              className="relative group block"
             >
-              <div className="relative">
-                <div className="w-9 h-9 rounded-full bg-brand-gradient text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm">
-                  {profile.firstName.slice(0, 1)}
-                  {profile.lastName.slice(0, 1)}
-                </div>
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#16805D] ring-2 ring-white dark:ring-[#211729]" />
+              <div className="w-10 h-10 rounded-full bg-brand-gradient text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                {profile.firstName.slice(0, 1)}
+                {profile.lastName.slice(0, 1)}
               </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="text-xs font-black text-[#241329] dark:text-white truncate">
-                  {profile.name}
-                </div>
-                <div className="text-[10px] font-bold text-[#8D49A6] dark:text-[#C58ADB] truncate flex items-center gap-1">
-                  <span>{profile.className}</span>
-                  <span>•</span>
-                  <span>Seviye {Math.max(1, Math.round(profile.gpa / 10))}</span>
-                </div>
-              </div>
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#16805D] ring-2 ring-white dark:ring-[#211729]" />
             </Link>
-
-            <div className="flex items-center gap-0.5 shrink-0">
+          ) : (
+            <div className="p-2 rounded-2xl bg-[#F7F0FA] dark:bg-[#2D2035] border border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-between gap-2.5">
               <Link
                 href="/student/settings"
-                className="w-7 h-7 rounded-lg hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#716779] hover:text-[#4B075F] dark:hover:text-white flex items-center justify-center transition-colors"
-                title="Ayarlar"
+                className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-90 transition-opacity"
               >
-                <Settings size={14} />
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-full bg-brand-gradient text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm">
+                    {profile.firstName.slice(0, 1)}
+                    {profile.lastName.slice(0, 1)}
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#16805D] ring-2 ring-white dark:ring-[#211729]" />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-black text-[#241329] dark:text-white truncate">
+                    {profile.name}
+                  </div>
+                  <div className="text-[10px] font-bold text-[#8D49A6] dark:text-[#C58ADB] truncate flex items-center gap-1">
+                    <span>{profile.className}</span>
+                    <span>•</span>
+                    <span>Seviye {Math.max(1, Math.round(profile.gpa / 10))}</span>
+                  </div>
+                </div>
               </Link>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (typeof window !== 'undefined') {
-                    try {
-                      localStorage.removeItem('oxonom_student_profile')
-                      localStorage.removeItem('oxonom_current_role')
-                    } catch (_) {}
-                  }
-                  await signOut()
-                  window.location.href = '/login'
-                }}
-                className="w-7 h-7 rounded-lg hover:bg-[#FCE8ED] dark:hover:bg-[#C62848]/20 text-[#716779] hover:text-[#C62848] dark:hover:text-[#F17AE6] flex items-center justify-center transition-colors cursor-pointer"
-                title="Oturumu Kapat"
-              >
-                <LogOut size={13} />
-              </button>
+
+              <div className="flex items-center gap-0.5 shrink-0">
+                <Link
+                  href="/student/settings"
+                  className="w-7 h-7 rounded-lg hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#716779] hover:text-[#4B075F] dark:hover:text-white flex items-center justify-center transition-colors"
+                  title="Ayarlar"
+                >
+                  <Settings size={14} />
+                </Link>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (typeof window !== 'undefined') {
+                      try {
+                        localStorage.removeItem('oxonom_student_profile')
+                        localStorage.removeItem('oxonom_current_role')
+                      } catch (_) {}
+                    }
+                    await signOut()
+                    window.location.href = '/login'
+                  }}
+                  className="w-7 h-7 rounded-lg hover:bg-[#FCE8ED] dark:hover:bg-[#C62848]/20 text-[#716779] hover:text-[#C62848] dark:hover:text-[#F17AE6] flex items-center justify-center transition-colors cursor-pointer"
+                  title="Oturumu Kapat"
+                >
+                  <LogOut size={13} />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </aside>
 
       {/* ── MAIN CONTENT WORKSPACE ── */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen lg:pl-[270px] xl:pl-[280px]">
+      <div
+        className={`flex-1 flex flex-col min-w-0 min-h-screen transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          isSidebarCollapsed ? 'lg:pl-[76px]' : 'lg:pl-[270px] xl:pl-[280px]'
+        }`}
+      >
         {/* Desktop Top Header Bar (lg+) — Sleek & Minimal */}
         <header className="hidden lg:flex items-center justify-between h-16 px-8 border-b border-[#E8DFEB] dark:border-[#49364F] bg-white/80 dark:bg-[#211729]/80 backdrop-blur-xl sticky top-0 z-20 select-none">
           {/* Rounded Pill Search Input */}

@@ -3,31 +3,24 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
 import {
   Crown,
   Sparkles,
   Check,
-  X,
   Zap,
   ShieldCheck,
   Star,
   BookOpen,
-  TrendingUp,
-  Award,
   ChevronRight,
   Gift,
   Coffee,
   GraduationCap,
-  Calculator,
-  HelpCircle,
   Clock,
   ArrowRight,
   CheckCircle2,
-  Sliders,
-  Smartphone,
-  Flame,
   BadgePercent,
+  Flame,
+  HelpCircle,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -46,8 +39,8 @@ const FAQS: FaqItem[] = [
     a: 'Eğitim-öğretim dönemi olan 9 ay için aylık sadece 200 ₺ (toplam 1.800 ₺) ödersiniz ve sistemimiz size ekstra 3 ayı (yaz tatili telafi ve hazırlık kampı dönemi dahil) tamamen hediye eder. Böylece tam 365 gün boyunca kesintisiz tam erişim kazanırsınız.',
   },
   {
-    q: 'Aylık paketten 9 aylık pakete sonradan geçebilir miyim?',
-    a: 'Evet, dilediğiniz zaman öğrenci panelinizden veya veli ayarlarından kampanya koşullarını kaybetmeden 9 aylık pakete yükseltme yapabilirsiniz.',
+    q: 'Aylık paket ile 9 aylık paket arasında özellik farkı var mı?',
+    a: 'Hayır, her iki pakette de tüm özellikler (312 MEB kitabı, 7/24 sınırsız yapay zekâ, sınav tahminleri, oyunlar ve veli paneli) eksiksiz olarak sunulur. 9 aylık paketin tek avantajı %50 indirim sağlaması ve 3 ayı hediye ederek 12 ay kullanım sunmasıdır.',
   },
   {
     q: 'Yapay Zekâ Eğitmen MEB müfredatına uygun mu?',
@@ -63,8 +56,51 @@ const FAQS: FaqItem[] = [
   },
 ]
 
+// Common 10 Features that are IDENTICAL for both Monthly and Yearly packages
+const FULL_PACKAGE_FEATURES = [
+  {
+    title: 'İlk 14 Gün Ücretsiz Deneme',
+    desc: 'Kredi kartı gerekmez, sıfır risk ile hemen başla',
+  },
+  {
+    title: '312 MEB Ders Kitabı & Flipbook',
+    desc: 'Tüm sınıf düzeylerinde resmî MEB e-kitapları',
+  },
+  {
+    title: 'Sınırsız 7/24 Yapay Zekâ Eğitmen',
+    desc: 'Fotoğraf çek veya soruyu yaz, anında adım adım çöz',
+  },
+  {
+    title: 'MEB Zümre Sınav Tahminleri',
+    desc: 'Okul yazılıları için birebir açık uçlu soru havuzu',
+  },
+  {
+    title: 'Çevrimdışı Flipbook Okuma Modu',
+    desc: 'İnternet bağlantısı olmadan da kitapları incele',
+  },
+  {
+    title: 'Konu Anlatım & Çözüm Videoları',
+    desc: 'Uzman öğretmenlerden ayrıntılı konu izahatları',
+  },
+  {
+    title: 'Oxonom Game Studio Zeka Oyunları',
+    desc: 'Pedagojik eğitici oyunlarla eğlenerek öğren',
+  },
+  {
+    title: 'Kişisel Dijital Defterim & Notlar',
+    desc: 'Kitap sayfalarına doğrudan renkli notlar bağla',
+  },
+  {
+    title: 'Veli Gelişim & Başarı Analitiği',
+    desc: 'Haftalık ilerleme ve başarı takip karnesi',
+  },
+  {
+    title: 'Web, Tablet ve Telefonla %100 Uyum',
+    desc: 'Tüm cihazlarda kesintisiz otomatik senkronizasyon',
+  },
+]
+
 export default function OxonomPricingClient() {
-  const [billingCycle, setBillingCycle] = useState<'yearly' | 'monthly'>('yearly')
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0)
 
   const handleStartTrial = (planName: string) => {
@@ -74,157 +110,183 @@ export default function OxonomPricingClient() {
     })
   }
 
+  const scrollToPlans = () => {
+    const el = document.getElementById('pricing-plans-section')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#FCF9FD] dark:bg-[#0A0512] text-[#241329] dark:text-[#FCF9FD] font-jakarta selection:bg-[#D914C8]/30 selection:text-[#241329] dark:selection:text-white transition-colors duration-200">
       {/* ── TOP AMBIENT CONTINUOUS GLOW (NO FLICKER) ── */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[900px] h-[380px] bg-gradient-to-b from-[#8D49A6]/15 via-[#D914C8]/8 to-transparent rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-gradient-to-b from-[#8D49A6]/20 via-[#D914C8]/10 to-transparent rounded-full blur-3xl pointer-events-none -z-10" />
 
-      {/* ── NAVBAR ── */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0E0617]/80 backdrop-blur-md border-b border-[#E8DFEB] dark:border-[#2D1B36]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
-          <Link href="/student/dashboard" className="flex items-center gap-3 group">
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-[#4B075F] via-[#8D49A6] to-[#D914C8] p-[1.5px] shadow-md shadow-[#4B075F]/20">
-              <div className="w-full h-full rounded-[14px] bg-[#1A1122] flex items-center justify-center overflow-hidden">
-                <Image
-                  src="/oxonom-logo-light.png"
-                  alt="Oxonom EDU"
-                  width={28}
-                  height={28}
-                  className="object-contain drop-shadow-xs"
-                />
-              </div>
+      {/* ── 1. HERO SECTION WITH PROMINENT "14 GÜN ÜCRETSİZ DENE" GRAPHIC ── */}
+      <section className="pt-6 pb-8 sm:pt-10 sm:pb-12 px-4 sm:px-6 max-w-6xl mx-auto">
+        <div className="rounded-[32px] p-6 sm:p-10 lg:p-12 bg-white/70 dark:bg-[#1A1122]/70 backdrop-blur-md border border-[#E8DFEB] dark:border-[#3A2845] shadow-[0_15px_45px_rgba(75,7,95,0.06)] relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+          {/* Subtle decorative glow behind mascot */}
+          <div className="absolute top-1/2 -right-16 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-[#8D49A6]/25 via-[#D914C8]/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+          {/* Left Hero Content */}
+          <div className="space-y-4 sm:space-y-5 max-w-xl text-center lg:text-left z-10">
+            {/* Risk-free Pill */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FCE8FA] dark:bg-[#350444]/60 border border-[#D914C8]/35 text-[#8D49A6] dark:text-[#F17AE6] text-xs font-black shadow-xs">
+              <Gift size={15} className="text-[#D914C8] dark:text-[#F17AE6]" />
+              <span>KREDİ KARTI GEREKMEDEN İLK 14 GÜN TAMAMEN ÜCRETSİZ</span>
             </div>
-            <div>
-              <div className="text-base sm:text-lg font-black tracking-tight text-[#241329] dark:text-white flex items-center gap-1.5">
-                <span>OXONOM</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8D49A6] to-[#D914C8]">
-                  EDU
-                </span>
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] border border-[#D914C8]/25">
-                  PLUS
-                </span>
-              </div>
+
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#241329] dark:text-white leading-[1.15]">
+              Özel Ders Kalitesinde Eğitim,{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] dark:from-[#F17AE6] dark:via-[#C58ADB] dark:to-white">
+                Her Öğrencinin Cebinde.
+              </span>
+            </h1>
+
+            {/* Description */}
+            <p className="text-xs sm:text-sm text-[#514458] dark:text-[#D2C5D8] leading-relaxed font-medium">
+              312 MEB ders kitabı, 7/24 kişisel yapay zekâ eğitmen desteği, yazılı sınav tahminleri ve
+              eğitsel oyunlar tek platformda. İlk 14 gün hiçbir ücret ödemeden ve kart gerekmeden deneyin.
+            </p>
+
+            {/* Trust Checkmarks */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-1 text-xs font-bold text-[#241329] dark:text-white">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 size={16} className="text-[#16805D] dark:text-emerald-400" />
+                <span>Kart Bilgisi Gerekmez</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 size={16} className="text-[#16805D] dark:text-emerald-400" />
+                <span>Anında Aktivasyon</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 size={16} className="text-[#16805D] dark:text-emerald-400" />
+                <span>İstediğin An İptal</span>
+              </span>
             </div>
-          </Link>
 
-          <div className="flex items-center gap-2.5 sm:gap-4">
-            <Link
-              href="/student/courses"
-              className="text-xs sm:text-sm font-bold text-[#514458] dark:text-[#D2C5D8] hover:text-[#4B075F] dark:hover:text-[#F17AE6] transition-colors px-3 py-2 rounded-xl hover:bg-[#F7F0FA] dark:hover:bg-[#1F1429]"
-            >
-              Derslerime Dön
-            </Link>
+            {/* Actions */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+              <button
+                type="button"
+                onClick={() => handleStartTrial('14 Günlük Ücretsiz Deneme')}
+                className="w-full sm:w-auto py-3.5 px-7 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-[#4B075F]/30 hover:shadow-2xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-white/20"
+              >
+                <Sparkles size={16} className="text-[#FCE8FA]" />
+                <span>14 Gün Ücretsiz Başla</span>
+                <ChevronRight size={17} strokeWidth={2.8} />
+              </button>
 
-            <button
-              type="button"
-              onClick={() => handleStartTrial('14 Günlük Ücretsiz Deneme')}
-              className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-brand-gradient text-white text-xs sm:text-sm font-black shadow-md shadow-[#4B075F]/25 hover:opacity-95 transition-all cursor-pointer"
-            >
-              Ücretsiz Dene
-            </button>
+              <button
+                type="button"
+                onClick={scrollToPlans}
+                className="w-full sm:w-auto py-3.5 px-6 rounded-2xl bg-[#FCF9FD] dark:bg-[#251830] hover:bg-[#F0D8FA] dark:hover:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] font-bold text-xs sm:text-sm border border-[#E8DFEB] dark:border-[#49364F] transition-all cursor-pointer text-center"
+              >
+                Planları ve Fiyatları İncele
+              </button>
+            </div>
+          </div>
+
+          {/* Right Hero Visual: 3D Mascot "14 Gün Ücretsiz Deneyin" Graphic */}
+          <div className="relative shrink-0 flex items-center justify-center z-10">
+            <div className="relative w-72 sm:w-84 md:w-96 lg:w-[420px] max-w-full">
+              <Image
+                src="/14-gun-ucretsiz-dene.png"
+                alt="14 Gün Ücretsiz Deneyin - Oxonom EDU"
+                width={500}
+                height={350}
+                priority
+                className="w-full h-auto object-contain drop-shadow-[0_20px_45px_rgba(75,7,95,0.35)] select-none transition-transform hover:scale-[1.02] duration-300"
+              />
+            </div>
           </div>
         </div>
-      </header>
+      </section>
 
-      {/* ── HERO SECTION WITH 3D CAMPAIGN BANNER ── */}
-      <section className="pt-10 pb-8 sm:pt-16 sm:pb-12 px-4 sm:px-6 max-w-6xl mx-auto text-center space-y-6">
-        {/* Risk-free Pill */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FCF9FD] dark:bg-[#211729] border border-[#D914C8]/40 shadow-xs text-xs font-black text-[#8D49A6] dark:text-[#F17AE6]">
-          <Gift size={14} className="text-[#D914C8]" />
-          <span>KREDİ KARTI GEREKMEDEN İLK 14 GÜN TAMAMEN ÜCRETSİZ</span>
-        </div>
+      {/* ── 2. HIGH-IMPACT 3D CAMPAIGN CARD: 9 AY ÖDE 12 AY KULLAN ── */}
+      <section className="py-6 px-4 sm:px-6 max-w-5xl mx-auto">
+        <div className="relative rounded-[36px] p-[2.5px] bg-gradient-to-r from-[#D914C8] via-[#8D49A6] to-[#4B075F] shadow-[0_28px_80px_-15px_rgba(217,20,200,0.45)]">
+          <div className="rounded-[34px] bg-gradient-to-br from-[#2D123B] via-[#1A0C22] to-[#360945] p-6 sm:p-9 lg:p-10 text-white relative overflow-hidden border border-white/15">
+            {/* Ambient Background Sheen */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#D914C8]/30 via-[#8D49A6]/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-[#4B075F]/40 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-        {/* Hero Title */}
-        <div className="space-y-3 max-w-3xl mx-auto">
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-[#241329] dark:text-white leading-[1.15]">
-            Özel Ders Kalitesinde Eğitim,{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] dark:from-[#F17AE6] dark:via-[#C58ADB] dark:to-white">
-              Her Öğrencinin Cebinde.
-            </span>
-          </h1>
-          <p className="text-sm sm:text-base text-[#514458] dark:text-[#D2C5D8] leading-relaxed max-w-2xl mx-auto font-medium">
-            312 MEB kitabı, 7/24 kişisel yapay zekâ soru koçu, okul yazılı sınav tahminleri ve
-            etkileşimli testler. Notlarını yükselt, geleceğine güvenle adım at.
-          </p>
-        </div>
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+              {/* Left Info Column */}
+              <div className="space-y-4 max-w-xl">
+                {/* 3D Metallic Badge */}
+                <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#D914C8] via-[#8D49A6] to-[#4B075F] text-white text-[11px] font-black uppercase tracking-wider shadow-lg shadow-[#D914C8]/30 border border-white/30">
+                  <Flame size={14} className="text-amber-300 fill-amber-300" />
+                  <span>Büyük Yıl Kampanyası — %50 İndirim & 3 Ay Hediye</span>
+                </div>
 
-        {/* ── 3D HIGHLIGHT CAMPAIGN CARD (9 AY ÖDE 12 AY KULLAN) ── */}
-        <div className="pt-4 max-w-3xl mx-auto">
-          <div className="relative rounded-[32px] p-[2px] bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] shadow-[0_25px_60px_-15px_rgba(75,7,95,0.35)]">
-            <div className="rounded-[30px] bg-gradient-to-br from-[#FCF9FD] via-white to-[#F7F0FA] dark:from-[#211729] dark:via-[#1A1122] dark:to-[#2B1736] p-6 sm:p-8 text-left border border-[#E8DFEB]/80 dark:border-[#49364F]/50 relative overflow-hidden">
-              {/* Background ambient sheen */}
-              <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-[#D914C8]/15 via-[#8D49A6]/10 to-transparent rounded-full blur-2xl pointer-events-none" />
+                <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+                  9 Ay Öde, 12 Ay Kesintisiz Kullan!
+                </h2>
 
-              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div className="space-y-3 max-w-xl">
-                  {/* 3D Badge */}
-                  <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-[#4B075F] to-[#8D49A6] text-white text-[11px] font-black uppercase tracking-wider shadow-sm">
-                    <Flame size={14} className="text-amber-300" />
-                    <span>Büyük Yıl Kampanyası</span>
+                <p className="text-xs sm:text-sm text-[#FCF9FD]/90 font-medium leading-relaxed">
+                  Okul dönemi boyunca ve yaz tatilinde kesintisiz tam erişim! Toplam{' '}
+                  <strong className="text-[#F17AE6] font-black">3 ay ücretsiz hediye</strong> ediyoruz.{' '}
+                  400 ₺ yerine sadece{' '}
+                  <strong className="text-white font-black">200 ₺ / Ay</strong> ile yılda{' '}
+                  <strong className="text-emerald-300 font-black">2.400 ₺ tasarruf</strong> edin.
+                </p>
+
+                {/* Micro Perks Strip */}
+                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-bold text-white/95">
+                  <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>İlk 14 Gün Ücretsiz</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>Kredi Kartı Gerekmez</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>İstediğin An İptal</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Right 3D Price Showcase Box */}
+              <div className="shrink-0 p-5 sm:p-6 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl space-y-4 text-center sm:text-right min-w-[260px]">
+                <div className="text-[11px] font-black uppercase text-[#FCE8FA] tracking-wider text-center sm:text-right">
+                  Özel Kampanya Fiyatı
+                </div>
+
+                <div className="flex sm:flex-col items-baseline justify-center sm:items-end gap-2 sm:gap-0">
+                  <div className="text-sm sm:text-base font-extrabold text-white/60 line-through decoration-rose-400 decoration-2">
+                    400 ₺ / Ay
                   </div>
-
-                  <h2 className="text-2xl sm:text-3xl font-black text-[#241329] dark:text-white tracking-tight">
-                    9 Ay Öde, 12 Ay Kesintisiz Kullan!
-                  </h2>
-
-                  <p className="text-xs sm:text-sm text-[#514458] dark:text-[#D2C5D8] font-medium leading-relaxed">
-                    Okul dönemi boyunca ve yaz tatilinde kesintisiz tam erişim! Toplam{' '}
-                    <strong className="text-[#4B075F] dark:text-[#F17AE6]">3 ay ücretsiz hediye</strong>{' '}
-                    ediyoruz. 400 ₺ yerine sadece{' '}
-                    <strong className="text-[#241329] dark:text-white">200 ₺ / Ay</strong> ile yılda{' '}
-                    <strong className="text-[#16805D] dark:text-emerald-400">2.400 ₺ tasarruf</strong> edin.
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-bold text-[#241329] dark:text-white">
-                    <span className="flex items-center gap-1.5">
-                      <CheckCircle2 size={16} className="text-[#16805D] dark:text-emerald-400" />
-                      İlk 14 Gün Ücretsiz
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <CheckCircle2 size={16} className="text-[#16805D] dark:text-emerald-400" />
-                      Kredi Kartı Gerekmez
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <CheckCircle2 size={16} className="text-[#16805D] dark:text-emerald-400" />
-                      İstediğin An İptal
-                    </span>
+                  <div className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-[#FCE8FA] to-[#F17AE6] drop-shadow-sm">
+                    200 ₺
+                  </div>
+                  <div className="text-xs font-bold text-white/80">
+                    / Ay (Toplam 1.800 ₺)
                   </div>
                 </div>
 
-                {/* Price Display & Quick CTA */}
-                <div className="shrink-0 sm:text-right space-y-3 p-4.5 rounded-2xl bg-[#FCF9FD] dark:bg-[#1A1122]/90 border border-[#E8DFEB] dark:border-[#49364F]">
-                  <div className="text-[11px] font-black uppercase text-[#716779] dark:text-[#B5A5BD] tracking-wider">
-                    Özel Kampanya Fiyatı
-                  </div>
-
-                  <div className="flex sm:flex-col items-baseline sm:items-end gap-2 sm:gap-0">
-                    <div className="text-xs sm:text-sm font-bold text-[#716779] dark:text-[#B5A5BD] line-through decoration-rose-500">
-                      400 ₺ / Ay
-                    </div>
-                    <div className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] dark:from-[#F17AE6] dark:via-[#C58ADB] dark:to-white">
-                      200 ₺
-                    </div>
-                    <div className="text-[11px] font-bold text-[#514458] dark:text-[#D2C5D8]">
-                      / Ay (Toplam 1.800 ₺)
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleStartTrial('9 Aylık Süper Paket (12 Ay Kullanım)')}
-                    className="w-full py-3 px-5 rounded-xl bg-brand-gradient text-white text-xs font-black shadow-lg shadow-[#4B075F]/30 hover:opacity-95 transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    <span>14 Gün Ücretsiz Başla</span>
-                    <ChevronRight size={15} />
-                  </button>
+                <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10.5px] font-black">
+                  Günde Sadece 4.9 ₺ · %50 Tasarruf
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleStartTrial('9 Aylık Süper Paket (12 Ay Kullanım)')}
+                  className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:opacity-95 text-white font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-[#D914C8]/40 transition-all cursor-pointer flex items-center justify-center gap-2 border border-white/30"
+                >
+                  <span>14 Gün Ücretsiz Başla</span>
+                  <ChevronRight size={17} strokeWidth={2.8} />
+                </button>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── ECONOMIC REALITY COMPARISON (GÜNÜMÜZ ŞARTLARINDA NE KADAR UCUZ?) ── */}
+      {/* ── 3. ECONOMIC REALITY COMPARISON (GÜNÜMÜZ ŞARTLARINDA NE KADAR UCUZ?) ── */}
       <section className="py-10 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="text-center space-y-2 mb-8">
           <h2 className="text-2xl sm:text-3xl font-black text-[#241329] dark:text-white tracking-tight">
@@ -236,7 +298,7 @@ export default function OxonomPricingClient() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Kahve Fiyatı */}
+          {/* Card 1 */}
           <div className="p-5 rounded-2xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] space-y-3 shadow-xs">
             <div className="w-10 h-10 rounded-xl bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] flex items-center justify-center shrink-0">
               <Coffee size={20} />
@@ -249,7 +311,7 @@ export default function OxonomPricingClient() {
             </p>
           </div>
 
-          {/* Card 2: 1 Saatlik Özel Ders vs Tüm Yıl */}
+          {/* Card 2 */}
           <div className="p-5 rounded-2xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] space-y-3 shadow-xs">
             <div className="w-10 h-10 rounded-xl bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] flex items-center justify-center shrink-0">
               <GraduationCap size={20} />
@@ -258,11 +320,11 @@ export default function OxonomPricingClient() {
               1 Saat Özel Ders = Tüm Yıl Oxonom
             </h3>
             <p className="text-xs text-[#514458] dark:text-[#D2C5D8] leading-relaxed">
-              Günümüzde tek bir saatlik özel ders 1.500 ₺ - 2.500 ₺ iken, Oxonom EDU ile 12 ay boyunca sınırsız yapay zekâ eğitimi 1.800 ₺.
+              Günümüzde tek bir saatlik özel ders 1.500 ₺ - 2.500 ₺ iken, Oxonom EDU ile 12 ay boyunca sınırsız eğitim 1.800 ₺.
             </p>
           </div>
 
-          {/* Card 3: Test Kitabı Tasarrufu */}
+          {/* Card 3 */}
           <div className="p-5 rounded-2xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] space-y-3 shadow-xs">
             <div className="w-10 h-10 rounded-xl bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] flex items-center justify-center shrink-0">
               <BookOpen size={20} />
@@ -275,7 +337,7 @@ export default function OxonomPricingClient() {
             </p>
           </div>
 
-          {/* Card 4: Zaman & Ulaşım Tasarrufu */}
+          {/* Card 4 */}
           <div className="p-5 rounded-2xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] space-y-3 shadow-xs">
             <div className="w-10 h-10 rounded-xl bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] flex items-center justify-center shrink-0">
               <Clock size={20} />
@@ -290,10 +352,10 @@ export default function OxonomPricingClient() {
         </div>
       </section>
 
-      {/* ── 2 PLANS SIDE-BY-SIDE (AYLIK vs 9 AYLIK SÜPER PAKET) ── */}
-      <section className="py-10 px-4 sm:px-6 max-w-5xl mx-auto">
+      {/* ── 4. 2 PACKAGES SIDE-BY-SIDE (AYLIK vs 9 AYLIK) — CONTENTS ARE 100% IDENTICAL ── */}
+      <section id="pricing-plans-section" className="py-10 px-4 sm:px-6 max-w-5xl mx-auto scroll-mt-20">
         <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] text-xs font-black">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] text-xs font-black">
             <BadgePercent size={14} />
             <span>ŞEFFAF & TAAHHÜTSÜZ FİYATLANDIRMA</span>
           </div>
@@ -303,13 +365,13 @@ export default function OxonomPricingClient() {
           </h2>
 
           <p className="text-xs sm:text-sm text-[#514458] dark:text-[#D2C5D8] max-w-lg mx-auto">
-            Her iki pakette de ilk 14 gün ücretsizdir. Kredi kartı gerekmez, risk almadan deneyin.
+            Her iki pakette de tüm özellikler eksiksiz ve sınırsızdır. 9 aylık paket ile %50 tasarruf edin ve 3 ayı hediye kazanın.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           {/* ── PLAN 1: AYLIK STANDART PLAN ── */}
-          <div className="rounded-[28px] p-6 sm:p-8 bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-sm flex flex-col justify-between space-y-6">
+          <div className="rounded-[30px] p-6 sm:p-8 bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-sm flex flex-col justify-between space-y-6">
             <div className="space-y-4">
               <div>
                 <span className="text-xs font-black uppercase text-[#716779] dark:text-[#B5A5BD] tracking-wider">
@@ -326,64 +388,53 @@ export default function OxonomPricingClient() {
               {/* Price */}
               <div className="pt-2 pb-1 border-b border-[#E8DFEB] dark:border-[#2D1B36]">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-4xl font-black text-[#241329] dark:text-white">
+                  <span className="text-4xl sm:text-5xl font-black text-[#241329] dark:text-white">
                     400 ₺
                   </span>
                   <span className="text-xs font-bold text-[#514458] dark:text-[#D2C5D8]">
                     / Ay
                   </span>
                 </div>
-                <div className="text-[11px] text-[#716779] dark:text-[#B5A5BD] mt-1 font-semibold">
+                <div className="text-[11px] text-[#716779] dark:text-[#B5A5BD] mt-1.5 font-semibold">
                   Aylık yenilenir · Dilediğin an tek tıkla iptal et
                 </div>
               </div>
 
-              {/* Feature Checklist */}
+              {/* Feature Checklist — IDENTICAL TO 9-MONTH PACKAGE */}
               <div className="space-y-3 pt-2">
                 <div className="text-xs font-black text-[#241329] dark:text-white uppercase tracking-wider">
-                  Paket İçeriği:
+                  Paket İçeriği (Tam Erişim):
                 </div>
                 <ul className="space-y-2.5 text-xs text-[#514458] dark:text-[#D2C5D8]">
-                  <li className="flex items-start gap-2.5">
-                    <Check size={16} className="text-[#16805D] dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <span><strong>14 Gün Ücretsiz Deneme</strong> (Kredi kartı gerekmez)</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <Check size={16} className="text-[#16805D] dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <span><strong>312 MEB Ders Kitabı</strong> ve etkileşimli flipbook</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <Check size={16} className="text-[#16805D] dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <span>Temel Yapay Zekâ Soru Çözümü (Günlük 20 soru)</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <Check size={16} className="text-[#16805D] dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <span>Konu Anlatım ve Çözüm Videoları</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <Check size={16} className="text-[#16805D] dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <span>Standart Haftalık Kazanım Testleri</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <Check size={16} className="text-[#16805D] dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <span>Web, Tablet ve Mobil Erişim</span>
-                  </li>
+                  {FULL_PACKAGE_FEATURES.map((feat, i) => (
+                    <li key={i} className="flex items-start gap-2.5">
+                      <Check size={16} className="text-[#16805D] dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <span>
+                        <strong className="text-[#241329] dark:text-white">{feat.title}:</strong> {feat.desc}
+                      </span>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => handleStartTrial('Aylık Paket')}
-              className="w-full py-3.5 px-6 rounded-2xl bg-[#F7F0FA] hover:bg-[#F0D8FA] dark:bg-[#251830] dark:hover:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] font-black text-xs sm:text-sm tracking-wide transition-all cursor-pointer border border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-center gap-2"
-            >
-              <span>Aylık Planla 14 Gün Ücretsiz Başla</span>
-              <ArrowRight size={15} />
-            </button>
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={() => handleStartTrial('Aylık Paket')}
+                className="w-full py-4 px-6 rounded-2xl bg-[#F7F0FA] hover:bg-[#F0D8FA] dark:bg-[#251830] dark:hover:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] font-black text-xs sm:text-sm tracking-wide transition-all cursor-pointer border border-[#E8DFEB] dark:border-[#49364F] flex items-center justify-center gap-2"
+              >
+                <span>Aylık Planla 14 Gün Ücretsiz Başla</span>
+                <ArrowRight size={16} />
+              </button>
+              <div className="text-[10.5px] text-[#716779] dark:text-[#B5A5BD] text-center font-medium">
+                İlk 14 gün ücretsiz · Kredi kartı gerekmez
+              </div>
+            </div>
           </div>
 
           {/* ── PLAN 2: 9 AYLIK SÜPER PAKET (12 AY KULLANIM - 3D SHEEN & ÖNERİLEN) ── */}
-          <div className="relative rounded-[32px] p-[2.5px] bg-gradient-to-br from-[#4B075F] via-[#8D49A6] to-[#D914C8] shadow-[0_25px_60px_-15px_rgba(217,20,200,0.35)] flex flex-col justify-between">
+          <div className="relative rounded-[32px] p-[2.5px] bg-gradient-to-br from-[#4B075F] via-[#8D49A6] to-[#D914C8] shadow-[0_25px_70px_-15px_rgba(217,20,200,0.4)] flex flex-col justify-between">
             {/* Top 3D Badge */}
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-[11px] font-black uppercase tracking-wider shadow-md flex items-center gap-1.5 z-20">
               <Crown size={13} className="fill-white" />
@@ -398,7 +449,7 @@ export default function OxonomPricingClient() {
                 <div>
                   <div className="inline-flex items-center gap-1 text-[11px] font-black uppercase text-[#8D49A6] dark:text-[#F17AE6] tracking-wider">
                     <Sparkles size={13} />
-                    <span>9 Ay Öde 12 Ay Kullan</span>
+                    <span>9 Ay Öde 12 Ay Kesintisiz Kullan</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-black text-[#241329] dark:text-white mt-1">
                     9 Aylık Süper Paket
@@ -431,61 +482,23 @@ export default function OxonomPricingClient() {
                   </div>
                 </div>
 
-                {/* Feature Checklist */}
+                {/* Feature Checklist — IDENTICAL CONTENTS TO MONTHLY */}
                 <div className="space-y-3 pt-2">
                   <div className="text-xs font-black text-[#241329] dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                     <CheckCircle2 size={14} className="text-[#D914C8]" />
-                    <span>Aylık Paketteki Her Şey, Artı Olarak:</span>
+                    <span>Paket İçeriği (Tam Erişim):</span>
                   </div>
                   <ul className="space-y-2.5 text-xs text-[#241329] dark:text-[#FCF9FD] font-medium">
-                    <li className="flex items-start gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shrink-0 mt-0.5">
-                        <Check size={11} strokeWidth={3} />
-                      </div>
-                      <span>
-                        <strong>12 Ay Boyunca Kesintisiz Tam Erişim:</strong> 9 ay öde, 3 ay yaz dönemi hediye!
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shrink-0 mt-0.5">
-                        <Check size={11} strokeWidth={3} />
-                      </div>
-                      <span>
-                        <strong>Sınırsız 7/24 Yapay Zekâ Eğitmen:</strong> Soru sınırı olmadan adım adım anlatım.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shrink-0 mt-0.5">
-                        <Check size={11} strokeWidth={3} />
-                      </div>
-                      <span>
-                        <strong>MEB Zümre Sınav Tahminleri:</strong> Yazılı sınavlar için birebir açık uçlu soru havuzu.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shrink-0 mt-0.5">
-                        <Check size={11} strokeWidth={3} />
-                      </div>
-                      <span>
-                        <strong>Çevrimdışı Flipbook Okuma Modu:</strong> İnternet olmadan da tüm ders kitapları hazır.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shrink-0 mt-0.5">
-                        <Check size={11} strokeWidth={3} />
-                      </div>
-                      <span>
-                        <strong>Oxonom Game Studio:</strong> Pedagojik eğitici zeka oyunlarına sınırsız katılım.
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shrink-0 mt-0.5">
-                        <Check size={11} strokeWidth={3} />
-                      </div>
-                      <span>
-                        <strong>Veli Gelişim & Başarı Analitiği:</strong> Haftalık ilerleme ve eksik konu raporları.
-                      </span>
-                    </li>
+                    {FULL_PACKAGE_FEATURES.map((feat, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#8D49A6] to-[#D914C8] text-white flex items-center justify-center shrink-0 mt-0.5">
+                          <Check size={11} strokeWidth={3} />
+                        </div>
+                        <span>
+                          <strong>{feat.title}:</strong> {feat.desc}
+                        </span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -495,7 +508,7 @@ export default function OxonomPricingClient() {
                 <button
                   type="button"
                   onClick={() => handleStartTrial('9 Aylık Süper Paket (12 Ay Kullanım)')}
-                  className="w-full py-4 px-6 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-sm tracking-wide shadow-xl shadow-[#4B075F]/35 transition-all cursor-pointer flex items-center justify-center gap-2 group border border-white/20"
+                  className="w-full py-4 px-6 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-[#4B075F]/35 transition-all cursor-pointer flex items-center justify-center gap-2 group border border-white/20"
                 >
                   <Sparkles size={16} className="text-[#FCE8FA]" />
                   <span>12 Ay Avantajıyla 14 Gün Ücretsiz Başla</span>
@@ -512,7 +525,7 @@ export default function OxonomPricingClient() {
         </div>
       </section>
 
-      {/* ── WHY OXONOM EDU? PEDAGOGICAL BENEFITS ── */}
+      {/* ── 5. WHY OXONOM EDU? PEDAGOGICAL BENEFITS ── */}
       <section className="py-12 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="p-8 sm:p-12 rounded-[32px] bg-gradient-to-br from-white via-[#FCF9FD] to-[#F7F0FA] dark:from-[#1A1122] dark:via-[#140D1D] dark:to-[#251830] border border-[#E8DFEB] dark:border-[#3A2845] space-y-8">
           <div className="text-center space-y-2 max-w-2xl mx-auto">
@@ -533,7 +546,7 @@ export default function OxonomPricingClient() {
                 Kişiselleştirilmiş Öğrenme Hızı
               </h3>
               <p className="text-xs text-[#514458] dark:text-[#D2C5D8] leading-relaxed">
-                Her öğrencinin anlama süresi farklıdır. Yapay zekâ, öğrencinin takıldığı yerleri tespit eder ve seviyeye uygun ek alıştırmalar sunar.
+                Her öğrencinin anlama süresi farklıdır. Yapay zekâ, takıldığın yerleri tespit eder ve seviyeye uygun ek alıştırmalar sunar.
               </p>
             </div>
 
@@ -545,7 +558,7 @@ export default function OxonomPricingClient() {
                 Okul Yazılılarında %40+ Başarı Artışı
               </h3>
               <p className="text-xs text-[#514458] dark:text-[#D2C5D8] leading-relaxed">
-                MEB zümre öğretmenleri tarafından hazırlanan sınav simülasyonları ile öğrenciler okul sınavlarından önce birebir provasını yapar.
+                MEB zümre öğretmenleri tarafından hazırlanan sınav simülasyonları ile okul sınavlarından önce birebir prova imkânı.
               </p>
             </div>
 
@@ -557,7 +570,7 @@ export default function OxonomPricingClient() {
                 Sırt Çantası Hafifliği
               </h3>
               <p className="text-xs text-[#514458] dark:text-[#D2C5D8] leading-relaxed">
-                Onlarca ağır ders kitabını taşımaya gerek yok. Tüm MEB müfredatı interaktif dijital flipbook formatında tablette veya telefonda.
+                Ağır kitapları taşımaya son. Tüm MEB müfredatı interaktif dijital flipbook formatında tablette veya telefonda elinin altında.
               </p>
             </div>
 
@@ -569,7 +582,7 @@ export default function OxonomPricingClient() {
                 Oyunlaştırılmış Motivasyon
               </h3>
               <p className="text-xs text-[#514458] dark:text-[#D2C5D8] leading-relaxed">
-                Oxonom Game Studio sayesinde öğrenciler matematik ve Türkçe kavramlarını eğlenceli mini oyunlarla pekiştirir, sıkılmadan öğrenir.
+                Oxonom Game Studio sayesinde matematik ve Türkçe kavramlarını eğlenceli mini oyunlarla pekiştir, sıkılmadan öğren.
               </p>
             </div>
 
@@ -581,7 +594,7 @@ export default function OxonomPricingClient() {
                 %100 Güvenli & Reklamsız
               </h3>
               <p className="text-xs text-[#514458] dark:text-[#D2C5D8] leading-relaxed">
-                Hiçbir üçüncü taraf reklam, dikkat dağıtıcı banner veya uygunsuz içerik barındırmaz. Sadece ve sadece eğitime odaklanma alanı.
+                Hiçbir üçüncü taraf reklam veya dikkat dağıtıcı banner barındırmaz. Sadece ve sadece eğitime odaklanma alanı.
               </p>
             </div>
 
@@ -593,14 +606,14 @@ export default function OxonomPricingClient() {
                 Şeffaf Veli Gelişim Paneli
               </h3>
               <p className="text-xs text-[#514458] dark:text-[#D2C5D8] leading-relaxed">
-                Anne ve babalar çocuklarının hangi derste ne kadar ilerlediğini, çözülen soru sayısını ve başarı oranlarını anlık olarak takip edebilir.
+                Anne ve babalar çocuğun hangi derste ne kadar ilerlediğini, çözülen soru sayısını ve başarı oranlarını anlık izleyebilir.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── FAQ ACCORDION ── */}
+      {/* ── 6. FAQ ACCORDION ── */}
       <section className="py-10 px-4 sm:px-6 max-w-4xl mx-auto space-y-6">
         <div className="text-center space-y-2">
           <h2 className="text-2xl sm:text-3xl font-black text-[#241329] dark:text-white tracking-tight">
@@ -647,7 +660,7 @@ export default function OxonomPricingClient() {
         </div>
       </section>
 
-      {/* ── BOTTOM CTA BANNER ── */}
+      {/* ── 7. BOTTOM CTA BANNER ── */}
       <section className="py-12 px-4 sm:px-6 max-w-5xl mx-auto">
         <div className="relative rounded-[32px] p-[2px] bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] shadow-[0_20px_50px_rgba(75,7,95,0.25)]">
           <div className="rounded-[30px] bg-gradient-to-br from-[#241329] via-[#1A1122] to-[#2B1736] p-8 sm:p-12 text-center text-white space-y-5 relative overflow-hidden">
@@ -668,7 +681,7 @@ export default function OxonomPricingClient() {
               <button
                 type="button"
                 onClick={() => handleStartTrial('9 Aylık Süper Paket (12 Ay Kullanım)')}
-                className="w-full sm:w-auto py-4 px-8 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-sm tracking-wide shadow-xl shadow-[#4B075F]/40 transition-all cursor-pointer flex items-center justify-center gap-2 border border-white/20"
+                className="w-full sm:w-auto py-4 px-8 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-[#4B075F]/40 transition-all cursor-pointer flex items-center justify-center gap-2 border border-white/20"
               >
                 <span>Hemen 14 Gün Ücretsiz Başla</span>
                 <ChevronRight size={18} strokeWidth={2.8} />
@@ -676,7 +689,7 @@ export default function OxonomPricingClient() {
 
               <Link
                 href="/student/courses"
-                className="w-full sm:w-auto py-4 px-6 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-sm transition-all border border-white/15 text-center"
+                className="w-full sm:w-auto py-4 px-6 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs sm:text-sm transition-all border border-white/15 text-center"
               >
                 Dersleri İncele
               </Link>
