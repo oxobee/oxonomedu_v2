@@ -145,10 +145,30 @@ export async function proxy(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
-  // 7. Apex Root & Default Fallback: Always serve /login
+  // 7. Public Promo & Marketing Pages: Apex Root '/' and Promo Routes
   // -------------------------------------------------------------------------
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL(`/login${search}`, req.url), 307)
+  const PUBLIC_PROMO_EXACT_ROUTES = [
+    '/',
+    '/paketler',
+    '/indir',
+    '/blog',
+    '/akilli-tahta',
+    '/derslerim',
+    '/sinavlarim',
+    '/notlarim-ajanda',
+    '/gelisimim',
+    '/kitaplik',
+    '/oyunlar',
+    '/hakkimizda',
+    '/entegrasyonlar',
+    '/sektorler'
+  ]
+  if (
+    PUBLIC_PROMO_EXACT_ROUTES.includes(pathname) ||
+    pathname.startsWith('/blog/') ||
+    pathname.startsWith('/sektorler/')
+  ) {
+    return NextResponse.next()
   }
 
   return NextResponse.next()
