@@ -20,6 +20,12 @@ export default function SuperadminNavbar() {
 
   const navItems = [
     {
+      label: 'Tanıtım & Bannerlar',
+      path: '/superadmin/banners',
+      icon: Sliders,
+      badge: 'Promo',
+    },
+    {
       label: 'Game Studio',
       path: '/superadmin/gamestudio',
       icon: Gamepad2,

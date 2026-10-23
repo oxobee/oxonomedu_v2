@@ -377,7 +377,7 @@ export default function PromoHero({
                   )}
 
                   <Link
-                    href="/superadmin"
+                    href="/superadmin/banners"
                     className="text-[11px] text-[#FCE8FA] hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition-all"
                     title="Hero Banner Yönetim Paneli"
                   >

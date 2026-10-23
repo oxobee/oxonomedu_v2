@@ -23,6 +23,7 @@ import {
   Clock,
   MapPin,
   TrendingUp,
+  Sliders,
 } from 'lucide-react'
 import { isSupabaseConfigured, getSupabaseBrowserClient } from '@/lib/supabase/client'
 
@@ -74,6 +75,15 @@ export default function SuperadminDashboardPage() {
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
+            <Link
+              href="/superadmin/banners"
+              className="h-11 px-6 rounded-2xl bg-[#D914C8]/20 hover:bg-[#D914C8]/30 text-[#FCE8FA] font-black text-sm flex items-center gap-2 transition-all border border-[#D914C8]/40 shadow-lg shadow-[#D914C8]/15 hover:scale-105"
+            >
+              <Sliders size={18} className="text-[#D914C8]" />
+              <span>Tanıtım & Banner Yönetimi</span>
+              <ArrowRight size={15} />
+            </Link>
+
             <Link
               href="/superadmin/schools"
               className="h-11 px-6 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-black text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-xl shadow-[#D914C8]/30"
