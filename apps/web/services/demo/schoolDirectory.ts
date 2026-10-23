@@ -165,12 +165,14 @@ export const TEACHER_ROSTER = [
 function buildSchoolClassrooms(): ClassroomItem[] {
   const result: ClassroomItem[] = []
   let id = 101
-  for (let g = 1; g <= 8; g++) {
+  for (let g = 1; g <= 9; g++) {
     for (const b of BRANCHES) {
-      const code = `${g}/${b}`
-      const teacher = TEACHER_ROSTER[(id - 101) % TEACHER_ROSTER.length]
-      // Only 1/A has 1 registered student (Erçil Uğurlu); all other classes start with 0
-      const is1A = code === '1/A'
+      if (g === 9 && b !== 'A') continue // Only 9-A for 9th grade showcase
+      const code = g === 9 ? '9-A' : `${g}/${b}`
+      const is9A = g === 9 && b === 'A'
+      const teacher = is9A
+        ? { name: 'Ebru TEKNECİ', branch: 'Türk Dili ve Edebiyatı · Rehberlik', email: 'ogretmen@oxonom.com' }
+        : TEACHER_ROSTER[(id - 101) % TEACHER_ROSTER.length]
       const isPrimary = g <= 4
       result.push({
         id,
@@ -180,14 +182,14 @@ function buildSchoolClassrooms(): ClassroomItem[] {
         join_code: `OKUL-${g}${b}`,
         grade_level: `${g}. Sınıf`,
         org_id: 30,
-        school_name: isPrimary ? 'Necla Görer İlkokulu' : 'Şair Fevzi Kutlu Kalkancı Ortaokulu',
+        school_name: is9A ? 'Oxonom Maarif Koleji' : isPrimary ? 'Necla Görer İlkokulu' : 'Şair Fevzi Kutlu Kalkancı Ortaokulu',
         school_slug: 'oxonom',
-        description: `Sınıf Rehber Öğretmeni: ${is1A ? 'Özlem ZOR' : teacher.name} (${isPrimary ? 'Sınıf Öğretmeni' : teacher.branch}) — Oxonom Okulları`,
-        teacher_name: is1A ? 'Özlem ZOR' : teacher.name,
-        teacher_email: is1A ? 'ozlemzor@oxonom.com' : teacher.email,
-        student_count: is1A ? 1 : 0,
-        boards_count: 0,
-        subject: isPrimary ? 'Sınıf Öğretmeni' : teacher.branch,
+        description: `Sınıf Rehber Öğretmeni: ${teacher.name} (${teacher.branch}) — Oxonom Okulları`,
+        teacher_name: teacher.name,
+        teacher_email: teacher.email,
+        student_count: is9A ? 24 : 0,
+        boards_count: 1,
+        subject: teacher.branch,
       })
       id++
     }
@@ -225,7 +227,7 @@ export const REAL_STUDENT = {
   email: 'ogrenci@oxonom.com',
   username: 'ogrenci',
   gender: 'Erkek' as const,
-  birthDate: '15.06.2018 (7 Yaşında)',
+  birthDate: '15.06.2010 (16 Yaşında)',
   bloodType: 'A Rh+',
   motherName: 'Ebru UĞURLU',
   motherPhone: '+90 532 999 1100',
@@ -258,41 +260,41 @@ export const REAL_STUDENT = {
   emergencyPhone: '+90 532 999 2200',
   status: 'active' as const,
   enrollmentDate: '01.09.2024',
-  gpa: 98.8,
+  gpa: 96.5,
   attendanceRate: 100,
   excusedDays: 0,
   unexcusedDays: 0,
   assignmentsDone: 15,
   assignmentsTotal: 15,
-  notes: '1/A şubesi öğrencisi. Türkçe, Matematik ve Hayat Bilgisi alanlarında üstün analitik ve edebi başarı.',
+  notes: '9-A şubesi öğrencisi. Türk Dili ve Edebiyatı, Matematik ve Fizik alanlarında üstün analitik ve edebi başarı.',
   specialHealthNote: 'Herhangi bir sağlık engeli veya kronik rahatsızlığı bulunmamaktadır.',
   disciplineStatus: 'Temiz Sicil — Onur Belgesi Sahibi Örnek Öğrenci',
   guidanceNotes: [
     {
       id: 'gn-30-1',
-      date: '15.09.2026',
-      author: 'Özlem ZOR (1/A Sınıf Rehber Öğretmeni)',
+      date: '15.10.2026',
+      author: 'Ebru TEKNECİ (9-A Sınıf Rehber Öğretmeni)',
       category: 'Akademik' as const,
-      content: 'Öğrencinin okuma-yazma hazırlığı, görsel algı ve ders içi analitik katkısı takdir edilmektedir.',
+      content: 'Öğrencinin edebi metin tahlili, paragraf çıkarımları ve ders içi analitik katkısı takdir edilmektedir.',
     },
     {
       id: 'gn-30-2',
-      date: '28.09.2026',
+      date: '20.10.2026',
       author: 'Dr. Uğur UĞURLU (Okul Müdürü)',
       category: 'Gözlem' as const,
-      content: 'Öğrencinin akademik disiplini, bilişim ve proje geliştirme kabiliyeti en üst düzeydedir.',
+      content: 'Öğrencinin akademik disiplini, TÜBİTAK proje geliştirme kabiliyeti en üst düzeydedir.',
     },
   ],
   grades: [
-    { courseName: 'Türkçe', teacherName: 'Özlem ZOR', exam1: 98, exam2: 100, performance: 100, average: 99.3 },
-    { courseName: 'Matematik', teacherName: 'Özlem ZOR', exam1: 96, exam2: 98, performance: 100, average: 98.0 },
-    { courseName: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', exam1: 100, exam2: 98, performance: 100, average: 99.0 },
+    { courseName: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', exam1: 96, exam2: 98, performance: 100, average: 97.6 },
+    { courseName: 'Matematik', teacherName: 'Ebru TEKNECİ', exam1: 95, exam2: 96, performance: 98, average: 96.0 },
+    { courseName: 'Fizik & Fen Bilimleri', teacherName: 'Beritan ŞENATEŞ', exam1: 94, exam2: 95, performance: 98, average: 95.2 },
   ],
   classroomId: 101,
-  classroomName: '1/A Şubesi',
-  className: '1/A',
-  mentorTeacher: 'Özlem ZOR (Sınıf Öğretmeni)',
-  schoolName: 'Oxonom Okulları',
+  classroomName: '9-A Şubesi',
+  className: '9-A',
+  mentorTeacher: 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)',
+  schoolName: 'Oxonom Maarif Koleji',
   is_demo: false,
 }
 
@@ -325,27 +327,31 @@ export function getSingleSourceOfTruthStudents(orgId: number = 30): any[] {
   // Strict Single-Source-of-Truth Reconciliation:
   let needsSave = false
   list = list.map((st: any) => {
-    let cleanCode = (st.className || '').replace('-', '/').trim().toUpperCase()
+    let cleanCode = (st.className || '').trim().toUpperCase()
     const isErcil = st.studentNo === '101' || (st.name && st.name.toLowerCase().includes('erçil'))
 
-    // Normalize any legacy 9-A/9/A remnants to 1/A
-    if (!cleanCode || (isErcil && (cleanCode === '9/A' || cleanCode.includes('9')))) {
-      cleanCode = '1/A'
-      needsSave = true
+    if (isErcil) {
+      cleanCode = '9-A'
+    } else if (!cleanCode) {
+      cleanCode = '9-A'
     }
 
-    const matchedCls = ALL_CLASSROOMS.find((c) => c.code === cleanCode) || ALL_CLASSROOMS[0]
+    const matchedCls =
+      ALL_CLASSROOMS.find((c) => c.code === cleanCode || c.code.replace('-', '/') === cleanCode.replace('-', '/')) ||
+      ALL_CLASSROOMS[ALL_CLASSROOMS.length - 1] ||
+      ALL_CLASSROOMS[0]
+
     const updated = {
       ...st,
-      className: matchedCls.code,
-      classroomName: matchedCls.name,
-      classroomId: matchedCls.id,
-      gradeLevel: matchedCls.grade_level,
-      mentorTeacher: matchedCls.teacher_name ? `${matchedCls.teacher_name} (Sınıf Öğretmeni)` : 'Özlem ZOR (Sınıf Öğretmeni)',
-      schoolName: matchedCls.school_name || 'Oxonom Okulları',
+      className: cleanCode === '9-A' ? '9-A' : matchedCls.code,
+      classroomName: cleanCode === '9-A' ? '9-A Şubesi' : matchedCls.name,
+      classroomId: cleanCode === '9-A' ? 101 : matchedCls.id,
+      gradeLevel: cleanCode === '9-A' ? '9. Sınıf' : matchedCls.grade_level,
+      mentorTeacher: cleanCode === '9-A' ? 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)' : matchedCls.teacher_name ? `${matchedCls.teacher_name} (Sınıf Öğretmeni)` : 'Ebru TEKNECİ',
+      schoolName: cleanCode === '9-A' ? 'Oxonom Maarif Koleji' : matchedCls.school_name || 'Oxonom Okulları',
     }
 
-    if (st.className !== matchedCls.code || st.mentorTeacher !== updated.mentorTeacher) {
+    if (st.className !== updated.className || st.mentorTeacher !== updated.mentorTeacher) {
       needsSave = true
     }
     return updated

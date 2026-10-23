@@ -10,77 +10,9 @@ const SERVICE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNya29lcHRub2hlaXF4dWt4cGlnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MjYxNjU2MCwiZXhwIjoyMTA4MTkyNTYwfQ.GyBCPOX4Zhp9hyhic2a8RtZU34eY21JOZGF9ZX40_7g'
 
-export const CANONICAL_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
-  {
-    id: 1001,
-    assignment_uuid: 'asg_dede_korkut_okuma',
-    title: 'Dede Korkut Hikâyeleri Metin Tahlili & Karakter İncelemesi',
-    description: 'Dede Korkut destanlarından "Dirse Han Oğlu Boğaç Han" boyunun ana fikri, olay örgüsü ve kültürel motiflerinin tahlili.',
-    grade_level: '9. Sınıf',
-    grade_category: 'Lise (9-12)',
-    subject: 'Türk Dili ve Edebiyatı',
-    tool_type: 'READING',
-    classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-    due_date: '2026-10-30T23:59:00',
-    max_score: 100,
-    published: true,
-    teacher_name: 'Ebru TEKNECİ',
-    creation_date: '2026-10-06T09:00:00',
-    tool_data: {
-      readingBook: 'Dede Korkut Kitabı',
-      readingPages: 'Sayfa 15-42',
-      readingQuestions: '1) Boğaç Han boyunun teması nedir? 2) Dirse Han ve hatununun fedakarlığı neyi simgeler?',
-    },
-  },
-  {
-    id: 1002,
-    assignment_uuid: 'asg_edebi_sanatlar_tahta',
-    title: 'Edebi Sanatlar & Teşbih-Mecaz Kavram Haritası Çizimi',
-    description: 'Divan ve Halk edebiyatında kullanılan teşbih, istiare ve mecaz-ı mürsel sanatlarını gösteren interaktif kavram haritası.',
-    grade_level: '9. Sınıf',
-    grade_category: 'Lise (9-12)',
-    subject: 'Türk Dili ve Edebiyatı',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_edebi_sanatlar_9a',
-    classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-    due_date: '2026-11-02T23:59:00',
-    max_score: 100,
-    published: true,
-    teacher_name: 'Ebru TEKNECİ',
-    creation_date: '2026-10-08T10:00:00',
-    tool_data: {
-      whiteboardTopic: 'Teşbih, İstiare ve Mecaz Sanatları Şeması',
-      whiteboardCanvasType: 'İnteraktif Çizim Tuvali',
-    },
-  },
-  {
-    id: 1003,
-    assignment_uuid: 'asg_paragraf_anlam_test',
-    title: 'Sözcükte Anlam & Paragrafta Ana Düşünce Değerlendirme Quiz',
-    description: 'ÖSYM ve MEB soru havuzuna uyumlu 10 soruluk paragraf yapısı ve cümlede anlam pekiştirme sınavı.',
-    grade_level: '9. Sınıf',
-    grade_category: 'Lise (9-12)',
-    subject: 'Türk Dili ve Edebiyatı',
-    tool_type: 'QUIZ',
-    classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-    due_date: '2026-11-05T23:59:00',
-    max_score: 100,
-    published: true,
-    teacher_name: 'Ebru TEKNECİ',
-    creation_date: '2026-10-10T11:00:00',
-    tool_data: {
-      quizQuestions: [
-        {
-          id: 1,
-          question: '"Gözlerini ufuktan bir an olsun ayırmıyordu." cümlesindeki edebi sanat hangisidir?',
-          options: ['Teşbih', 'Mecaz-ı Mürsel', 'Kinaye', 'Tezat'],
-          correctIndex: 1,
-          points: 10,
-        },
-      ],
-    },
-  },
-]
+import { MASTER_ASSIGNMENTS } from '@/lib/demo/demoMasterData'
+
+export const CANONICAL_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = MASTER_ASSIGNMENTS as unknown as SchoolAssignmentItem[]
 
 // In-memory cache for fast read within the same serverless instance
 let memoryAssignmentsCache: SchoolAssignmentItem[] | null = null

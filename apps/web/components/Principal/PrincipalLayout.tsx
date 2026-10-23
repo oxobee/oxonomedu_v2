@@ -38,6 +38,7 @@ import toast from 'react-hot-toast'
 import { getStoredPrincipalProfile, getPrincipalInitials } from '@/lib/principal/principalProfileStorage'
 import HeaderLiveClock from '@components/Common/HeaderLiveClock'
 import HeaderNotificationDropdown from '@components/Notifications/HeaderNotificationDropdown'
+import { startDemoAutoResetWatcher, resetAllDemoData } from '@/lib/demo/demoResetEngine'
 
 interface PrincipalLayoutProps {
   children: React.ReactNode
@@ -60,17 +61,19 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
   }>({
     name: 'Dr. Uğur UĞURLU',
     title: 'Okul Müdürü · Kurum Yetkilisi',
-    schoolName: 'Necla Görer İlkokulu',
+    schoolName: 'Oxonom Maarif Koleji',
   })
 
   // Dynamic counts for menu badges to completely eliminate mock data
   const [counts, setCounts] = useState({
-    teachers: '1 Öğretmen',
-    students: '1 Öğrenci',
-    classes: '1 Sınıf (9/A)',
+    teachers: '18 Öğretmen',
+    students: '24 Öğrenci (9-A)',
+    classes: '33 Sınıf (9-A Aktif)',
   })
 
   useEffect(() => {
+    const stopWatcher = startDemoAutoResetWatcher()
+
     const loadAdminSessionAndCounts = () => {
       if (typeof window !== 'undefined') {
         try {
@@ -78,24 +81,24 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           setAdminProfile({
             name: profile.name,
             title: profile.title,
-            schoolName: profile.schoolName,
+            schoolName: profile.schoolName || 'Oxonom Maarif Koleji',
           })
 
           const org = 30
           // Teachers dynamic count
           const rawTeachers = localStorage.getItem(`oxonom_admin_teachers_${org}`)
           const teachers = rawTeachers ? JSON.parse(rawTeachers) : null
-          const tCount = Array.isArray(teachers) && teachers.length > 0 ? teachers.length : 1
+          const tCount = Array.isArray(teachers) && teachers.length > 0 ? teachers.length : 18
 
           // Students dynamic count
-          const rawStudents = localStorage.getItem(`oxonom_admin_students_${org}`)
+          const rawStudents = localStorage.getItem(`oxonom_admin_students_${org}`) || localStorage.getItem('oxonom_m_students_v3')
           const students = rawStudents ? JSON.parse(rawStudents) : null
-          const sCount = Array.isArray(students) && students.length > 0 ? students.length : 1
+          const sCount = Array.isArray(students) && students.length > 0 ? students.length : 24
 
           // Classes dynamic count
           const rawClasses = localStorage.getItem(`oxonom_admin_classes_${org}`)
           const classes = rawClasses ? JSON.parse(rawClasses) : null
-          const cCount = Array.isArray(classes) && classes.length > 0 ? classes.length : 1
+          const cCount = Array.isArray(classes) && classes.length > 0 ? classes.length : 33
 
           setCounts({
             teachers: `${tCount} Öğretmen`,
@@ -106,6 +109,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
       }
     }
     loadAdminSessionAndCounts()
+    window.addEventListener('oxonom_demo_reset', loadAdminSessionAndCounts)
     window.addEventListener('oxonom_admin_updated', loadAdminSessionAndCounts)
     window.addEventListener('oxonom_principal_updated', loadAdminSessionAndCounts)
     window.addEventListener('oxonom_school_updated', loadAdminSessionAndCounts)
@@ -113,6 +117,8 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
     window.addEventListener('oxonom_teachers_updated', loadAdminSessionAndCounts)
     window.addEventListener('storage', loadAdminSessionAndCounts)
     return () => {
+      stopWatcher()
+      window.removeEventListener('oxonom_demo_reset', loadAdminSessionAndCounts)
       window.removeEventListener('oxonom_admin_updated', loadAdminSessionAndCounts)
       window.removeEventListener('oxonom_principal_updated', loadAdminSessionAndCounts)
       window.removeEventListener('oxonom_school_updated', loadAdminSessionAndCounts)
@@ -373,6 +379,20 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           </div>
 
           <div className="flex items-center gap-2.5">
+            {/* Demo Reset Indicator & Trigger */}
+            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 select-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Demo Modu (30 dk Sıfırlama)</span>
+              <button
+                type="button"
+                onClick={() => resetAllDemoData({ force: true, notify: true })}
+                title="Demo verilerini şimdi sıfırla"
+                className="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold transition-all cursor-pointer"
+              >
+                Yenile
+              </button>
+            </div>
+
             {/* Live Clock minimal */}
             <HeaderLiveClock theme="oxonom" variant="desktop" />
 

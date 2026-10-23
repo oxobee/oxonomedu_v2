@@ -21,6 +21,15 @@ import {
 import { CANONICAL_SCHOOL_EXAMS, getStoredSchoolExams } from '@/lib/teacher/teacherAgendaStorage'
 import { getStudentAttendanceSummary } from '@services/demo/attendanceService'
 
+import {
+  MASTER_STUDENT_PROFILE,
+  MASTER_ASSIGNMENTS,
+  MASTER_EXAMS,
+  MASTER_PLANNER_TASKS,
+  MASTER_STUDENT_NOTES,
+  MASTER_SCHEDULE,
+} from '@/lib/demo/demoMasterData'
+
 export interface GuidanceNoteItem {
   id: string
   date: string
@@ -65,38 +74,7 @@ export interface StudentProfile {
   grades?: MStudentCourseGrade[]
 }
 
-export const DEFAULT_STUDENT_PROFILE: StudentProfile = {
-  id: 's-1',
-  name: 'Erçil UĞURLU',
-  firstName: 'Erçil',
-  lastName: 'UĞURLU',
-  email: 'ogrenci@oxonom.com',
-  studentNo: '101',
-  tcNo: '10000000146',
-  gender: 'Erkek',
-  birthDate: '15.06.2018 (7 Yaşında)',
-  bloodType: 'A Rh+',
-  enrollmentDate: '01.09.2024',
-  className: '1/A',
-  gradeLevel: '1. Sınıf',
-  mentorTeacher: 'Özlem ZOR (Sınıf Öğretmeni)',
-  schoolName: 'Oxonom Okulları',
-  gpa: 98.8,
-  classRank: 1,
-  attendanceRate: 100,
-  absentDays: 0,
-  absentExcusedDays: 0,
-  absentUnexcusedDays: 0,
-  parentName: 'Ebru UĞURLU',
-  parentPhone: '+90 532 999 1100',
-  parentRelation: 'Anne (Mimar)',
-  secondParentName: 'Dr. Uğur UĞURLU',
-  secondParentPhone: '+90 532 999 2200',
-  secondParentRelation: 'Baba (Kurum Müdürü)',
-  emergencyPhone: '+90 532 999 2200',
-  address: 'Caddebostan Mah. Bağdat Cad. No: 142/5 Kadıköy / İstanbul',
-  disciplineStatus: 'Temiz Sicil — Örnek Öğrenci',
-}
+export const DEFAULT_STUDENT_PROFILE: StudentProfile = MASTER_STUDENT_PROFILE as StudentProfile
 
 export interface StudentCourse {
   id: string
@@ -297,7 +275,231 @@ export const GRADE_1_COURSES: StudentCourse[] = [
   },
 ]
 
-export const STUDENT_COURSES: StudentCourse[] = GRADE_1_COURSES
+export const GRADE_9_COURSES: StudentCourse[] = [
+  {
+    id: 'turkce',
+    code: 'EDE-901',
+    name: 'Türk Dili ve Edebiyatı',
+    teacherName: 'Ebru TEKNECİ',
+    teacherBranch: 'Türk Dili ve Edebiyatı · Rehberlik',
+    weeklyHours: 5,
+    classroom: '9-A',
+    roomType: 'Derslik 101 (9-A)',
+    color: 'blue',
+    gradient: 'from-blue-600 to-indigo-700',
+    description: 'Giriş Ünitesi, Edebiyatın Sanatlarla İlişkisi, İletişim Ögeleri, Hikâye Tahlili (Dede Korkut, Ömer Seyfettin), Şiir ve Edebi Sanatlar, Masal-Fabl.',
+    topics: [
+      { id: 't1', title: 'Giriş: Edebiyatın Tanımı, Güzel Sanatlarla İlişkisi ve Metinlerin Sınıflandırılması', completed: true, week: 1 },
+      { id: 't2', title: 'Dilin İşlevleri ve İletişim Ögeleri (Gönderici, Alıcı, İleti, Kanal, Dönüt)', completed: true, week: 2 },
+      { id: 't3', title: 'Hikâye (Öykü): Olay ve Durum Hikâyesi Ayrımı, Dede Korkut Hikâyeleri Tahlili', completed: true, week: 3 },
+      { id: 't4', title: 'Şiir Bilgisi: Nazım Birimi, Ölçü (Aruz/Hece), Uyak ve Redif Çeşitleri', completed: false, week: 4 },
+      { id: 't5', title: 'Edebi Sanatlar: Teşbih, İstiare, Mecaz-ı Mürsel, Tezat ve Telmih', completed: false, week: 5 },
+      { id: 't6', title: 'Masal ve Fabl: Yapı Unsurları, Dünya ve Türk Edebiyatında Örnekler', completed: false, week: 6 },
+    ],
+    materials: [
+      { id: 'm1', title: '9. Sınıf Edebiyat ve Hikâye Tahlili Çalışma Föyü (PDF)', type: 'pdf', size: '3.4 MB' },
+      { id: 'm2', title: 'Edebi Sanatlar ve Aruz Ölçüsü Kavram Haritası', type: 'doc', size: '1.2 MB' },
+      { id: 'm3', title: 'Dede Korkut Boğaç Han Boyu Canlandırma Videosu', type: 'video', size: '48 MB' },
+    ],
+  },
+  {
+    id: 'matematik',
+    code: 'MAT-901',
+    name: 'Matematik',
+    teacherName: 'Ebru TEKNECİ',
+    teacherBranch: 'Matematik',
+    weeklyHours: 6,
+    classroom: '9-A',
+    roomType: 'Derslik 101 (9-A)',
+    color: 'indigo',
+    gradient: 'from-indigo-600 to-purple-700',
+    description: 'Mantık ve Önermeler, Bileşik Önermeler, Kümeler ve Kümelerde İşlemler, Birinci ve İkinci Dereceden Denklemler, Eşitsizlikler, Üçgenler.',
+    topics: [
+      { id: 't1', title: 'Önermeler, Doğruluk Değerleri ve Bileşik Önermeler (Ve, Veya, İse, Ancak ve Ancak)', completed: true, week: 1 },
+      { id: 't2', title: 'Açık Önermeler, Niceleyiciler ve Tanım-Aksiyom-Teorem Kavramları', completed: true, week: 2 },
+      { id: 't3', title: 'Kümeler: Alt Küme, Kümelerde Kesişim, Birleşim, Fark ve Tümleme İşlemleri', completed: true, week: 3 },
+      { id: 't4', title: 'Gerçek Sayılar, Aralık Kavramı ve Birinci Dereceden Denklemler', completed: false, week: 4 },
+      { id: 't5', title: 'İkinci Dereceden Bir Bilinmeyenli Denklemler ve Diskriminant (Delta) Çözümü', completed: false, week: 5 },
+      { id: 't6', title: 'Üçgenlerde Açılar, Kenar-Açı Bağıntıları ve Pisagor Teoremi', completed: false, week: 6 },
+    ],
+    materials: [
+      { id: 'm1', title: '9. Sınıf Mantık ve Kümeler MEB Çalışma Kitabı (PDF)', type: 'pdf', size: '4.8 MB' },
+      { id: 'm2', title: 'İkinci Dereceden Denklemler Soru Bankası ve Formül Föyü', type: 'doc', size: '2.1 MB' },
+    ],
+  },
+  {
+    id: 'fizik',
+    code: 'FIZ-901',
+    name: 'Fizik & Fen Bilimleri',
+    teacherName: 'Beritan ŞENATEŞ',
+    teacherBranch: 'Fizik & Fen Bilimleri',
+    weeklyHours: 2,
+    classroom: '9-A',
+    roomType: 'Fen & Teknoloji Laboratuvarı',
+    color: 'emerald',
+    gradient: 'from-emerald-600 to-teal-700',
+    description: 'Fizik Bilimine Giriş, Madde ve Özellikleri, Özkütle, Hareket ve Kuvvet, Newton Yasaları, Enerji ve Verim.',
+    topics: [
+      { id: 't1', title: 'Fiziğin Alt Dalları ve Fiziksel Büyüklüklerin Sınıflandırılması', completed: true, week: 1 },
+      { id: 't2', title: 'Madde ve Özkütle: Kütle-Hacim Grafikleri ve Karışımların Özkütlesi', completed: true, week: 2 },
+      { id: 't3', title: 'Dayanıklılık, Adezyon, Kohezyon ve Yüzey Gerilimi', completed: false, week: 3 },
+      { id: 't4', title: 'Doğrusal Hareket: Konum, Alınan Yol, Yer Değiştirme, Hız ve Sürat', completed: false, week: 4 },
+      { id: 't5', title: 'Newton’un Hareket Yasaları ve Sürtünme Kuvveti', completed: false, week: 5 },
+    ],
+    materials: [
+      { id: 'm1', title: 'Fizik Laboratuvar Deney Kılavuzu ve Rapor Şablonu (PDF)', type: 'pdf', size: '2.9 MB' },
+    ],
+  },
+  {
+    id: 'bilisim',
+    code: 'BIL-901',
+    name: 'Bilişim & Yazılım',
+    teacherName: 'Murat DEMİR',
+    teacherBranch: 'Bilişim Teknolojileri',
+    weeklyHours: 2,
+    classroom: '9-A',
+    roomType: 'Bilişim & Kodlama Atölyesi',
+    color: 'cyan',
+    gradient: 'from-cyan-600 to-blue-700',
+    description: 'Algoritmik Düşünme, Akış Şemaları, Python ile Programlamaya Giriş, Değişkenler, Koşullu İfadeler ve Döngüler.',
+    topics: [
+      { id: 't1', title: 'Problem Çözme Süreci, Algoritma Mantığı ve Akış Şeması Sembolleri', completed: true, week: 1 },
+      { id: 't2', title: 'Python Geliştirme Ortamı Kurulumu ve print/input Fonksiyonları', completed: true, week: 2 },
+      { id: 't3', title: 'Veri Tipleri (int, float, str, bool) ve Aritmetik Operatörler', completed: true, week: 3 },
+      { id: 't4', title: 'Koşullu Durumlar: if - elif - else Blokları', completed: false, week: 4 },
+      { id: 't5', title: 'Döngüler: for ve while ile Liste İşlemleri', completed: false, week: 5 },
+    ],
+    materials: [
+      { id: 'm1', title: 'Python Temelleri ve Algoritma Örnekleri Kitapçığı (PDF)', type: 'pdf', size: '5.2 MB' },
+    ],
+  },
+  {
+    id: 'ingilizce',
+    code: 'ING-901',
+    name: 'Yabancı Dil (İngilizce)',
+    teacherName: 'Canan YILDIRIM',
+    teacherBranch: 'İngilizce',
+    weeklyHours: 4,
+    classroom: '9-A',
+    roomType: 'Derslik 101 (9-A)',
+    color: 'purple',
+    gradient: 'from-purple-600 to-violet-700',
+    description: 'Studying Abroad, My Environment, Movies and Books, Human in Nature, Inspirational People.',
+    topics: [
+      { id: 't1', title: 'Unit 1: Studying Abroad - Introductions, Nationalities and Present Simple', completed: true, week: 1 },
+      { id: 't2', title: 'Unit 1: Asking for and Giving Directions in Campus', completed: true, week: 2 },
+      { id: 't3', title: 'Unit 2: My Environment - Describing Places, Comparatives and Superlatives', completed: false, week: 3 },
+      { id: 't4', title: 'Unit 2: Expressing Likes/Dislikes and Writing a Neighborhood Review', completed: false, week: 4 },
+    ],
+    materials: [
+      { id: 'm1', title: 'B1 English Vocabulary and Reading Pack (PDF)', type: 'pdf', size: '3.1 MB' },
+    ],
+  },
+  {
+    id: 'tarih',
+    code: 'TAR-901',
+    name: 'Tarih',
+    teacherName: 'Deniz ARSLAN',
+    teacherBranch: 'Tarih',
+    weeklyHours: 2,
+    classroom: '9-A',
+    roomType: 'Derslik 101 (9-A)',
+    color: 'amber',
+    gradient: 'from-amber-600 to-orange-700',
+    description: 'Tarih ve Zaman, İnsanlığın İlk Dönemleri, Orta Çağ’da Dünya, İlk ve Orta Çağlarda Türk Dünyası.',
+    topics: [
+      { id: 't1', title: 'Tarih Biliminin Konusu, Yöntemi ve Kaynakların Sınıflandırılması', completed: true, week: 1 },
+      { id: 't2', title: 'Zamanın Taksimi ve Takvim Çeşitleri (Güneş ve Ay Yılı Takvimleri)', completed: true, week: 2 },
+      { id: 't3', title: 'İlk Çağ Medeniyetleri: Mezopotamya, Anadolu, Mısır ve Ege Medeniyetleri', completed: false, week: 3 },
+    ],
+    materials: [
+      { id: 'm1', title: 'İlk Çağ Medeniyetleri Haritası ve Kronoloji Tablosu', type: 'pdf', size: '2.5 MB' },
+    ],
+  },
+  {
+    id: 'cografya',
+    code: 'COG-901',
+    name: 'Coğrafya',
+    teacherName: 'Zeynep GÜLER',
+    teacherBranch: 'Coğrafya',
+    weeklyHours: 2,
+    classroom: '9-A',
+    roomType: 'Derslik 101 (9-A)',
+    color: 'teal',
+    gradient: 'from-teal-600 to-emerald-700',
+    description: 'Doğa ve İnsan, Coğrafyanın Konusu, Harita Bilgisi ve Coğrafi Koordinat Sistemi, Atmosfer ve İklim.',
+    topics: [
+      { id: 't1', title: 'Doğal Sistemler ve İnsan Etkileşimi, Coğrafyanın Bölümleri', completed: true, week: 1 },
+      { id: 't2', title: 'Harita Bilgisi, Projeksiyon Tipleri ve Ölçek Hesaplamaları', completed: true, week: 2 },
+      { id: 't3', title: 'Dünya’nın Şekli, Günlük ve Yıllık Hareketlerinin Sonuçları', completed: false, week: 3 },
+    ],
+    materials: [
+      { id: 'm1', title: '9. Sınıf Coğrafi Bilgi Sistemleri ve Harita Rehberi', type: 'pdf', size: '4.0 MB' },
+    ],
+  },
+  {
+    id: 'beden',
+    code: 'BED-901',
+    name: 'Beden Eğitimi & Spor',
+    teacherName: 'Selim AKSOY',
+    teacherBranch: 'Beden Eğitimi',
+    weeklyHours: 2,
+    classroom: '9-A',
+    roomType: 'Kapalı Spor Salonu',
+    color: 'orange',
+    gradient: 'from-orange-500 to-amber-600',
+    description: 'Temel Isınma, Takım Sporları Kuralları (Voleybol, Basketbol, Hentbol), Fiziksel Uygunluk ve Sağlıklı Yaşam.',
+    topics: [
+      { id: 't1', title: 'Fiziksel Uygunluk Testleri (Mekik, Şınav, Esneklik)', completed: true, week: 1 },
+      { id: 't2', title: 'Voleybol Temel Teknikleri: Parmak Pas ve Manşet Pas', completed: false, week: 2 },
+    ],
+    materials: [
+      { id: 'm1', title: 'Takım Sporları Oyun Kuralları Kılavuzu', type: 'doc', size: '850 KB' },
+    ],
+  },
+  {
+    id: 'gorsel-sanatlar',
+    code: 'GOR-901',
+    name: 'Görsel Sanatlar & Atölye',
+    teacherName: 'Gülşah ÖZTÜRK',
+    teacherBranch: 'Görsel Sanatlar',
+    weeklyHours: 1,
+    classroom: '9-A',
+    roomType: 'Sanat Atölyesi',
+    color: 'pink',
+    gradient: 'from-pink-500 to-rose-600',
+    description: 'Perspektif Çizimi, Işık ve Gölge, Renk Teorisi, Geleneksel Türk Sanatları (Ebru, Minyatür).',
+    topics: [
+      { id: 't1', title: 'Tek ve Çift Kaçışlı Perspektif Çizim Teknikleri', completed: true, week: 1 },
+      { id: 't2', title: 'Karakalem Tonlama ve Obje Etüdü', completed: false, week: 2 },
+    ],
+    materials: [
+      { id: 'm1', title: 'Perspektif ve Desen Çizim Föyü', type: 'pdf', size: '2.7 MB' },
+    ],
+  },
+  {
+    id: 'muzik',
+    code: 'MUZ-901',
+    name: 'Müzik & Sahne Sanatları',
+    teacherName: 'Hande EREZ',
+    teacherBranch: 'Müzik',
+    weeklyHours: 1,
+    classroom: '9-A',
+    roomType: 'Müzik Odası',
+    color: 'rose',
+    gradient: 'from-rose-500 to-pink-600',
+    description: 'Müzik Kültürü, Türk Sanat ve Halk Müziği Makamları, Klasik Batı Müziği Dönemleri, Ritim ve Koro.',
+    topics: [
+      { id: 't1', title: 'Temel Müzik Yazısı, Notalar ve Süre Değerleri', completed: true, week: 1 },
+      { id: 't2', title: 'Türk Halk Müziği Türleri ve Çalgı Grupları', completed: false, week: 2 },
+    ],
+    materials: [
+      { id: 'm1', title: 'Makamlar ve Ritim Egzersizleri Notasyonu', type: 'pdf', size: '1.9 MB' },
+    ],
+  },
+]
+
+export const STUDENT_COURSES: StudentCourse[] = GRADE_9_COURSES
 
 export interface StudentAssessment {
   id: string
@@ -706,12 +908,7 @@ export interface PlannerTask {
   pageNumber?: number
 }
 
-export const INITIAL_PLANNER_TASKS: PlannerTask[] = [
-  { id: 'pt-1', title: 'Türkçe ses kartları ve hece okuma çalışması', course: 'Türkçe', dueDate: 'Bugün', completed: false, priority: 'high' },
-  { id: 'pt-2', title: 'Matematik 1-20 arası ritmik sayma etkinliği', course: 'Matematik', dueDate: 'Yarın', completed: false, priority: 'medium' },
-  { id: 'pt-3', title: 'Hayat Bilgisi okul kuralları resmi boyama', course: 'Hayat Bilgisi', dueDate: '16 Ekim', completed: true, priority: 'low' },
-  { id: 'pt-4', title: 'İngilizce Greetings şarkısı telaffuz tekrarı', course: 'Yabancı Dil (İngilizce)', dueDate: '18 Ekim', completed: false, priority: 'medium' },
-]
+export const INITIAL_PLANNER_TASKS: PlannerTask[] = MASTER_PLANNER_TASKS as PlannerTask[]
 
 export function getStoredPlannerTasks(): PlannerTask[] {
   if (typeof window === 'undefined') return INITIAL_PLANNER_TASKS
@@ -773,57 +970,29 @@ export function getSynchronizedStudentProfile(): StudentProfile {
       studentRecord = ALL_INITIAL_STUDENTS[0] || (DEFAULT_STUDENT_PROFILE as any)
     }
 
-    let needStudentCleanse = false
     if (studentRecord) {
-      const is9 = !studentRecord.className || studentRecord.className.includes('9') || studentRecord.className === '9-A'
       const isErcil = (studentRecord.name && studentRecord.name.toLowerCase().includes('erçil')) || studentRecord.studentNo === '101'
-      if (is9 || isErcil) {
-        studentRecord.className = '1/A'
-        ;(studentRecord as any).gradeLevel = '1. Sınıf'
-        studentRecord.mentorTeacher = 'Özlem ZOR (Sınıf Öğretmeni)'
+      if (isErcil) {
+        studentRecord.className = '9-A'
+        ;(studentRecord as any).gradeLevel = '9. Sınıf'
+        studentRecord.mentorTeacher = 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)'
         if (!studentRecord.gpa || Number(studentRecord.gpa) < 50) {
-          studentRecord.gpa = 98.8
-          needStudentCleanse = true
+          studentRecord.gpa = 96.5
         }
-        // If grades have high school subjects, replace with authentic 1. Sınıf grades
-        const hasHighSchool = studentRecord.grades?.some((g: any) =>
-          g.courseName?.includes('Edebiyat') || g.courseName?.includes('Fizik') || g.courseName?.includes('Felsefe') || g.courseName?.includes('Bilişim')
-        )
-        if (!studentRecord.grades || studentRecord.grades.length === 0 || hasHighSchool) {
-          studentRecord.grades = [
-            { courseName: 'Türkçe', teacherName: 'Özlem ZOR', exam1: 99, exam2: 100, performance: 99, average: 99.3 },
-            { courseName: 'Matematik', teacherName: 'Özlem ZOR', exam1: 98, exam2: 97, performance: 99, average: 98.0 },
-            { courseName: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', exam1: 100, exam2: 98, performance: 99, average: 99.0 },
-            { courseName: 'Yabancı Dil (İngilizce)', teacherName: 'Nilgün KAYA', exam1: 98, exam2: 100, performance: 99, average: 99.0 },
-          ]
-          needStudentCleanse = true
+        if (!studentRecord.grades || studentRecord.grades.length === 0) {
+          studentRecord.grades = MASTER_STUDENT_PROFILE.grades
         }
       }
     }
 
-    if (needStudentCleanse && rawStudents) {
-      try {
-        const parsed = JSON.parse(rawStudents)
-        if (Array.isArray(parsed)) {
-          const updated = parsed.map((s: any) => {
-            if (s.id === studentRecord?.id || s.studentNo === '101' || (s.name && s.name.toLowerCase().includes('erçil'))) {
-              return studentRecord
-            }
-            return s
-          })
-          localStorage.setItem('oxonom_m_students_v3', JSON.stringify(updated))
-        }
-      } catch (_) {}
-    }
-
     // 2. Mentor Teacher synchronization from active teacher's profile
-    let mentorTeacher = studentRecord.mentorTeacher || 'Özlem ZOR (Sınıf Öğretmeni)'
+    let mentorTeacher = studentRecord.mentorTeacher || 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)'
     const rawTeacher = localStorage.getItem('oxonom_teacher_profile')
     if (rawTeacher) {
       try {
         const teacherObj = JSON.parse(rawTeacher)
-        const tName = `${teacherObj.firstName || teacherObj.name || 'Özlem'} ${teacherObj.lastName || 'ZOR'}`.trim()
-        const tBranch = teacherObj.branch || 'Sınıf Öğretmeni'
+        const tName = `${teacherObj.firstName || teacherObj.name || 'Ebru'} ${teacherObj.lastName || 'TEKNECİ'}`.trim()
+        const tBranch = teacherObj.branch || 'Türk Dili ve Edebiyatı · Rehberlik'
         mentorTeacher = `${tName} (${tBranch})`
       } catch (_) {}
     }
@@ -1238,14 +1407,14 @@ export const CANONICAL_1A_SCHEDULE_30: ScheduleEntry[] = [
   { id: 'sc-1a-fri-6', orgId: 30, day: 'fri', period: 6, classCode: '1/A', subject: 'Beden Eğitimi ve Oyun', teacherName: 'Selim AKSOY', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
 ]
 
-export const CANONICAL_9A_SCHEDULE_30: ScheduleEntry[] = CANONICAL_1A_SCHEDULE_30
+export const CANONICAL_9A_SCHEDULE_30: ScheduleEntry[] = MASTER_SCHEDULE as unknown as ScheduleEntry[]
 
 /**
- * Returns the weekly class schedule configured by the school principal for the given class (defaults to 1/A).
- * Synchronizes from oxonom_admin_schedule_30 and other admin schedule stores with fallback to CANONICAL_1A_SCHEDULE_30.
+ * Returns the weekly class schedule configured by the school principal for the given class (defaults to 9-A).
+ * Synchronizes from oxonom_canonical_schedule_9a and other admin schedule stores with fallback to CANONICAL_9A_SCHEDULE_30.
  */
-export function getSynchronizedClassWeeklySchedule(classCode: string = '1/A'): ScheduleEntry[] {
-  let entries = CANONICAL_1A_SCHEDULE_30
+export function getSynchronizedClassWeeklySchedule(classCode: string = '9-A'): ScheduleEntry[] {
+  let entries = CANONICAL_9A_SCHEDULE_30
 
   if (typeof window !== 'undefined') {
     try {
@@ -1327,138 +1496,8 @@ export function getSynchronizedStudentAssignments(): SchoolAssignmentItem[] {
     } catch (_) {}
   }
 
-  // Teacher 9-A initial curriculum assignments
-  const teacherDefaults: SchoolAssignmentItem[] = [
-    {
-      id: 1001,
-      assignment_uuid: 'asg_dede_korkut_okuma',
-      title: 'Dede Korkut Hikâyeleri Metin Tahlili & Karakter İncelemesi',
-      description: 'Dede Korkut destanlarından "Dirse Han Oğlu Boğaç Han" boyunun ana fikri, olay örgüsü ve kültürel motiflerinin tahlili.',
-      grade_level: '9. Sınıf',
-      grade_category: 'Lise (9-12)',
-      subject: 'Türk Dili ve Edebiyatı',
-      tool_type: 'READING',
-      classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-      due_date: '2026-10-18T23:59:00',
-      max_score: 100,
-      published: true,
-      teacher_name: 'Ebru TEKNECİ',
-      creation_date: '2026-10-06T09:00:00',
-      tool_data: {
-        readingBook: 'Dede Korkut Kitabı',
-        readingPages: 'Sayfa 15-42',
-        readingQuestions: '1) Boğaç Han boyunun teması nedir? 2) Dirse Han ve hatununun fedakarlığı neyi simgeler?',
-      },
-    },
-    {
-      id: 1002,
-      assignment_uuid: 'asg_edebi_sanatlar_tahta',
-      title: 'Edebi Sanatlar & Teşbih-Mecaz Kavram Haritası Çizimi',
-      description: 'Divan ve Halk edebiyatında kullanılan teşbih, istiare ve mecaz-ı mürsel sanatlarını gösteren interaktif kavram haritası.',
-      grade_level: '9. Sınıf',
-      grade_category: 'Lise (9-12)',
-      subject: 'Türk Dili ve Edebiyatı',
-      tool_type: 'WHITEBOARD',
-      board_uuid: 'board_edebi_sanatlar_9a',
-      classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-      due_date: '2026-10-20T23:59:00',
-      max_score: 100,
-      published: true,
-      teacher_name: 'Ebru TEKNECİ',
-      creation_date: '2026-10-08T10:00:00',
-      tool_data: {
-        whiteboardTopic: 'Teşbih, İstiare ve Mecaz Sanatları Şeması',
-        whiteboardCanvasType: 'İnteraktif Çizim Tuvali',
-      },
-    },
-    {
-      id: 1003,
-      assignment_uuid: 'asg_paragraf_anlam_test',
-      title: 'Sözcükte Anlam & Paragrafta Ana Düşünce Değerlendirme Quiz',
-      description: 'Çoktan seçmeli, doğru-yanlış, eşleştirme ve kısa cevaplı sorular içeren interaktif tarama testi.',
-      grade_level: '9. Sınıf',
-      grade_category: 'Lise (9-12)',
-      subject: 'Türk Dili ve Edebiyatı',
-      tool_type: 'QUIZ',
-      classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-      due_date: '2026-10-22T23:59:00',
-      max_score: 100,
-      published: true,
-      teacher_name: 'Ebru TEKNECİ',
-      creation_date: '2026-10-09T11:00:00',
-      quiz_questions: [
-        {
-          id: 'q-1',
-          questionNumber: 1,
-          type: 'multiple_choice',
-          prompt: '“Yazar, olayları bir kamera sessizliğiyle aktarmak yerine karakterlerinin iç dünyasındaki fırtınaları kelimelere dökmüştür.” Bu cümlede yazarın öne çıkan özelliği aşağıdakilerden hangisidir?',
-          points: 25,
-          options: [
-            { id: 'A', label: 'A', text: 'Olayları kronolojik sırayla belgesel gibi aktarması' },
-            { id: 'B', label: 'B', text: 'Ruhsal tahlil ve iç çatışmaları derinlemesine işlemesi' },
-            { id: 'C', label: 'C', text: 'Sadece dış gözleme dayalı betimlemeler yapması' },
-            { id: 'D', label: 'D', text: 'Mekân tasvirlerine odaklanıp insanı arka plana atması' },
-          ],
-          correctOptionId: 'B',
-          explanation: 'Karakterlerin iç dünyasındaki fırtınalar, bireyin psikolojik ve ruhsal boyutunu derinlemesine ele almayı ifade eder.',
-        },
-        {
-          id: 'q-2',
-          questionNumber: 2,
-          type: 'true_false',
-          prompt: 'Dede Korkut Hikâyelerinde olağanüstü mitolojik motifler ile gerçekçi tarihsel unsurlar bir arada bulunur ve eser nazım-nesir (şiir-düzyazı) karışık olarak kaleme alınmıştır.',
-          points: 25,
-          correctBoolean: true,
-          explanation: 'Dede Korkut destansı anlatılarında olaylar düzyazı, duygular şiir biçimindedir.',
-        },
-        {
-          id: 'q-3',
-          questionNumber: 3,
-          type: 'matching',
-          prompt: 'Aşağıdaki edebi sanatları uygun şiir dizeleriyle eşleştiriniz.',
-          points: 25,
-          matchingPairs: [
-            { id: 'm-1', left: 'Teşbih (Benzetme)', right: 'Kükremiş sel gibiyim, bendimi çiğner aşarım.' },
-            { id: 'm-2', left: 'Teşhis (Kişileştirme)', right: 'Rüzgâr hüzünle fısıldıyordu kırık penceremde.' },
-            { id: 'm-3', left: 'Tezat (Karşıtlık)', right: 'Ağlarım çağlar gibi, gülerim güller gibi.' },
-          ],
-          explanation: 'Kükremiş sel benzetme, rüzgârın fısıldaması kişileştirme, ağlamak-gülmek tezattır.',
-        },
-        {
-          id: 'q-4',
-          questionNumber: 4,
-          type: 'short_answer',
-          prompt: 'Bir edebi metinde anlatıcının olayları her şeyi bilen, kahramanların geçmişini, geleceğini ve gizli düşüncelerini sezen bakış açısına ne ad verilir?',
-          points: 25,
-          sampleAnswer: 'İlahi (Hakim / Tanrısal) Bakış Açısı',
-          explanation: 'Kahramanların aklından geçenleri ve geleceği bilen anlatıcı ilahi bakış açısına sahiptir.',
-        },
-      ],
-      tool_data: {
-        quizQuestionCount: 4,
-        quizDifficulty: 'Orta',
-      },
-    },
-    {
-      id: 1004,
-      assignment_uuid: 'asg_kumeler_mantik_calisma',
-      title: 'Kümeler, Önermeler ve Mantık Çalışma Föyü',
-      description: 'Doğruluk tabloları ve küme işlemleri içeren analitik matematik çalışma föyü.',
-      grade_level: '9. Sınıf',
-      grade_category: 'Lise (9-12)',
-      subject: 'Matematik',
-      tool_type: 'WORKSHEET',
-      classes: [{ id: 101, name: '9-A Şubesi', code: '9/A' }],
-      due_date: '2026-10-24T23:59:00',
-      max_score: 100,
-      published: true,
-      teacher_name: 'Ebru TEKNECİ',
-      creation_date: '2026-10-10T14:00:00',
-      tool_data: {
-        attachedFileName: '9A_Matematik_Mantık_ve_Kümeler_Çalışma_Föyü.pdf',
-      },
-    },
-  ]
+  // Teacher 9-A canonical showcase curriculum assignments
+  const teacherDefaults: SchoolAssignmentItem[] = MASTER_ASSIGNMENTS as unknown as SchoolAssignmentItem[]
 
   // Filter teacherDefaults to remove deleted ones
   const activeTeacherDefaults = teacherDefaults.filter(

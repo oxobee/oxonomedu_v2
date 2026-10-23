@@ -34,6 +34,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { signOut } from '@components/Contexts/AuthContext'
 import HeaderLiveClock from '@components/Common/HeaderLiveClock'
 import HeaderNotificationDropdown from '@components/Notifications/HeaderNotificationDropdown'
+import { startDemoAutoResetWatcher, resetAllDemoData } from '@/lib/demo/demoResetEngine'
 
 interface TeacherLayoutProps {
   children: React.ReactNode
@@ -55,7 +56,9 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
   })
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    const stopWatcher = startDemoAutoResetWatcher()
+
+    const syncTeacher = () => {
       try {
         const saved = localStorage.getItem('oxonom_teacher_profile')
         if (saved) {
@@ -74,6 +77,18 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           branch: 'Türk Dili ve Edebiyatı · Rehberlik',
         })
       }
+    }
+
+    syncTeacher()
+    window.addEventListener('oxonom_demo_reset', syncTeacher)
+    window.addEventListener('oxonom_teacher_profile_updated', syncTeacher)
+    window.addEventListener('storage', syncTeacher)
+
+    return () => {
+      stopWatcher()
+      window.removeEventListener('oxonom_demo_reset', syncTeacher)
+      window.removeEventListener('oxonom_teacher_profile_updated', syncTeacher)
+      window.removeEventListener('storage', syncTeacher)
     }
   }, [user])
 
@@ -285,6 +300,20 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           </div>
 
           <div className="flex items-center gap-2.5">
+            {/* Demo Reset Indicator & Trigger */}
+            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 select-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Demo Modu (30 dk Sıfırlama)</span>
+              <button
+                type="button"
+                onClick={() => resetAllDemoData({ force: true, notify: true })}
+                title="Demo verilerini şimdi sıfırla"
+                className="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold transition-all cursor-pointer"
+              >
+                Yenile
+              </button>
+            </div>
+
             {/* Live Clock minimal */}
             <HeaderLiveClock theme="oxonom" variant="desktop" />
 

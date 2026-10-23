@@ -20,6 +20,7 @@ import {
 import { useAuth } from '@components/Contexts/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
 import { getStoredPrincipalProfile, savePrincipalProfile } from '@/lib/principal/principalProfileStorage'
+import { isDemoResetDue, resetAllDemoData } from '@/lib/demo/demoResetEngine'
 
 type RoleType = 'principal' | 'teacher' | 'student' | 'superadmin'
 
@@ -91,6 +92,9 @@ export default function GlobalLoginClient() {
 
   useEffect(() => {
     try {
+      if (isDemoResetDue()) {
+        resetAllDemoData({ notify: false })
+      }
       const p = getStoredPrincipalProfile()
       if (p && p.name) {
         setPrincipalDisplayName(p.name)
@@ -258,7 +262,7 @@ export default function GlobalLoginClient() {
               className: '9-A',
               gradeLevel: '9. Sınıf',
               mentorTeacher: 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)',
-              schoolName: 'Necla Görer İlkokulu',
+              schoolName: 'Oxonom Maarif Koleji',
               gpa: currentGpa,
               classRank: currentRank,
               attendanceRate: 100,

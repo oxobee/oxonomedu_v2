@@ -51,30 +51,9 @@ export interface StudentNote {
   pageNumber?: number
 }
 
-const INITIAL_NOTES: StudentNote[] = [
-  {
-    id: 'note-1',
-    title: 'Divan Şiirinde Aruz Kalıpları ve İmale Kuralları',
-    course: 'Türk Dili ve Edebiyatı',
-    date: '11 Ekim 2026',
-    content:
-      'Fâilâtün fâilâtün fâilün kalıbı gazellerde sıkça kullanılır. Açık hece (nokta), kapalı hece (çizgi) ile gösterilir. İmale heceyi uzatma, zihaf ise kısaltmadır.',
-    bookId: 80,
-    bookTitle: '9. Sınıf Türk Dili ve Edebiyatı Ders Kitabı',
-    pageNumber: 42,
-  },
-  {
-    id: 'note-2',
-    title: 'İkinci Dereceden Denklemlerde Diskriminant (Delta)',
-    course: 'Matematik',
-    date: '09 Ekim 2026',
-    content:
-      'ax² + bx + c = 0 için Δ = b² - 4ac. Δ > 0 ise iki farklı reel kök vardır. Δ = 0 ise çakışık tek kök. Δ < 0 ise reel kök yoktur.',
-    bookId: 79,
-    bookTitle: '9. Sınıf Matematik Ders Kitabı',
-    pageNumber: 88,
-  },
-]
+import { MASTER_STUDENT_NOTES } from '@/lib/demo/demoMasterData'
+
+const INITIAL_NOTES: StudentNote[] = MASTER_STUDENT_NOTES as StudentNote[]
 
 export default function StudentPlannerView({ initialTab = 'all' }: StudentPlannerViewProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'calendar' | 'notes' | 'tasks' | 'board-notes'>(initialTab)

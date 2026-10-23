@@ -41,6 +41,7 @@ import HeaderLiveClock from '@components/Common/HeaderLiveClock'
 import HeaderNotificationDropdown from '@components/Notifications/HeaderNotificationDropdown'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import OxonomPlusModal from '@components/Student/modals/OxonomPlusModal'
+import { startDemoAutoResetWatcher, resetAllDemoData } from '@/lib/demo/demoResetEngine'
 
 // Real 3D Owl Mascot Icon matching user's uploaded corporate mascot
 export function OxoMascotIcon({ className = 'w-9 h-9' }: { className?: string }) {
@@ -82,17 +83,22 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
 
   // Load student profile synchronized with teacher records
   useEffect(() => {
+    const stopWatcher = startDemoAutoResetWatcher()
+
     const syncProfile = () => {
       setProfile(getSynchronizedStudentProfile())
     }
     syncProfile()
 
+    window.addEventListener('oxonom_demo_reset', syncProfile)
     window.addEventListener('oxonom_student_updated', syncProfile)
     window.addEventListener('oxonom_teacher_profile_updated', syncProfile)
     window.addEventListener('oxonom_attendance_updated', syncProfile)
     window.addEventListener('storage', syncProfile)
 
     return () => {
+      stopWatcher()
+      window.removeEventListener('oxonom_demo_reset', syncProfile)
       window.removeEventListener('oxonom_student_updated', syncProfile)
       window.removeEventListener('oxonom_teacher_profile_updated', syncProfile)
       window.removeEventListener('oxonom_attendance_updated', syncProfile)
@@ -410,6 +416,20 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
 
           {/* Right Status (Minimal Clock, Notification, Theme, Profile) */}
           <div className="flex items-center gap-2.5">
+            {/* Demo Reset Indicator & Trigger */}
+            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 select-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Demo Modu (30 dk Sıfırlama)</span>
+              <button
+                type="button"
+                onClick={() => resetAllDemoData({ force: true, notify: true })}
+                title="Demo verilerini şimdi sıfırla"
+                className="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold transition-all cursor-pointer"
+              >
+                Yenile
+              </button>
+            </div>
+
             <HeaderLiveClock theme="oxonom" variant="desktop" />
 
             {/* Notification Dropdown with Elastic Popup & Audio */}
