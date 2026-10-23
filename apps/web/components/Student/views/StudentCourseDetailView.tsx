@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -35,6 +35,12 @@ import {
   X,
   ChevronRight,
   Play,
+  PenTool,
+  MessageSquare,
+  Compass,
+  CheckSquare,
+  SlidersHorizontal,
+  BookmarkCheck,
 } from 'lucide-react'
 import {
   STUDENT_COURSES,
@@ -66,13 +72,99 @@ interface CustomCourseMaterial {
   target?: string
   dateAdded?: string
   description?: string
+  category?: string
 }
+
+interface CourseUnitDef {
+  id: string
+  unitNumber: number
+  title: string
+  description: string
+  learningPill: string
+  topicIds: string[]
+  suggestedBookPage?: number
+}
+
+// Dedicated Pedagogical Units for Turkish Course (1. Sınıf Türkçe)
+const TURKCE_UNITS: CourseUnitDef[] = [
+  {
+    id: 'turkce-u1',
+    unitNumber: 1,
+    title: '1. Ünite: Sesler Dünyası ve Çizgi Yolculuğu',
+    description: 'İlk okuma yazmaya hazırlık, doğru kalem tutuşu, el-göz koordinasyonu ve 1. ses grubu (A - N - E - T).',
+    learningPill: 'MEB Kazanım: T.1.1 (Dinleme & Ses Bilgisi)',
+    topicIds: ['t1', 't2', 't3'],
+    suggestedBookPage: 12,
+  },
+  {
+    id: 'turkce-u2',
+    unitNumber: 2,
+    title: '2. Ünite: Hece ve Kelime Fabrikası',
+    description: 'Seslerden heceler, hecelerden anlamlı sözcükler üretme, açık-kapalı hece mantığı ve görsel kartlar.',
+    learningPill: 'MEB Kazanım: T.1.2 (Heceleme & Söz Varlığı)',
+    topicIds: ['t4'],
+    suggestedBookPage: 48,
+  },
+  {
+    id: 'turkce-u3',
+    unitNumber: 3,
+    title: '3. Ünite: Cümle Bilgisi ve İmla Kuralları',
+    description: 'Anlamlı ve kurallı cümle kurma, büyük harfle başlama kuralı ve nokta (.) işareti kullanımı.',
+    learningPill: 'MEB Kazanım: T.1.3 (Yazma & Noktalama)',
+    topicIds: ['t5'],
+    suggestedBookPage: 76,
+  },
+  {
+    id: 'turkce-u4',
+    unitNumber: 4,
+    title: '4. Ünite: Anlama, Görsel Okuma ve Masallar',
+    description: 'Görselleri yorumlama, dinlediği masalı anlatma, serbest okuma metinleri ve sözcük dağarcığı geliştirme.',
+    learningPill: 'MEB Kazanım: T.1.4 (Görsel Okuma & Yorumlama)',
+    topicIds: ['t6'],
+    suggestedBookPage: 110,
+  },
+]
+
+// 4 Core Competency Pillars for Turkish Language
+const TURKCE_PILLARS = [
+  {
+    id: 'reading',
+    title: 'Okuma & Anlama',
+    desc: 'Ses tanıma, heceleme, ritmik okuma ve metin anlama',
+    icon: BookOpen,
+    badge: '312 MEB Kitabı Entegre',
+  },
+  {
+    id: 'writing',
+    title: 'Yazma & Dil Bilgisi',
+    desc: 'Çizgi çalışmaları, harf yönleri, büyük harf ve nokta',
+    icon: PenTool,
+    badge: 'Yazı Defteri & Föyler',
+  },
+  {
+    id: 'speaking',
+    title: 'Dinleme & Konuşma',
+    desc: 'Masal dinletileri, görsel yorumlama ve kendini ifade etme',
+    icon: MessageSquare,
+    badge: 'Etkileşimli İçerikler',
+  },
+  {
+    id: 'assessment',
+    title: 'Kazanım Değerlendirme',
+    desc: 'Haftalık MEB zümre soru kalıpları ve deneme testleri',
+    icon: Award,
+    badge: 'Anında Geri Bildirim',
+  },
+]
 
 export default function StudentCourseDetailView({ courseId }: StudentCourseDetailViewProps) {
   const [activeTab, setActiveTab] = useState<'topics' | 'materials' | 'assessments' | 'books' | 'quizzes' | 'notes'>('topics')
   const [courses, setCourses] = useState<StudentCourse[]>(STUDENT_COURSES)
   const [assessments, setAssessments] = useState<StudentAssessment[]>([])
   const [profile, setProfile] = useState<StudentProfile>(getSynchronizedStudentProfile())
+
+  // Unit filter for topics view
+  const [selectedUnitId, setSelectedUnitId] = useState<string>('all')
 
   // Reader state for MEB textbooks
   const [readingBook, setReadingBook] = useState<MebBookItem | null>(null)
@@ -205,6 +297,8 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
   }, [courseId])
 
   const course = courses.find((c) => c.id === courseId) || courses[0] || STUDENT_COURSES[0]
+  const isTurkceCourse = course.id === 'turkce' || course.name.toLowerCase().includes('türkçe')
+
   const courseExams = assessments.filter(
     (a) =>
       a.courseName.toLowerCase().includes(course.name.toLowerCase()) ||
@@ -235,7 +329,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
   })
 
   // Topics list combining standard and teacher-added custom topics
-  const allCourseTopics = React.useMemo(() => {
+  const allCourseTopics = useMemo(() => {
     const base = course.topics || []
     const custom = (customCourseTopics || []).map((ct: any, idx: number) => ({
       id: ct.id,
@@ -246,8 +340,8 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
     return [...base, ...custom]
   }, [course.topics, customCourseTopics])
 
-  // Effective Active Topic (teacher selected, or user selected for quiz, or first unfinished)
-  const effectiveActiveTopic = React.useMemo(() => {
+  // Effective Active Topic
+  const effectiveActiveTopic = useMemo(() => {
     if (selectedTopicForQuiz) return selectedTopicForQuiz
     if (activeTopicId) {
       const found = allCourseTopics.find((t) => t.id === activeTopicId)
@@ -257,10 +351,41 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
     return firstUnfinished || allCourseTopics[0] || { id: 'top-1', title: 'Temel Ders Kazanımları', week: 1 }
   }, [selectedTopicForQuiz, activeTopicId, allCourseTopics, completedTopicIds])
 
-  // Topics progress calculation based on synchronized topics
+  // Topics progress calculation
   const completedTopicsCount = allCourseTopics.filter((t) => completedTopicIds.includes(t.id)).length
   const totalTopicsCount = allCourseTopics.length
   const progressPercent = totalTopicsCount > 0 ? Math.round((completedTopicsCount / totalTopicsCount) * 100) : 0
+
+  // Defined Units
+  const definedUnits: CourseUnitDef[] = useMemo(() => {
+    if (isTurkceCourse) {
+      return TURKCE_UNITS
+    }
+
+    // Generic grouping for other courses
+    const chunkSize = 2
+    const generated: CourseUnitDef[] = []
+    for (let i = 0; i < allCourseTopics.length; i += chunkSize) {
+      const uNum = Math.floor(i / chunkSize) + 1
+      const slice = allCourseTopics.slice(i, i + chunkSize)
+      generated.push({
+        id: `gen-unit-${uNum}`,
+        unitNumber: uNum,
+        title: `${uNum}. Ünite: ${slice[0]?.title || 'Ders Kazanımları'}`,
+        description: `${course.name} müfredatı ${uNum}. ünite konu ve kazanımları.`,
+        learningPill: `Kazanım Grubu ${uNum}`,
+        topicIds: slice.map((t) => t.id),
+        suggestedBookPage: uNum * 25,
+      })
+    }
+    return generated
+  }, [isTurkceCourse, allCourseTopics, course.name])
+
+  // Filtered Units based on selectedUnitId
+  const displayedUnits = useMemo(() => {
+    if (selectedUnitId === 'all') return definedUnits
+    return definedUnits.filter((u) => u.id === selectedUnitId)
+  }, [definedUnits, selectedUnitId])
 
   // File Download Handler
   const handleDownload = (materialTitle: string) => {
@@ -333,19 +458,32 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
     syncAll()
   }
 
-  // Open book at specific page from note
+  // Open book at specific page
   const handleOpenBookAtPage = (bookId: number, pageNumber?: number) => {
     const foundBook = MEB_TEXTBOOKS_CATALOG.find((b) => b.id === bookId)
     if (foundBook) {
       setReaderInitialPage(pageNumber || 1)
       setReadingBook(foundBook)
+    } else if (visibleBooks.length > 0) {
+      setReaderInitialPage(pageNumber || 1)
+      setReadingBook(visibleBooks[0])
     } else {
-      toast.error('Kitap kataloğunda bulunamadı.')
+      toast.error('Kitap bulunamadı.')
+    }
+  }
+
+  // Open First Available Book
+  const handleOpenMainBook = (suggestedPage?: number) => {
+    if (visibleBooks.length > 0) {
+      setReaderInitialPage(suggestedPage || 1)
+      setReadingBook(visibleBooks[0])
+    } else {
+      setActiveTab('books')
     }
   }
 
   // Multi-type dynamic question generator based on active topic & MEB curriculum
-  const currentQuizQuestions = React.useMemo(() => {
+  const currentQuizQuestions = useMemo(() => {
     const topicTitle = effectiveActiveTopic.title || 'Temel Kazanım'
     const norm = course.name.toLowerCase()
 
@@ -465,134 +603,36 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
       ]
     }
 
-    if (norm.includes('hayat') || norm.includes('sosyal')) {
-      return [
-        {
-          id: 'q1',
-          type: 'single' as const,
-          typeLabel: 'Çoktan Seçmeli',
-          question: `"${topicTitle}" konusuna göre sınıfta söz alıp konuşmak istediğimizde ilk olarak ne yapmalıyız?`,
-          options: [
-            { key: 'A', text: 'Parmak kaldırıp öğretmenimizden söz istemeliyiz.' },
-            { key: 'B', text: 'Ayağa fırlayıp yüksek sesle konuşmalıyız.' },
-            { key: 'C', text: 'Arkadaşımızın sözünü kesmeliyiz.' },
-            { key: 'D', text: 'Sıraya vurarak dikkat çekmeliyiz.' },
-          ],
-          correct: 'A',
-          explanation: 'Sınıf içi nezaket kuralı olarak parmak kaldırılır.',
-        },
-        {
-          id: 'q2',
-          type: 'true_false' as const,
-          typeLabel: 'Doğru / Yanlış',
-          question: `Okulumuzdaki lavaboları, suyu ve lambaları tasarruflu kullanmak hepimizin sorumluluğudur.`,
-          options: [
-            { key: 'D', text: 'Doğru' },
-            { key: 'Y', text: 'Yanlış' },
-          ],
-          correct: 'D',
-          explanation: 'Tasarruf ve kaynak koruma yurttaşlık bilincidir.',
-        },
-        {
-          id: 'q3',
-          type: 'fill_in' as const,
-          typeLabel: 'Kavram Doldurma',
-          question: `Sabah okula geldiğimizde arkadaşlarımıza ve öğretmenimize ________ demeliyiz.`,
-          options: [
-            { key: 'A', text: 'Günaydın' },
-            { key: 'B', text: 'İyi geceler' },
-            { key: 'C', text: 'Görüşürüz' },
-          ],
-          correct: 'A',
-          explanation: 'Sabah selamlaşması saygı ve sevginin ifadesidir.',
-        },
-        {
-          id: 'q4',
-          type: 'concept' as const,
-          typeLabel: 'Davranış Kuralı',
-          question: `Teneffüste okul koridorunda hareket ederken hangisi en doğrudur?`,
-          options: [
-            { key: 'A', text: 'Sakin ve dikkatli adımlarla sağdan yürümek' },
-            { key: 'B', text: 'Koşarak diğer öğrencilere çarpmak' },
-            { key: 'C', text: 'Merdiven korkuluklarından kaymak' },
-            { key: 'D', text: 'Yüksek sesle bağırmak' },
-          ],
-          correct: 'A',
-          explanation: 'Okul güvenliği için koridorlarda koşulmaz.',
-        },
-      ]
-    }
-
-    // Default dynamic questions
     return [
       {
         id: 'q1',
         type: 'single' as const,
         typeLabel: 'Çoktan Seçmeli',
-        question: `"${topicTitle}" konusundaki temel bilgileri pekiştirmek için hangisi en etkilidir?`,
+        question: `"${topicTitle}" konusunda öğrendiklerimizi günlük hayatımızda nasıl uygularız?`,
         options: [
-          { key: 'A', text: 'Ders kitabını incelemek ve etkinlikleri dikkatle tamamlamak' },
-          { key: 'B', text: 'Konuyu hiç tekrar etmemek' },
-          { key: 'C', text: 'Ders materyallerini evde unutmak' },
-          { key: 'D', text: 'Öğretmenin uyarılarını dinlememek' },
+          { key: 'A', text: 'Öğrendiğimiz kurallara uyarak ve düzenli pratik yaparak' },
+          { key: 'B', text: 'Konuyu hemen unutup tekrar etmeyerek' },
+          { key: 'C', text: 'Sadece sınav günü hatırlamaya çalışarak' },
+          { key: 'D', text: 'Ders kitaplarını hiç açmayarak' },
         ],
         correct: 'A',
-        explanation: 'Düzenli tekrar ve çalışma başarıyı getirir.',
-      },
-      {
-        id: 'q2',
-        type: 'true_false' as const,
-        typeLabel: 'Doğru / Yanlış',
-        question: `"${topicTitle}" kazanımı bu haftanın temel müfredat hedefleri arasındadır.`,
-        options: [
-          { key: 'D', text: 'Doğru' },
-          { key: 'Y', text: 'Yanlış' },
-        ],
-        correct: 'D',
-        explanation: 'MEB Maarif Modeli çerçevesinde haftalık kazanımlar sıralıdır.',
-      },
-      {
-        id: 'q3',
-        type: 'fill_in' as const,
-        typeLabel: 'Kavram Doldurma',
-        question: `Başarılı bir öğrenci olmak için her gün derslerimizi düzenli olarak ________ etmeliyiz.`,
-        options: [
-          { key: 'A', text: 'Tekrar' },
-          { key: 'B', text: 'İhmal' },
-          { key: 'C', text: 'Ertesi güne terk' },
-        ],
-        correct: 'A',
-        explanation: 'Tekrar bilginin kalıcı olmasını sağlar.',
-      },
-      {
-        id: 'q4',
-        type: 'concept' as const,
-        typeLabel: 'Kazanım Analizi',
-        question: `Bu derste işlenen "${topicTitle}" konusunun temel amacı nedir?`,
-        options: [
-          { key: 'A', text: 'Öğrenilen bilgiyi ve beceriyi günlük hayatta uygulayabilmek' },
-          { key: 'B', text: 'Sadece sınavda puan alıp unutmak' },
-          { key: 'C', text: 'Ders saatini doldurmak' },
-          { key: 'D', text: 'Kitaptaki boşlukları rastgele doldurmak' },
-        ],
-        correct: 'A',
-        explanation: 'Eğitimin amacı edinilen bilgiyi yaşam becerisine dönüştürmektir.',
+        explanation: 'Düzenli tekrar ve uygulama bilginin kalıcılığını sağlar.',
       },
     ]
-  }, [course.name, effectiveActiveTopic])
+  }, [effectiveActiveTopic, course.name])
 
-  // Handle Complete Quiz & Save Results
+  // Handle Complete Quiz
   const handleCompleteQuiz = () => {
-    const total = currentQuizQuestions.length
+    let total = currentQuizQuestions.length
     let correct = 0
     let wrong = 0
     let unanswered = 0
 
     currentQuizQuestions.forEach((q) => {
-      const ans = quizAnswers[q.id]
-      if (!ans) {
+      const userAns = quizAnswers[q.id]
+      if (!userAns) {
         unanswered++
-      } else if (ans === q.correct) {
+      } else if (userAns === q.correct) {
         correct++
       } else {
         wrong++
@@ -635,32 +675,32 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
   })
 
   return (
-    <div className="p-4 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 lg:p-8 max-w-6xl mx-auto space-y-6 font-jakarta">
       {/* ── TOP BACK NAVIGATION ── */}
       <Link
         href="/student/courses"
-        className="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-bold text-[#514458] hover:text-[#4B075F] dark:text-[#D2C5D8] dark:hover:text-[#F17AE6] transition-colors"
       >
         <ArrowLeft size={16} />
         <span>Tüm Derslerime Geri Dön</span>
       </Link>
 
-      {/* ── COURSE HERO BANNER (THEME MATCHED & RESPONSIVE) ── */}
-      <div className="p-6 lg:p-8 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-5 relative overflow-hidden">
-        {/* Subtle decorative background gradient accent */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-cyan-500/10 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* ── BRAND THEMED COURSE HERO BANNER ── */}
+      <div className="p-6 lg:p-8 rounded-[30px] bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-sm space-y-5 relative overflow-hidden">
+        {/* Subtle decorative ambient radial glow */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-[#8D49A6]/15 via-[#D914C8]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 relative z-10">
-          <div className="space-y-2.5 max-w-2xl">
+          <div className="space-y-3 max-w-2xl">
             {/* Badges strip */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-black px-2.5 py-1 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200/50 dark:border-cyan-800/50">
+              <span className="text-[10px] font-black px-2.5 py-1 rounded-xl bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] border border-[#D914C8]/30">
                 {course.code}
               </span>
-              <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/40 dark:border-indigo-800/40">
+              <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-xl bg-[#F0D8FA] dark:bg-[#2D1B36] text-[#4B075F] dark:text-[#D2C5D8] border border-[#8D49A6]/30">
                 {profile.schoolName || 'Oxonom Okulları'}
               </span>
-              <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1">
+              <span className="text-[11px] font-bold text-[#716779] dark:text-[#B5A5BD] flex items-center gap-1">
                 <span>{profile.className} Şubesi</span>
                 <span>•</span>
                 <span>{profile.gradeLevel}</span>
@@ -668,80 +708,121 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
             </div>
 
             {/* Course Title */}
-            <h1 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-              {course.name}
+            <h1 className="text-2xl lg:text-3xl font-black text-[#241329] dark:text-white tracking-tight flex items-center gap-3">
+              <span>{course.name}</span>
+              {isTurkceCourse && (
+                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-brand-gradient text-white shadow-xs">
+                  MEB Maarif Modeli
+                </span>
+              )}
             </h1>
 
             {/* Course Description */}
-            <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+            <p className="text-xs lg:text-sm text-[#514458] dark:text-[#D2C5D8] leading-relaxed font-medium">
               {course.description}
             </p>
 
             {/* Progress Bar */}
-            <div className="pt-2 max-w-md space-y-1.5">
+            <div className="pt-1 max-w-md space-y-1.5">
               <div className="flex items-center justify-between text-[11px] font-bold">
-                <span className="text-gray-500 dark:text-gray-400">Dönem Kazanım İlerlemesi</span>
-                <span className="text-cyan-600 dark:text-cyan-400">
+                <span className="text-[#716779] dark:text-[#B5A5BD]">Dönem Kazanım İlerlemesi</span>
+                <span className="text-[#8D49A6] dark:text-[#F17AE6] font-black">
                   %{progressPercent} ({completedTopicsCount}/{totalTopicsCount} Konu)
                 </span>
               </div>
-              <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+              <div className="h-2.5 w-full rounded-full bg-[#F7F0FA] dark:bg-[#251830] overflow-hidden border border-[#E8DFEB] dark:border-[#3A2845]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-indigo-600 transition-all duration-500"
+                  className="h-full rounded-full bg-brand-gradient transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
             </div>
+
+            {/* Quick Action Shortcuts */}
+            <div className="pt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleOpenMainBook()}
+                className="px-3.5 py-1.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white text-xs font-black shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <BookOpen size={14} />
+                <span>Ders Kitabını Aç (Flipbook)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('quizzes')
+                  setQuizSubTab('current')
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-[#F7F0FA] hover:bg-[#F0D8FA] dark:bg-[#251830] dark:hover:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] text-xs font-bold transition-all border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-1.5 cursor-pointer"
+              >
+                <Sparkles size={14} />
+                <span>Kazanım Testi Çöz</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('notes')
+                  setShowNoteForm(true)
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-[#FCF9FD] dark:bg-[#1F1429] hover:bg-[#F7F0FA] text-[#514458] dark:text-[#D2C5D8] text-xs font-bold transition-all border border-[#E8DFEB] dark:border-[#3A2845] flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus size={14} />
+                <span>Not Ekle</span>
+              </button>
+            </div>
           </div>
 
           {/* Teacher & Schedule Card */}
-          <div className="p-4 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/60 dark:border-gray-800/60 space-y-2.5 shrink-0 min-w-[240px]">
+          <div className="p-4.5 rounded-2xl bg-[#FCF9FD] dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#3A2845] space-y-3 shrink-0 min-w-[240px]">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 text-white font-black text-base flex items-center justify-center shrink-0 shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-brand-gradient text-white font-black text-base flex items-center justify-center shrink-0 shadow-sm">
                 {course.teacherName.slice(0, 1)}
               </div>
               <div>
-                <div className="text-xs font-black text-gray-900 dark:text-white">
+                <div className="text-xs font-black text-[#241329] dark:text-white">
                   {course.teacherName}
                 </div>
-                <div className="text-[10px] text-gray-400 font-semibold">{course.teacherBranch}</div>
+                <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] font-semibold">{course.teacherBranch}</div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-gray-200/60 dark:border-gray-800/60 space-y-1 text-[11px]">
-              <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-                <Clock size={13} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
-                <span className="font-bold">Haftada {course.weeklyHours} Saat</span>
+            <div className="pt-2 border-t border-[#E8DFEB] dark:border-[#3A2845] space-y-1.5 text-[11px]">
+              <div className="flex items-center gap-2 text-[#514458] dark:text-[#D2C5D8]">
+                <Clock size={13} className="text-[#8D49A6] dark:text-[#F17AE6] shrink-0" />
+                <span className="font-bold">Haftada {course.weeklyHours} Ders Saati</span>
               </div>
-              <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-                <MapPin size={13} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <div className="flex items-center gap-2 text-[#514458] dark:text-[#D2C5D8]">
+                <MapPin size={13} className="text-[#4B075F] dark:text-[#D2C5D8] shrink-0" />
                 <span>{course.roomType}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── 6 CATEGORICAL TABS SWITCHER ── */}
-        <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-wrap gap-2">
+        {/* ── 6 BRAND CATEGORICAL TABS ── */}
+        <div className="pt-4 border-t border-[#E8DFEB] dark:border-[#2D1B36] flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setActiveTab('topics')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
               activeTab === 'topics'
-                ? 'bg-cyan-600 text-white shadow-xs'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-brand-gradient text-white shadow-xs'
+                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
             }`}
           >
-            Müfredat Konuları ({course.topics.length})
+            Müfredat & Üniteler ({allCourseTopics.length})
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('materials')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
               activeTab === 'materials'
-                ? 'bg-cyan-600 text-white shadow-xs'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-brand-gradient text-white shadow-xs'
+                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
             }`}
           >
             Ders Materyalleri ({courseMaterials.length})
@@ -749,23 +830,11 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
 
           <button
             type="button"
-            onClick={() => setActiveTab('assessments')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'assessments'
-                ? 'bg-cyan-600 text-white shadow-xs'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            Sınavlar & Sonuçlar ({courseExams.length})
-          </button>
-
-          <button
-            type="button"
             onClick={() => setActiveTab('books')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
               activeTab === 'books'
-                ? 'bg-cyan-600 text-white shadow-xs'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-brand-gradient text-white shadow-xs'
+                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
             }`}
           >
             Müfredat Kitapları ({visibleBooks.length})
@@ -774,10 +843,10 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
           <button
             type="button"
             onClick={() => setActiveTab('quizzes')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
               activeTab === 'quizzes'
-                ? 'bg-cyan-600 text-white shadow-xs'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-brand-gradient text-white shadow-xs'
+                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
             }`}
           >
             Testler & Etkinlikler
@@ -785,11 +854,23 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
 
           <button
             type="button"
+            onClick={() => setActiveTab('assessments')}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              activeTab === 'assessments'
+                ? 'bg-brand-gradient text-white shadow-xs'
+                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
+            }`}
+          >
+            Yazılı Sınavlar ({courseExams.length})
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('notes')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
               activeTab === 'notes'
-                ? 'bg-cyan-600 text-white shadow-xs'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-brand-gradient text-white shadow-xs'
+                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
             }`}
           >
             Notlarım ({courseNotes.length})
@@ -797,112 +878,220 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
         </div>
       </div>
 
-      {/* ── TAB 1: MÜFREDAT KONULARI ── */}
+      {/* ── TÜRKÇE DERSİ İÇİN 4 TEMEL DİL ALANI KATEGORİZASYON KARTLARI ── */}
+      {isTurkceCourse && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {TURKCE_PILLARS.map((p) => {
+            const Icon = p.icon
+            return (
+              <div
+                key={p.id}
+                className="p-4 rounded-2xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] space-y-2 shadow-xs transition-all hover:border-[#8D49A6]/40"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-8 h-8 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] flex items-center justify-center shrink-0">
+                    <Icon size={16} />
+                  </div>
+                  <span className="text-[9.5px] font-black px-2 py-0.5 rounded-full bg-[#FCF9FD] dark:bg-[#211729] text-[#8D49A6] dark:text-[#D2C5D8] border border-[#E8DFEB] dark:border-[#3A2845]">
+                    {p.badge}
+                  </span>
+                </div>
+
+                <div className="text-xs font-black text-[#241329] dark:text-white">
+                  {p.title}
+                </div>
+                <div className="text-[11px] text-[#514458] dark:text-[#D2C5D8] leading-tight">
+                  {p.desc}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── TAB 1: MÜFREDAT & KATEGORİZE ÜNİTELER ── */}
       {activeTab === 'topics' && (
-        <div className="p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
-                <Layers size={18} className="text-cyan-600 dark:text-cyan-400" />
-                Haftalık Ders Kazanımları ve Konu İlerlemesi
-              </h2>
-              <p className="text-xs text-gray-400 mt-0.5">
-                Öğretmeninizin belirlediği aktif konu ve tamamlanan üniteler renklerle belirtilmiştir.
-              </p>
+        <div className="space-y-5">
+          {/* Unit Filter Strip */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal size={15} className="text-[#8D49A6] dark:text-[#F17AE6]" />
+              <span className="text-xs font-black text-[#241329] dark:text-white uppercase tracking-wider">
+                Ünite Filtreleme:
+              </span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 border border-cyan-200/60 dark:border-cyan-800/60 self-start sm:self-auto">
-              <span>{completedTopicsCount} / {totalTopicsCount} Tamamlandı</span>
-              <span>(%{progressPercent})</span>
+
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSelectedUnitId('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  selectedUnitId === 'all'
+                    ? 'bg-brand-gradient text-white shadow-xs'
+                    : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] border border-[#E8DFEB] dark:border-[#3A2845]'
+                }`}
+              >
+                Tüm Üniteler ({definedUnits.length})
+              </button>
+
+              {definedUnits.map((u) => (
+                <button
+                  key={u.id}
+                  type="button"
+                  onClick={() => setSelectedUnitId(u.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    selectedUnitId === u.id
+                      ? 'bg-brand-gradient text-white shadow-xs'
+                      : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] border border-[#E8DFEB] dark:border-[#3A2845]'
+                  }`}
+                >
+                  {u.unitNumber}. Ünite
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Color legend guide */}
-          <div className="flex flex-wrap items-center gap-2.5 pt-2 pb-1 text-[11px] font-semibold text-gray-500 border-b border-gray-100 dark:border-gray-800/80">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span>Geçilen Konular</span>
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-pulse" />
-              <span>En Son İşlenen (Aktif)</span>
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-              <span>Gelecek Konular</span>
-            </span>
-          </div>
-
-          <div className="space-y-3 pt-1">
-            {allCourseTopics.map((topic, index) => {
-              const isCompleted = completedTopicIds.includes(topic.id)
-              const isActive =
-                topic.id === activeTopicId ||
-                (!isCompleted && allCourseTopics.findIndex((t) => !completedTopicIds.includes(t.id)) === index)
-              const isUpcoming = !isCompleted && !isActive
-
-              let containerStyle = ''
-              let badgeStyle = ''
-              let badgeText = ''
-              let iconNode = null
-
-              if (isCompleted) {
-                containerStyle = 'bg-emerald-500/5 dark:bg-emerald-950/20 border-emerald-500/30'
-                badgeStyle = 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20'
-                badgeText = '✓ Geçilen / Tamamlandı'
-                iconNode = <CheckCircle2 size={19} className="text-emerald-500 shrink-0" />
-              } else if (isActive) {
-                containerStyle =
-                  'bg-cyan-500/10 dark:bg-cyan-950/30 border-cyan-500/60 ring-2 ring-cyan-500/30 shadow-xs'
-                badgeStyle = 'bg-cyan-600 text-white shadow-xs'
-                badgeText = '🎯 En Son İşlenen Konu'
-                iconNode = <Sparkles size={19} className="text-cyan-600 dark:text-cyan-400 shrink-0 animate-pulse" />
-              } else {
-                containerStyle =
-                  'bg-gray-50/70 dark:bg-[#131C31]/70 border-gray-200/60 dark:border-gray-800/60 opacity-80'
-                badgeStyle = 'bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
-                badgeText = 'Sıradaki Konu'
-                iconNode = <Circle size={19} className="text-gray-400 shrink-0" />
-              }
+          {/* Categorized Units Listing */}
+          <div className="space-y-5">
+            {displayedUnits.map((unit) => {
+              const unitTopics = allCourseTopics.filter((t) => unit.topicIds.includes(t.id))
+              const unitCompletedCount = unitTopics.filter((t) => completedTopicIds.includes(t.id)).length
+              const unitTotalCount = unitTopics.length
+              const unitPercent = unitTotalCount > 0 ? Math.round((unitCompletedCount / unitTotalCount) * 100) : 0
 
               return (
                 <div
-                  key={topic.id}
-                  className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${containerStyle}`}
+                  key={unit.id}
+                  className="rounded-[26px] bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-xs p-5 sm:p-6 space-y-4"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {iconNode}
-                    <div className="min-w-0">
+                  {/* Unit Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8DFEB] dark:border-[#2D1B36]">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-gray-900 dark:text-white leading-tight">
-                          {topic.title}
+                        <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#4B075F] to-[#8D49A6] text-white font-black text-xs flex items-center justify-center shrink-0">
+                          {unit.unitNumber}
                         </span>
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${badgeStyle}`}>
-                          {badgeText}
+                        <h2 className="text-base font-black text-[#241329] dark:text-white">
+                          {unit.title}
+                        </h2>
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6]">
+                          {unit.learningPill}
                         </span>
                       </div>
-                      <div className="text-[10px] text-gray-400 mt-0.5">
-                        {topic.week ? `${topic.week}. Hafta Kazanımı · ` : ''}MEB Türkiye Yüzyılı Maarif Modeli
-                      </div>
+                      <p className="text-xs text-[#514458] dark:text-[#D2C5D8]">
+                        {unit.description}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                      <span className="text-xs font-bold text-[#16805D] dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-xl border border-emerald-500/20">
+                        %{unitPercent} Tamamlandı ({unitCompletedCount}/{unitTotalCount})
+                      </span>
+
+                      {unit.suggestedBookPage && visibleBooks.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenMainBook(unit.suggestedBookPage)}
+                          className="px-3 py-1 rounded-xl bg-[#F0D8FA] hover:bg-[#E2B9F4] dark:bg-[#2D1B36] text-[#4B075F] dark:text-[#F17AE6] text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+                        >
+                          <BookOpen size={13} />
+                          <span>s. {unit.suggestedBookPage}</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedTopicForQuiz(topic)
-                        setActiveTab('quizzes')
-                        setQuizSubTab('current')
-                        setQuizSubmitted(false)
-                        setQuizAnswers({})
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-                    >
-                      <Sparkles size={13} />
-                      <span>Test Yap</span>
-                    </button>
+                  {/* Topics in this Unit */}
+                  <div className="space-y-2.5">
+                    {unitTopics.length === 0 ? (
+                      <div className="text-xs text-[#716779] dark:text-[#B5A5BD] py-2">
+                        Bu ünite için henüz tanımlı bir konu bulunmamaktadır.
+                      </div>
+                    ) : (
+                      unitTopics.map((topic, index) => {
+                        const isCompleted = completedTopicIds.includes(topic.id)
+                        const isActive =
+                          topic.id === activeTopicId ||
+                          (!isCompleted && allCourseTopics.findIndex((t) => !completedTopicIds.includes(t.id)) === index)
+
+                        let containerStyle = ''
+                        let badgeStyle = ''
+                        let badgeText = ''
+                        let iconNode = null
+
+                        if (isCompleted) {
+                          containerStyle = 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/30'
+                          badgeStyle = 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20'
+                          badgeText = '✓ Tamamlandı'
+                          iconNode = <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        } else if (isActive) {
+                          containerStyle =
+                            'bg-[#FCE8FA]/60 dark:bg-[#2A1633] border-[#D914C8]/50 ring-1 ring-[#D914C8]/30 shadow-xs'
+                          badgeStyle = 'bg-brand-gradient text-white shadow-xs'
+                          badgeText = '🎯 En Son İşlenen Konu'
+                          iconNode = <Sparkles size={18} className="text-[#D914C8] dark:text-[#F17AE6] shrink-0" />
+                        } else {
+                          containerStyle =
+                            'bg-[#FCF9FD] dark:bg-[#211729]/70 border-[#E8DFEB] dark:border-[#3A2845] opacity-85'
+                          badgeStyle = 'bg-[#F0D8FA]/50 dark:bg-[#2D1B36] text-[#716779] dark:text-[#B5A5BD]'
+                          badgeText = 'Sıradaki Konu'
+                          iconNode = <Circle size={18} className="text-[#A998B3] shrink-0" />
+                        }
+
+                        return (
+                          <div
+                            key={topic.id}
+                            className={`p-3.5 sm:p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${containerStyle}`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              {iconNode}
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-xs font-bold text-[#241329] dark:text-white leading-tight">
+                                    {topic.title}
+                                  </span>
+                                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${badgeStyle}`}>
+                                    {badgeText}
+                                  </span>
+                                </div>
+                                <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] mt-0.5">
+                                  {topic.week ? `${topic.week}. Hafta Kazanımı · ` : ''}MEB Maarif Modeli Uyumlu
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                              {visibleBooks.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenMainBook(unit.suggestedBookPage)}
+                                  className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] text-[#514458] dark:text-[#D2C5D8] hover:text-[#4B075F] text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                                  title="Kitapta Konuyu Aç"
+                                >
+                                  <BookOpen size={13} />
+                                  <span>Kitapta Aç</span>
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedTopicForQuiz(topic)
+                                  setActiveTab('quizzes')
+                                  setQuizSubTab('current')
+                                  setQuizSubmitted(false)
+                                  setQuizAnswers({})
+                                }}
+                                className="px-3.5 py-1.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-extrabold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                              >
+                                <Sparkles size={13} />
+                                <span>Test Yap</span>
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })
+                    )}
                   </div>
                 </div>
               )
@@ -911,7 +1100,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
         </div>
       )}
 
-      {/* ── TAB 2: DERS MATERYALLERİ & DRAG-AND-DROP DOSYA SİSTEMİ ── */}
+      {/* ── TAB 2: DERS MATERYALLERİ & ÇALIŞMA DOSYALARI ── */}
       {activeTab === 'materials' && (
         <div className="space-y-6">
           {/* Interactive Drag & Drop Upload Zone */}
@@ -927,10 +1116,10 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
               handleFileUpload(e.dataTransfer.files)
             }}
             onClick={() => fileInputRef.current?.click()}
-            className={`p-6 rounded-3xl border-2 border-dashed transition-all text-center cursor-pointer flex flex-col items-center justify-center gap-2 ${
+            className={`p-6 rounded-[28px] border-2 border-dashed transition-all text-center cursor-pointer flex flex-col items-center justify-center gap-2 ${
               isDragging
-                ? 'border-cyan-500 bg-cyan-500/10'
-                : 'border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-[#131C31]/50 hover:border-cyan-500/60'
+                ? 'border-[#D914C8] bg-[#FCE8FA]/40 dark:bg-[#350444]/30'
+                : 'border-[#E8DFEB] dark:border-[#3A2845] bg-[#FCF9FD] dark:bg-[#1A1122] hover:border-[#8D49A6]'
             }`}
           >
             <input
@@ -939,34 +1128,34 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
               className="hidden"
               onChange={(e) => handleFileUpload(e.target.files)}
             />
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] flex items-center justify-center">
               <Upload size={22} />
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-900 dark:text-white">
+              <p className="text-xs font-bold text-[#241329] dark:text-white">
                 Çalışma veya Ödev Dosyası Yükle
               </p>
-              <p className="text-[11px] text-gray-400 mt-0.5">
+              <p className="text-[11px] text-[#716779] dark:text-[#B5A5BD] mt-0.5">
                 Dosyaları buraya sürükleyin veya seçmek için tıklayın (PDF, Word, Video)
               </p>
             </div>
           </div>
 
-          {/* Filing System Filter Chips */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4">
+          {/* Categorized Filter Chips */}
+          <div className="p-6 rounded-[28px] bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <h2 className="text-base font-extrabold text-gray-900 dark:text-white">
+              <h2 className="text-base font-black text-[#241329] dark:text-white">
                 Ders Dosyaları & Paylaşılan Kaynaklar
               </h2>
 
-              <div className="flex gap-1.5 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shrink-0">
+              <div className="flex gap-1.5 bg-[#FCF9FD] dark:bg-[#211729] p-1 rounded-xl shrink-0 border border-[#E8DFEB] dark:border-[#3A2845]">
                 <button
                   type="button"
                   onClick={() => setMaterialFilter('all')}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+                  className={`px-3 py-1 rounded-lg text-[11px] font-black transition-colors cursor-pointer ${
                     materialFilter === 'all'
-                      ? 'bg-white dark:bg-[#0E1526] text-gray-900 dark:text-white shadow-xs'
-                      : 'text-gray-500'
+                      ? 'bg-brand-gradient text-white shadow-xs'
+                      : 'text-[#716779] dark:text-[#B5A5BD]'
                   }`}
                 >
                   Tümü ({courseMaterials.length})
@@ -974,10 +1163,10 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                 <button
                   type="button"
                   onClick={() => setMaterialFilter('pdf')}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+                  className={`px-3 py-1 rounded-lg text-[11px] font-black transition-colors cursor-pointer ${
                     materialFilter === 'pdf'
-                      ? 'bg-white dark:bg-[#0E1526] text-gray-900 dark:text-white shadow-xs'
-                      : 'text-gray-500'
+                      ? 'bg-brand-gradient text-white shadow-xs'
+                      : 'text-[#716779] dark:text-[#B5A5BD]'
                   }`}
                 >
                   PDF Föyleri
@@ -985,37 +1174,48 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                 <button
                   type="button"
                   onClick={() => setMaterialFilter('doc')}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+                  className={`px-3 py-1 rounded-lg text-[11px] font-black transition-colors cursor-pointer ${
                     materialFilter === 'doc'
-                      ? 'bg-white dark:bg-[#0E1526] text-gray-900 dark:text-white shadow-xs'
-                      : 'text-gray-500'
+                      ? 'bg-brand-gradient text-white shadow-xs'
+                      : 'text-[#716779] dark:text-[#B5A5BD]'
                   }`}
                 >
                   Çalışma Kağıtları
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMaterialFilter('video')}
+                  className={`px-3 py-1 rounded-lg text-[11px] font-black transition-colors cursor-pointer ${
+                    materialFilter === 'video'
+                      ? 'bg-brand-gradient text-white shadow-xs'
+                      : 'text-[#716779] dark:text-[#B5A5BD]'
+                  }`}
+                >
+                  Videolar
                 </button>
               </div>
             </div>
 
             <div className="space-y-2.5">
               {filteredMaterials.length === 0 ? (
-                <div className="p-8 text-center text-xs text-gray-400">
+                <div className="p-8 text-center text-xs text-[#716779] dark:text-[#B5A5BD]">
                   Bu filtreye uygun ders materyali bulunamadı.
                 </div>
               ) : (
                 filteredMaterials.map((mat) => (
                   <div
                     key={mat.id}
-                    className="p-4 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/60 dark:border-gray-800/60 flex items-center justify-between gap-3"
+                    className="p-4 rounded-2xl bg-[#FCF9FD] dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#3A2845] flex items-center justify-between gap-3"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F17AE6] flex items-center justify-center shrink-0">
                         {mat.type === 'video' ? <Video size={18} /> : <FileText size={18} />}
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                        <div className="text-xs font-bold text-[#241329] dark:text-white truncate">
                           {mat.title}
                         </div>
-                        <div className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-2">
+                        <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] mt-0.5 flex items-center gap-2">
                           <span>{mat.size}</span>
                           {mat.dateAdded && (
                             <>
@@ -1030,7 +1230,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                     <button
                       type="button"
                       onClick={() => handleDownload(mat.title)}
-                      className="px-3 py-1.5 rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-cyan-600 flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                      className="px-3.5 py-1.5 rounded-xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] text-xs font-bold text-[#514458] dark:text-[#D2C5D8] hover:text-[#4B075F] dark:hover:text-[#F17AE6] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                     >
                       <Download size={14} />
                       <span>İndir</span>
@@ -1043,145 +1243,72 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
         </div>
       )}
 
-      {/* ── TAB 3: SINAVLAR VE NOTLAR ── */}
-      {activeTab === 'assessments' && (
-        <div className="p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-gray-900 dark:text-white">
-              {course.name} Sınavları, Değerlendirmeleri ve Öğretmen Notları
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            {courseExams.length === 0 ? (
-              <div className="p-8 text-center text-xs text-gray-400">
-                Bu ders için planlanan veya girilen sınav kaydı bulunmamaktadır.
-              </div>
-            ) : (
-              courseExams.map((exam) => (
-                <div
-                  key={exam.id}
-                  className="p-5 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/60 dark:border-gray-800/60 flex flex-col md:flex-row md:items-center justify-between gap-4"
-                >
-                  <div className="space-y-1.5 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
-                        {exam.date}
-                      </span>
-                      <span className="text-xs font-bold text-gray-900 dark:text-white">
-                        {exam.title}
-                      </span>
-                      <span className="text-[10px] text-gray-400">
-                        ({exam.examTypeLabel || 'Değerlendirme'})
-                      </span>
-                    </div>
-
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-3">
-                      <span>Süre: {exam.durationMinutes} Dk</span>
-                      <span>•</span>
-                      <span>Yer: {exam.location}</span>
-                      <span>•</span>
-                      <span>Öğretmen: {exam.teacherName || course.teacherName}</span>
-                    </div>
-
-                    {exam.teacherFeedback && (
-                      <div className="p-3 rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200/60 dark:border-gray-800/60 mt-2">
-                        <p className="text-[11px] text-gray-700 dark:text-gray-300 italic">
-                          "{exam.teacherFeedback}"
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    {exam.isPublished && exam.score !== undefined ? (
-                      <div className="space-y-1">
-                        <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">
-                          {exam.score} / {exam.maxScore}
-                        </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600">
-                          Değerlendirildi
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-xs font-bold text-amber-600 dark:text-amber-400 px-3 py-1 rounded-xl bg-amber-500/10">
-                        Yaklaşan Sınav
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── TAB 4: MÜFREDAT KİTAPLARI (PDF OKUYUCU ENTEGRASYONU) ── */}
+      {/* ── TAB 3: MÜFREDAT KİTAPLARI (MEB FLIPBOOK READER ENTEGRASYONU) ── */}
       {activeTab === 'books' && (
         <div className="space-y-4">
-          <div className="p-4 rounded-2xl bg-cyan-50/60 dark:bg-cyan-950/20 border border-cyan-200/60 dark:border-cyan-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4.5 rounded-2xl bg-[#FCE8FA]/60 dark:bg-[#211729] border border-[#D914C8]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-brand-gradient text-white flex items-center justify-center shrink-0 shadow-xs">
                 <BookOpen size={20} />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-gray-900 dark:text-white">
-                  MEB Resmi Ders Kitapları & Öğretim Materyalleri
+                <h3 className="text-xs font-black text-[#241329] dark:text-white">
+                  MEB Resmi Ders Kitapları & Etkileşimli Flipbook
                 </h3>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                  Öğretmeniniz veya okul idaresi tarafından erişime açılan resmî MEB ders kitapları listelenmektedir.
+                <p className="text-[11px] text-[#514458] dark:text-[#D2C5D8]">
+                  Öğretmeniniz ve okul idaresi tarafından onaylanan resmî MEB ders kitapları listelenmektedir.
                 </p>
               </div>
             </div>
 
-            <span className="text-xs font-bold text-cyan-700 dark:text-cyan-300 shrink-0">
+            <span className="text-xs font-black text-[#8D49A6] dark:text-[#F17AE6] shrink-0">
               {visibleBooks.length} Kitap Mevcut
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {visibleBooks.length === 0 ? (
-              <div className="col-span-full p-8 text-center text-xs text-gray-400 bg-white dark:bg-[#0E1526] rounded-3xl border border-gray-200 dark:border-gray-800">
-                Bu ders için öğretmeniniz tarafından henüz erişime açılmış bir kitap bulunmamaktadır.
+              <div className="col-span-full p-8 text-center text-xs text-[#716779] dark:text-[#B5A5BD] bg-white dark:bg-[#1A1122] rounded-3xl border border-[#E8DFEB] dark:border-[#3A2845]">
+                Bu ders için henüz erişime açılmış bir ders kitabı bulunmamaktadır.
               </div>
             ) : (
               visibleBooks.map((book) => (
                 <div
                   key={book.id}
-                  className="p-4 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs flex flex-col justify-between gap-4 hover:border-cyan-500/50 transition-colors"
+                  className="p-4.5 rounded-[26px] bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-xs flex flex-col justify-between gap-4 hover:border-[#8D49A6]/50 transition-colors"
                 >
-                  <div className="flex gap-3">
+                  <div className="flex gap-3.5">
                     <img
                       src={book.imageUrl}
                       alt={book.title}
-                      className="w-20 h-28 object-cover rounded-xl shadow-xs shrink-0 bg-gray-100 dark:bg-gray-800"
+                      className="w-20 h-28 object-cover rounded-xl shadow-xs shrink-0 bg-gray-100 dark:bg-gray-800 border border-[#E8DFEB] dark:border-[#3A2845]"
                       onError={(e) => {
                         ;(e.target as any).src =
                           'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80'
                       }}
                     />
                     <div className="min-w-0 space-y-1">
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400">
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6]">
                         {book.bookType} · {book.gradeLevel}. Sınıf
                       </span>
-                      <h4 className="text-xs font-extrabold text-gray-900 dark:text-white leading-tight line-clamp-2">
+                      <h4 className="text-xs font-black text-[#241329] dark:text-white leading-tight line-clamp-2">
                         {book.title}
                       </h4>
-                      <p className="text-[10px] text-gray-400 line-clamp-1">{book.publisher}</p>
-                      <p className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                      <p className="text-[10px] text-[#716779] dark:text-[#B5A5BD] line-clamp-1">{book.publisher}</p>
+                      <p className="text-[9.5px] text-[#16805D] dark:text-emerald-400 font-bold">
                         {book.curriculumModel}
                       </p>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-[#E8DFEB] dark:border-[#2D1B36] flex items-center justify-between gap-2">
                     <button
                       type="button"
                       onClick={() => {
                         setReaderInitialPage(1)
                         setReadingBook(book)
                       }}
-                      className="w-full h-9 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      className="w-full h-9 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                       <BookOpen size={14} />
                       <span>Kitabı Aç & Oku</span>
@@ -1194,11 +1321,11 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
         </div>
       )}
 
-      {/* ── TAB 5: TESTLER & ETKİNLİKLER ── */}
+      {/* ── TAB 4: TESTLER & ETKİNLİKLER ── */}
       {activeTab === 'quizzes' && (
         <div className="space-y-6">
-          {/* Hero Banner: Auto-generated quiz prompt based on last active topic */}
-          <div className="p-5 lg:p-6 rounded-3xl bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-md relative overflow-hidden">
+          {/* Hero Banner */}
+          <div className="p-6 rounded-[28px] bg-brand-gradient text-white shadow-md relative overflow-hidden">
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1.5 max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-black tracking-wide">
@@ -1208,8 +1335,8 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                 <h3 className="text-lg lg:text-xl font-black tracking-tight">
                   Bu derste en son "{effectiveActiveTopic.title}" konusunu işlediniz.
                 </h3>
-                <p className="text-xs text-white/90 leading-relaxed">
-                  Aşağıda konu ile ilgili MEB Türkiye Yüzyılı Maarif Modeli'ne uygun denemeler ve çok yönlü soruları çözerek kendinizi test edebilirsiniz.
+                <p className="text-xs text-white/90 leading-relaxed font-medium">
+                  Aşağıda konu ile ilgili MEB Maarif Modeli'ne uygun denemeler ve çok yönlü soruları çözerek kendinizi test edebilirsiniz.
                 </p>
               </div>
 
@@ -1221,7 +1348,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                     setQuizSubmitted(false)
                     setShowResultModal(false)
                   }}
-                  className="px-4 py-2 rounded-xl bg-white text-cyan-700 hover:bg-cyan-50 font-black text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-white text-[#4B075F] hover:bg-white/90 font-black text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
                 >
                   <RefreshCw size={14} />
                   <span>Testi Sıfırla</span>
@@ -1231,14 +1358,14 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
           </div>
 
           {/* Subtabs: Günlük Test vs Geçmiş Testler */}
-          <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-2">
+          <div className="flex items-center gap-2 border-b border-[#E8DFEB] dark:border-[#2D1B36] pb-2">
             <button
               type="button"
               onClick={() => setQuizSubTab('current')}
               className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
                 quizSubTab === 'current'
-                  ? 'bg-cyan-600 text-white shadow-xs'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                  ? 'bg-brand-gradient text-white shadow-xs'
+                  : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] border border-[#E8DFEB] dark:border-[#3A2845]'
               }`}
             >
               <Sparkles size={14} />
@@ -1250,8 +1377,8 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
               onClick={() => setQuizSubTab('history')}
               className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
                 quizSubTab === 'history'
-                  ? 'bg-cyan-600 text-white shadow-xs'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                  ? 'bg-brand-gradient text-white shadow-xs'
+                  : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] border border-[#E8DFEB] dark:border-[#3A2845]'
               }`}
             >
               <BarChart3 size={14} />
@@ -1261,22 +1388,22 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
 
           {/* SUBTAB 1: GÜNLÜK TEST */}
           {quizSubTab === 'current' && (
-            <div className="p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+            <div className="p-6 rounded-[28px] bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-xs space-y-6">
+              <div className="flex items-center justify-between pb-3 border-b border-[#E8DFEB] dark:border-[#2D1B36]">
                 <div>
-                  <h4 className="text-sm font-black text-gray-900 dark:text-white">
+                  <h4 className="text-sm font-black text-[#241329] dark:text-white">
                     {effectiveActiveTopic.title} — Kazanım Pekiştirme Soruları
                   </h4>
-                  <p className="text-[11px] text-gray-400">
+                  <p className="text-[11px] text-[#716779] dark:text-[#B5A5BD]">
                     Çoktan seçmeli, doğru-yanlış ve kavram tamamlama türlerinde karma MEB soruları.
                   </p>
                 </div>
-                <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                <span className="text-xs font-black text-[#8D49A6] dark:text-[#F17AE6]">
                   {Object.keys(quizAnswers).length} / {currentQuizQuestions.length} Yanıtlandı
                 </span>
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {currentQuizQuestions.map((q, idx) => {
                   const isAnswered = !!quizAnswers[q.id]
                   const isCorrect = quizAnswers[q.id] === q.correct
@@ -1284,14 +1411,14 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                   return (
                     <div
                       key={q.id}
-                      className="p-5 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/70 dark:border-gray-800/70 space-y-3.5"
+                      className="p-5 rounded-2xl bg-[#FCF9FD] dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#3A2845] space-y-3"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-lg bg-cyan-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                          <span className="w-6 h-6 rounded-lg bg-brand-gradient text-white font-black text-xs flex items-center justify-center shrink-0">
                             {idx + 1}
                           </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200/50 dark:border-cyan-800/50">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] border border-[#D914C8]/30">
                             {q.typeLabel}
                           </span>
                         </div>
@@ -1308,7 +1435,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                         )}
                       </div>
 
-                      <div className="text-xs lg:text-sm font-bold text-gray-900 dark:text-white leading-relaxed">
+                      <div className="text-xs lg:text-sm font-bold text-[#241329] dark:text-white leading-relaxed">
                         {q.question}
                       </div>
 
@@ -1316,21 +1443,21 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                         {q.options.map((opt) => {
                           const isSelected = quizAnswers[q.id] === opt.key
                           let optionClass =
-                            'bg-white dark:bg-[#0E1526] border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-cyan-500/60'
+                            'bg-white dark:bg-[#1A1122] border-[#E8DFEB] dark:border-[#3A2845] text-[#514458] dark:text-[#D2C5D8] hover:border-[#8D49A6]'
 
                           if (quizSubmitted) {
                             if (opt.key === q.correct) {
                               optionClass =
-                                'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-800 dark:text-emerald-200 font-black ring-1 ring-emerald-500/40'
+                                'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-800 dark:text-emerald-200 font-black'
                             } else if (isSelected && opt.key !== q.correct) {
                               optionClass =
                                 'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-800 dark:text-rose-200 line-through'
                             } else {
-                              optionClass = 'bg-white/50 dark:bg-[#0E1526]/50 border-gray-200 dark:border-gray-800 text-gray-400'
+                              optionClass = 'bg-white/50 dark:bg-[#1A1122]/50 border-gray-200 dark:border-gray-800 text-gray-400'
                             }
                           } else if (isSelected) {
                             optionClass =
-                              'bg-cyan-50 dark:bg-cyan-950/40 border-cyan-500 text-cyan-800 dark:text-cyan-200 font-bold ring-2 ring-cyan-500/30'
+                              'bg-[#FCE8FA] dark:bg-[#350444]/60 border-[#D914C8] text-[#4B075F] dark:text-[#F17AE6] font-black ring-1 ring-[#D914C8]/40'
                           }
 
                           return (
@@ -1343,7 +1470,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                               }}
                               className={`p-3 rounded-xl border text-left text-xs transition-all flex items-center gap-3 cursor-pointer ${optionClass}`}
                             >
-                              <span className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-800 font-black text-[11px] flex items-center justify-center shrink-0">
+                              <span className="w-6 h-6 rounded-lg bg-[#F7F0FA] dark:bg-[#2D1B36] font-black text-[11px] flex items-center justify-center shrink-0">
                                 {opt.key}
                               </span>
                               <span className="flex-1 leading-snug">{opt.text}</span>
@@ -1356,8 +1483,8 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                       </div>
 
                       {quizSubmitted && q.explanation && (
-                        <div className="p-3 rounded-xl bg-cyan-50/70 dark:bg-cyan-950/30 border border-cyan-200/50 dark:border-cyan-800/50 text-[11px] text-cyan-900 dark:text-cyan-200 flex items-start gap-2">
-                          <Sparkles size={14} className="text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                        <div className="p-3 rounded-xl bg-[#FCE8FA]/60 dark:bg-[#2D1B36] border border-[#D914C8]/30 text-[11px] text-[#4B075F] dark:text-[#F17AE6] flex items-start gap-2">
+                          <Sparkles size={14} className="shrink-0 mt-0.5" />
                           <span>
                             <strong>Kazanım Notu:</strong> {q.explanation}
                           </span>
@@ -1369,8 +1496,8 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
               </div>
 
               {/* Bottom Actions */}
-              <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xs text-gray-500">
+              <div className="pt-4 border-t border-[#E8DFEB] dark:border-[#2D1B36] flex flex-wrap items-center justify-between gap-3">
+                <div className="text-xs text-[#716779] dark:text-[#B5A5BD]">
                   Toplam {currentQuizQuestions.length} sorudan {Object.keys(quizAnswers).length} tanesini işaretlediniz.
                 </div>
 
@@ -1379,7 +1506,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                     <button
                       type="button"
                       onClick={handleCompleteQuiz}
-                      className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xs shadow-md transition-colors cursor-pointer flex items-center gap-2"
+                      className="px-6 py-2.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs shadow-md transition-all cursor-pointer flex items-center gap-2"
                     >
                       <Trophy size={14} />
                       <span>Testi Tamamla ve Sonuçları Göster</span>
@@ -1391,7 +1518,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                       className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-2"
                     >
                       <BarChart3 size={14} />
-                      <span>Grafiksel Sonuç Kartını Aç</span>
+                      <span>Sonuç Kartını Aç</span>
                     </button>
                   )}
                 </div>
@@ -1401,29 +1528,29 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
 
           {/* SUBTAB 2: GEÇMİŞ TESTLER & DENEMELER */}
           {quizSubTab === 'history' && (
-            <div className="p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4">
+            <div className="p-6 rounded-[28px] bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-black text-gray-900 dark:text-white">
+                  <h4 className="text-sm font-black text-[#241329] dark:text-white">
                     {course.name} Çözülen Deneme & Test Geçmişi
                   </h4>
-                  <p className="text-[11px] text-gray-400">
-                    Öğrencinin tamamladığı testler, doğru-yanlış grafikleri ve başarı oranları.
+                  <p className="text-[11px] text-[#716779] dark:text-[#B5A5BD]">
+                    Öğrencinin tamamladığı testler, doğru-yanlış dökümleri ve başarı oranları.
                   </p>
                 </div>
-                <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                <span className="text-xs font-bold text-[#8D49A6] dark:text-[#F17AE6]">
                   {pastQuizzes.length} Test Çözüldü
                 </span>
               </div>
 
               {pastQuizzes.length === 0 ? (
-                <div className="p-10 text-center text-xs text-gray-400 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl space-y-2">
-                  <Sparkles size={24} className="mx-auto text-gray-300 dark:text-gray-600" />
-                  <p>Bu ders için henüz tamamlanmış bir deneme veya günlük test kaydı bulunmuyor.</p>
+                <div className="p-10 text-center text-xs text-[#716779] dark:text-[#B5A5BD] border border-dashed border-[#E8DFEB] dark:border-[#3A2845] rounded-2xl space-y-2">
+                  <Sparkles size={24} className="mx-auto text-[#A998B3]" />
+                  <p>Bu ders için henüz tamamlanmış bir test kaydı bulunmuyor.</p>
                   <button
                     type="button"
                     onClick={() => setQuizSubTab('current')}
-                    className="px-4 py-1.5 rounded-xl bg-cyan-600 text-white text-xs font-bold inline-flex items-center gap-1.5 mt-2 cursor-pointer"
+                    className="px-4 py-1.5 rounded-xl bg-brand-gradient text-white text-xs font-bold inline-flex items-center gap-1.5 mt-2 cursor-pointer"
                   >
                     <span>Hemen Günlük Testi Çöz</span>
                     <ChevronRight size={13} />
@@ -1434,39 +1561,18 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                   {pastQuizzes.map((pq: any, pIdx: number) => (
                     <div
                       key={pq.id || pIdx}
-                      className="p-4 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/60 dark:border-gray-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      className="p-4 rounded-2xl bg-[#FCF9FD] dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#3A2845] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        {/* Circular Score Ring */}
-                        <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
-                          <svg className="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
-                            <path
-                              className="text-gray-200 dark:text-gray-700"
-                              strokeWidth="3.5"
-                              stroke="currentColor"
-                              fill="none"
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            />
-                            <path
-                              className="text-cyan-500"
-                              strokeDasharray={`${pq.percentage || 0}, 100`}
-                              strokeWidth="3.5"
-                              strokeLinecap="round"
-                              stroke="currentColor"
-                              fill="none"
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                            />
-                          </svg>
-                          <span className="absolute text-[11px] font-black text-gray-900 dark:text-white">
-                            %{pq.percentage}
-                          </span>
+                        <div className="w-11 h-11 rounded-xl bg-brand-gradient text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
+                          %{pq.percentage}
                         </div>
 
                         <div className="min-w-0">
-                          <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                          <div className="text-xs font-bold text-[#241329] dark:text-white truncate">
                             {pq.topicTitle}
                           </div>
-                          <div className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-2">
+                          <div className="text-[10px] text-[#716779] dark:text-[#B5A5BD] mt-0.5 flex items-center gap-2">
                             <span>{pq.date}</span>
                             <span>•</span>
                             <span>{pq.week ? `${pq.week}. Hafta` : 'Kazanım Testi'}</span>
@@ -1495,7 +1601,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                             setLastQuizStats(pq)
                             setShowResultModal(true)
                           }}
-                          className="px-3 py-1.5 rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-cyan-600 transition-colors cursor-pointer"
+                          className="px-3 py-1.5 rounded-xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] text-xs font-bold text-[#514458] dark:text-[#D2C5D8] hover:text-[#4B075F] dark:hover:text-[#F17AE6] transition-colors cursor-pointer"
                         >
                           İncele
                         </button>
@@ -1509,59 +1615,39 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
 
           {/* ── GRAPHICAL POST-TEST COMPLETION MODAL ── */}
           {showResultModal && lastQuizStats && (
-            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="w-full max-w-lg bg-white dark:bg-[#0E1526] rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl p-6 lg:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+            <div className="fixed inset-0 z-50 bg-[#0E0617]/75 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="w-full max-w-lg bg-white dark:bg-[#1A1122] rounded-[30px] border border-[#E8DFEB] dark:border-[#3A2845] shadow-2xl p-6 lg:p-8 space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-[#E8DFEB] dark:border-[#2D1B36]">
                   <div className="flex items-center gap-2">
                     <Trophy size={20} className="text-amber-500" />
-                    <h3 className="text-base font-black text-gray-900 dark:text-white">
+                    <h3 className="text-base font-black text-[#241329] dark:text-white">
                       Test Değerlendirme & Başarı Raporu
                     </h3>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowResultModal(false)}
-                    className="w-8 h-8 rounded-xl text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center justify-center cursor-pointer"
+                    className="w-8 h-8 rounded-xl text-[#716779] hover:text-[#241329] dark:hover:text-white flex items-center justify-center cursor-pointer"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
                 <div className="text-center space-y-3">
-                  <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
-                    <svg className="w-28 h-28 -rotate-90" viewBox="0 0 36 36">
-                      <path
-                        className="text-gray-100 dark:text-gray-800"
-                        strokeWidth="3.5"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                      <path
-                        className="text-cyan-500"
-                        strokeDasharray={`${lastQuizStats.percentage}, 100`}
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                    </svg>
-                    <div className="absolute text-center">
-                      <div className="text-2xl font-black text-gray-900 dark:text-white">
-                        %{lastQuizStats.percentage}
-                      </div>
-                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                        Başarı
-                      </div>
+                  <div className="w-20 h-20 rounded-full bg-brand-gradient text-white flex flex-col items-center justify-center mx-auto shadow-lg shadow-[#4B075F]/30">
+                    <div className="text-2xl font-black">
+                      %{lastQuizStats.percentage}
+                    </div>
+                    <div className="text-[9px] font-bold uppercase tracking-wider">
+                      Başarı
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-extrabold text-gray-900 dark:text-white">
+                    <h4 className="text-sm font-extrabold text-[#241329] dark:text-white">
                       {lastQuizStats.topicTitle}
                     </h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-[#514458] dark:text-[#D2C5D8] mt-1 font-medium">
                       {lastQuizStats.percentage >= 80
                         ? '🌟 Harika Bir Performans! Takdir Düzeyinde Başarı.'
                         : lastQuizStats.percentage >= 50
@@ -1573,9 +1659,9 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
 
                 {/* 4 Stat Cards */}
                 <div className="grid grid-cols-4 gap-2 pt-2">
-                  <div className="p-3 rounded-2xl bg-gray-50 dark:bg-[#131C31] text-center space-y-1">
-                    <span className="text-[10px] font-bold text-gray-400">Toplam</span>
-                    <div className="text-base font-black text-gray-900 dark:text-white">
+                  <div className="p-3 rounded-2xl bg-[#FCF9FD] dark:bg-[#211729] text-center space-y-1 border border-[#E8DFEB] dark:border-[#3A2845]">
+                    <span className="text-[10px] font-bold text-[#716779] dark:text-[#B5A5BD]">Toplam</span>
+                    <div className="text-base font-black text-[#241329] dark:text-white">
                       {lastQuizStats.total}
                     </div>
                   </div>
@@ -1608,14 +1694,14 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                       setQuizAnswers({})
                       setQuizSubmitted(false)
                     }}
-                    className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-xs font-bold text-gray-700 dark:text-gray-300 transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-[#F7F0FA] dark:bg-[#211729] text-xs font-bold text-[#514458] dark:text-[#D2C5D8] transition-colors cursor-pointer"
                   >
                     Tekrar Çöz
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowResultModal(false)}
-                    className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-black transition-colors shadow-xs cursor-pointer"
+                    className="px-5 py-2 rounded-xl bg-brand-gradient text-white text-xs font-black transition-all shadow-xs cursor-pointer"
                   >
                     Kapat & İncele
                   </button>
@@ -1626,16 +1712,89 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
         </div>
       )}
 
+      {/* ── TAB 5: YAZILI SINAVLAR VE NOTLAR ── */}
+      {activeTab === 'assessments' && (
+        <div className="p-6 rounded-[28px] bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-black text-[#241329] dark:text-white">
+              {course.name} Sınavları ve Öğretmen Değerlendirmeleri
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            {courseExams.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[#716779] dark:text-[#B5A5BD]">
+                Bu ders için planlanan veya girilen sınav kaydı bulunmamaktadır.
+              </div>
+            ) : (
+              courseExams.map((exam) => (
+                <div
+                  key={exam.id}
+                  className="p-5 rounded-2xl bg-[#FCF9FD] dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#3A2845] flex flex-col md:flex-row md:items-center justify-between gap-4"
+                >
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6]">
+                        {exam.date}
+                      </span>
+                      <span className="text-xs font-black text-[#241329] dark:text-white">
+                        {exam.title}
+                      </span>
+                      <span className="text-[10px] text-[#716779] dark:text-[#B5A5BD]">
+                        ({exam.examTypeLabel || 'Değerlendirme'})
+                      </span>
+                    </div>
+
+                    <div className="text-[11px] text-[#514458] dark:text-[#D2C5D8] flex items-center gap-3">
+                      <span>Süre: {exam.durationMinutes} Dk</span>
+                      <span>•</span>
+                      <span>Yer: {exam.location}</span>
+                      <span>•</span>
+                      <span>Öğretmen: {exam.teacherName || course.teacherName}</span>
+                    </div>
+
+                    {exam.teacherFeedback && (
+                      <div className="p-3 rounded-xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] mt-2">
+                        <p className="text-[11px] text-[#241329] dark:text-[#FCF9FD] italic">
+                          "{exam.teacherFeedback}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    {exam.isPublished && exam.score !== undefined ? (
+                      <div className="space-y-1">
+                        <div className="text-xl font-black text-[#16805D] dark:text-emerald-400">
+                          {exam.score} / {exam.maxScore}
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600">
+                          Değerlendirildi
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs font-bold text-amber-600 dark:text-amber-400 px-3 py-1 rounded-xl bg-amber-500/10">
+                        Yaklaşan Sınav
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── TAB 6: NOTLARIM (KİTAP NOTLARI & DEFTERİM ENTEGRASYONU) ── */}
       {activeTab === 'notes' && (
         <div className="space-y-6">
-          <div className="p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4">
+          <div className="p-6 rounded-[28px] bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="text-base font-extrabold text-gray-900 dark:text-white">
+                <h2 className="text-base font-black text-[#241329] dark:text-white">
                   {course.name} Ders Notlarım ve Kitap İçi Kayıtlarım
                 </h2>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[#716779] dark:text-[#B5A5BD]">
                   Bu ders kapsamında aldığınız notlar ve e-kitap okuyucuda kaydettiğiniz sayfa notları burada toplanır.
                 </p>
               </div>
@@ -1643,7 +1802,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
               <button
                 type="button"
                 onClick={() => setShowNoteForm(!showNoteForm)}
-                className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                className="px-4 py-2 rounded-xl bg-brand-gradient hover:opacity-95 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
               >
                 <Plus size={15} />
                 <span>Yeni Not Ekle</span>
@@ -1652,32 +1811,32 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
 
             {/* Note Creation Form */}
             {showNoteForm && (
-              <form onSubmit={handleCreateNote} className="p-4 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200 dark:border-gray-800 space-y-3">
+              <form onSubmit={handleCreateNote} className="p-4.5 rounded-2xl bg-[#FCF9FD] dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#3A2845] space-y-3">
                 <input
                   type="text"
-                  placeholder="Not Başlığı (Örn: Ritmik Sayma Kuralları Notum)"
+                  placeholder="Not Başlığı (Örn: Çizgi Yönleri ve Harf Birleştirme Notum)"
                   value={newNoteTitle}
                   onChange={(e) => setNewNoteTitle(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200 dark:border-gray-700 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-hidden"
+                  className="w-full h-10 px-3.5 rounded-xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] text-xs text-[#241329] dark:text-white placeholder:text-[#A998B3] focus:outline-hidden"
                 />
                 <textarea
                   rows={3}
                   placeholder="Not içeriğinizi buraya yazın..."
                   value={newNoteContent}
                   onChange={(e) => setNewNoteContent(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-white dark:bg-[#0E1526] border border-gray-200 dark:border-gray-700 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-hidden resize-none"
+                  className="w-full p-3.5 rounded-xl bg-white dark:bg-[#1A1122] border border-[#E8DFEB] dark:border-[#3A2845] text-xs text-[#241329] dark:text-white placeholder:text-[#A998B3] focus:outline-hidden resize-none"
                 />
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setShowNoteForm(false)}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold text-gray-500 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#716779] dark:text-[#B5A5BD] cursor-pointer"
                   >
                     Vazgeç
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-1.5 rounded-xl bg-cyan-600 text-white text-xs font-bold cursor-pointer"
+                    className="px-4 py-1.5 rounded-xl bg-brand-gradient text-white text-xs font-bold cursor-pointer"
                   >
                     Kaydet
                   </button>
@@ -1688,7 +1847,7 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
             {/* Notes List */}
             <div className="space-y-3">
               {courseNotes.length === 0 ? (
-                <div className="p-8 text-center text-xs text-gray-400 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl">
+                <div className="p-8 text-center text-xs text-[#716779] dark:text-[#B5A5BD] border border-dashed border-[#E8DFEB] dark:border-[#3A2845] rounded-2xl">
                   Bu ders için henüz bir not almadınız. Yukarıdaki "Yeni Not Ekle" butonuna basarak veya e-kitap okuyucuda sayfaya not ekleyerek buraya kaydedebilirsiniz.
                 </div>
               ) : (
@@ -1697,27 +1856,27 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                   return (
                     <div
                       key={note.id}
-                      className="p-4 rounded-2xl bg-gray-50 dark:bg-[#131C31] border border-gray-200/60 dark:border-gray-800/60 space-y-2"
+                      className="p-4 rounded-2xl bg-[#FCF9FD] dark:bg-[#211729] border border-[#E8DFEB] dark:border-[#3A2845] space-y-2"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 flex-wrap">
                           {isBookNote ? (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FCE8FA] dark:bg-[#350444] text-[#8D49A6] dark:text-[#F17AE6] flex items-center gap-1">
                               <BookOpen size={11} />
                               Kitap Notu · Sayfa {note.pageNumber}
                             </span>
                           ) : (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#F0D8FA] dark:bg-[#2D1B36] text-[#4B075F] dark:text-[#D2C5D8]">
                               Ders Notu
                             </span>
                           )}
-                          <h4 className="text-xs font-bold text-gray-900 dark:text-white">
+                          <h4 className="text-xs font-bold text-[#241329] dark:text-white">
                             {note.title}
                           </h4>
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[10px] text-gray-400">{note.date}</span>
+                          <span className="text-[10px] text-[#716779] dark:text-[#B5A5BD]">{note.date}</span>
                           <button
                             type="button"
                             onClick={() => handleDeleteNote(note.id)}
@@ -1729,19 +1888,19 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
                         </div>
                       </div>
 
-                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs text-[#514458] dark:text-[#D2C5D8] leading-relaxed whitespace-pre-wrap">
                         {note.content}
                       </p>
 
                       {isBookNote && (
-                        <div className="pt-2 flex items-center justify-between border-t border-gray-200/40 dark:border-gray-800/40">
-                          <span className="text-[10px] text-gray-400 italic">
+                        <div className="pt-2 flex items-center justify-between border-t border-[#E8DFEB] dark:border-[#3A2845]">
+                          <span className="text-[10px] text-[#716779] dark:text-[#B5A5BD] italic">
                             Kaynak: {note.bookTitle}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleOpenBookAtPage(note.bookId, note.pageNumber)}
-                            className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
+                            className="text-[11px] font-bold text-[#8D49A6] dark:text-[#F17AE6] hover:underline flex items-center gap-1 cursor-pointer"
                           >
                             <span>Kitapta Sayfaya Git (s. {note.pageNumber})</span>
                             <ExternalLink size={12} />

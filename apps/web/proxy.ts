@@ -112,6 +112,8 @@ export async function proxy(req: NextRequest) {
   if (
     pathname === '/login' ||
     pathname.startsWith('/login/') ||
+    pathname === '/pricing' ||
+    pathname.startsWith('/pricing/') ||
     pathname === '/student' ||
     pathname.startsWith('/student/') ||
     pathname === '/teacher' ||
