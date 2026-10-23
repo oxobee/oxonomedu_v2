@@ -93,7 +93,7 @@ export function getDemoBoardInitialContent(board: any): DemoBoardDocument {
 function getPrimaryTurkceContent(board: any): DemoBoardDocument {
   const teacher = board?.description?.includes('Öğretmen:')
     ? board.description.split('.')[0]
-    : 'Öğretmen: Özlem ZOR'
+    : 'Öğretmen: Bahar ÇETİN'
 
   return {
     type: 'doc',
@@ -203,7 +203,7 @@ function getPrimaryTurkceContent(board: any): DemoBoardDocument {
               { type: 'text', marks: [{ type: 'bold' }], text: '🌟 Haftanın Yıldız Okuyucusu:\n\n' },
               {
                 type: 'text',
-                text: 'Erçil Evren UĞURLU tebrikler!\n1 dakikada 68 kelimeyi hatasız ve noktalama işaretlerine dikkat ederek okudun.',
+                text: 'Ali Yağız DEMİREL tebrikler!\n1 dakikada 68 kelimeyi hatasız ve noktalama işaretlerine dikkat ederek okudun.',
               },
             ],
           },
@@ -525,7 +525,7 @@ function getClassPanoContent(board: any): DemoBoardDocument {
               { type: 'text', marks: [{ type: 'bold' }], text: '📋 Haftanın Nöbetçi Öğrencileri:\n\n' },
               {
                 type: 'text',
-                text: '• Erçil Evren UĞURLU (1. Sıra)\n• Zeynep KAYA (2. Sıra)\n\nGörevler: Ders aralarında tahtayı temizlemek, sınıf havalandırmasını sağlamak ve düzeni korumak.',
+                text: '• Ali Yağız DEMİREL (1. Sıra)\n• Zeynep KAYA (2. Sıra)\n\nGörevler: Ders aralarında tahtayı temizlemek, sınıf havalandırmasını sağlamak ve düzeni korumak.',
               },
             ],
           },
@@ -561,7 +561,7 @@ function getClassPanoContent(board: any): DemoBoardDocument {
           {
             type: 'paragraph',
             content: [
-              { type: 'text', marks: [{ type: 'bold' }], text: 'Tebrikler: Erçil Evren UĞURLU 🎖️\n\n' },
+              { type: 'text', marks: [{ type: 'bold' }], text: 'Tebrikler: Ali Yağız DEMİREL 🎖️\n\n' },
               {
                 type: 'text',
                 text: 'Kazanımlar: Sorumluluk bilinci, arkadaşlarına karşı nazik yaklaşımı, düzenli ve zamanında ödev teslimi ile sınıfımıza örnek oldu.\n\nBaşarılarının ve örnek davranışlarının devamını dileriz.',

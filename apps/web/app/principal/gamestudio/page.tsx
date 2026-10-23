@@ -32,7 +32,7 @@ import {
 
 const SCHOOL_CLASSES = [
   'Tüm Sınıflar',
-  '9-A (Erçil UĞURLU)',
+  '9-A (Ali Yağız DEMİREL)',
   '9-B',
   '10-A',
   '10-B',

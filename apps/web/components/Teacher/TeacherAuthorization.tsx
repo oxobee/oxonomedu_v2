@@ -23,7 +23,7 @@ export default function TeacherAuthorization({ children }: TeacherAuthorizationP
   const [isClientAuthorized, setIsClientAuthorized] = useState<boolean>(true)
   const [isExplicitStudent, setIsExplicitStudent] = useState<boolean>(false)
 
-  // Verify and auto-initialize authentic Teacher session (Ebru TEKNECİ)
+  // Verify and auto-initialize authentic Teacher session (Bahar ÇETİN)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -45,7 +45,7 @@ export default function TeacherAuthorization({ children }: TeacherAuthorizationP
             username: 'ogretmen',
             firstName: 'Ebru',
             lastName: 'TEKNECİ',
-            name: 'Ebru TEKNECİ',
+            name: 'Bahar ÇETİN',
             tcNo: '10000000204',
             phone: '+90 532 999 3300',
             branch: 'Türk Dili ve Edebiyatı · Rehberlik',
@@ -82,7 +82,7 @@ export default function TeacherAuthorization({ children }: TeacherAuthorizationP
           username: 'ogretmen',
           firstName: 'Ebru',
           lastName: 'TEKNECİ',
-          name: 'Ebru TEKNECİ',
+          name: 'Bahar ÇETİN',
           tcNo: '10000000204',
           phone: '+90 532 999 3300',
           branch: 'Türk Dili ve Edebiyatı · Rehberlik',
@@ -101,7 +101,7 @@ export default function TeacherAuthorization({ children }: TeacherAuthorizationP
     }
     setIsExplicitStudent(false)
     setIsClientAuthorized(true)
-    toast.success('Öğretmen çalışma alanı aktif edildi (Ebru TEKNECİ).')
+    toast.success('Öğretmen çalışma alanı aktif edildi (Bahar ÇETİN).')
   }
 
   // Explicit Student Account Trying to Access Teacher Area
@@ -115,7 +115,7 @@ export default function TeacherAuthorization({ children }: TeacherAuthorizationP
           <div className="space-y-2">
             <h2 className="text-xl font-extrabold text-white">Öğretmen Çalışma Alanı</h2>
             <p className="text-xs text-gray-400 leading-relaxed">
-              Şu anda öğrenci oturumunuz açık. Öğretmen çalışma merkezine (Ebru TEKNECİ) geçiş yapmak veya öğrenci panelinize dönmek için seçim yapabilirsiniz.
+              Şu anda öğrenci oturumunuz açık. Öğretmen çalışma merkezine (Bahar ÇETİN) geçiş yapmak veya öğrenci panelinize dönmek için seçim yapabilirsiniz.
             </p>
           </div>
 

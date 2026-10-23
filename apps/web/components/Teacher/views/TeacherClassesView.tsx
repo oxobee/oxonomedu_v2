@@ -355,7 +355,7 @@ export default function TeacherClassesView() {
                 </span>
                 <span className="text-xs text-gray-400">•</span>
                 <span className="text-xs text-gray-500 font-semibold">
-                  Sınıf Rehberliği: Ebru TEKNECİ
+                  Sınıf Rehberliği: Bahar ÇETİN
                 </span>
               </div>
               <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">

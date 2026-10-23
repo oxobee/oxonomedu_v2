@@ -139,7 +139,7 @@ export default function TeacherAssessmentsView() {
   const [newScope, setNewScope] = useState('')
 
   // Active Teacher details
-  const [teacherName, setTeacherName] = useState('Ebru TEKNECİ')
+  const [teacherName, setTeacherName] = useState('Bahar ÇETİN')
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

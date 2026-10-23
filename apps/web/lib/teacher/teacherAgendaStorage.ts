@@ -28,7 +28,7 @@ export interface SchoolExamItem {
   period?: number // e.g. 3 (3. Ders)
   durationMinutes: number // e.g. 40
   location: string // e.g. "Derslik 101 (9-A)"
-  teacherName: string // e.g. "Ebru TEKNECİ"
+  teacherName: string // e.g. "Bahar ÇETİN"
   scope?: string // Kazanımlar ve Konu Kapsamı
   isPublished: boolean
   status: 'upcoming' | 'completed' | 'in_progress'
@@ -190,7 +190,7 @@ export const INITIAL_TEACHER_NOTES: TeacherNote[] = [
     title: 'Edebiyat Zümresi Toplantı Kararları (Ekim Ayı)',
     category: 'meeting',
     content:
-      'Müdür Dr. Uğur UĞURLU başkanlığında yapılan zümre toplantısında 2. ortak yazılı sınav tarihi 28 Kasım olarak kararlaştırıldı. Soru dağılım tabloları MEB formatına uyarlandı.',
+      'Müdür Kemal SOYSAL başkanlığında yapılan zümre toplantısında 2. ortak yazılı sınav tarihi 28 Kasım olarak kararlaştırıldı. Soru dağılım tabloları MEB formatına uyarlandı.',
     color: 'indigo',
     className: 'Tüm Sınıflar',
     date: '10 Ekim 2026',
@@ -226,7 +226,7 @@ export const CANONICAL_SCHOOL_EXAMS: SchoolExamItem[] = [
     period: 2,
     durationMinutes: 40,
     location: 'Derslik 101 (9-A)',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     scope: 'Giriş Ünitesi, Edebiyatın Sanatlarla İlişkisi, İletişim Ögeleri ve Hikaye Tahlili',
     isPublished: true,
     status: 'upcoming',
@@ -244,7 +244,7 @@ export const CANONICAL_SCHOOL_EXAMS: SchoolExamItem[] = [
     period: 1,
     durationMinutes: 40,
     location: 'Derslik 101 (9-A)',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     scope: 'Önermeler, Bileşik Önermeler ve Kümelerde İşlemler',
     isPublished: true,
     status: 'upcoming',
@@ -262,7 +262,7 @@ export const CANONICAL_SCHOOL_EXAMS: SchoolExamItem[] = [
     period: 4,
     durationMinutes: 40,
     location: 'Derslik 101 (9-A)',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     scope: 'Ezbere şiir okuma, tonlama ve vurgu, divan şiiri ahenk tahlili',
     isPublished: true,
     status: 'upcoming',
@@ -280,7 +280,7 @@ export const CANONICAL_SCHOOL_EXAMS: SchoolExamItem[] = [
     period: 4,
     durationMinutes: 40,
     location: 'Derslik 101 (9-A)',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     scope: 'Günlük hayat problemlerinin fonksiyonlarla modellenmesi ve grafik çizimi',
     isPublished: true,
     status: 'upcoming',
@@ -298,7 +298,7 @@ export const CANONICAL_SCHOOL_EXAMS: SchoolExamItem[] = [
     period: 3,
     durationMinutes: 20,
     location: 'Derslik 101 (9-A)',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     scope: 'Nazım birimi, kafiye ve redif, şiirde ahenk unsurları',
     isPublished: true,
     status: 'upcoming',
@@ -315,7 +315,7 @@ export const CANONICAL_SCHOOL_EXAMS: SchoolExamItem[] = [
     period: 4,
     durationMinutes: 25,
     location: 'Derslik 101 (9-A)',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     scope: 'Birinci dereceden iki bilinmeyenli denklem ve eşitsizlikler',
     isPublished: true,
     status: 'upcoming',
@@ -332,7 +332,7 @@ export const CANONICAL_SCHOOL_EXAMS: SchoolExamItem[] = [
     period: 6,
     durationMinutes: 40,
     location: 'Bilişim Atölyesi',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     scope: 'Python değişkenler, koşul blokları ve akış diyagramları',
     isPublished: true,
     status: 'upcoming',
@@ -349,7 +349,7 @@ export const CANONICAL_SCHOOL_EXAMS: SchoolExamItem[] = [
     period: 3,
     durationMinutes: 40,
     location: 'Derslik 101 (9-A)',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     scope: 'Şiir ünitesi geneli, masal/fabl türleri, isim tamlamaları ve yazım kuralları',
     isPublished: true,
     status: 'upcoming',

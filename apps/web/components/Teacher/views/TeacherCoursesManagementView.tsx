@@ -278,7 +278,7 @@ export default function TeacherCoursesManagementView() {
       type: newMatType,
       size: `${(Math.random() * 2 + 1).toFixed(1)} MB`,
       target: newMatTarget,
-      studentName: newMatTarget === 'individual' ? 'Erçil UĞURLU (No: 101)' : undefined,
+      studentName: newMatTarget === 'individual' ? 'Ali Yağız DEMİREL (No: 101)' : undefined,
       dateAdded: new Date().toLocaleDateString('tr-TR'),
       description: newMatDesc.trim() || undefined,
     }
@@ -338,7 +338,7 @@ export default function TeacherCoursesManagementView() {
           's-1': scoreNum,
           '101': scoreNum,
         },
-        teacherName: 'Özlem ZOR',
+        teacherName: 'Bahar ÇETİN',
         teacherFeedback: teacherFeedback.trim(),
       }
 
@@ -363,7 +363,7 @@ export default function TeacherCoursesManagementView() {
                 courseName: selectedCourse.name,
                 exam1: scoreNum,
                 average: scoreNum,
-                teacherName: 'Özlem ZOR',
+                teacherName: 'Bahar ÇETİN',
               })
             }
             localStorage.setItem('oxonom_m_students_v3', JSON.stringify(parsed))
@@ -373,7 +373,7 @@ export default function TeacherCoursesManagementView() {
 
       window.dispatchEvent(new CustomEvent('oxonom_student_updated'))
       window.dispatchEvent(new CustomEvent('storage', { detail: { key: 'oxonom_school_exams' } }))
-      toast.success(`${selectedCourse.name} değerlendirme notu (${scoreNum}/100) Erçil Uğurlu dosyasına işlendi!`)
+      toast.success(`${selectedCourse.name} değerlendirme notu (${scoreNum}/100) Ali Yağız Demirel dosyasına işlendi!`)
       setExamTitle('')
     } catch (err) {
       toast.error('Not kaydedilirken bir hata oluştu.')
@@ -395,7 +395,7 @@ export default function TeacherCoursesManagementView() {
           student.guidanceNotes.unshift({
             id: `gn-${Date.now()}`,
             date: new Date().toLocaleDateString('tr-TR'),
-            author: 'Özlem ZOR (1/A Sınıf Öğretmeni)',
+            author: 'Bahar ÇETİN (1/A Sınıf Öğretmeni)',
             content: guidanceText.trim(),
           })
           localStorage.setItem('oxonom_m_students_v3', JSON.stringify(parsed))
@@ -473,7 +473,7 @@ export default function TeacherCoursesManagementView() {
           <div className="flex flex-wrap items-center gap-3">
             <span className="font-extrabold text-gray-900 dark:text-white flex items-center gap-1.5">
               <Users size={14} className="text-indigo-600 dark:text-indigo-400" />
-              {selectedClass} Şubesi · {selectedClass === '1/A' ? '1 Kayıtlı Öğrenci (Erçil Uğurlu)' : '0 Öğrenci'}
+              {selectedClass} Şubesi · {selectedClass === '1/A' ? '1 Kayıtlı Öğrenci (Ali Yağız Demirel)' : '0 Öğrenci'}
             </span>
             <span className="text-gray-300 dark:text-gray-700">•</span>
             <span className="text-gray-600 dark:text-gray-300">
@@ -854,7 +854,7 @@ export default function TeacherCoursesManagementView() {
                         : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
                     }`}
                   >
-                    Bireysel (Erçil U.)
+                    Bireysel (Ali Yağız U.)
                   </button>
                 </div>
               </div>
@@ -962,7 +962,7 @@ export default function TeacherCoursesManagementView() {
                           <span>{mat.dateAdded}</span>
                           <span>•</span>
                           <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                            {mat.target === 'individual' ? 'Bireysel (Erçil U.)' : 'Tüm Şube'}
+                            {mat.target === 'individual' ? 'Bireysel (Ali Yağız U.)' : 'Tüm Şube'}
                           </span>
                         </div>
                         {mat.description && (
@@ -1056,7 +1056,7 @@ export default function TeacherCoursesManagementView() {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-gray-900 dark:text-white">
-                        Erçil UĞURLU (No: 101)
+                        Ali Yağız DEMİREL (No: 101)
                       </div>
                       <div className="text-[10px] text-gray-400">1/A Şubesi · Kayıtlı Öğrenci</div>
                     </div>
@@ -1102,7 +1102,7 @@ export default function TeacherCoursesManagementView() {
           {/* Current Live Grades in System */}
           <div className="p-6 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4">
             <h3 className="text-sm font-black text-gray-900 dark:text-white">
-              Aktif Not Çizelgesi (Erçil Uğurlu · 1/A)
+              Aktif Not Çizelgesi (Ali Yağız Demirel · 1/A)
             </h3>
             <div className="space-y-3">
               <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200/60 dark:border-indigo-800/50 flex items-center justify-between">

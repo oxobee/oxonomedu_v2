@@ -83,7 +83,7 @@ export default function StudentLibraryView({
 }: StudentLibraryViewProps) {
   // Student Profile & Grade
   const [studentGrade, setStudentGrade] = useState<string>('9. Sınıf')
-  const [studentName, setStudentName] = useState<string>('Erçil UĞURLU')
+  const [studentName, setStudentName] = useState<string>('Ali Yağız DEMİREL')
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('')

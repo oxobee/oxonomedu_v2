@@ -56,7 +56,7 @@ function createMockBoardSvg(subject: string, topic: string, date: string): strin
         TÜRKÇE DERSİ — CÜMLENİN ÖGELERİ VE ANLAM İLİŞKİLERİ
       </text>
       <text x="1140" y="64" text-anchor="end" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="700" fill="#A78BFA">
-        📅 ${date} • Öğretmen: Ebru TEKNECİ
+        📅 ${date} • Öğretmen: Bahar ÇETİN
       </text>
 
       <!-- Left diagram box: Syntax Hierarchy -->
@@ -402,7 +402,7 @@ export const INITIAL_DEFAULT_BOARD_NOTES: SavedBoardNote[] = [
     timestamp: Date.now() - 1000 * 60 * 60 * 2,
     classCodes: ['1/A', '1/B'],
     imageUrl: createMockBoardSvg('Türkçe', 'Cümlenin Ögeleri ve Anlam Bilgisi', '21 Ekim 2026'),
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     boardInfo: '1A-01',
     studentNote: '⭐ Yüklem daima ilk bulunur! Tamlamalar asla bölünmez. Cuma günkü mini quize çalış.',
     studentNoteUpdatedAt: Date.now() - 1000 * 60 * 30,

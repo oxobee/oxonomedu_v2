@@ -51,7 +51,7 @@ const getClassDefaultNotes = (code: string): NoteItem[] => {
     },
     {
       id: 'n-1a-2',
-      text: 'Erçil Evren: Ritmik sayma ödevinde ek pekiştirme yapılacak.',
+      text: 'Ali Yağız: Ritmik sayma ödevinde ek pekiştirme yapılacak.',
       done: true,
       createdAt: 'Dün 14:30',
       category: 'Öğrenci Takip',

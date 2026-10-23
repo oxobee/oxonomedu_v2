@@ -95,6 +95,9 @@ export function resetAllDemoData(options?: { force?: boolean; notify?: boolean }
       'oxonom_course_progress_matematik',
       'oxonom_student_homeworks_3001',
       'oxonom_student_homeworks_101',
+      'oxonom_student_submissions_ercil',
+      'oxonom_student_planner_tasks_ercil',
+      'oxonom_student_notes_ercil',
     ]
     keysToRemove.forEach((key) => {
       try {
@@ -111,12 +114,16 @@ export function resetAllDemoData(options?: { force?: boolean; notify?: boolean }
     localStorage.setItem('oxonom_m_students_v3', JSON.stringify(MASTER_9A_STUDENTS))
     localStorage.setItem('oxonom_admin_students_list_30', JSON.stringify(MASTER_9A_STUDENTS))
     localStorage.setItem('oxonom_custom_school_assignments_v2', JSON.stringify(MASTER_ASSIGNMENTS))
+    localStorage.setItem('oxonom_student_submissions_ali_yagiz', JSON.stringify(MASTER_STUDENT_SUBMISSIONS_RECORD))
     localStorage.setItem('oxonom_student_submissions_ercil', JSON.stringify(MASTER_STUDENT_SUBMISSIONS_RECORD))
     localStorage.setItem('m_homework_submissions_v2', JSON.stringify(MASTER_TEACHER_SUBMISSIONS_DATA))
     localStorage.setItem('oxonom_school_exam_calendar', JSON.stringify(MASTER_EXAMS))
+    localStorage.setItem('oxonom_student_planner_tasks_ali_yagiz', JSON.stringify(MASTER_PLANNER_TASKS))
     localStorage.setItem('oxonom_student_planner_tasks_ercil', JSON.stringify(MASTER_PLANNER_TASKS))
+    localStorage.setItem('oxonom_student_notes_ali_yagiz', JSON.stringify(MASTER_STUDENT_NOTES))
     localStorage.setItem('oxonom_student_notes_ercil', JSON.stringify(MASTER_STUDENT_NOTES))
     localStorage.setItem('oxonom_school_announcements', JSON.stringify(MASTER_ANNOUNCEMENTS))
+    localStorage.setItem('oxonom_canonical_schedule_1a', JSON.stringify(MASTER_SCHEDULE))
     localStorage.setItem('oxonom_canonical_schedule_9a', JSON.stringify(MASTER_SCHEDULE))
 
     // 3. Update reset timestamp and schema version

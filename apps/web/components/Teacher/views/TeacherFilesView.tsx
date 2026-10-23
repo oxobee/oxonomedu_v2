@@ -189,7 +189,7 @@ export default function TeacherFilesView() {
       extension: safeExt,
       size: selectedFileObj ? formatFileSize(selectedFileObj.size) : '1.8 MB',
       updatedAt: 'Şimdi',
-      author: 'Ebru TEKNECİ',
+      author: 'Bahar ÇETİN',
       sharedWithClass: uploadClassShare === 'none' ? undefined : uploadClassShare,
       downloadsCount: 0,
       dataUrl: fileDataUrl || undefined,
@@ -1328,7 +1328,7 @@ export default function TeacherFilesView() {
                               <div className="text-[10px] text-gray-400">Şube: {uploadClassShare} / {ALL_CLASSROOMS[1]?.code || '1/B'}</div>
                             </div>
                             <div className="text-center">
-                              <div className="font-bold text-xs">Ebru TEKNECİ</div>
+                              <div className="font-bold text-xs">Bahar ÇETİN</div>
                               <div className="text-[10px] text-gray-500">Türk Dili ve Edebiyatı Zümre Başkanı</div>
                               <div className="w-24 h-0.5 bg-gray-400 mx-auto mt-2" />
                             </div>
@@ -1467,7 +1467,7 @@ export default function TeacherFilesView() {
                         </ol>
 
                         <div className="pt-8 border-t mt-8 flex justify-between items-center text-xs text-gray-500">
-                          <span>Hazırlayan: Ebru TEKNECİ</span>
+                          <span>Hazırlayan: Bahar ÇETİN</span>
                           <span>Tutanak No: 2026/04</span>
                         </div>
                       </div>

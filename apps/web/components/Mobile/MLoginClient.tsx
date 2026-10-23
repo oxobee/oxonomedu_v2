@@ -70,7 +70,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   const handleFillDemoTeacher = () => {
     setIdentifier('ogretmen@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Öğretmen (Ebru TEKNECİ — Edebiyat Öğretmeni) bilgileri dolduruldu!', {
+    toast.success('Öğretmen (Bahar ÇETİN — Edebiyat Öğretmeni) bilgileri dolduruldu!', {
       icon: '👩‍🏫',
       duration: 2500,
     })
@@ -80,7 +80,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   const handleFillDemoAdmin = () => {
     setIdentifier('mudur@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Okul Müdürü (Uğur UĞURLU) bilgileri dolduruldu!', {
+    toast.success('Okul Müdürü (Kemal SOYSAL) bilgileri dolduruldu!', {
       icon: '👔',
       duration: 2500,
     })
@@ -90,7 +90,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
   const handleFillDemoStudent = () => {
     setIdentifier('ogrenci@oxonom.com')
     setPassword('Ugur2803*')
-    toast.success('Öğrenci (Erçil UĞURLU — 1/A) bilgileri dolduruldu!', {
+    toast.success('Öğrenci (Ali Yağız DEMİREL — 1/A) bilgileri dolduruldu!', {
       icon: '🎒',
       duration: 2500,
     })
@@ -188,7 +188,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
             username: registeredTeacher?.username || 'ogretmen',
             firstName: registeredTeacher?.name?.split(' ')[0] || 'Ebru',
             lastName: registeredTeacher?.name?.split(' ').slice(1).join(' ') || 'TEKNECİ',
-            name: registeredTeacher?.name || 'Ebru TEKNECİ',
+            name: registeredTeacher?.name || 'Bahar ÇETİN',
             tcNo: registeredTeacher?.tcNo || '10000000204',
             phone: registeredTeacher?.phone || '+90 532 999 3300',
             branch: registeredTeacher?.branch || 'Türk Dili ve Edebiyatı · Rehberlik',
@@ -294,7 +294,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               type="button"
               onClick={handleFillDemoAdmin}
               className="text-[10px] font-bold text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0 shadow-xs"
-              title="Okul Müdürü (Uğur UĞURLU) ile giriş yap"
+              title="Okul Müdürü (Kemal SOYSAL) ile giriş yap"
             >
               <ShieldCheck size={11} className="text-amber-400" />
               <span>Müdür</span>
@@ -304,7 +304,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               type="button"
               onClick={handleFillDemoTeacher}
               className="text-[10px] font-bold text-[#34D399] bg-[#34D399]/10 hover:bg-[#34D399]/20 border border-[#34D399]/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0"
-              title="Öğretmen (Ebru TEKNECİ — Edebiyat Öğretmeni) ile giriş yap"
+              title="Öğretmen (Bahar ÇETİN — Edebiyat Öğretmeni) ile giriş yap"
             >
               <Sparkles size={11} className="text-[#34D399]" />
               <span>Öğretmen</span>
@@ -314,7 +314,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               type="button"
               onClick={handleFillDemoStudent}
               className="text-[10px] font-bold text-sky-300 bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 px-2 py-1 rounded-full transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0"
-              title="Öğrenci (Erçil UĞURLU — 1/A) ile giriş yap"
+              title="Öğrenci (Ali Yağız DEMİREL — 1/A) ile giriş yap"
             >
               <BookOpen size={11} className="text-sky-400" />
               <span>Öğrenci</span>
@@ -409,11 +409,11 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               </h2>
               <p className="text-[13px] text-[#5B6577] mt-1 mb-0 font-medium">
                 {identifier.includes('mudur') || identifier.includes('idare')
-                  ? 'Okul Müdürü (Dr. Uğur UĞURLU) yönetim hesabı'
+                  ? 'Okul Müdürü (Kemal SOYSAL) yönetim hesabı'
                   : identifier.includes('ogrenci')
-                  ? 'Öğrenci (Erçil UĞURLU — 1/A) hesabı'
+                  ? 'Öğrenci (Ali Yağız DEMİREL — 1/A) hesabı'
                   : identifier.includes('ogretmen')
-                  ? 'Öğretmen (Ebru TEKNECİ — 1/A Rehberi) hesabı'
+                  ? 'Öğretmen (Bahar ÇETİN — 1/A Rehberi) hesabı'
                   : 'Oxonom Okulları hesabınıza erişmek için bilgilerinizi girin.'}
               </p>
             </div>

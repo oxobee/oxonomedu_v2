@@ -399,7 +399,7 @@ export default function MAdminStudentsClient({
       gradeLevel: matchedClass.grade_level,
       mentorTeacher: matchedClass.teacher_name
         ? `${matchedClass.teacher_name} (Sınıf Öğretmeni)`
-        : (selectedStudentForDetail.mentorTeacher || 'Özlem ZOR (Sınıf Öğretmeni)'),
+        : (selectedStudentForDetail.mentorTeacher || 'Bahar ÇETİN (Sınıf Öğretmeni)'),
       schoolName: matchedClass.school_name || 'Oxonom Okulları',
       birthDate: editBirthDate.trim(),
       birthPlace: editBirthPlace.trim(),
@@ -511,7 +511,7 @@ export default function MAdminStudentsClient({
       gradeLevel: matchedClass.grade_level,
       mentorTeacher: matchedClass.teacher_name
         ? `${matchedClass.teacher_name} (Sınıf Öğretmeni)`
-        : 'Özlem ZOR (Sınıf Öğretmeni)',
+        : 'Bahar ÇETİN (Sınıf Öğretmeni)',
       schoolName: matchedClass.school_name || 'Oxonom Okulları',
       gender: newGender,
       birthDate: newBirthDate,
@@ -605,7 +605,7 @@ export default function MAdminStudentsClient({
       gradeLevel: matchedClass.grade_level,
       mentorTeacher: matchedClass.teacher_name
         ? `${matchedClass.teacher_name} (Sınıf Öğretmeni)`
-        : (studentToTransfer.mentorTeacher || 'Özlem ZOR (Sınıf Öğretmeni)'),
+        : (studentToTransfer.mentorTeacher || 'Bahar ÇETİN (Sınıf Öğretmeni)'),
       class: matchedClass.code,
     }
     const updatedList = studentsList.map((s) =>
@@ -1071,7 +1071,7 @@ export default function MAdminStudentsClient({
                           <span>·</span>
                           <span className="flex items-center gap-1 text-emerald-300">
                             <School size={12} />
-                            <span>Rehber: {selectedStudentForDetail.mentorTeacher || 'Özlem ZOR (Sınıf Öğretmeni)'}</span>
+                            <span>Rehber: {selectedStudentForDetail.mentorTeacher || 'Bahar ÇETİN (Sınıf Öğretmeni)'}</span>
                           </span>
                         </div>
                       </div>
@@ -1760,7 +1760,7 @@ export default function MAdminStudentsClient({
                         <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 flex justify-between items-center">
                           <span className="text-gray-500 font-bold">Sınıf Rehber Öğretmeni</span>
                           <span className="font-bold text-gray-900 dark:text-white">
-                            {selectedStudentForDetail.mentorTeacher || 'Özlem ZOR (Sınıf Öğretmeni)'}
+                            {selectedStudentForDetail.mentorTeacher || 'Bahar ÇETİN (Sınıf Öğretmeni)'}
                           </span>
                         </div>
 
@@ -2225,7 +2225,7 @@ export default function MAdminStudentsClient({
                           type="text"
                           value={newFirstName}
                           onChange={(e) => setNewFirstName(e.target.value)}
-                          placeholder="Örn: Erçil"
+                          placeholder="Örn: Ali Yağız"
                           className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white"
                           required
                         />

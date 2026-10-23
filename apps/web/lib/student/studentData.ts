@@ -97,7 +97,7 @@ export const GRADE_1_COURSES: StudentCourse[] = [
     id: 'turkce',
     code: 'TUR-101',
     name: 'Türkçe',
-    teacherName: 'Özlem ZOR',
+    teacherName: 'Bahar ÇETİN',
     teacherBranch: 'Sınıf Öğretmeni (1/A)',
     weeklyHours: 10,
     classroom: '1/A',
@@ -123,7 +123,7 @@ export const GRADE_1_COURSES: StudentCourse[] = [
     id: 'matematik',
     code: 'MAT-101',
     name: 'Matematik',
-    teacherName: 'Özlem ZOR',
+    teacherName: 'Bahar ÇETİN',
     teacherBranch: 'Sınıf Öğretmeni (1/A)',
     weeklyHours: 5,
     classroom: '1/A',
@@ -148,7 +148,7 @@ export const GRADE_1_COURSES: StudentCourse[] = [
     id: 'hayat-bilgisi',
     code: 'HAY-101',
     name: 'Hayat Bilgisi',
-    teacherName: 'Özlem ZOR',
+    teacherName: 'Bahar ÇETİN',
     teacherBranch: 'Sınıf Öğretmeni (1/A)',
     weeklyHours: 4,
     classroom: '1/A',
@@ -257,7 +257,7 @@ export const GRADE_1_COURSES: StudentCourse[] = [
     id: 'serbest-etkinlikler',
     code: 'SER-101',
     name: 'Serbest Etkinlikler & Kodlama',
-    teacherName: 'Özlem ZOR',
+    teacherName: 'Bahar ÇETİN',
     teacherBranch: 'Sınıf Öğretmeni (1/A)',
     weeklyHours: 2,
     classroom: '1/A',
@@ -280,7 +280,7 @@ export const GRADE_9_COURSES: StudentCourse[] = [
     id: 'turkce',
     code: 'EDE-901',
     name: 'Türk Dili ve Edebiyatı',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     teacherBranch: 'Türk Dili ve Edebiyatı · Rehberlik',
     weeklyHours: 5,
     classroom: '9-A',
@@ -306,7 +306,7 @@ export const GRADE_9_COURSES: StudentCourse[] = [
     id: 'matematik',
     code: 'MAT-901',
     name: 'Matematik',
-    teacherName: 'Ebru TEKNECİ',
+    teacherName: 'Bahar ÇETİN',
     teacherBranch: 'Matematik',
     weeklyHours: 6,
     classroom: '9-A',
@@ -499,7 +499,7 @@ export const GRADE_9_COURSES: StudentCourse[] = [
   },
 ]
 
-export const STUDENT_COURSES: StudentCourse[] = GRADE_9_COURSES
+export const STUDENT_COURSES: StudentCourse[] = GRADE_1_COURSES
 
 export interface StudentAssessment {
   id: string
@@ -538,7 +538,7 @@ export const STUDENT_ASSESSMENTS: StudentAssessment[] = [
     isGraded: true,
     isPublished: true,
     status: 'completed',
-    teacherFeedback: 'Özlem ZOR: Harika ses tanıma ve heceleme becerisi. Tebrikler!',
+    teacherFeedback: 'Bahar ÇETİN: Harika ses tanıma ve heceleme becerisi. Tebrikler!',
   },
   {
     id: 'as-2',
@@ -554,7 +554,7 @@ export const STUDENT_ASSESSMENTS: StudentAssessment[] = [
     isGraded: true,
     isPublished: true,
     status: 'completed',
-    teacherFeedback: 'Özlem ZOR: Ritmik sayma ve şekil eşleştirmede üstün başarı.',
+    teacherFeedback: 'Bahar ÇETİN: Ritmik sayma ve şekil eşleştirmede üstün başarı.',
   },
   {
     id: 'as-3',
@@ -570,7 +570,7 @@ export const STUDENT_ASSESSMENTS: StudentAssessment[] = [
     isGraded: true,
     isPublished: true,
     status: 'completed',
-    teacherFeedback: 'Özlem ZOR: Sınıf kurallarına uyum ve arkadaşlık ilişkilerinde örnek davranış.',
+    teacherFeedback: 'Bahar ÇETİN: Sınıf kurallarına uyum ve arkadaşlık ilişkilerinde örnek davranış.',
   },
   {
     id: 'as-4',
@@ -605,18 +605,18 @@ export const STUDENT_ANNOUNCEMENTS: StudentAnnouncement[] = [
   {
     id: 'ann-1',
     title: '1/A Şubesi Dönem Ortası Akademik Başarı ve Uyum Tebriği',
-    author: 'Dr. Uğur UĞURLU',
+    author: 'Kemal SOYSAL',
     authorRole: 'Okul Müdürü',
     date: 'Bugün, 09:30',
     category: 'academic',
     priority: 'important',
     isPinned: true,
-    content: '1/A şubemiz Türkçe, Matematik ve Hayat Bilgisi derslerindeki örnek sınıf düzeni ve üstün performansıyla okulumuzun gururu olmuştur. Sevgili öğrencimiz Erçil ve sınıf öğretmenimiz Özlem Hanımı tebrik eder, başarılarının devamını dilerim.',
+    content: '1/A şubemiz Türkçe, Matematik ve Hayat Bilgisi derslerindeki örnek sınıf düzeni ve üstün performansıyla okulumuzun gururu olmuştur. Sevgili öğrencimiz Ali Yağız ve sınıf öğretmenimiz Özlem Hanımı tebrik eder, başarılarının devamını dilerim.',
   },
   {
     id: 'ann-2',
     title: 'Akıllı Tahta ve Dijital Kütüphane 1. Sınıf Yeni Föyleri Eklendi',
-    author: 'Özlem ZOR',
+    author: 'Bahar ÇETİN',
     authorRole: '1/A Sınıf Öğretmeni',
     date: 'Dün, 14:15',
     category: 'academic',
@@ -684,16 +684,16 @@ export function resolveAnnouncementVariables(
     defaultTime = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
   } catch (_) {}
 
-  let mentorTeacher = String(profile?.mentorTeacher || 'Özlem ZOR')
+  let mentorTeacher = String(profile?.mentorTeacher || 'Bahar ÇETİN')
   if (mentorTeacher.includes('(')) {
     mentorTeacher = mentorTeacher.split('(')[0].trim()
   }
 
   const ctx = {
-    studentName: String(customContext?.studentName || customContext?.ogrenci_adi || profile?.name || 'Erçil UĞURLU'),
+    studentName: String(customContext?.studentName || customContext?.ogrenci_adi || profile?.name || 'Ali Yağız DEMİREL'),
     parentName: String(customContext?.parentName || customContext?.veli_adi || profile?.parentName || 'Ebru UĞURLU'),
     className: String(customContext?.className || customContext?.sinif || profile?.className || '1/A'),
-    teacherName: String(customContext?.teacherName || customContext?.ogretmen_adi || mentorTeacher || 'Özlem ZOR'),
+    teacherName: String(customContext?.teacherName || customContext?.ogretmen_adi || mentorTeacher || 'Bahar ÇETİN'),
     schoolName: String(customContext?.schoolName || customContext?.okul_adi || profile?.schoolName || 'Oxonom Okulları'),
     date: String(customContext?.date || customContext?.tarih || defaultDate),
     time: String(customContext?.time || customContext?.saat || defaultTime),
@@ -949,7 +949,7 @@ export function getSynchronizedStudentProfile(): StudentProfile {
       try {
         const parsed = JSON.parse(rawStudents)
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Erçil UĞURLU (student ID s-1, No 101, class 9-A)
+          // Ali Yağız DEMİREL (student ID s-1, No 101, class 9-A)
           studentRecord =
             parsed.find(
               (s: MStudentItem) =>
@@ -959,7 +959,7 @@ export function getSynchronizedStudentProfile(): StudentProfile {
             ) ||
             parsed.find(
               (s: MStudentItem) =>
-                s.className?.includes('9-A') || s.className?.includes('9/A')
+                s.className?.includes('1-A') || s.className?.includes('1/A')
             ) ||
             parsed[0]
         }
@@ -971,13 +971,16 @@ export function getSynchronizedStudentProfile(): StudentProfile {
     }
 
     if (studentRecord) {
-      const isErcil = (studentRecord.name && studentRecord.name.toLowerCase().includes('erçil')) || studentRecord.studentNo === '101'
-      if (isErcil) {
-        studentRecord.className = '9-A'
-        ;(studentRecord as any).gradeLevel = '9. Sınıf'
-        studentRecord.mentorTeacher = 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)'
+      const isDemoStudent =
+        (studentRecord.name && (studentRecord.name.toLowerCase().includes('ali') || studentRecord.name.toLowerCase().includes('demirel'))) ||
+        studentRecord.studentNo === '101' ||
+        (studentRecord.name && studentRecord.name.toLowerCase().includes('erçil'))
+      if (isDemoStudent) {
+        studentRecord.className = '1/A'
+        ;(studentRecord as any).gradeLevel = '1. Sınıf'
+        studentRecord.mentorTeacher = 'Bahar ÇETİN (Sınıf Öğretmeni)'
         if (!studentRecord.gpa || Number(studentRecord.gpa) < 50) {
-          studentRecord.gpa = 96.5
+          studentRecord.gpa = 98.2
         }
         if (!studentRecord.grades || studentRecord.grades.length === 0) {
           studentRecord.grades = MASTER_STUDENT_PROFILE.grades
@@ -986,7 +989,7 @@ export function getSynchronizedStudentProfile(): StudentProfile {
     }
 
     // 2. Mentor Teacher synchronization from active teacher's profile
-    let mentorTeacher = studentRecord.mentorTeacher || 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)'
+    let mentorTeacher = studentRecord.mentorTeacher || 'Bahar ÇETİN (Türk Dili ve Edebiyatı)'
     const rawTeacher = localStorage.getItem('oxonom_teacher_profile')
     if (rawTeacher) {
       try {
@@ -1022,7 +1025,7 @@ export function getSynchronizedStudentProfile(): StudentProfile {
           ? 'Gülşah ÖZTÜRK'
           : cName.includes('Müzik')
           ? 'Bahar ŞEN'
-          : 'Özlem ZOR',
+          : 'Bahar ÇETİN',
       })
     })
 
@@ -1149,13 +1152,13 @@ export function getSynchronizedStudentProfile(): StudentProfile {
       absentDays = summary.absentSessions
     } catch (_) {}
 
-    const nameParts = (studentRecord.name || 'Erçil UĞURLU').split(' ')
-    const firstName = nameParts[0] || 'Erçil'
+    const nameParts = (studentRecord.name || 'Ali Yağız DEMİREL').split(' ')
+    const firstName = nameParts[0] || 'Ali Yağız'
     const lastName = nameParts.slice(1).join(' ') || 'UĞURLU'
 
     return {
       id: studentRecord.id || 's-1',
-      name: studentRecord.name || 'Erçil UĞURLU',
+      name: studentRecord.name || 'Ali Yağız DEMİREL',
       firstName,
       lastName,
       email: studentRecord.email || 'ogrenci@oxonom.com',
@@ -1167,7 +1170,7 @@ export function getSynchronizedStudentProfile(): StudentProfile {
       enrollmentDate: studentRecord.enrollmentDate || '01.09.2024',
       className: studentRecord.className ? studentRecord.className.replace(' Şubesi', '') : '1/A',
       gradeLevel: (studentRecord as any).gradeLevel || '1. Sınıf',
-      mentorTeacher: mentorTeacher || 'Özlem ZOR (Sınıf Öğretmeni)',
+      mentorTeacher: mentorTeacher || 'Bahar ÇETİN (Sınıf Öğretmeni)',
       schoolName: studentRecord.schoolName || 'Oxonom Okulları',
       gpa: calculatedGpa,
       classRank,
@@ -1178,7 +1181,7 @@ export function getSynchronizedStudentProfile(): StudentProfile {
       parentName: studentRecord.parentName || 'Ebru UĞURLU',
       parentPhone: studentRecord.parentPhone || '+90 532 999 1100',
       parentRelation: studentRecord.parentRelation || 'Anne (Mimar)',
-      secondParentName: studentRecord.secondParentName || 'Dr. Uğur UĞURLU',
+      secondParentName: studentRecord.secondParentName || 'Kemal SOYSAL',
       secondParentPhone: studentRecord.secondParentPhone || '+90 532 999 2200',
       secondParentRelation: studentRecord.secondParentRelation || 'Baba (Kurum Müdürü)',
       emergencyPhone: studentRecord.emergencyPhone || '+90 532 999 2200',
@@ -1290,7 +1293,7 @@ export function getSynchronizedStudentAssessments(): StudentAssessment[] {
         status: isGraded ? 'completed' : 'upcoming',
         teacherFeedback: feedback,
         scope: ce.scope,
-        teacherName: ce.teacherName || courseGrade?.teacherName || 'Ebru TEKNECİ',
+        teacherName: ce.teacherName || courseGrade?.teacherName || 'Bahar ÇETİN',
         className: ce.className,
       })
     })
@@ -1350,14 +1353,14 @@ export function getSynchronizedGuidanceNotes(): GuidanceNoteItem[] {
     {
       id: 'gn-1',
       date: '28.09.2026',
-      author: 'Özlem ZOR (1/A Sınıf Öğretmeni)',
+      author: 'Bahar ÇETİN (1/A Sınıf Öğretmeni)',
       content:
         'Öğrencinin ilk okuma yazma hazırlık sürecindeki motivasyonu, sesleri fark etme ve arkadaşlarıyla uyumu mükemmel düzeydedir.',
     },
     {
       id: 'gn-2',
       date: '15.09.2026',
-      author: 'Dr. Uğur UĞURLU (Okul Müdürü)',
+      author: 'Kemal SOYSAL (Okul Müdürü)',
       content:
         'Velisi Ebru Hanım ile 1. sınıf oryantasyon ve okula uyum süreci görüşmesi başarıyla gerçekleştirildi.',
     },
@@ -1367,43 +1370,43 @@ export function getSynchronizedGuidanceNotes(): GuidanceNoteItem[] {
 // Canonical 30-hour (6 periods/day x 5 days) schedule for 1/A matching the Principal's 1. Sınıf curriculum
 export const CANONICAL_1A_SCHEDULE_30: ScheduleEntry[] = [
   // Pazartesi (6)
-  { id: 'sc-1a-mon-1', orgId: 30, day: 'mon', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-1a-mon-2', orgId: 30, day: 'mon', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-1a-mon-3', orgId: 30, day: 'mon', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-1a-mon-4', orgId: 30, day: 'mon', period: 4, classCode: '1/A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-1a-mon-5', orgId: 30, day: 'mon', period: 5, classCode: '1/A', subject: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'teal', isSmartBoardActive: true },
+  { id: 'sc-1a-mon-1', orgId: 30, day: 'mon', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-mon-2', orgId: 30, day: 'mon', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-mon-3', orgId: 30, day: 'mon', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-1a-mon-4', orgId: 30, day: 'mon', period: 4, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-1a-mon-5', orgId: 30, day: 'mon', period: 5, classCode: '1/A', subject: 'Hayat Bilgisi', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'teal', isSmartBoardActive: true },
   { id: 'sc-1a-mon-6', orgId: 30, day: 'mon', period: 6, classCode: '1/A', subject: 'Beden Eğitimi ve Oyun', teacherName: 'Selim AKSOY', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
 
   // Salı (6)
-  { id: 'sc-1a-tue-1', orgId: 30, day: 'tue', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-1a-tue-2', orgId: 30, day: 'tue', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-1a-tue-3', orgId: 30, day: 'tue', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-1a-tue-4', orgId: 30, day: 'tue', period: 4, classCode: '1/A', subject: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'teal', isSmartBoardActive: true },
+  { id: 'sc-1a-tue-1', orgId: 30, day: 'tue', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-tue-2', orgId: 30, day: 'tue', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-tue-3', orgId: 30, day: 'tue', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-1a-tue-4', orgId: 30, day: 'tue', period: 4, classCode: '1/A', subject: 'Hayat Bilgisi', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'teal', isSmartBoardActive: true },
   { id: 'sc-1a-tue-5', orgId: 30, day: 'tue', period: 5, classCode: '1/A', subject: 'Yabancı Dil (İngilizce)', teacherName: 'Canan YILDIRIM', roomName: '1. Kat · Derslik 101', color: 'purple', isSmartBoardActive: true },
   { id: 'sc-1a-tue-6', orgId: 30, day: 'tue', period: 6, classCode: '1/A', subject: 'Beden Eğitimi ve Oyun', teacherName: 'Selim AKSOY', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
 
   // Çarşamba (6)
-  { id: 'sc-1a-wed-1', orgId: 30, day: 'wed', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-1a-wed-2', orgId: 30, day: 'wed', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-1a-wed-3', orgId: 30, day: 'wed', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-1a-wed-4', orgId: 30, day: 'wed', period: 4, classCode: '1/A', subject: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'teal', isSmartBoardActive: true },
+  { id: 'sc-1a-wed-1', orgId: 30, day: 'wed', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-wed-2', orgId: 30, day: 'wed', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-wed-3', orgId: 30, day: 'wed', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-1a-wed-4', orgId: 30, day: 'wed', period: 4, classCode: '1/A', subject: 'Hayat Bilgisi', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'teal', isSmartBoardActive: true },
   { id: 'sc-1a-wed-5', orgId: 30, day: 'wed', period: 5, classCode: '1/A', subject: 'Görsel Sanatlar', teacherName: 'Gülşah ÖZTÜRK', roomName: 'Görsel Sanatlar Atölyesi', color: 'pink', isSmartBoardActive: false },
   { id: 'sc-1a-wed-6', orgId: 30, day: 'wed', period: 6, classCode: '1/A', subject: 'Beden Eğitimi ve Oyun', teacherName: 'Selim AKSOY', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
 
   // Perşembe (6)
-  { id: 'sc-1a-thu-1', orgId: 30, day: 'thu', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-1a-thu-2', orgId: 30, day: 'thu', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-1a-thu-3', orgId: 30, day: 'thu', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-1a-thu-4', orgId: 30, day: 'thu', period: 4, classCode: '1/A', subject: 'Hayat Bilgisi', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'teal', isSmartBoardActive: true },
+  { id: 'sc-1a-thu-1', orgId: 30, day: 'thu', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-thu-2', orgId: 30, day: 'thu', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-thu-3', orgId: 30, day: 'thu', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-1a-thu-4', orgId: 30, day: 'thu', period: 4, classCode: '1/A', subject: 'Hayat Bilgisi', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'teal', isSmartBoardActive: true },
   { id: 'sc-1a-thu-5', orgId: 30, day: 'thu', period: 5, classCode: '1/A', subject: 'Müzik', teacherName: 'Müzik Zümresi', roomName: 'Müzik Odası', color: 'pink', isSmartBoardActive: true },
   { id: 'sc-1a-thu-6', orgId: 30, day: 'thu', period: 6, classCode: '1/A', subject: 'Beden Eğitimi ve Oyun', teacherName: 'Selim AKSOY', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
 
   // Cuma (6)
-  { id: 'sc-1a-fri-1', orgId: 30, day: 'fri', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-1a-fri-2', orgId: 30, day: 'fri', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-fri-1', orgId: 30, day: 'fri', period: 1, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-1a-fri-2', orgId: 30, day: 'fri', period: 2, classCode: '1/A', subject: 'Türkçe', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'blue', isSmartBoardActive: true },
   { id: 'sc-1a-fri-3', orgId: 30, day: 'fri', period: 3, classCode: '1/A', subject: 'Yabancı Dil (İngilizce)', teacherName: 'Canan YILDIRIM', roomName: '1. Kat · Derslik 101', color: 'purple', isSmartBoardActive: true },
-  { id: 'sc-1a-fri-4', orgId: 30, day: 'fri', period: 4, classCode: '1/A', subject: 'Serbest Etkinlikler & Kodlama', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'cyan', isSmartBoardActive: true },
-  { id: 'sc-1a-fri-5', orgId: 30, day: 'fri', period: 5, classCode: '1/A', subject: 'Serbest Etkinlikler & Kodlama', teacherName: 'Özlem ZOR', roomName: '1. Kat · Derslik 101', color: 'cyan', isSmartBoardActive: true },
+  { id: 'sc-1a-fri-4', orgId: 30, day: 'fri', period: 4, classCode: '1/A', subject: 'Serbest Etkinlikler & Kodlama', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'cyan', isSmartBoardActive: true },
+  { id: 'sc-1a-fri-5', orgId: 30, day: 'fri', period: 5, classCode: '1/A', subject: 'Serbest Etkinlikler & Kodlama', teacherName: 'Bahar ÇETİN', roomName: '1. Kat · Derslik 101', color: 'cyan', isSmartBoardActive: true },
   { id: 'sc-1a-fri-6', orgId: 30, day: 'fri', period: 6, classCode: '1/A', subject: 'Beden Eğitimi ve Oyun', teacherName: 'Selim AKSOY', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
 ]
 
@@ -1465,7 +1468,7 @@ export function getSynchronizedClassWeeklySchedule(classCode: string = '9-A'): S
 }
 
 /**
- * Returns homework assignments assigned by the teacher to 9-A or specifically to Erçil Uğurlu.
+ * Returns homework assignments assigned by the teacher to 9-A or specifically to Ali Yağız Demirel.
  */
 export function getSynchronizedStudentAssignments(): SchoolAssignmentItem[] {
   let storedCustom: SchoolAssignmentItem[] = []
@@ -1528,43 +1531,45 @@ export function getSynchronizedStudentAssignments(): SchoolAssignmentItem[] {
     }
   }
 
-  // Filter for 9-A class or individual student Erçil Uğurlu
+  // Filter for 1/A class or demo student Ali Yağız Demirel
   return uniquePool.filter((asg: any) => {
     // Check if target is individual
     const targetType = asg.target_type || asg.tool_data?.targetType || 'CLASS'
     if (targetType === 'INDIVIDUAL') {
       const studentId = String(asg.target_student_id || asg.tool_data?.targetStudentId || '')
       const studentName = String(asg.target_student_name || asg.tool_data?.targetStudentName || '').toLowerCase()
-      const isForErcil =
+      const isForDemoStudent =
         studentId === 's-1' ||
         studentId === '101' ||
-        studentName.includes('erçil') ||
-        studentName.includes('ugurlu') ||
-        studentName.includes('uğurlu')
-      return isForErcil
+        studentName.includes('ali') ||
+        studentName.includes('demirel') ||
+        studentName.includes('erçil')
+      return isForDemoStudent
     }
 
-    // Class assignment targeted to 9-A or 9. Sınıf
+    // Class assignment targeted to 1/A or 1. Sınıf
     const classStr = String(asg.className || asg.grade_level || '').toLowerCase()
     const hasClassInClasses = asg.classes?.some((c: any) => {
       const cStr = String(c.code || c.name || '').toLowerCase()
-      return cStr.includes('9-a') || cStr.includes('9/a') || cStr.includes('9a') || cStr.includes('9. sınıf')
+      return cStr.includes('1-a') || cStr.includes('1/a') || cStr.includes('1a') || cStr.includes('1. sınıf')
     })
 
     if (
-      classStr.includes('9-a') ||
-      classStr.includes('9/a') ||
-      classStr.includes('9a') ||
-      classStr.includes('9. sınıf') ||
+      classStr.includes('1-a') ||
+      classStr.includes('1/a') ||
+      classStr.includes('1a') ||
+      classStr.includes('1. sınıf') ||
       hasClassInClasses
     ) {
       return true
     }
 
-    // Exclude if explicitly targeted to other grades (1. Sınıf, 5-A, etc.)
+    // Exclude if explicitly targeted to other grades (2. Sınıf, 5-A, etc.)
     if (
       asg.grade_level &&
-      (asg.grade_level.includes('1.') ||
+      (asg.grade_level.includes('2.') ||
+        asg.grade_level.includes('3.') ||
+        asg.grade_level.includes('4.') ||
         asg.grade_level.includes('5.') ||
         asg.grade_level.includes('6.') ||
         asg.grade_level.includes('7.') ||

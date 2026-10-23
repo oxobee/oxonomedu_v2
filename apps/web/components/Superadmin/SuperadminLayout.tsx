@@ -39,10 +39,10 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
       if (raw) {
         setAdminUser(JSON.parse(raw))
       } else {
-        setAdminUser({ username: 'ugurxugurlu', name: 'Uğur UĞURLU' })
+        setAdminUser({ username: 'ugurxugurlu', name: 'Kemal SOYSAL' })
       }
     } catch {
-      setAdminUser({ username: 'ugurxugurlu', name: 'Uğur UĞURLU' })
+      setAdminUser({ username: 'ugurxugurlu', name: 'Kemal SOYSAL' })
     }
   }, [])
 
@@ -123,7 +123,7 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
             <div className="w-2.5 h-2.5 rounded-full bg-[#45C7A2] animate-pulse" />
             <div className="text-left text-xs">
               <div className="font-bold text-white leading-none">
-                {adminUser?.name || 'Uğur UĞURLU'}
+                {adminUser?.name || 'Kemal SOYSAL'}
               </div>
               <div className="text-[10px] text-[#A898B0] font-mono leading-none mt-0.5">
                 @{adminUser?.username || 'ugurxugurlu'}

@@ -313,7 +313,7 @@ export default function DashV2Client({
     if (user?.full_name) {
       return user.full_name
     }
-    return selectedClass?.teacher_name || 'Ebru TEKNECİ'
+    return selectedClass?.teacher_name || 'Bahar ÇETİN'
   }, [teacherProfile, user, selectedClass])
 
   const teacherInitials = useMemo(() => {
@@ -703,6 +703,25 @@ export default function DashV2Client({
       return
     }
 
+    const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png')
+    const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')
+
+    // For transparent formats (PNG, SVG) under 3MB, read directly to preserve 100% alpha transparency
+    if ((isPng || isSvg) && file.size <= 3 * 1024 * 1024) {
+      const reader = new FileReader()
+      reader.onload = () => {
+        setSelectedFile({
+          name: file.name,
+          size: file.size,
+          type: isPng ? 'image/png' : 'image/svg+xml',
+          previewUrl: reader.result as string,
+        })
+        toast.success(`"${file.name}" yüklendi (şeffaflık korundu).`, { icon: '🖼️' })
+      }
+      reader.readAsDataURL(file)
+      return
+    }
+
     const objectUrl = URL.createObjectURL(file)
     const img = new Image()
     img.onload = () => {
@@ -716,12 +735,14 @@ export default function DashV2Client({
         canvas.height = Math.round(h * scale)
         const ctx = canvas.getContext('2d')
         if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85)
+          const targetMime = isPng ? 'image/png' : 'image/jpeg'
+          const compressedDataUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.85)
           setSelectedFile({
             name: file.name,
             size: Math.round((compressedDataUrl.length * 3) / 4),
-            type: 'image/jpeg',
+            type: targetMime,
             previewUrl: compressedDataUrl,
           })
           toast.success(`"${file.name}" yüklendi ve optimize edildi.`, { icon: '🖼️' })
@@ -732,7 +753,7 @@ export default function DashV2Client({
           setSelectedFile({
             name: file.name,
             size: file.size,
-            type: file.type,
+            type: file.type || (isPng ? 'image/png' : 'image/jpeg'),
             previewUrl: reader.result as string,
           })
           toast.success(`"${file.name}" yüklendi.`, { icon: '🖼️' })
@@ -1551,7 +1572,7 @@ export default function DashV2Client({
                       {selectedClass.code} Şubesi · Türk Dili ve Edebiyatı
                     </p>
                     <p className="text-[11px] text-gray-400 mt-0.5 truncate">
-                      Erçil UĞURLU (No: 101)
+                      Ali Yağız DEMİREL (No: 101)
                     </p>
                   </div>
                 </div>
@@ -1758,7 +1779,7 @@ export default function DashV2Client({
                       </h3>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      {selectedClass.code} Şubesi · Erçil UĞURLU için verilen ödevler, teslim durumları ve puanlama ekranı.
+                      {selectedClass.code} Şubesi · Ali Yağız DEMİREL için verilen ödevler, teslim durumları ve puanlama ekranı.
                     </p>
                   </div>
 

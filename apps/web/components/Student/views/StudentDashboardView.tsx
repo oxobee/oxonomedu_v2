@@ -703,7 +703,7 @@ export default function StudentDashboardView() {
     {
       id: 'turkce',
       name: 'Türkçe',
-      teacher: 'Özlem ZOR',
+      teacher: 'Bahar ÇETİN',
       hours: '10 Saat / Hafta',
       icon: BookOpen,
       bg: 'bg-[#EDE9FE] dark:bg-[#2E1065]/40',
@@ -713,7 +713,7 @@ export default function StudentDashboardView() {
     {
       id: 'matematik',
       name: 'Matematik',
-      teacher: 'Özlem ZOR',
+      teacher: 'Bahar ÇETİN',
       hours: '5 Saat / Hafta',
       icon: Lightbulb,
       bg: 'bg-[#FFE4E6] dark:bg-[#881337]/40',
@@ -723,7 +723,7 @@ export default function StudentDashboardView() {
     {
       id: 'hayat-bilgisi',
       name: 'Hayat Bilgisi',
-      teacher: 'Özlem ZOR',
+      teacher: 'Bahar ÇETİN',
       hours: '4 Saat / Hafta',
       icon: Compass,
       bg: 'bg-[#DCFCE7] dark:bg-[#052E16]/40',
@@ -746,7 +746,7 @@ export default function StudentDashboardView() {
     (activeOrNextLesson as any)?.subjectName ||
     activeOrNextLesson?.subject ||
     'Türkçe'
-  const activeTeacherName = activeOrNextLesson?.teacherName || profile.mentorTeacher || 'Özlem ZOR'
+  const activeTeacherName = activeOrNextLesson?.teacherName || profile.mentorTeacher || 'Bahar ÇETİN'
   const activeRoomName = activeOrNextLesson?.roomName || `Derslik ${profile.className}`
 
   // Smart Academic Performance Calculation
@@ -1254,7 +1254,7 @@ export default function StudentDashboardView() {
                       Rehberlik & Öğretmen Notu
                     </h3>
                     <p className="text-[10px] text-slate-400 font-bold mt-0.5">
-                      {profile.mentorTeacher || 'Ebru TEKNECİ'}
+                      {profile.mentorTeacher || 'Bahar ÇETİN'}
                     </p>
                   </div>
                 </div>

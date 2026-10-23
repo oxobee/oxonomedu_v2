@@ -347,7 +347,7 @@ export default function StudentSettingsView({
                   </span>
                 </div>
                 <div className="font-black text-gray-900 dark:text-white text-sm">
-                  {profile.secondParentName || 'Dr. Uğur UĞURLU'}
+                  {profile.secondParentName || 'Kemal SOYSAL'}
                 </div>
                 <div className="text-gray-600 dark:text-gray-300 font-medium">
                   Meslek: Kurum Müdürü

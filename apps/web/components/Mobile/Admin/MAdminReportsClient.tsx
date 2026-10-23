@@ -72,7 +72,7 @@ export default function MAdminReportsClient({
         return getStoredPrincipalProfile()
       } catch (_) {}
     }
-    return { name: 'Dr. Uğur UĞURLU', title: 'Okul Müdürü' }
+    return { name: 'Kemal SOYSAL', title: 'Okul Müdürü' }
   })
 
   useEffect(() => {
@@ -157,7 +157,7 @@ export default function MAdminReportsClient({
       return [
         {
           code: ALL_CLASSROOMS[0]?.code || '1/A',
-          teacher: 'Ebru TEKNECİ',
+          teacher: 'Bahar ÇETİN',
           students: 24,
           average: avg > 0 ? avg : 89.2,
           attendanceRate: 98.4,
@@ -246,7 +246,7 @@ export default function MAdminReportsClient({
         },
         {
           code: '4/A',
-          teacher: 'Özlem ZOR',
+          teacher: 'Bahar ÇETİN',
           students: 28,
           average: 90.8,
           attendanceRate: 97.6,

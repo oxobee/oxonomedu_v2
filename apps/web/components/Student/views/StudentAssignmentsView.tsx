@@ -250,7 +250,7 @@ export default function StudentAssignmentsView() {
                     <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
                       <span>Öğretmen:</span>
                       <span className="font-bold text-gray-900 dark:text-white">
-                        {asg.teacher_name || 'Ebru TEKNECİ'}
+                        {asg.teacher_name || 'Bahar ÇETİN'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">

@@ -139,7 +139,7 @@ export default function MAdminClient({
     loginTime: string
     twoFactorActive: boolean
   }>({
-    name: 'Dr. Uğur UĞURLU',
+    name: 'Kemal SOYSAL',
     title: 'Okul Müdürü · Kurum Yetkilisi',
     email: 'mudur@oxonom.com',
     tcNo: '10000000001',
@@ -152,7 +152,7 @@ export default function MAdminClient({
   })
 
   // Edit profile form state
-  const [editName, setEditName] = useState('Dr. Uğur UĞURLU')
+  const [editName, setEditName] = useState('Kemal SOYSAL')
   const [editTitle, setEditTitle] = useState('Okul Müdürü · Kurum Yetkilisi')
   const [editTcNo, setEditTcNo] = useState('10000000146')
   const [editPhone, setEditPhone] = useState('+90 532 999 2200')
@@ -162,9 +162,9 @@ export default function MAdminClient({
   // Dynamic counts for strictly REAL DATA (No mock data)
   const [realStats, setRealStats] = useState({
     studentCount: 1,
-    studentName: 'Erçil UĞURLU',
+    studentName: 'Ali Yağız DEMİREL',
     teacherCount: 16,
-    teacherName: 'Özlem ZOR',
+    teacherName: 'Bahar ÇETİN',
     classCount: 32,
     className: '1/A',
     parentCount: 1,
@@ -202,7 +202,7 @@ export default function MAdminClient({
           const rawTeachers = localStorage.getItem(`oxonom_admin_teachers_${selectedOrgId}`)
           const teachers = rawTeachers ? JSON.parse(rawTeachers) : null
           const tCount = Array.isArray(teachers) && teachers.length > 0 ? teachers.length : 16
-          const tName = Array.isArray(teachers) && teachers.length > 0 ? teachers[0].name : 'Özlem ZOR'
+          const tName = Array.isArray(teachers) && teachers.length > 0 ? teachers[0].name : 'Bahar ÇETİN'
 
           const rawStudents =
             localStorage.getItem(`oxonom_admin_students_list_${selectedOrgId}`) ||
@@ -210,7 +210,7 @@ export default function MAdminClient({
             localStorage.getItem('oxonom_m_students_v3')
           const students = rawStudents ? JSON.parse(rawStudents) : null
           const sCount = Array.isArray(students) && students.length > 0 ? students.length : 1
-          const sName = Array.isArray(students) && students.length > 0 ? (students[0]?.name || 'Erçil UĞURLU') : 'Erçil UĞURLU'
+          const sName = Array.isArray(students) && students.length > 0 ? (students[0]?.name || 'Ali Yağız DEMİREL') : 'Ali Yağız DEMİREL'
           const sClass = Array.isArray(students) && students.length > 0 ? (students[0]?.className || '1/A') : '1/A'
 
           const rawClasses = localStorage.getItem(`oxonom_admin_classes_${selectedOrgId}`)

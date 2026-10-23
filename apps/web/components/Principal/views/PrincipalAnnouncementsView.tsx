@@ -174,8 +174,8 @@ const INITIAL_ANNOUNCEMENTS: AnnouncementItem[] = [
     id: 'ann-p-1',
     title: '1/A Şubesi Dönem Ortası Akademik Başarı ve Uyum Tebrik Bildirimi',
     content:
-      '1/A şubemiz Türkçe, Matematik ve Hayat Bilgisi derslerindeki üstün performansıyla okulumuzun birinci şubesi olarak devam etmektedir. Sevgili öğrencimiz Erçil ve sınıf öğretmenimiz Özlem Hanımı tebrik eder, başarılarının devamını dilerim.',
-    author: 'Dr. Uğur UĞURLU',
+      '1/A şubemiz Türkçe, Matematik ve Hayat Bilgisi derslerindeki üstün performansıyla okulumuzun birinci şubesi olarak devam etmektedir. Sevgili öğrencimiz Ali Yağız ve sınıf öğretmenimiz Özlem Hanımı tebrik eder, başarılarının devamını dilerim.',
+    author: 'Kemal SOYSAL',
     authorRole: 'Okul Müdürü',
     targetChannels: { student: true, teacher: true, parent: true, board: true },
     priority: 'important',
@@ -193,7 +193,7 @@ const INITIAL_ANNOUNCEMENTS: AnnouncementItem[] = [
     title: '2026-2027 Eğitim Öğretim Yılı 1. Dönem Veli Toplantısı',
     content:
       'Değerli Velilerimiz; 1. Dönem Veli-Öğretmen Değerlendirme Toplantısı 25 Ekim 2026 Cumartesi günü saat 13:00\'te okulumuz konferans salonunda gerçekleştirilecektir. Katılımınızı önemle rica ederiz.',
-    author: 'Dr. Uğur UĞURLU',
+    author: 'Kemal SOYSAL',
     authorRole: 'Okul Müdürü',
     targetChannels: { student: false, teacher: true, parent: true, board: false },
     priority: 'important',
@@ -211,7 +211,7 @@ const INITIAL_ANNOUNCEMENTS: AnnouncementItem[] = [
     title: 'Öğretmenler Kurulu ve Zümre Başkanları Toplantısı',
     content:
       'Değerli Öğretmenlerimiz; Ara sınav öncesi soru hazırlama ve kazanım değerlendirme toplantısı yarın saat 16:30\'da Öğretmenler Odasında yapılacaktır. Taslak kazanım formlarıyla katılım rica olunur.',
-    author: 'Dr. Uğur UĞURLU',
+    author: 'Kemal SOYSAL',
     authorRole: 'Okul Müdürü',
     targetChannels: { student: false, teacher: true, parent: false, board: false },
     priority: 'normal',
@@ -229,7 +229,7 @@ const INITIAL_ANNOUNCEMENTS: AnnouncementItem[] = [
     title: 'Akıllı Tahta ve Dijital Kütüphane 1. Sınıf Yeni Föyleri Eklendi',
     content:
       'Dersliklerimizde bulunan akıllı tahtalar ve öğrenci mobil uygulaması ile senkron çalışan yeni MEB uyumlu dijital çalışma föyleri ve ritmik sayma etkinlikleri kütüphaneye eklenmiştir.',
-    author: 'Özlem ZOR',
+    author: 'Bahar ÇETİN',
     authorRole: '1/A Sınıf Öğretmeni',
     targetChannels: { student: true, teacher: true, parent: false, board: true },
     priority: 'normal',
@@ -277,7 +277,7 @@ export default function PrincipalAnnouncementsView() {
   const [searchQuery, setSearchQuery] = useState('')
 
   // Principal profile identity
-  const [principalName, setPrincipalName] = useState('Dr. Uğur UĞURLU')
+  const [principalName, setPrincipalName] = useState('Kemal SOYSAL')
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -1345,7 +1345,7 @@ export default function PrincipalAnnouncementsView() {
                   <div className="p-3 rounded-xl bg-cyan-50/70 dark:bg-cyan-950/30 border border-cyan-200/50 dark:border-cyan-800/50 text-[11px] text-cyan-950 dark:text-cyan-200 space-y-1">
                     <span className="font-black text-cyan-700 dark:text-cyan-300 flex items-center gap-1">
                       <Sparkles size={12} />
-                      Canlı Çözümlenmiş Önizleme (Örnek Öğrenci: Erçil UĞURLU - 1/A):
+                      Canlı Çözümlenmiş Önizleme (Örnek Öğrenci: Ali Yağız DEMİREL - 1/A):
                     </span>
                     <p className="whitespace-pre-wrap leading-relaxed italic">
                       "{resolveTemplateTags(formContent)}"

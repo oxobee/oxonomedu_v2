@@ -136,7 +136,7 @@ export interface BranchOption {
 }
 
 const BRANCH_TEACHERS_CATALOG = [
-  { name: 'Özlem ZOR', branch: 'Sınıf Öğretmeni (1/A)' },
+  { name: 'Bahar ÇETİN', branch: 'Sınıf Öğretmeni (1/A)' },
   { name: 'Beyzanur SALMANLI', branch: 'Sınıf Öğretmeni' },
   { name: 'Özge KABA', branch: 'Sınıf Öğretmeni' },
   { name: 'İpek ŞAHİN', branch: 'Sınıf Öğretmeni' },
@@ -159,7 +159,7 @@ const BRANCH_TEACHERS_CATALOG = [
   { name: 'Murat DEMİR', branch: 'Bilişim Teknolojileri' },
   { name: 'Gülşah ÖZTÜRK', branch: 'Görsel Sanatlar' },
   { name: 'Selim AKSOY', branch: 'Beden Eğitimi' },
-  { name: 'Ebru TEKNECİ', branch: 'Türkçe / Edebiyat' },
+  { name: 'Bahar ÇETİN', branch: 'Türkçe / Edebiyat' },
 ]
 
 export function generateAllBranchOptions(): BranchOption[] {
@@ -192,7 +192,7 @@ export function generateAllBranchOptions(): BranchOption[] {
         title: `${code} Şubesi`,
         code,
         desc: is1A
-          ? 'Sınıf Rehber Öğretmeni: Özlem ZOR · 1 Kayıtlı Öğrenci (Erçil UĞURLU)'
+          ? 'Sınıf Rehber Öğretmeni: Bahar ÇETİN · 1 Kayıtlı Öğrenci (Ali Yağız DEMİREL)'
           : `Sınıf Rehber Öğretmeni: ${teacher.name} (${teacher.branch})`,
         grade: `${g}. Sınıf`,
         gradeNumber: g,
@@ -293,7 +293,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     periodLabel: 'Bu Hafta',
     accentColor: 'emerald',
     max_score: 100,
-    teacher_name: 'Özlem ZOR',
+    teacher_name: 'Bahar ÇETİN',
   },
   {
     id: 'hw-1a-reading-1',
@@ -313,7 +313,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     periodLabel: 'Bu Hafta',
     accentColor: 'rose',
     max_score: 100,
-    teacher_name: 'Özlem ZOR',
+    teacher_name: 'Bahar ÇETİN',
   },
   {
     id: 'hw-1a-worksheet-1',
@@ -333,7 +333,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     periodLabel: 'Geçen Hafta',
     accentColor: 'amber',
     max_score: 100,
-    teacher_name: 'Özlem ZOR',
+    teacher_name: 'Bahar ÇETİN',
   },
   {
     id: 'hw-1a-hayat-1',
@@ -354,7 +354,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     periodLabel: 'Bu Hafta',
     accentColor: 'blue',
     max_score: 100,
-    teacher_name: 'Özlem ZOR',
+    teacher_name: 'Bahar ÇETİN',
   },
 
   // ── 1/A ŞUBESİ (TÜRK DİLİ & EDEBİYAT) ──
@@ -376,7 +376,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     periodLabel: 'Geçen Hafta',
     accentColor: 'emerald',
     max_score: 100,
-    teacher_name: 'Ebru TEKNECİ',
+    teacher_name: 'Bahar ÇETİN',
   },
   {
     id: 'hw-whiteboard-1',
@@ -397,7 +397,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     periodLabel: 'Bu Hafta',
     accentColor: 'purple',
     max_score: 100,
-    teacher_name: 'Ebru TEKNECİ',
+    teacher_name: 'Bahar ÇETİN',
   },
   {
     id: 'hw-quiz-1',
@@ -418,7 +418,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     periodLabel: 'Bu Hafta',
     accentColor: 'blue',
     max_score: 100,
-    teacher_name: 'Ebru TEKNECİ',
+    teacher_name: 'Bahar ÇETİN',
   },
   {
     id: 'hw-worksheet-1',
@@ -438,7 +438,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     periodLabel: 'Bu Hafta',
     accentColor: 'amber',
     max_score: 100,
-    teacher_name: 'Ebru TEKNECİ',
+    teacher_name: 'Bahar ÇETİN',
   },
   {
     id: 'hw-math-1',
@@ -458,7 +458,7 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     periodLabel: 'Bu Hafta',
     accentColor: 'rose',
     max_score: 100,
-    teacher_name: 'Ebru TEKNECİ',
+    teacher_name: 'Bahar ÇETİN',
   },
 ]
 
@@ -738,7 +738,7 @@ export default function MHomeworkClient({
   const [editDescription, setEditDescription] = useState('')
   const [editTargetType, setEditTargetType] = useState<'CLASS' | 'INDIVIDUAL'>('CLASS')
   const [editTargetStudentId, setEditTargetStudentId] = useState('s-1')
-  const [editTargetStudentName, setEditTargetStudentName] = useState('Erçil UĞURLU')
+  const [editTargetStudentName, setEditTargetStudentName] = useState('Ali Yağız DEMİREL')
 
   // ── Assignment Permissions (Yetkilendirme) Modal State ──
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false)
@@ -840,7 +840,7 @@ export default function MHomeworkClient({
       due_date: createDueDate || '2026-10-20T23:59:00',
       max_score: Number(createMaxScore) || 100,
       published: true,
-      teacher_name: targetBranchObj?.teacherName || 'Özlem ZOR',
+      teacher_name: targetBranchObj?.teacherName || 'Bahar ÇETİN',
       creation_date: new Date().toISOString(),
     }
 
@@ -922,7 +922,7 @@ export default function MHomeworkClient({
           periodLabel,
           accentColor: asg.subject === 'Türkçe' || asg.subject.includes('Edebiyat') ? 'rose' : asg.subject === 'Hayat Bilgisi' ? 'emerald' : 'blue',
           max_score: asg.max_score || 100,
-          teacher_name: asg.teacher_name || 'Ebru TEKNECİ',
+          teacher_name: asg.teacher_name || 'Bahar ÇETİN',
           permissions: asg.tool_data?.permissions,
         }
       })
@@ -1118,7 +1118,7 @@ export default function MHomeworkClient({
 
     saveAllSubmissions(updatedAll)
 
-    // Bridge into student submissions storage if grading Erçil (s-1)
+    // Bridge into student submissions storage if grading Ali Yağız (s-1)
     if (selectedStudent && selectedStudent.id === 's-1') {
       try {
         const raw = localStorage.getItem('oxonom_student_submissions_ercil')
@@ -1256,7 +1256,7 @@ export default function MHomeworkClient({
     setEditDescription(hw.description)
     setEditTargetType(hw.target_type || 'CLASS')
     setEditTargetStudentId(hw.target_student_id || 's-1')
-    setEditTargetStudentName(hw.target_student_name || 'Erçil UĞURLU')
+    setEditTargetStudentName(hw.target_student_name || 'Ali Yağız DEMİREL')
     const hwQuestions =
       hw.quiz_questions ||
       (hw.tool_data?.quizQuestions as QuizQuestion[]) ||
@@ -1296,7 +1296,7 @@ export default function MHomeworkClient({
       due_date: editDueDate || '2026-10-25T23:59:00',
       max_score: Number(editMaxScore) || 100,
       published: true,
-      teacher_name: editingHomework.teacher_name || 'Ebru TEKNECİ',
+      teacher_name: editingHomework.teacher_name || 'Bahar ÇETİN',
       creation_date: new Date(editingHomework.assignedTimestamp || Date.now()).toISOString(),
     }
 
@@ -1367,7 +1367,7 @@ export default function MHomeworkClient({
       due_date: new Date(permissionHomework.dueTimestamp || Date.now() + 7 * 86400000).toISOString(),
       max_score: permissionHomework.max_score || 100,
       published: permScope !== 'DRAFT',
-      teacher_name: permissionHomework.teacher_name || 'Ebru TEKNECİ',
+      teacher_name: permissionHomework.teacher_name || 'Bahar ÇETİN',
       creation_date: new Date(permissionHomework.assignedTimestamp || Date.now()).toISOString(),
     }
 

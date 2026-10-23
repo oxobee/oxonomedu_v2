@@ -214,7 +214,7 @@ export default function DemoClassSwitcher({
         </div>
         <div className="inline-flex items-center gap-1.5 bg-white/95 px-3 py-1.5 rounded-xl border border-emerald-200 shadow-2xs whitespace-nowrap">
           <span className="text-gray-400 font-medium">Veliler:</span>
-          <span className="font-bold text-gray-900">Ebru & Uğur UĞURLU</span>
+          <span className="font-bold text-gray-900">Ebru & Kemal SOYSAL</span>
         </div>
         <div className="inline-flex items-center gap-1.5 bg-white/95 px-3 py-1.5 rounded-xl border border-emerald-200 shadow-2xs whitespace-nowrap">
           <span className="text-gray-400 font-medium">Sınıf Mevcudu:</span>

@@ -393,7 +393,7 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     due_date: '2026-10-15T23:59:00',
     max_score: 100,
     published: true,
-    teacher_name: 'Özlem ZOR',
+    teacher_name: 'Bahar ÇETİN',
     total_submissions: 0,
     graded_submissions: 0,
     average_score: null,
@@ -417,7 +417,7 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     due_date: '2026-10-16T23:59:00',
     max_score: 100,
     published: true,
-    teacher_name: 'Özlem ZOR',
+    teacher_name: 'Bahar ÇETİN',
     total_submissions: 0,
     graded_submissions: 0,
     average_score: null,
@@ -441,7 +441,7 @@ export const DEFAULT_SCHOOL_ASSIGNMENTS: SchoolAssignmentItem[] = [
     due_date: '2026-10-18T23:59:00',
     max_score: 100,
     published: true,
-    teacher_name: 'Özlem ZOR',
+    teacher_name: 'Bahar ÇETİN',
     total_submissions: 0,
     graded_submissions: 0,
     average_score: null,
@@ -819,7 +819,7 @@ export async function getAssignmentSubmissions(
       if (saved) {
         const parsed = JSON.parse(saved)
         studentsData = studentsData.map((s) => {
-          if (s.user_id === 1001 || s.username === 'demo_ogrenci' || s.name.includes('Erçil')) {
+          if (s.user_id === 1001 || s.username === 'demo_ogrenci' || s.name.includes('Ali Yağız')) {
             return {
               ...s,
               submission_id: parsed.submission_id || 501,

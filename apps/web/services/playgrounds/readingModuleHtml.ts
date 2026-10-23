@@ -718,7 +718,7 @@ export const READING_MODULE_HTML = `<!DOCTYPE html>
         title: 'Robot Robi Okula Başlıyor',
         color: 'from-blue-600 to-indigo-700',
         summary: 'Çocuklara matematik ve kodlama öğreten sevimli minik robot.',
-        content: 'Mert, fen laboratuvarında küçük metal parçalardan akıllı bir robot tasarladı. Adını Robi koydular. Robi mavi ışıkları yanan gözlere ve tekerlekli ayaklara sahipti. Mert onu sınıfa getirdiğinde bütün öğrenciler heyecanla etrafına toplandı. Robi çocuklara sorular soruyor, doğru cevap verildiğinde melodiler çalarak neşeyle etrafında dönüyordu. Teneffüste çocuklarla bahçede yarış yaptı. O günden sonra sınıfın en sevilen yardımcısı oldu.'
+        content: 'Kerem, fen laboratuvarında küçük metal parçalardan akıllı bir robot tasarladı. Adını Robi koydular. Robi mavi ışıkları yanan gözlere ve tekerlekli ayaklara sahipti. Kerem onu sınıfa getirdiğinde bütün öğrenciler heyecanla etrafına toplandı. Robi çocuklara sorular soruyor, doğru cevap verildiğinde melodiler çalarak neşeyle etrafında dönüyordu. Teneffüste çocuklarla bahçede yarış yaptı. O günden sonra sınıfın en sevilen yardımcısı oldu.'
       },
       {
         id: 9,

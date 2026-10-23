@@ -134,7 +134,7 @@ export default function TeacherReportsView() {
   const handleExportCSV = () => {
     const csvContent =
       `data:text/csv;charset=utf-8,Ogrenci No,Ad Soyad,Sube,Akademik Not Ortalamasi,Devam Orani,Odev Tamamlama\n` +
-      `${targetStudent?.studentNo || '101'},${targetStudent?.name || 'Erçil UĞURLU'},${activeClass.name},${studentGpa},%${activeClass.attendanceRate},%100\n`
+      `${targetStudent?.studentNo || '101'},${targetStudent?.name || 'Ali Yağız DEMİREL'},${activeClass.name},${studentGpa},%${activeClass.attendanceRate},%100\n`
 
     const encodedUri = encodeURI(csvContent)
     const link = document.createElement('a')
@@ -179,7 +179,7 @@ export default function TeacherReportsView() {
   const sampleStudents = [
     {
       no: targetStudent?.studentNo || '101',
-      name: targetStudent?.name || 'Erçil UĞURLU',
+      name: targetStudent?.name || 'Ali Yağız DEMİREL',
       avg: studentGpa,
       attendance: `%${activeClass.attendanceRate}`,
       hwRate: '%100',
@@ -330,7 +330,7 @@ export default function TeacherReportsView() {
               <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
                 {studentGpa} <span className="text-xs font-bold text-gray-400">/ 100</span>
               </div>
-              <div className="text-[10px] text-gray-400 mt-0.5">{targetStudent?.name || 'Erçil UĞURLU'}</div>
+              <div className="text-[10px] text-gray-400 mt-0.5">{targetStudent?.name || 'Ali Yağız DEMİREL'}</div>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 shadow-xs">

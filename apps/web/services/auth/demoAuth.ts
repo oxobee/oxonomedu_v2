@@ -23,7 +23,7 @@ export interface DemoUser {
 
 // Strictly authentic accounts — Zero demo / dummy accounts
 export const DEMO_USERS: Record<string, DemoUser> = {
-  // 👔 OKUL MÜDÜRÜ: Dr. Uğur UĞURLU
+  // 👔 OKUL MÜDÜRÜ: Kemal SOYSAL
   'mudur@oxonom.com': {
     id: 50,
     user_uuid: 'user_64e03f9b-6734-414a-9775-f87f52dae15d',
@@ -115,7 +115,7 @@ export const DEMO_USERS: Record<string, DemoUser> = {
     },
   },
 
-  // 👩‍🏫 EDEBİYAT ÖĞRETMENİ & 9-A REHBERİ: Ebru TEKNECİ
+  // 👩‍🏫 EDEBİYAT ÖĞRETMENİ & 9-A REHBERİ: Bahar ÇETİN
   'ogretmen@oxonom.com': {
     id: 3001,
     user_uuid: 'user_6f129354-53fb-40c0-be52-0cc8dc07cce1',
@@ -177,14 +177,14 @@ export const DEMO_USERS: Record<string, DemoUser> = {
     },
   },
 
-  // 🎒 ÖĞRENCİ (9-A ŞUBESİ NO: 101): Erçil UĞURLU
+  // 🎒 ÖĞRENCİ (9-A ŞUBESİ NO: 101): Ali Yağız DEMİREL
   'ogrenci@oxonom.com': {
     id: 3001,
     user_uuid: 'user_ercil_ugurlu',
     username: 'ogrenci',
     email: 'ogrenci@oxonom.com',
     password: 'Ugur2803*',
-    first_name: 'Erçil',
+    first_name: 'Ali Yağız',
     last_name: 'UĞURLU',
     email_verified: true,
     is_superadmin: false,
@@ -214,7 +214,7 @@ export const DEMO_USERS: Record<string, DemoUser> = {
     username: 'ogrenci',
     email: 'ogrenci@oxonom.com',
     password: 'Ugur2803*',
-    first_name: 'Erçil',
+    first_name: 'Ali Yağız',
     last_name: 'UĞURLU',
     email_verified: true,
     is_superadmin: false,
@@ -244,7 +244,7 @@ export const DEMO_USERS: Record<string, DemoUser> = {
     username: '101',
     email: 'ogrenci@oxonom.com',
     password: 'Ugur2803*',
-    first_name: 'Erçil',
+    first_name: 'Ali Yağız',
     last_name: 'UĞURLU',
     email_verified: true,
     is_superadmin: false,

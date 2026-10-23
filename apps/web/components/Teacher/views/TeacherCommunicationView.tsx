@@ -38,7 +38,7 @@ const DEFAULT_TEACHER_ANNOUNCEMENTS: TeacherAnnouncement[] = [
     title: 'Öğretmenler Kurulu ve 1. Dönem Zümre Değerlendirmesi',
     content:
       'Değerli Öğretmenlerimiz; Ara sınav öncesi soru hazırlama ve kazanım değerlendirme toplantısı yarın saat 16:30\'da Öğretmenler Odasında yapılacaktır. Taslak kazanım formlarıyla katılım rica olunur.',
-    author: 'Dr. Uğur UĞURLU',
+    author: 'Kemal SOYSAL',
     authorRole: 'Okul Müdürü',
     date: 'Bugün, 09:30',
     priority: 'important',
@@ -49,7 +49,7 @@ const DEFAULT_TEACHER_ANNOUNCEMENTS: TeacherAnnouncement[] = [
     title: '1/A Şubesi Dönem Ortası Akademik Başarı ve Uyum Tebrik Bildirimi',
     content:
       '1/A şubemiz Türkçe, Matematik ve Hayat Bilgisi derslerindeki üstün performansıyla okulumuzun birinci şubesi olarak devam etmektedir. Sınıf öğretmenimiz Özlem Hanımı tebrik eder, başarılarının devamını dilerim.',
-    author: 'Dr. Uğur UĞURLU',
+    author: 'Kemal SOYSAL',
     authorRole: 'Okul Müdürü',
     date: 'Dün, 14:20',
     priority: 'normal',
@@ -118,7 +118,7 @@ export default function TeacherCommunicationView() {
       id: `ann-t-${Date.now()}`,
       title: resolvedTitle,
       content: resolvedContent,
-      author: 'Özlem ZOR',
+      author: 'Bahar ÇETİN',
       authorRole: '1/A Sınıf Öğretmeni',
       date: 'Bugün, ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
       priority: 'normal',
@@ -137,7 +137,7 @@ export default function TeacherCommunicationView() {
       saveSynchronizedStudentAnnouncement({
         id: `ann-s-${Date.now()}`,
         title: resolvedTitle,
-        author: 'Özlem ZOR',
+        author: 'Bahar ÇETİN',
         authorRole: '1/A Sınıf Öğretmeni',
         date: 'Bugün, ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
         category: 'general',

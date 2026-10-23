@@ -242,51 +242,51 @@ function getSubjectBadgeColors(color: string) {
 
 // ── INITIAL PRE-FILLED SCHEDULE ENTRIES ──
 export const INITIAL_SCHEDULE_ENTRIES: ScheduleEntry[] = [
-  // ── OXONOM OKULLARI: 1/A ŞUBESİ (Ebru TEKNECİ) ──
+  // ── OXONOM OKULLARI: 1/A ŞUBESİ (Bahar ÇETİN) ──
   // Pazartesi
-  { id: 'sc-ox-1', orgId: 30, day: 'mon', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-ox-2', orgId: 30, day: 'mon', period: 2, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-ox-3', orgId: 30, day: 'mon', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-ox-4', orgId: 30, day: 'mon', period: 4, classCode: '1/A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-ox-5', orgId: 30, day: 'mon', period: 5, classCode: '1/A', subject: 'Tarih', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'amber', isSmartBoardActive: true },
-  { id: 'sc-ox-6', orgId: 30, day: 'mon', period: 6, classCode: '1/A', subject: 'İngilizce', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'purple', isSmartBoardActive: true },
-  { id: 'sc-ox-7', orgId: 30, day: 'mon', period: 7, classCode: '1/A', subject: 'Bilişim & Kodlama', teacherName: 'Ebru TEKNECİ', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
+  { id: 'sc-ox-1', orgId: 30, day: 'mon', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-2', orgId: 30, day: 'mon', period: 2, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-3', orgId: 30, day: 'mon', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-4', orgId: 30, day: 'mon', period: 4, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-5', orgId: 30, day: 'mon', period: 5, classCode: '1/A', subject: 'Tarih', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'amber', isSmartBoardActive: true },
+  { id: 'sc-ox-6', orgId: 30, day: 'mon', period: 6, classCode: '1/A', subject: 'İngilizce', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'purple', isSmartBoardActive: true },
+  { id: 'sc-ox-7', orgId: 30, day: 'mon', period: 7, classCode: '1/A', subject: 'Bilişim & Kodlama', teacherName: 'Bahar ÇETİN', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
 
   // Salı
-  { id: 'sc-ox-8', orgId: 30, day: 'tue', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-ox-9', orgId: 30, day: 'tue', period: 2, classCode: '1/A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-ox-10', orgId: 30, day: 'tue', period: 3, classCode: '1/A', subject: 'Fen Bilimleri', teacherName: 'Ebru TEKNECİ', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
-  { id: 'sc-ox-11', orgId: 30, day: 'tue', period: 4, classCode: '1/A', subject: 'Coğrafya', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'teal', isSmartBoardActive: true },
-  { id: 'sc-ox-12', orgId: 30, day: 'tue', period: 5, classCode: '1/A', subject: 'İngilizce', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'purple', isSmartBoardActive: true },
-  { id: 'sc-ox-13', orgId: 30, day: 'tue', period: 6, classCode: '1/A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Ebru TEKNECİ', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
-  { id: 'sc-ox-14', orgId: 30, day: 'tue', period: 7, classCode: '1/A', subject: 'Rehberlik & Kariyer', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'pink', isSmartBoardActive: true },
+  { id: 'sc-ox-8', orgId: 30, day: 'tue', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-9', orgId: 30, day: 'tue', period: 2, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-10', orgId: 30, day: 'tue', period: 3, classCode: '1/A', subject: 'Fen Bilimleri', teacherName: 'Bahar ÇETİN', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
+  { id: 'sc-ox-11', orgId: 30, day: 'tue', period: 4, classCode: '1/A', subject: 'Coğrafya', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'teal', isSmartBoardActive: true },
+  { id: 'sc-ox-12', orgId: 30, day: 'tue', period: 5, classCode: '1/A', subject: 'İngilizce', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'purple', isSmartBoardActive: true },
+  { id: 'sc-ox-13', orgId: 30, day: 'tue', period: 6, classCode: '1/A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Bahar ÇETİN', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
+  { id: 'sc-ox-14', orgId: 30, day: 'tue', period: 7, classCode: '1/A', subject: 'Rehberlik & Kariyer', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'pink', isSmartBoardActive: true },
 
   // Çarşamba
-  { id: 'sc-ox-15', orgId: 30, day: 'wed', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-ox-16', orgId: 30, day: 'wed', period: 2, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-ox-17', orgId: 30, day: 'wed', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-ox-18', orgId: 30, day: 'wed', period: 4, classCode: '1/A', subject: 'Bilişim & Kodlama', teacherName: 'Ebru TEKNECİ', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
-  { id: 'sc-ox-19', orgId: 30, day: 'wed', period: 5, classCode: '1/A', subject: 'Tarih', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'amber', isSmartBoardActive: true },
-  { id: 'sc-ox-20', orgId: 30, day: 'wed', period: 6, classCode: '1/A', subject: 'İngilizce', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'purple', isSmartBoardActive: true },
-  { id: 'sc-ox-21', orgId: 30, day: 'wed', period: 7, classCode: '1/A', subject: 'Görsel Sanatlar', teacherName: 'Ebru TEKNECİ', roomName: 'Görsel Sanatlar Atölyesi', color: 'amber', isSmartBoardActive: false },
+  { id: 'sc-ox-15', orgId: 30, day: 'wed', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-16', orgId: 30, day: 'wed', period: 2, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-17', orgId: 30, day: 'wed', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-18', orgId: 30, day: 'wed', period: 4, classCode: '1/A', subject: 'Bilişim & Kodlama', teacherName: 'Bahar ÇETİN', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
+  { id: 'sc-ox-19', orgId: 30, day: 'wed', period: 5, classCode: '1/A', subject: 'Tarih', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'amber', isSmartBoardActive: true },
+  { id: 'sc-ox-20', orgId: 30, day: 'wed', period: 6, classCode: '1/A', subject: 'İngilizce', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'purple', isSmartBoardActive: true },
+  { id: 'sc-ox-21', orgId: 30, day: 'wed', period: 7, classCode: '1/A', subject: 'Görsel Sanatlar', teacherName: 'Bahar ÇETİN', roomName: 'Görsel Sanatlar Atölyesi', color: 'amber', isSmartBoardActive: false },
 
   // Perşembe
-  { id: 'sc-ox-22', orgId: 30, day: 'thu', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-ox-23', orgId: 30, day: 'thu', period: 2, classCode: '1/A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-ox-24', orgId: 30, day: 'thu', period: 3, classCode: '1/A', subject: 'Fen Bilimleri', teacherName: 'Ebru TEKNECİ', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
-  { id: 'sc-ox-25', orgId: 30, day: 'thu', period: 4, classCode: '1/A', subject: 'Coğrafya', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'teal', isSmartBoardActive: true },
-  { id: 'sc-ox-26', orgId: 30, day: 'thu', period: 5, classCode: '1/A', subject: 'İngilizce', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'purple', isSmartBoardActive: true },
-  { id: 'sc-ox-27', orgId: 30, day: 'thu', period: 6, classCode: '1/A', subject: 'Din Kültürü & Ahlak', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'emerald', isSmartBoardActive: true },
-  { id: 'sc-ox-28', orgId: 30, day: 'thu', period: 7, classCode: '1/A', subject: 'Müzik', teacherName: 'Ebru TEKNECİ', roomName: 'Müzik Dersliği', color: 'pink', isSmartBoardActive: false },
+  { id: 'sc-ox-22', orgId: 30, day: 'thu', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-23', orgId: 30, day: 'thu', period: 2, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-24', orgId: 30, day: 'thu', period: 3, classCode: '1/A', subject: 'Fen Bilimleri', teacherName: 'Bahar ÇETİN', roomName: 'Fen Laboratuvarı', color: 'emerald', isSmartBoardActive: true },
+  { id: 'sc-ox-25', orgId: 30, day: 'thu', period: 4, classCode: '1/A', subject: 'Coğrafya', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'teal', isSmartBoardActive: true },
+  { id: 'sc-ox-26', orgId: 30, day: 'thu', period: 5, classCode: '1/A', subject: 'İngilizce', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'purple', isSmartBoardActive: true },
+  { id: 'sc-ox-27', orgId: 30, day: 'thu', period: 6, classCode: '1/A', subject: 'Din Kültürü & Ahlak', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'emerald', isSmartBoardActive: true },
+  { id: 'sc-ox-28', orgId: 30, day: 'thu', period: 7, classCode: '1/A', subject: 'Müzik', teacherName: 'Bahar ÇETİN', roomName: 'Müzik Dersliği', color: 'pink', isSmartBoardActive: false },
 
   // Cuma
-  { id: 'sc-ox-29', orgId: 30, day: 'fri', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
-  { id: 'sc-ox-30', orgId: 30, day: 'fri', period: 2, classCode: '1/A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-ox-31', orgId: 30, day: 'fri', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
-  { id: 'sc-ox-32', orgId: 30, day: 'fri', period: 4, classCode: '1/A', subject: 'Bilişim & Yazılım', teacherName: 'Ebru TEKNECİ', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
-  { id: 'sc-ox-33', orgId: 30, day: 'fri', period: 5, classCode: '1/A', subject: 'Proje & Edebi Metinler', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'rose', isSmartBoardActive: true },
-  { id: 'sc-ox-34', orgId: 30, day: 'fri', period: 6, classCode: '1/A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Ebru TEKNECİ', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
-  { id: 'sc-ox-35', orgId: 30, day: 'fri', period: 7, classCode: '1/A', subject: 'Haftalık Değerlendirme & Etüt', teacherName: 'Ebru TEKNECİ', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-29', orgId: 30, day: 'fri', period: 1, classCode: '1/A', subject: 'Türk Dili ve Edebiyatı', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'blue', isSmartBoardActive: true },
+  { id: 'sc-ox-30', orgId: 30, day: 'fri', period: 2, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-31', orgId: 30, day: 'fri', period: 3, classCode: '1/A', subject: 'Matematik', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
+  { id: 'sc-ox-32', orgId: 30, day: 'fri', period: 4, classCode: '1/A', subject: 'Bilişim & Yazılım', teacherName: 'Bahar ÇETİN', roomName: 'Bilişim & Kodlama Atölyesi', color: 'cyan', isSmartBoardActive: true },
+  { id: 'sc-ox-33', orgId: 30, day: 'fri', period: 5, classCode: '1/A', subject: 'Proje & Edebi Metinler', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'rose', isSmartBoardActive: true },
+  { id: 'sc-ox-34', orgId: 30, day: 'fri', period: 6, classCode: '1/A', subject: 'Beden Eğitimi & Oyun', teacherName: 'Bahar ÇETİN', roomName: 'Kapalı Spor Salonu', color: 'orange', isSmartBoardActive: false },
+  { id: 'sc-ox-35', orgId: 30, day: 'fri', period: 7, classCode: '1/A', subject: 'Haftalık Değerlendirme & Etüt', teacherName: 'Bahar ÇETİN', roomName: 'Derslik 1/A (1. Kat)', color: 'indigo', isSmartBoardActive: true },
 ]
 
 export default function MAdminScheduleClient({
@@ -309,7 +309,7 @@ export default function MAdminScheduleClient({
 
   // Selected Targets
   const [selectedClass, setSelectedClass] = useState<string>(() => ALL_CLASSROOMS[0]?.code || '1/A')
-  const [selectedTeacher, setSelectedTeacher] = useState<string>('Ebru TEKNECİ')
+  const [selectedTeacher, setSelectedTeacher] = useState<string>('Bahar ÇETİN')
   const [selectedRoom, setSelectedRoom] = useState<string>(() => `Derslik ${ALL_CLASSROOMS[0]?.code || '1/A'} (1. Kat)`)
 
   // Modals state
@@ -328,7 +328,7 @@ export default function MAdminScheduleClient({
 
   // Edit Slot Form State
   const [formSubject, setFormSubject] = useState('Türkçe')
-  const [formTeacher, setFormTeacher] = useState('Özlem ZOR')
+  const [formTeacher, setFormTeacher] = useState('Bahar ÇETİN')
   const [formRoom, setFormRoom] = useState('Derslik 101 (1. Kat)')
   const [formClassCode, setFormClassCode] = useState('1-A')
   const [formSmartBoard, setFormSmartBoard] = useState(true)
@@ -395,7 +395,7 @@ export default function MAdminScheduleClient({
     }
     setScheduleList(INITIAL_SCHEDULE_ENTRIES)
     setSelectedClass(ALL_CLASSROOMS[0]?.code || '1/A')
-    setSelectedTeacher('Ebru TEKNECİ')
+    setSelectedTeacher('Bahar ÇETİN')
     setSelectedRoom(`Derslik ${ALL_CLASSROOMS[0]?.code || '1/A'} (1. Kat)`)
   }, [selectedOrgId])
 
@@ -571,7 +571,7 @@ export default function MAdminScheduleClient({
         period,
         classCode: viewMode === 'class' ? selectedClass : availableClasses[0] || '1-A',
         subject: quickSelectedSubject,
-        teacherName: viewMode === 'teacher' ? selectedTeacher : availableTeachers[0]?.name || 'Özlem ZOR',
+        teacherName: viewMode === 'teacher' ? selectedTeacher : availableTeachers[0]?.name || 'Bahar ÇETİN',
         roomName: viewMode === 'room' ? selectedRoom : 'Derslik 101 (1. Kat)',
         color,
         isSmartBoardActive: true,
@@ -594,7 +594,7 @@ export default function MAdminScheduleClient({
       setFormSmartBoard(existing.isSmartBoardActive)
     } else {
       setFormSubject('Türkçe')
-      setFormTeacher(viewMode === 'teacher' ? selectedTeacher : availableTeachers[0]?.name || 'Özlem ZOR')
+      setFormTeacher(viewMode === 'teacher' ? selectedTeacher : availableTeachers[0]?.name || 'Bahar ÇETİN')
       setFormRoom(viewMode === 'room' ? selectedRoom : 'Derslik 101 (1. Kat)')
       setFormClassCode(viewMode === 'class' ? selectedClass : availableClasses[0] || '1-A')
       setFormSmartBoard(true)

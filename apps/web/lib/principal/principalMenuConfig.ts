@@ -97,7 +97,7 @@ export const PRINCIPAL_MENU_CONFIG: PrincipalMenuItem[] = [
     description: 'Öğretmen kadrosu, branş dağılımı, özlük dosyaları, yetkilendirme ve avans/ek ders yönetimi.',
     children: [
       { id: 'teachers-list', label: 'Öğretmen Listesi', path: '/principal/teachers', status: 'active' },
-      { id: 'teachers-workspace', label: 'Öğretmen Portalı (Ebru TEKNECİ)', path: '/teacher/dashboard', status: 'active' },
+      { id: 'teachers-workspace', label: 'Öğretmen Portalı (Bahar ÇETİN)', path: '/teacher/dashboard', status: 'active' },
       { id: 'teachers-assign', label: 'Ders Görevlendirme', path: '/principal/teachers?action=assign', status: 'active' },
       { id: 'teachers-duties', label: 'Nöbet Çizelgesi', path: '/principal/teachers?tab=nobet', status: 'active' },
       { id: 'teachers-perm', label: 'Yetkilendirme Matrisi', path: '/principal/teachers?tab=yetkiler', status: 'active' },

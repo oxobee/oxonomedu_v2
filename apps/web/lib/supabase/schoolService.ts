@@ -122,7 +122,7 @@ export const SchoolService = {
         content: 'Sayın velilerimiz ve değerli öğretmenlerimiz, yeni eğitim öğretim dönemi ders programları sisteme tanımlanmıştır.',
         priority: 'normal',
         target_audience: ['all'],
-        sender_name: 'Dr. Uğur UĞURLU',
+        sender_name: 'Kemal SOYSAL',
         sender_role: 'Okul Müdürü',
         created_at: new Date().toISOString(),
       },
@@ -132,7 +132,7 @@ export const SchoolService = {
         content: '1/A şubesi öğrencilerimizin ilk okuma-yazma kazanım değerlendirmesi cuma günü gerçekleştirilecektir.',
         priority: 'high',
         target_audience: ['students', 'teachers'],
-        sender_name: 'Özlem ZOR',
+        sender_name: 'Bahar ÇETİN',
         sender_role: 'Sınıf Öğretmeni',
         created_at: new Date().toISOString(),
       },
@@ -199,11 +199,11 @@ export const SchoolService = {
       }
     }
 
-    // Default primary student: Erçil Uğurlu (1/A, No: 101)
+    // Default primary student: Ali Yağız Demirel (1/A, No: 101)
     const baseStudents: SchoolStudent[] = [
       {
         id: 'std-101',
-        full_name: 'Erçil UĞURLU',
+        full_name: 'Ali Yağız DEMİREL',
         student_number: '101',
         class_name: '1/A',
         parent_name: 'Uğur Uğurlu',

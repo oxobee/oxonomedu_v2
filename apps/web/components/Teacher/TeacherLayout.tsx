@@ -51,7 +51,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
 
   // Teacher identity details (Authentic teacher profile, never mixes with principal)
   const [teacherProfile, setTeacherProfile] = useState<{ name: string; branch: string }>({
-    name: 'Ebru TEKNECİ',
+    name: 'Bahar ÇETİN',
     branch: 'Türk Dili ve Edebiyatı · Rehberlik',
   })
 

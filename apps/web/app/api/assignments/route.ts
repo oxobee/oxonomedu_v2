@@ -43,7 +43,7 @@ async function getAssignmentsFromSupabase(): Promise<SchoolAssignmentItem[]> {
           due_date: r.due_date || new Date().toISOString(),
           max_score: 100,
           published: true,
-          teacher_name: r.teacher_name || 'Ebru TEKNECİ',
+          teacher_name: r.teacher_name || 'Bahar ÇETİN',
           creation_date: r.created_at || new Date().toISOString(),
           tool_data: {},
         }))
@@ -138,7 +138,7 @@ export async function POST(request: Request) {
         description: item.description || '',
         class_name: className,
         course_name: item.subject || 'Türk Dili ve Edebiyatı',
-        teacher_name: item.teacher_name || 'Ebru TEKNECİ',
+        teacher_name: item.teacher_name || 'Bahar ÇETİN',
         due_date: item.due_date || new Date().toISOString(),
       }
 

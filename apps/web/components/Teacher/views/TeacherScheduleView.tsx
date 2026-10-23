@@ -153,7 +153,7 @@ export default function TeacherScheduleView() {
   const [scheduleVersion, setScheduleVersion] = useState(0)
 
   // Current Logged-in Teacher Name
-  const teacherName = 'Ebru TEKNECİ'
+  const teacherName = 'Bahar ÇETİN'
 
   // Dynamic Active / Lead Class
   const [activeClassCode, setActiveClassCode] = useState<string>(() => {

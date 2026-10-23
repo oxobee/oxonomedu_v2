@@ -227,9 +227,9 @@ const INITIAL_OXONOM_COURSES: CurriculumCourse[] = [
     targetClass: '1/A',
     orgId: 30,
     weeklyHours: 10,
-    branchTeacher: 'Özlem ZOR',
+    branchTeacher: 'Bahar ÇETİN',
     teacherBranch: 'Sınıf Öğretmeni (1/A)',
-    backupTeachers: [{ id: 'b-ox-1', name: 'Dr. Uğur UĞURLU', priority: 1, branch: 'Kurum Yönetimi' }],
+    backupTeachers: [{ id: 'b-ox-1', name: 'Kemal SOYSAL', priority: 1, branch: 'Kurum Yönetimi' }],
     roomType: 'normal',
     requiredRoom: '1. Kat · Derslik 101',
     isSmartBoardReady: true,
@@ -245,9 +245,9 @@ const INITIAL_OXONOM_COURSES: CurriculumCourse[] = [
     targetClass: '1/A',
     orgId: 30,
     weeklyHours: 5,
-    branchTeacher: 'Özlem ZOR',
+    branchTeacher: 'Bahar ÇETİN',
     teacherBranch: 'Sınıf Öğretmeni (1/A)',
-    backupTeachers: [{ id: 'b-ox-2', name: 'Dr. Uğur UĞURLU', priority: 1, branch: 'Matematik & Analitik' }],
+    backupTeachers: [{ id: 'b-ox-2', name: 'Kemal SOYSAL', priority: 1, branch: 'Matematik & Analitik' }],
     roomType: 'normal',
     requiredRoom: '1. Kat · Derslik 101',
     isSmartBoardReady: true,
@@ -263,9 +263,9 @@ const INITIAL_OXONOM_COURSES: CurriculumCourse[] = [
     targetClass: '1/A',
     orgId: 30,
     weeklyHours: 4,
-    branchTeacher: 'Özlem ZOR',
+    branchTeacher: 'Bahar ÇETİN',
     teacherBranch: 'Sınıf Öğretmeni (1/A)',
-    backupTeachers: [{ id: 'b-ox-3', name: 'Dr. Uğur UĞURLU', priority: 1, branch: 'Sosyal Gelişim' }],
+    backupTeachers: [{ id: 'b-ox-3', name: 'Kemal SOYSAL', priority: 1, branch: 'Sosyal Gelişim' }],
     roomType: 'normal',
     requiredRoom: '1. Kat · Derslik 101',
     isSmartBoardReady: true,
@@ -283,7 +283,7 @@ const INITIAL_OXONOM_COURSES: CurriculumCourse[] = [
     weeklyHours: 2,
     branchTeacher: 'Canan YILDIRIM',
     teacherBranch: 'İngilizce',
-    backupTeachers: [{ id: 'b-ox-4', name: 'Dr. Uğur UĞURLU', priority: 1, branch: 'Yabancı Diller' }],
+    backupTeachers: [{ id: 'b-ox-4', name: 'Kemal SOYSAL', priority: 1, branch: 'Yabancı Diller' }],
     roomType: 'normal',
     requiredRoom: '1. Kat · Derslik 101',
     isSmartBoardReady: true,
@@ -353,7 +353,7 @@ const INITIAL_OXONOM_COURSES: CurriculumCourse[] = [
     targetClass: '1/A',
     orgId: 30,
     weeklyHours: 2,
-    branchTeacher: 'Özlem ZOR',
+    branchTeacher: 'Bahar ÇETİN',
     teacherBranch: 'Sınıf Öğretmeni (1/A)',
     backupTeachers: [],
     roomType: 'normal',
@@ -471,10 +471,10 @@ export default function MAdminCurriculumClient({
   const [formIsSmartBoard, setFormIsSmartBoard] = useState(true)
 
   // Section 2: Öğretmen Bilgileri
-  const [formBranchTeacher, setFormBranchTeacher] = useState('Özlem ZOR')
+  const [formBranchTeacher, setFormBranchTeacher] = useState('Bahar ÇETİN')
   const [formTeacherBranch, setFormTeacherBranch] = useState('Sınıf Öğretmeni (1/A)')
   const [formBackupTeachers, setFormBackupTeachers] = useState<BackupTeacher[]>([
-    { id: 'b-default', name: 'Dr. Uğur UĞURLU', priority: 1, branch: 'Edebiyat & Kurum Yönetimi' },
+    { id: 'b-default', name: 'Kemal SOYSAL', priority: 1, branch: 'Edebiyat & Kurum Yönetimi' },
   ])
   const [newBackupTeacherSelect, setNewBackupTeacherSelect] = useState('')
 
@@ -601,7 +601,7 @@ export default function MAdminCurriculumClient({
         return getStoredPrincipalProfile().name
       } catch (_) {}
     }
-    return 'Dr. Uğur UĞURLU'
+    return 'Kemal SOYSAL'
   })
 
   useEffect(() => {
@@ -1060,7 +1060,7 @@ export default function MAdminCurriculumClient({
   const handleToggleTeacherLeave = (entry: ScheduleEntry) => {
     const isNowOnLeave = !entry.isTeacherOnLeave
     const newActiveTeacher = isNowOnLeave
-      ? entry.backupTeacherName || 'Dr. Uğur UĞURLU'
+      ? entry.backupTeacherName || 'Kemal SOYSAL'
       : entry.teacherName
 
     const updated = scheduleList.map((e) => {
@@ -1539,7 +1539,7 @@ export default function MAdminCurriculumClient({
           targetClass: norm,
           orgId,
           weeklyHours: 6,
-          branchTeacher: 'Ebru TEKNECİ',
+          branchTeacher: 'Bahar ÇETİN',
           teacherBranch: 'Türkçe',
           backupTeachers: [],
           roomType: 'normal',
@@ -1705,7 +1705,7 @@ export default function MAdminCurriculumClient({
           targetClass: norm,
           orgId,
           weeklyHours: 5,
-          branchTeacher: 'Ebru TEKNECİ',
+          branchTeacher: 'Bahar ÇETİN',
           teacherBranch: 'Türkçe',
           backupTeachers: [],
           roomType: 'normal',
@@ -1813,7 +1813,7 @@ export default function MAdminCurriculumClient({
           targetClass: norm,
           orgId,
           weeklyHours: 1,
-          branchTeacher: 'Ebru TEKNECİ',
+          branchTeacher: 'Bahar ÇETİN',
           teacherBranch: 'Rehberlik',
           backupTeachers: [],
           roomType: 'normal',
@@ -1871,7 +1871,7 @@ export default function MAdminCurriculumClient({
           targetClass: norm,
           orgId,
           weeklyHours: 5,
-          branchTeacher: 'Ebru TEKNECİ',
+          branchTeacher: 'Bahar ÇETİN',
           teacherBranch: 'Türk Dili ve Edebiyatı',
           backupTeachers: [],
           roomType: 'normal',
@@ -2074,7 +2074,7 @@ export default function MAdminCurriculumClient({
 
   // ── OPEN NEW COURSE MODAL HANDLERS ──
   const handleOpenNewCourseModal = () => {
-    const defaultTeacher = teachersList[0]?.name || 'Ebru TEKNECİ'
+    const defaultTeacher = teachersList[0]?.name || 'Bahar ÇETİN'
     const defaultBranch = teachersList[0]?.branch?.split('(')[0].trim() || 'Türk Dili ve Edebiyatı'
 
     setFormName('')
@@ -2085,7 +2085,7 @@ export default function MAdminCurriculumClient({
     setFormBranchTeacher(defaultTeacher)
     setFormTeacherBranch(defaultBranch)
     setFormBackupTeachers([
-      { id: 'b-default', name: 'Dr. Uğur UĞURLU', priority: 1, branch: 'Edebiyat & Kurum Yönetimi' },
+      { id: 'b-default', name: 'Kemal SOYSAL', priority: 1, branch: 'Edebiyat & Kurum Yönetimi' },
     ])
     setNewBackupTeacherSelect('')
     setFormRoomType('normal')
@@ -2103,7 +2103,7 @@ export default function MAdminCurriculumClient({
     if (teacherObj && teacherObj.branch) {
       const cleanBranch = teacherObj.branch.split('(')[0].trim()
       setFormTeacherBranch(cleanBranch)
-    } else if (teacherName === principalName || teacherName === 'Dr. Uğur UĞURLU') {
+    } else if (teacherName === principalName || teacherName === 'Kemal SOYSAL') {
       setFormTeacherBranch('Okul Müdürü & Edebiyat')
     }
   }
@@ -4071,7 +4071,7 @@ export default function MAdminCurriculumClient({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Tanımlı Yedek:</span>
-                  <span className="font-bold text-amber-500">{selectedSlotForAction.entry.backupTeacherName || 'Dr. Uğur UĞURLU'}</span>
+                  <span className="font-bold text-amber-500">{selectedSlotForAction.entry.backupTeacherName || 'Kemal SOYSAL'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Derslik:</span>

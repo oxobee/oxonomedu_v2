@@ -43,7 +43,7 @@ export default function TeacherDashboard() {
   const isPrimary = org?.slug === 'oxonom' || orgId === 30
   const teacherName = (user?.first_name && user?.last_name)
     ? `${user.first_name} ${user.last_name}`
-    : 'Ebru TEKNECİ'
+    : 'Bahar ÇETİN'
 
   // 1. Fetch Boards
   const { data: boardsData, isLoading: boardsLoading } = useQuery({

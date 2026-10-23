@@ -38,7 +38,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'notif-1',
     title: '1/A Şubesi Günlük Yoklama Onaylandı',
-    message: 'Özlem ZOR 1/A sınıfı sabah yoklamasını tamamladı. 24 öğrenci mevcut, 0 devamsız.',
+    message: 'Bahar ÇETİN 1/A sınıfı sabah yoklamasını tamamladı. 24 öğrenci mevcut, 0 devamsız.',
     time: '5 dk önce',
     isRead: false,
     category: 'attendance',
@@ -65,7 +65,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'notif-4',
     title: 'Haftalık Ders Dağılım Çizelgesi Güncellendi',
-    message: 'Ebru TEKNECİ ve sınıf öğretmenleri zümre çalışma saatleri eşitlendi.',
+    message: 'Bahar ÇETİN ve sınıf öğretmenleri zümre çalışma saatleri eşitlendi.',
     time: '3 saat önce',
     isRead: true,
     category: 'system',

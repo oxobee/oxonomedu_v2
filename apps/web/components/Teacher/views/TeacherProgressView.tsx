@@ -55,7 +55,7 @@ export default function TeacherProgressView() {
   const [search, setSearch] = useState('')
 
   // Active Teacher details for signing guidance notes
-  const [teacherName, setTeacherName] = useState('Ebru TEKNECİ')
+  const [teacherName, setTeacherName] = useState('Bahar ÇETİN')
   const [teacherBranch, setTeacherBranch] = useState('Türk Dili ve Edebiyatı · Rehberlik')
 
   useEffect(() => {

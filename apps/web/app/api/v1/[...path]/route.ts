@@ -578,7 +578,7 @@ async function handleFallback(request: NextRequest, path: string): Promise<Respo
       const demoUser = findDemoUser(token)
 
       if (demoUser?.username === 'ogretmen') {
-        const myTeacherCls = ALL_CLASSROOMS.filter((c) => c.teacher_name === 'Özlem ZOR' || c.code === '1-A')
+        const myTeacherCls = ALL_CLASSROOMS.filter((c) => c.teacher_name === 'Bahar ÇETİN' || c.code === '1-A')
         return NextResponse.json(myTeacherCls.length ? myTeacherCls : [ALL_CLASSROOMS[0]], { status: 200 })
       }
       if (demoUser?.is_superadmin) {

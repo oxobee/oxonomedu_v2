@@ -37,7 +37,7 @@ async function getExamsFromSupabase(): Promise<SchoolExamItem[]> {
             time: extra.time || '09:30',
             durationMinutes: extra.durationMinutes || 40,
             location: extra.location || 'Derslik 9-A',
-            teacherName: extra.teacherName || 'Ebru TEKNECİ',
+            teacherName: extra.teacherName || 'Bahar ÇETİN',
             isPublished: extra.isPublished !== undefined ? !!extra.isPublished : true,
             status: extra.status || 'upcoming',
             scores: extra.scores || {},

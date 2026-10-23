@@ -110,10 +110,10 @@ const DEFAULT_PRIMARY_CLASSES: AdminClassroom[] = [
     gradeNumber: 1,
     orgId: 10,
     roomName: '1. Kat · Derslik 101',
-    teacherName: 'Özlem ZOR',
+    teacherName: 'Bahar ÇETİN',
     teacherBranch: 'Sınıf Öğretmeni',
     teacherPhone: '+90 532 999 1001',
-    teacherEmail: 'ozlemzor@oxonom.com',
+    teacherEmail: 'ogretmen@oxonom.com',
     studentCount: 30,
     capacity: 32,
     boysCount: 15,
@@ -133,7 +133,7 @@ const DEFAULT_PRIMARY_CLASSES: AdminClassroom[] = [
     boardStatus: 'online',
     boardName: '1-A Akıllı Tahta',
     scheduleSummary: 'Haftalık 30 Saat',
-    classPresident: 'Erçil Evren UĞURLU',
+    classPresident: 'Ali Yağız DEMİREL',
     parentRepresentative: 'Ebru UĞURLU',
   },
   {
@@ -362,7 +362,7 @@ const DEFAULT_PRIMARY_CLASSES: AdminClassroom[] = [
     boardStatus: 'online',
     boardName: '3-B Akıllı Tahta',
     scheduleSummary: 'Haftalık 30 Saat',
-    classPresident: 'Erçil Evren UĞURLU',
+    classPresident: 'Ali Yağız DEMİREL',
     parentRepresentative: 'Ebru UĞURLU',
   },
   {
@@ -714,7 +714,7 @@ export const GENERATE_CLASSES_1_TO_8_A_D = (): AdminClassroom[] => {
   const classes: AdminClassroom[] = []
   const branches = ['A', 'B', 'C', 'D']
   const teachers = [
-    { name: 'Özlem ZOR', branch: 'Sınıf Öğretmeni' },
+    { name: 'Bahar ÇETİN', branch: 'Sınıf Öğretmeni' },
     { name: 'Beyzanur SALMANLI', branch: 'Sınıf Öğretmeni' },
     { name: 'Şevval ÇINAR', branch: 'Sınıf Öğretmeni' },
     { name: 'İpek ŞAHİN', branch: 'Sınıf Öğretmeni' },
@@ -722,7 +722,7 @@ export const GENERATE_CLASSES_1_TO_8_A_D = (): AdminClassroom[] => {
     { name: 'Hilal KAYA', branch: 'Sınıf Öğretmeni' },
     { name: 'Sümeyra Nur TAŞDEMİR', branch: 'Sınıf Öğretmeni' },
     { name: 'Aslı ERGÜN', branch: 'Sınıf Öğretmeni' },
-    { name: 'Ebru TEKNECİ', branch: 'Türkçe / Edebiyat' },
+    { name: 'Bahar ÇETİN', branch: 'Türkçe / Edebiyat' },
     { name: 'Orkun AYDIN', branch: 'Matematik' },
     { name: 'Beritan ŞENATEŞ', branch: 'Fen Bilimleri' },
     { name: 'Deniz ARSLAN', branch: 'Sosyal Bilgiler' },
@@ -751,10 +751,10 @@ export const GENERATE_CLASSES_1_TO_8_A_D = (): AdminClassroom[] => {
         gradeNumber: g,
         orgId: 30,
         roomName: `${floor}. Kat · Derslik ${roomNum}`,
-        teacherName: is1A ? 'Özlem ZOR' : teacher.name,
+        teacherName: is1A ? 'Bahar ÇETİN' : teacher.name,
         teacherBranch: is1A ? 'Sınıf Öğretmeni (1/A)' : teacher.branch,
         teacherPhone: is1A ? '+90 532 999 1001' : `+90 532 999 ${1000 + (idCounter % 900)}`,
-        teacherEmail: is1A ? 'ozlemzor@oxonom.com' : `${teacher.name.toLowerCase().replace(/[^a-z]/g, '')}@oxonom.com`,
+        teacherEmail: is1A ? 'ogretmen@oxonom.com' : `${teacher.name.toLowerCase().replace(/[^a-z]/g, '')}@oxonom.com`,
         studentCount,
         capacity: 30,
         boysCount: is1A ? 1 : 0,
@@ -772,7 +772,7 @@ export const GENERATE_CLASSES_1_TO_8_A_D = (): AdminClassroom[] => {
         boardStatus: 'offline',
         boardName: `${g}/${b} Akıllı Tahta`,
         scheduleSummary: `Haftalık ${g <= 4 ? 30 : 35} Saat`,
-        classPresident: is1A ? 'Erçil UĞURLU' : `Öğrenci Temsilcisi ${g}/${b}`,
+        classPresident: is1A ? 'Ali Yağız DEMİREL' : `Öğrenci Temsilcisi ${g}/${b}`,
         parentRepresentative: is1A ? 'Ebru UĞURLU' : `Veli Temsilcisi ${g}/${b}`,
       })
       idCounter++
@@ -802,7 +802,7 @@ export function reconcileClassesWithRealData(classes: AdminClassroom[], orgId: n
 
     let needsSave = false
 
-    // Normalize any stale student (e.g. Erçil, 101, or old 9-A) to 1/A
+    // Normalize any stale student (e.g. Ali Yağız, 101, or old 9-A) to 1/A
     students = students.map((s: any) => {
       const name = (s.name || '').toLowerCase()
       const isErcil = name.includes('erçil') || s.studentNo === '101' || s.id === 3001 || s.id === 's-1'
@@ -812,13 +812,13 @@ export function reconcileClassesWithRealData(classes: AdminClassroom[], orgId: n
         return {
           ...s,
           id: s.id || 3001,
-          name: 'Erçil UĞURLU',
+          name: 'Ali Yağız DEMİREL',
           className: '1/A',
           gradeLevel: '1. Sınıf',
           studentNo: '101',
           gpa: 98.8,
           gender: 'Erkek',
-          mentorTeacher: 'Özlem ZOR',
+          mentorTeacher: 'Bahar ÇETİN',
           status: 'active',
           birthDate: '15.06.2018 (7 Yaşında)',
           bloodType: 'A Rh+',
@@ -829,7 +829,7 @@ export function reconcileClassesWithRealData(classes: AdminClassroom[], orgId: n
       return s
     })
 
-    // If Erçil in 1/A is missing, add him
+    // If Ali Yağız in 1/A is missing, add him
     const has1A = students.some((s: any) => {
       const c = (s.className || '').replace('-', '/').trim().toUpperCase()
       return c === '1/A'
@@ -837,13 +837,13 @@ export function reconcileClassesWithRealData(classes: AdminClassroom[], orgId: n
     if (!has1A) {
       students.push({
         id: 3001,
-        name: 'Erçil UĞURLU',
+        name: 'Ali Yağız DEMİREL',
         className: '1/A',
         gradeLevel: '1. Sınıf',
         studentNo: '101',
         gpa: 98.8,
         gender: 'Erkek',
-        mentorTeacher: 'Özlem ZOR',
+        mentorTeacher: 'Bahar ÇETİN',
         status: 'active',
         birthDate: '15.06.2018 (7 Yaşında)',
         bloodType: 'A Rh+',
@@ -1600,7 +1600,7 @@ export default function MAdminClassesClient({
     setFormGradeLevel(defaultGrade)
     setFormCode(selectedOrgId === 30 ? '9/B' : selectedOrgId === 10 ? '1/B' : '5/B')
     setFormRoomName(selectedOrgId === 30 ? '1. Kat · Derslik 102' : '1. Kat · Derslik 107')
-    setFormTeacherName(availableTeachers[0]?.name || (selectedOrgId === 30 ? 'Ebru TEKNECİ' : 'Özlem ZOR'))
+    setFormTeacherName(availableTeachers[0]?.name || (selectedOrgId === 30 ? 'Bahar ÇETİN' : 'Bahar ÇETİN'))
     setFormCapacity(32)
     setIsNewClassModalOpen(true)
   }
@@ -1668,8 +1668,8 @@ export default function MAdminClassesClient({
       boardStatus: 'online',
       boardName: `${finalCode} Akıllı Tahta`,
       scheduleSummary: selectedOrgId === 30 ? 'Haftalık 35 Saat' : selectedOrgId === 10 ? 'Haftalık 30 Saat' : 'Haftalık 35 Saat',
-      classPresident: selectedOrgId === 30 ? 'Erçil UĞURLU' : 'Sınıf Temsilcisi',
-      parentRepresentative: selectedOrgId === 30 ? 'Uğur UĞURLU' : 'Veli Temsilcisi',
+      classPresident: selectedOrgId === 30 ? 'Ali Yağız DEMİREL' : 'Sınıf Temsilcisi',
+      parentRepresentative: selectedOrgId === 30 ? 'Kemal SOYSAL' : 'Veli Temsilcisi',
     }
 
     const updated = [newClassItem, ...classesList]
@@ -2389,7 +2389,7 @@ export default function MAdminClassesClient({
                       setTransferStudentSearchQuery(e.target.value)
                       setTransferStudentName(e.target.value)
                     }}
-                    placeholder="Öğrenci adı (örn: Erçil UĞURLU) veya numara ile ara..."
+                    placeholder="Öğrenci adı (örn: Ali Yağız DEMİREL) veya numara ile ara..."
                     className="w-full h-10 pl-9 pr-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold"
                   />
                 </div>

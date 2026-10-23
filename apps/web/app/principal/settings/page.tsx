@@ -34,7 +34,7 @@ import {
 export default function PrincipalSettingsPage() {
   // Principal Profile
   const [profile, setProfile] = useState({
-    name: 'Dr. Uğur UĞURLU',
+    name: 'Kemal SOYSAL',
     title: 'Okul Müdürü · Kurum Yetkilisi',
     email: 'mudur@oxonom.com',
     tcNo: '10000000146',

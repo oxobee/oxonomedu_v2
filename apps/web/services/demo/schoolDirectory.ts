@@ -27,9 +27,9 @@ export const SCHOOL_ORGS: SchoolOrg[] = [
     slug: 'oxonom',
     description: '1 Okul, 1 Sınıf, 1 Müdür, 1 Öğretmen, 1 Öğrenci — Bütünleşik Dijital Kurum',
     about: 'Oxonom Okulları; okul müdürü, sınıf rehber öğretmeni ve öğrencinin tamamen birbirine tanımlandığı, MEB müfredatına tam uyumlu yeni nesil akıllı eğitim kurumu.',
-    grades: '9. Sınıf (Anadolu Lisesi / Edebiyat)',
-    grade_levels: ['9. Sınıf'],
-    level_type: 'MIDDLE',
+    grades: '1. - 8. Sınıf (İlkokul & Ortaokul)',
+    grade_levels: ['1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf', '8. Sınıf'],
+    level_type: 'PRIMARY',
     address: 'Oxonom Dijital Eğitim Kampüsü No:1 Beşiktaş / İstanbul',
     phone: '+90 212 500 2803',
     email: 'bilgi@oxonom.com',
@@ -60,10 +60,10 @@ export interface TeacherDef {
 
 export const TEACHER_RAW_LIST: { grade: string; orgId: number; teachers: { className: string; name: string }[] }[] = [
   {
-    grade: '9. Sınıf',
+    grade: '1. Sınıf',
     orgId: 30,
     teachers: [
-      { className: '1/A', name: 'Ebru TEKNECİ' },
+      { className: '1/A', name: 'Bahar ÇETİN' },
     ],
   },
 ]
@@ -141,37 +141,36 @@ export function getClassBoardIdentity(
   return { panoId, boardNo }
 }
 
-// 32 Classrooms: 1/A through 8/D (MEB İlkokul & Ortaokul)
+// 32 Classrooms: 1/A through 8/D (MEB İlkokul & Ortaokul, No Grade 9+)
 const BRANCHES = ['A', 'B', 'C', 'D']
 export const TEACHER_ROSTER = [
-  { name: 'Özlem ZOR', branch: 'Sınıf Öğretmeni (1/A)', email: 'ozlemzor@oxonom.com' },
-  { name: 'Beyzanur SALMANLI', branch: 'Sınıf Öğretmeni', email: 'beyzanur@oxonom.com' },
-  { name: 'Özge KABA', branch: 'Sınıf Öğretmeni', email: 'ozgekaba@oxonom.com' },
-  { name: 'İpek ŞAHİN', branch: 'Sınıf Öğretmeni', email: 'ipeksahin@oxonom.com' },
-  { name: 'Meryem MACİT', branch: 'Sınıf Öğretmeni', email: 'meryemmacit@oxonom.com' },
-  { name: 'Hilal KAYA', branch: 'Sınıf Öğretmeni', email: 'hilalkaya@oxonom.com' },
-  { name: 'Sümeyra Nur TAŞDEMİR', branch: 'Sınıf Öğretmeni', email: 'sumeyranur@oxonom.com' },
-  { name: 'Aslı ERGÜN', branch: 'Sınıf Öğretmeni', email: 'asliergun@oxonom.com' },
-  { name: 'Ebru TEKNECİ', branch: 'Türkçe / Edebiyat', email: 'ebrutekneci@oxonom.com' },
-  { name: 'Orkun AYDIN', branch: 'Matematik', email: 'orkunaydin@oxonom.com' },
-  { name: 'Beritan ŞENATEŞ', branch: 'Fen Bilimleri', email: 'beritans@oxonom.com' },
-  { name: 'Deniz ARSLAN', branch: 'Sosyal Bilgiler', email: 'denizarslan@oxonom.com' },
-  { name: 'Canan YILDIRIM', branch: 'İngilizce', email: 'cananyildirim@oxonom.com' },
-  { name: 'Murat DEMİR', branch: 'Bilişim Teknolojileri', email: 'muratdemir@oxonom.com' },
-  { name: 'Gülşah ÖZTÜRK', branch: 'Görsel Sanatlar', email: 'gulsahozturk@oxonom.com' },
-  { name: 'Selim AKSOY', branch: 'Beden Eğitimi', email: 'selimaksoy@oxonom.com' },
+  { name: 'Bahar ÇETİN', branch: 'Sınıf Öğretmeni (1/A)', email: 'ogretmen@oxonom.com' },
+  { name: 'Selin TANYEL', branch: 'Sınıf Öğretmeni (1/B)', email: 'selintanyel@oxonom.com' },
+  { name: 'Hakan PEKCAN', branch: 'Sınıf Öğretmeni (1/C)', email: 'hakanpekcan@oxonom.com' },
+  { name: 'Duygu ŞENGÜL', branch: 'Sınıf Öğretmeni (1/D)', email: 'duygusengul@oxonom.com' },
+  { name: 'Cemre KANDEMİR', branch: 'Sınıf Öğretmeni (2/A)', email: 'cemrek@oxonom.com' },
+  { name: 'Tolga YILDIRIM', branch: 'Sınıf Öğretmeni (2/B)', email: 'tolgay@oxonom.com' },
+  { name: 'Ece BAYRAKTAR', branch: 'Sınıf Öğretmeni (3/A)', email: 'eceb@oxonom.com' },
+  { name: 'Bora GÖKÇE', branch: 'Sınıf Öğretmeni (4/A)', email: 'borag@oxonom.com' },
+  { name: 'Nesrin ALKAN', branch: 'Türkçe', email: 'nesrinalkan@oxonom.com' },
+  { name: 'Serhat KÖSE', branch: 'Matematik', email: 'serhatkose@oxonom.com' },
+  { name: 'Gözde ÜNAL', branch: 'Fen Bilimleri', email: 'gozdeunal@oxonom.com' },
+  { name: 'Tuna ŞİMŞEK', branch: 'Sosyal Bilgiler', email: 'tunasimsek@oxonom.com' },
+  { name: 'Aylin DERİN', branch: 'İngilizce', email: 'aylinderin@oxonom.com' },
+  { name: 'Oğuzhan ÇELİK', branch: 'Bilişim Teknolojileri', email: 'oguzhancelik@oxonom.com' },
+  { name: 'Melisa ERSOY', branch: 'Görsel Sanatlar', email: 'melisaersoy@oxonom.com' },
+  { name: 'Volkan ŞAHİNER', branch: 'Beden Eğitimi', email: 'volkansahiner@oxonom.com' },
 ]
 
 function buildSchoolClassrooms(): ClassroomItem[] {
   const result: ClassroomItem[] = []
   let id = 101
-  for (let g = 1; g <= 9; g++) {
+  for (let g = 1; g <= 8; g++) {
     for (const b of BRANCHES) {
-      if (g === 9 && b !== 'A') continue // Only 9-A for 9th grade showcase
-      const code = g === 9 ? '9-A' : `${g}/${b}`
-      const is9A = g === 9 && b === 'A'
-      const teacher = is9A
-        ? { name: 'Ebru TEKNECİ', branch: 'Türk Dili ve Edebiyatı · Rehberlik', email: 'ogretmen@oxonom.com' }
+      const code = `${g}/${b}`
+      const is1A = g === 1 && b === 'A'
+      const teacher = is1A
+        ? { name: 'Bahar ÇETİN', branch: 'Sınıf Öğretmeni (1/A)', email: 'ogretmen@oxonom.com' }
         : TEACHER_ROSTER[(id - 101) % TEACHER_ROSTER.length]
       const isPrimary = g <= 4
       result.push({
@@ -182,12 +181,12 @@ function buildSchoolClassrooms(): ClassroomItem[] {
         join_code: `OKUL-${g}${b}`,
         grade_level: `${g}. Sınıf`,
         org_id: 30,
-        school_name: is9A ? 'Oxonom Maarif Koleji' : isPrimary ? 'Necla Görer İlkokulu' : 'Şair Fevzi Kutlu Kalkancı Ortaokulu',
+        school_name: isPrimary ? 'Oxonom İlkokulu' : 'Oxonom Ortaokulu',
         school_slug: 'oxonom',
         description: `Sınıf Rehber Öğretmeni: ${teacher.name} (${teacher.branch}) — Oxonom Okulları`,
         teacher_name: teacher.name,
         teacher_email: teacher.email,
-        student_count: is9A ? 24 : 0,
+        student_count: is1A ? 24 : 0,
         boards_count: 1,
         subject: teacher.branch,
       })
@@ -215,14 +214,14 @@ export function getClassroomLiveStudentCount(classCode: string, orgId: number = 
 
 export const ALL_CLASSROOMS: ClassroomItem[] = buildSchoolClassrooms()
 
-// Authentic Student Profile: Erçil UĞURLU (strictly in 1/A)
+// Authentic Student Profile: Ali Yağız DEMİREL (strictly in 1/A)
 export const REAL_STUDENT = {
   id: 3001,
   user_uuid: 'user_ercil_ugurlu',
   studentNo: '101',
   tcNo: '10000000146',
-  name: 'Erçil UĞURLU',
-  first_name: 'Erçil',
+  name: 'Ali Yağız DEMİREL',
+  first_name: 'Ali Yağız',
   last_name: 'UĞURLU',
   email: 'ogrenci@oxonom.com',
   username: 'ogrenci',
@@ -231,9 +230,9 @@ export const REAL_STUDENT = {
   bloodType: 'A Rh+',
   motherName: 'Ebru UĞURLU',
   motherPhone: '+90 532 999 1100',
-  fatherName: 'Dr. Uğur UĞURLU (Okul Müdürü)',
+  fatherName: 'Kemal SOYSAL (Okul Müdürü)',
   fatherPhone: '+90 532 999 2200',
-  parentName: 'Dr. Uğur UĞURLU & Ebru UĞURLU',
+  parentName: 'Kemal SOYSAL & Ebru UĞURLU',
   parentPhone: '+90 532 999 2200',
   parentRelation: 'Baba (Kurum Müdürü) & Anne',
   parentOccupation: 'Eğitim Yöneticisi & Mimar',
@@ -241,7 +240,7 @@ export const REAL_STUDENT = {
   secondParentPhone: '+90 532 999 1100',
   parents: [
     {
-      name: 'Dr. Uğur UĞURLU',
+      name: 'Kemal SOYSAL',
       relation: 'Baba (Okul Müdürü)',
       phone: '+90 532 999 2200',
       occupation: 'Okul Müdürü · Kurum Yetkilisi',
@@ -256,7 +255,7 @@ export const REAL_STUDENT = {
     },
   ],
   address: 'Caddebostan Mah. Bağdat Cad. No: 142/5 Kadıköy / İstanbul',
-  emergencyContact: 'Dr. Uğur UĞURLU (Baba - Okul Müdürü)',
+  emergencyContact: 'Kemal SOYSAL (Baba - Okul Müdürü)',
   emergencyPhone: '+90 532 999 2200',
   status: 'active' as const,
   enrollmentDate: '01.09.2024',
@@ -273,27 +272,27 @@ export const REAL_STUDENT = {
     {
       id: 'gn-30-1',
       date: '15.10.2026',
-      author: 'Ebru TEKNECİ (9-A Sınıf Rehber Öğretmeni)',
+      author: 'Bahar ÇETİN (9-A Sınıf Rehber Öğretmeni)',
       category: 'Akademik' as const,
       content: 'Öğrencinin edebi metin tahlili, paragraf çıkarımları ve ders içi analitik katkısı takdir edilmektedir.',
     },
     {
       id: 'gn-30-2',
       date: '20.10.2026',
-      author: 'Dr. Uğur UĞURLU (Okul Müdürü)',
+      author: 'Kemal SOYSAL (Okul Müdürü)',
       category: 'Gözlem' as const,
       content: 'Öğrencinin akademik disiplini, TÜBİTAK proje geliştirme kabiliyeti en üst düzeydedir.',
     },
   ],
   grades: [
-    { courseName: 'Türk Dili ve Edebiyatı', teacherName: 'Ebru TEKNECİ', exam1: 96, exam2: 98, performance: 100, average: 97.6 },
-    { courseName: 'Matematik', teacherName: 'Ebru TEKNECİ', exam1: 95, exam2: 96, performance: 98, average: 96.0 },
+    { courseName: 'Türk Dili ve Edebiyatı', teacherName: 'Bahar ÇETİN', exam1: 96, exam2: 98, performance: 100, average: 97.6 },
+    { courseName: 'Matematik', teacherName: 'Bahar ÇETİN', exam1: 95, exam2: 96, performance: 98, average: 96.0 },
     { courseName: 'Fizik & Fen Bilimleri', teacherName: 'Beritan ŞENATEŞ', exam1: 94, exam2: 95, performance: 98, average: 95.2 },
   ],
   classroomId: 101,
   classroomName: '9-A Şubesi',
   className: '9-A',
-  mentorTeacher: 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)',
+  mentorTeacher: 'Bahar ÇETİN (Türk Dili ve Edebiyatı)',
   schoolName: 'Oxonom Maarif Koleji',
   is_demo: false,
 }
@@ -347,7 +346,7 @@ export function getSingleSourceOfTruthStudents(orgId: number = 30): any[] {
       classroomName: cleanCode === '9-A' ? '9-A Şubesi' : matchedCls.name,
       classroomId: cleanCode === '9-A' ? 101 : matchedCls.id,
       gradeLevel: cleanCode === '9-A' ? '9. Sınıf' : matchedCls.grade_level,
-      mentorTeacher: cleanCode === '9-A' ? 'Ebru TEKNECİ (Türk Dili ve Edebiyatı)' : matchedCls.teacher_name ? `${matchedCls.teacher_name} (Sınıf Öğretmeni)` : 'Ebru TEKNECİ',
+      mentorTeacher: cleanCode === '9-A' ? 'Bahar ÇETİN (Türk Dili ve Edebiyatı)' : matchedCls.teacher_name ? `${matchedCls.teacher_name} (Sınıf Öğretmeni)` : 'Bahar ÇETİN',
       schoolName: cleanCode === '9-A' ? 'Oxonom Maarif Koleji' : matchedCls.school_name || 'Oxonom Okulları',
     }
 
@@ -357,7 +356,7 @@ export function getSingleSourceOfTruthStudents(orgId: number = 30): any[] {
     return updated
   })
 
-  // Ensure Erçil exists in the list
+  // Ensure Ali Yağız exists in the list
   const hasErcil = list.some((s) => s.studentNo === '101' || (s.name && s.name.toLowerCase().includes('erçil')))
   if (!hasErcil) {
     list.unshift({ ...REAL_STUDENT })
@@ -386,7 +385,7 @@ export function saveSingleSourceOfTruthStudents(updatedList: any[], orgId: numbe
       classroomName: matchedCls.name,
       classroomId: matchedCls.id,
       gradeLevel: matchedCls.grade_level,
-      mentorTeacher: matchedCls.teacher_name ? `${matchedCls.teacher_name} (Sınıf Öğretmeni)` : (st.mentorTeacher || 'Özlem ZOR (Sınıf Öğretmeni)'),
+      mentorTeacher: matchedCls.teacher_name ? `${matchedCls.teacher_name} (Sınıf Öğretmeni)` : (st.mentorTeacher || 'Bahar ÇETİN (Sınıf Öğretmeni)'),
       schoolName: matchedCls.school_name || 'Oxonom Okulları',
     }
   })
@@ -521,7 +520,7 @@ export function getOrgTeachers(orgId?: number) {
   return [
     {
       id: 3001,
-      name: 'Ebru TEKNECİ',
+      name: 'Bahar ÇETİN',
       tcNo: '20000002803',
       email: 'ogretmen@oxonom.com',
       phone: '+90 533 280 0301',
@@ -577,7 +576,7 @@ export function generateClassroomAssignments(classItem?: ClassroomItem) {
       id: cls.id * 10 + 1,
       assignment_uuid: `asg_${cls.id}_1`,
       title: `${cls.code} Türkçe: Ses ve Harf Bilgisi Okuma Çalışması`,
-      description: `Sevgili öğrencimiz Erçil UĞURLU, 'A-N-E-T-İ-L' ses grubu ile oluşturulan kelime ve cümleleri sesli okuyarak çalışma kağıdını tamamlayınız.`,
+      description: `Sevgili öğrencimiz Ali Yağız DEMİREL, 'A-N-E-T-İ-L' ses grubu ile oluşturulan kelime ve cümleleri sesli okuyarak çalışma kağıdını tamamlayınız.`,
       grade_level: cls.grade_level,
       grade_category: 'İlkokul (1. Sınıf)',
       subject: 'Türkçe',
@@ -697,7 +696,7 @@ export interface TcRecord {
 export const KNOWN_TC_REGISTRY: Record<string, TcRecord> = {
   '64690186628': {
     tcNo: '64690186628',
-    name: 'Dr. Uğur UĞURLU',
+    name: 'Kemal SOYSAL',
     first_name: 'Uğur',
     last_name: 'UĞURLU',
     role: 'Okul Müdürü',
@@ -712,7 +711,7 @@ export const KNOWN_TC_REGISTRY: Record<string, TcRecord> = {
   },
   '10000002803': {
     tcNo: '10000002803',
-    name: 'Dr. Uğur UĞURLU',
+    name: 'Kemal SOYSAL',
     first_name: 'Uğur',
     last_name: 'UĞURLU',
     role: 'Okul Müdürü',
@@ -727,7 +726,7 @@ export const KNOWN_TC_REGISTRY: Record<string, TcRecord> = {
   },
   '20000002803': {
     tcNo: '20000002803',
-    name: 'Ebru TEKNECİ',
+    name: 'Bahar ÇETİN',
     first_name: 'Ebru',
     last_name: 'TEKNECİ',
     role: 'Öğretmen',
@@ -744,8 +743,8 @@ export const KNOWN_TC_REGISTRY: Record<string, TcRecord> = {
   },
   '10000000146': {
     tcNo: '10000000146',
-    name: 'Erçil UĞURLU',
-    first_name: 'Erçil',
+    name: 'Ali Yağız DEMİREL',
+    first_name: 'Ali Yağız',
     last_name: 'UĞURLU',
     role: 'Öğrenci',
     gender: 'Erkek',
@@ -753,7 +752,7 @@ export const KNOWN_TC_REGISTRY: Record<string, TcRecord> = {
     birthYear: 2010,
     age: 16,
     motherName: 'Ebru UĞURLU',
-    fatherName: 'Dr. Uğur UĞURLU (Okul Müdürü)',
+    fatherName: 'Kemal SOYSAL (Okul Müdürü)',
     bloodType: 'A Rh+',
     address: 'Caddebostan Mah. Bağdat Cad. No: 142/5 Kadıköy / İstanbul',
     school: 'Oxonom Okulları',
@@ -762,7 +761,7 @@ export const KNOWN_TC_REGISTRY: Record<string, TcRecord> = {
     mernis_status: 'MERNİS Nüfus ve Vatandaşlık İşleri (NVİ) Aktif Öğrenci Kütük Kaydı',
     parents: [
       {
-        name: 'Dr. Uğur UĞURLU',
+        name: 'Kemal SOYSAL',
         relation: 'Baba (Okul Müdürü)',
         phone: '+90 532 999 2200',
         occupation: 'Okul Müdürü · Kurum Yetkilisi',

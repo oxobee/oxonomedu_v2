@@ -33,7 +33,7 @@ export interface SchoolInfo {
 
 export const DEFAULT_PRINCIPAL_PROFILE: PrincipalProfile = {
   id: 50,
-  name: 'Dr. Uğur UĞURLU',
+  name: 'Kemal SOYSAL',
   title: 'Okul Müdürü · Kurum Yetkilisi',
   email: 'mudur@oxonom.com',
   tcNo: '10000000001',

@@ -607,7 +607,7 @@ export default function StudentCoursesView() {
                               </div>
                               <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
                                 <span className="font-semibold text-gray-700 dark:text-gray-300">
-                                  {item.teacherName || 'Ebru TEKNECİ'}
+                                  {item.teacherName || 'Bahar ÇETİN'}
                                 </span>
                                 <span>·</span>
                                 <span className="flex items-center gap-1 text-gray-400">

@@ -59,7 +59,7 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
     title: string
     schoolName: string
   }>({
-    name: 'Dr. Uğur UĞURLU',
+    name: 'Kemal SOYSAL',
     title: 'Okul Müdürü · Kurum Yetkilisi',
     schoolName: 'Oxonom Maarif Koleji',
   })

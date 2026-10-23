@@ -23,7 +23,7 @@ export default function StudentAuthorization({ children }: StudentAuthorizationP
   const [isClientAuthorized, setIsClientAuthorized] = useState<boolean>(true)
   const [isExplicitTeacherOrAdmin, setIsExplicitTeacherOrAdmin] = useState<boolean>(false)
 
-  // Verify and auto-initialize authentic Student session (Erçil UĞURLU)
+  // Verify and auto-initialize authentic Student session (Ali Yağız DEMİREL)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -62,7 +62,7 @@ export default function StudentAuthorization({ children }: StudentAuthorizationP
     }
     setIsExplicitTeacherOrAdmin(false)
     setIsClientAuthorized(true)
-    toast.success('Öğrenci çalışma alanı aktif edildi (Erçil UĞURLU - 9/A).')
+    toast.success('Öğrenci çalışma alanı aktif edildi (Ali Yağız DEMİREL - 9/A).')
   }
 
   // Explicit Teacher/Admin visiting Student Area
@@ -76,7 +76,7 @@ export default function StudentAuthorization({ children }: StudentAuthorizationP
           <div className="space-y-2">
             <h2 className="text-xl font-extrabold text-white">Öğrenci Portalı</h2>
             <p className="text-xs text-gray-400 leading-relaxed">
-              Şu anda {isTeacher ? 'Öğretmen' : 'Müdür/Yönetici'} oturumunuz açık. Öğrenci çalışma alanına (Erçil UĞURLU - 9/A) geçiş yapabilir veya kendi panelinize dönebilirsiniz.
+              Şu anda {isTeacher ? 'Öğretmen' : 'Müdür/Yönetici'} oturumunuz açık. Öğrenci çalışma alanına (Ali Yağız DEMİREL - 9/A) geçiş yapabilir veya kendi panelinize dönebilirsiniz.
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export default function StudentAuthorization({ children }: StudentAuthorizationP
               className="w-full h-11 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <UserCheck size={16} />
-              <span>Öğrenci Olarak Portalı Aç (Erçil UĞURLU)</span>
+              <span>Öğrenci Olarak Portalı Aç (Ali Yağız DEMİREL)</span>
             </button>
 
             {isTeacher ? (
@@ -96,7 +96,7 @@ export default function StudentAuthorization({ children }: StudentAuthorizationP
                 className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors"
               >
                 <ArrowLeft size={16} />
-                <span>Öğretmen Paneline Dön (Ebru TEKNECİ)</span>
+                <span>Öğretmen Paneline Dön (Bahar ÇETİN)</span>
               </Link>
             ) : (
               <Link
@@ -104,7 +104,7 @@ export default function StudentAuthorization({ children }: StudentAuthorizationP
                 className="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors"
               >
                 <ArrowLeft size={16} />
-                <span>Müdür Paneline Dön (Dr. Uğur UĞURLU)</span>
+                <span>Müdür Paneline Dön (Kemal SOYSAL)</span>
               </Link>
             )}
 

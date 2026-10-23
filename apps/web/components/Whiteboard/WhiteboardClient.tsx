@@ -152,13 +152,27 @@ export default function WhiteboardClient() {
     return initialIndex
   })
 
+  // Synchronous refs to prevent race conditions during board creation and switching
+  const currentFileIdRef = useRef<string>(filesIndex.current)
+  const filesIndexRef = useRef<WhiteboardIndex>(filesIndex)
+  const isSwitchingFileRef = useRef<boolean>(false)
+
+  // Keep refs synchronized
+  useEffect(() => {
+    filesIndexRef.current = filesIndex
+    currentFileIdRef.current = filesIndex.current
+  }, [filesIndex])
+
   // Synchronize index if scopeKey changes
   useEffect(() => {
     if (typeof window === 'undefined') return
     try {
       const saved = localStorage.getItem(indexKey)
       if (saved) {
-        setFilesIndex(normalizeIndex(JSON.parse(saved)))
+        const norm = normalizeIndex(JSON.parse(saved))
+        filesIndexRef.current = norm
+        currentFileIdRef.current = norm.current
+        setFilesIndex(norm)
         return
       }
     } catch {}
@@ -166,6 +180,8 @@ export default function WhiteboardClient() {
     try {
       localStorage.setItem(indexKey, JSON.stringify(initialIndex))
     } catch {}
+    filesIndexRef.current = initialIndex
+    currentFileIdRef.current = initialIndex.current
     setFilesIndex(initialIndex)
   }, [indexKey])
 
@@ -175,26 +191,42 @@ export default function WhiteboardClient() {
   const filesBtnRef = useRef<HTMLButtonElement>(null)
 
   const currentFile = useCallback(() => {
-    return filesIndex.files.find((f) => f.id === filesIndex.current) || filesIndex.files[0]
+    const curId = currentFileIdRef.current || filesIndex.current
+    return filesIndex.files.find((f) => f.id === curId) || filesIndex.files[0]
   }, [filesIndex])
+
+  // Synchronous atomic save helper
+  const saveFileSnapshot = useCallback(
+    (targetFileId?: string) => {
+      if (isSwitchingFileRef.current) return
+      const id = targetFileId || currentFileIdRef.current
+      if (!id) return
+      const board = boardInstanceRef.current
+      if (!board?.editor?.store) return
+
+      try {
+        const snap = board.editor.store.getSnapshot()
+        if (snap && snap.document) {
+          localStorage.setItem(getFileKey(id), JSON.stringify(snap))
+          const idx = filesIndexRef.current
+          const file = idx.files.find((f) => f.id === id)
+          if (file) {
+            file.updatedAt = Date.now()
+            localStorage.setItem(indexKey, JSON.stringify(idx))
+          }
+        }
+      } catch (err) {
+        console.warn('Whiteboard save skipped (storage limit)', err)
+      }
+    },
+    [getFileKey, indexKey]
+  )
 
   // Save current document to localStorage
   const saveNow = useCallback(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    const board = boardInstanceRef.current
-    if (!board) return
-    const file = currentFile()
-    if (!file) return
-
-    try {
-      const snap = board.editor.store.getSnapshot()
-      localStorage.setItem(getFileKey(file.id), JSON.stringify(snap))
-      file.updatedAt = Date.now()
-      localStorage.setItem(indexKey, JSON.stringify(filesIndex))
-    } catch (err) {
-      console.warn('Whiteboard save skipped (storage limit)', err)
-    }
-  }, [currentFile, filesIndex, getFileKey, indexKey])
+    saveFileSnapshot(currentFileIdRef.current)
+  }, [saveFileSnapshot])
 
   // ── INCOMING LIVE MATERIAL FROM TEACHER ──
   const [incomingBanner, setIncomingBanner] = useState<{
@@ -205,8 +237,34 @@ export default function WhiteboardClient() {
   const incomingBannerTimerRef = useRef<any>(null)
 
   // ── SAVE BOARD TO STUDENT PROFILES STATE ──
-  const ALL_SCHOOL_CLASSES = useMemo(() => ['1/A', '1/B', '1/C', '1/D', '2/A', '2/B', '2/C', '2/D', '3/A', '3/B', '4/A', '4/B'], [])
-  const ALL_COURSES = useMemo(() => ['Türkçe', 'Matematik', 'Fen Bilimleri', 'Sosyal Bilgiler', 'Hayat Bilgisi', 'İngilizce', 'Bilişim Teknolojileri', 'Görsel Sanatlar'], [])
+  const ALL_SCHOOL_CLASSES = useMemo(
+    () => [
+      '1/A', '1/B', '1/C', '1/D',
+      '2/A', '2/B', '2/C', '2/D',
+      '3/A', '3/B', '3/C', '3/D',
+      '4/A', '4/B', '4/C', '4/D',
+      '5/A', '5/B', '5/C', '5/D',
+      '6/A', '6/B', '6/C', '6/D',
+      '7/A', '7/B', '7/C', '7/D',
+      '8/A', '8/B', '8/C', '8/D',
+    ],
+    []
+  )
+  const ALL_COURSES = useMemo(
+    () => [
+      'Türkçe',
+      'Matematik',
+      'Hayat Bilgisi',
+      'Fen Bilimleri',
+      'Sosyal Bilgiler',
+      'İngilizce',
+      'Bilişim Teknolojileri',
+      'Görsel Sanatlar',
+      'Müzik',
+      'Beden Eğitimi',
+    ],
+    []
+  )
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false)
   const defaultClassCode = useMemo(() => {
@@ -299,12 +357,12 @@ export default function WhiteboardClient() {
     }
   }, [selectedClasses, saveNow, selectedCourse, boardInfo.fullId, playAudioChime])
 
-  // Helper to convert dataUrl or remote url to Blob for native whiteboard placement
+  // Helper to convert dataUrl or remote url to Blob for native whiteboard placement (Preserves alpha transparency)
   const urlToBlob = async (url: string): Promise<Blob> => {
     if (url.startsWith('data:')) {
       try {
         const arr = url.split(',')
-        const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg'
+        const mime = arr[0].match(/:(.*?);/)?.[1] || (url.includes('image/png') ? 'image/png' : 'image/png')
         const bstr = atob(arr[1])
         let n = bstr.length
         const u8arr = new Uint8Array(n)
@@ -313,7 +371,7 @@ export default function WhiteboardClient() {
         }
         return new Blob([u8arr], { type: mime })
       } catch (_) {
-        return new Blob([], { type: 'image/jpeg' })
+        return new Blob([], { type: 'image/png' })
       }
     }
     const res = await fetch(url)
@@ -405,51 +463,83 @@ export default function WhiteboardClient() {
   )
 
   // Open file by id
-  const openFile = useCallback((id: string, fit = true) => {
-    const board = boardInstanceRef.current
-    const target = filesIndex.files.find((f) => f.id === id)
-    if (!target) return
+  const openFile = useCallback(
+    (id: string, fit = true) => {
+      const board = boardInstanceRef.current
+      const currentId = currentFileIdRef.current
+      if (id === currentId && board) return
 
-    const newIdx = { ...filesIndex, current: target.id }
-    setFilesIndex(newIdx)
-    try {
-      localStorage.setItem(indexKey, JSON.stringify(newIdx))
-      if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href)
-        url.searchParams.set('sheet', String(target.boardNumber))
-        url.searchParams.set('id', boardInfo.fullId)
-        url.searchParams.set('panoId', boardInfo.pano)
-        url.searchParams.set('tahtaId', boardInfo.board)
-        window.history.replaceState({}, '', url.toString())
+      const target = filesIndexRef.current.files.find((f) => f.id === id)
+      if (!target) return
+
+      // 1. Immediately save current board before leaving!
+      if (currentId && board) {
+        saveFileSnapshot(currentId)
       }
-    } catch {}
 
-    if (board) {
-      let snap = null
+      // 2. Lock autosave while loading snapshot
+      isSwitchingFileRef.current = true
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+
+      // 3. Update refs and state
+      currentFileIdRef.current = target.id
+      const newIdx = { ...filesIndexRef.current, current: target.id }
+      filesIndexRef.current = newIdx
+      setFilesIndex(newIdx)
+
       try {
-        const raw = localStorage.getItem(getFileKey(target.id))
-        if (raw) snap = JSON.parse(raw)
-      } catch {
-        localStorage.removeItem(getFileKey(target.id))
-      }
+        localStorage.setItem(indexKey, JSON.stringify(newIdx))
+        if (typeof window !== 'undefined') {
+          const url = new URL(window.location.href)
+          url.searchParams.set('sheet', String(target.boardNumber))
+          url.searchParams.set('id', boardInfo.fullId)
+          url.searchParams.set('panoId', boardInfo.pano)
+          url.searchParams.set('tahtaId', boardInfo.board)
+          window.history.replaceState({}, '', url.toString())
+        }
+      } catch {}
 
-      board.editor.store.loadSnapshot(snap || { document: { store: {} } }, 'remote')
-      board.editor.store.undos.length = 0
-      board.editor.store.redos.length = 0
-      if (fit && snap) {
-        setTimeout(() => {
-          board.editor.fitContent({ animate: 200 })
-        }, 60)
+      if (board) {
+        let snap = null
+        try {
+          const raw = localStorage.getItem(getFileKey(target.id))
+          if (raw) snap = JSON.parse(raw)
+        } catch {
+          localStorage.removeItem(getFileKey(target.id))
+        }
+
+        board.editor.store.loadSnapshot(snap || { document: { store: {} } }, 'remote')
+        board.editor.store.undos.length = 0
+        board.editor.store.redos.length = 0
+        if (fit && snap) {
+          setTimeout(() => {
+            board.editor.fitContent({ animate: 200 })
+          }, 60)
+        }
       }
-    }
-    setCurrentFileName(target.name)
-  }, [filesIndex, getFileKey, indexKey, boardInfo])
+      setCurrentFileName(target.name)
+      setIsMenuOpen(false)
+
+      setTimeout(() => {
+        isSwitchingFileRef.current = false
+      }, 100)
+    },
+    [getFileKey, indexKey, boardInfo, saveFileSnapshot]
+  )
 
   // Create new drawing file
-  const handleCreateFile = () => {
-    saveNow()
+  const handleCreateFile = useCallback(() => {
+    const board = boardInstanceRef.current
+    const currentId = currentFileIdRef.current
+    if (currentId && board) {
+      saveFileSnapshot(currentId)
+    }
+
+    isSwitchingFileRef.current = true
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+
     const id = newId()
-    const nextNumber = Math.max(0, ...filesIndex.files.map((f) => f.boardNumber || 0)) + 1
+    const nextNumber = Math.max(0, ...filesIndexRef.current.files.map((f) => f.boardNumber || 0)) + 1
     const newFile: WhiteboardFile = {
       id,
       boardNumber: nextNumber,
@@ -458,11 +548,16 @@ export default function WhiteboardClient() {
     }
     const newIdx: WhiteboardIndex = {
       current: id,
-      files: [newFile, ...filesIndex.files],
+      files: [newFile, ...filesIndexRef.current.files],
     }
+
+    currentFileIdRef.current = id
+    filesIndexRef.current = newIdx
     setFilesIndex(newIdx)
+
     try {
       localStorage.setItem(indexKey, JSON.stringify(newIdx))
+      localStorage.setItem(getFileKey(id), JSON.stringify({ document: { store: {} } }))
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href)
         url.searchParams.set('sheet', String(nextNumber))
@@ -473,7 +568,6 @@ export default function WhiteboardClient() {
       }
     } catch {}
 
-    const board = boardInstanceRef.current
     if (board) {
       board.editor.store.loadSnapshot({ document: { store: {} } }, 'remote')
       board.editor.store.undos.length = 0
@@ -481,20 +575,25 @@ export default function WhiteboardClient() {
     }
     setCurrentFileName(newFile.name)
     setIsMenuOpen(false)
-  }
+
+    setTimeout(() => {
+      isSwitchingFileRef.current = false
+    }, 100)
+  }, [getFileKey, indexKey, boardInfo, saveFileSnapshot])
 
   // Delete file
   const handleDeleteFile = (e: React.MouseEvent, id: string) => {
     e.stopPropagation()
-    const target = filesIndex.files.find((f) => f.id === id)
-    if (!target || filesIndex.files.length <= 1) return
+    const target = filesIndexRef.current.files.find((f) => f.id === id)
+    if (!target || filesIndexRef.current.files.length <= 1) return
 
     const confirmMsg = `“${target.name}” (ID: #${target.boardNumber}) tahtasını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`
     if (!window.confirm(confirmMsg)) return
 
-    const remaining = filesIndex.files.filter((f) => f.id !== id)
-    let nextCurrent = filesIndex.current
-    if (filesIndex.current === id) {
+    const remaining = filesIndexRef.current.files.filter((f) => f.id !== id)
+    let nextCurrent = filesIndexRef.current.current
+    const wasCurrent = filesIndexRef.current.current === id
+    if (wasCurrent) {
       nextCurrent = remaining[0].id
     }
 
@@ -502,13 +601,14 @@ export default function WhiteboardClient() {
       current: nextCurrent,
       files: remaining,
     }
+    filesIndexRef.current = newIdx
     setFilesIndex(newIdx)
     try {
       localStorage.removeItem(getFileKey(id))
       localStorage.setItem(indexKey, JSON.stringify(newIdx))
     } catch {}
 
-    if (filesIndex.current === id) {
+    if (wasCurrent) {
       openFile(nextCurrent)
     }
   }
@@ -587,11 +687,12 @@ export default function WhiteboardClient() {
       }
     }
 
-    // Debounced autosave
+    // Debounced autosave with guard against snapshot switching
     const unsub = board.editor.store.listen(() => {
+      if (isSwitchingFileRef.current) return
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
       saveTimerRef.current = setTimeout(() => {
-        saveNow()
+        saveFileSnapshot()
       }, 400)
     })
 
@@ -606,7 +707,7 @@ export default function WhiteboardClient() {
     board.editor.on('theme', syncTheme)
 
     const handleBeforeUnload = () => {
-      saveNow()
+      saveFileSnapshot()
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
 
@@ -618,7 +719,7 @@ export default function WhiteboardClient() {
       // Ensure dark mode class is never left lingering on global documentElement
       document.documentElement.classList.remove('dark')
     }
-  }, [indexKey, themeKey, getFileKey])
+  }, [indexKey, themeKey, getFileKey, saveFileSnapshot, openSaveModal])
 
   // Check URL query param ?sheet=... or fallback ?tahta=... on initial mount
   useEffect(() => {

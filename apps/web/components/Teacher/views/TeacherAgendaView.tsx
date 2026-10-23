@@ -93,7 +93,7 @@ export default function TeacherAgendaView() {
   const [isSubmittingExam, setIsSubmittingExam] = useState(false)
 
   // Teacher Profile from localStorage
-  const [teacherName, setTeacherName] = useState('Ebru TEKNECİ')
+  const [teacherName, setTeacherName] = useState('Bahar ÇETİN')
 
   // ── Load Notes & Exams ──
   useEffect(() => {
@@ -289,7 +289,7 @@ export default function TeacherAgendaView() {
       period: examFormPeriod,
       durationMinutes: examFormDuration,
       location: examFormLocation,
-      teacherName: teacherName || 'Ebru TEKNECİ',
+      teacherName: teacherName || 'Bahar ÇETİN',
       scope: examFormScope.trim(),
       isPublished: true,
       status: 'upcoming',

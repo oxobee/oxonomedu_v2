@@ -41,22 +41,22 @@ interface TeacherMessage {
 const INITIAL_MESSAGES: TeacherMessage[] = [
   {
     id: 'msg-1',
-    sender: 'Ebru TEKNECİ',
+    sender: 'Bahar ÇETİN',
     senderRole: '9-A Rehber Öğretmeni & Edebiyat',
     date: 'Bugün, 11:20',
     subject: 'Şiir Tahlilleri Ödevi ve Geri Bildirim',
     content:
-      'Sevgili Erçil, yüklediğin şiir tahlili çalışmanı detaylıca inceledim. Beyit açıklamaların ve edebi sanatlar analizin harika seviyede. Tebrik ederim, tam puanını sisteme girdim.',
+      'Sevgili Ali Yağız, yüklediğin şiir tahlili çalışmanı detaylıca inceledim. Beyit açıklamaların ve edebi sanatlar analizin harika seviyede. Tebrik ederim, tam puanını sisteme girdim.',
     isRead: false,
   },
   {
     id: 'msg-2',
-    sender: 'Dr. Uğur UĞURLU',
+    sender: 'Kemal SOYSAL',
     senderRole: 'Okul Müdürü',
     date: 'Dün, 16:45',
     subject: 'Oxonom Bilim Şenliği Proje Koordinasyonu',
     content:
-      'Erçil merhaba, bu dönem Bilişim ve Kodlama zümresi ile hazırlayacağınız akıllı okul yazılım projesi için bilim şenliği takvimimiz belirlendi. Danışman öğretmenin Ebru Hanım ile birlikte projeyi şekillendirebilirsiniz.',
+      'Ali Yağız merhaba, bu dönem Bilişim ve Kodlama zümresi ile hazırlayacağınız akıllı okul yazılım projesi için bilim şenliği takvimimiz belirlendi. Danışman öğretmenin Ebru Hanım ile birlikte projeyi şekillendirebilirsiniz.',
     isRead: true,
   },
 ]
