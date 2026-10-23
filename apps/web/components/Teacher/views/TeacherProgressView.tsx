@@ -29,6 +29,12 @@ import {
   getSingleSourceOfTruthStudents,
   generateClassStudents,
 } from '@services/demo/schoolDirectory'
+import {
+  GlowBadge,
+  GlowButton,
+  InteractiveCard,
+  StatCounterCard,
+} from '@components/ui/21st'
 
 export default function TeacherProgressView() {
   const [selectedClass, setSelectedClass] = useState<string>(() => {
@@ -145,6 +151,29 @@ export default function TeacherProgressView() {
     })
   }, [classStudents, search])
 
+  // Class-level stats for 21st KPI Counter Cards
+  const classAvgGpa = useMemo(() => {
+    if (!classStudents || classStudents.length === 0) return 85
+    const total = classStudents.reduce((sum, st) => {
+      const g =
+        st.grades && st.grades.length > 0
+          ? st.grades.reduce((s: number, gr: any) => s + (Number(gr.average) || 0), 0) / st.grades.length
+          : Number(st.gpa) || 85
+      return sum + g
+    }, 0)
+    return Number((total / classStudents.length).toFixed(1))
+  }, [classStudents])
+
+  const classAvgAttendance = useMemo(() => {
+    if (!classStudents || classStudents.length === 0) return 96
+    const total = classStudents.reduce((sum, st) => sum + (st.attendanceRate || 95), 0)
+    return Math.round(total / classStudents.length)
+  }, [classStudents])
+
+  const guidanceCount = useMemo(() => {
+    return classStudents.reduce((sum, st) => sum + (st.guidanceNotes?.length || 0), 0)
+  }, [classStudents])
+
   // Add new guidance note
   const handleAddGuidanceNote = () => {
     if (!newGuidanceNote.trim() || !selectedStudent) return
@@ -221,6 +250,41 @@ export default function TeacherProgressView() {
         </div>
       </div>
 
+      {/* ── 21ST KPI STAT COUNTER CARDS ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <StatCounterCard
+          title="Sınıf Not Ortalaması"
+          value={classAvgGpa}
+          subtitle={`${selectedClass} genel akademik başarı`}
+          trend={{ value: classAvgGpa >= 85 ? '+4.2%' : '+1.8%', isPositive: true }}
+          badge={{ text: classAvgGpa >= 85 ? 'Pekiyi Düzey' : 'İyi Düzey', variant: 'emerald' }}
+          icon={<Award size={20} />}
+          iconColor="from-emerald-500 to-teal-700"
+          glowColor="rgba(16, 185, 129, 0.18)"
+        />
+
+        <StatCounterCard
+          title="Ortalama Devam"
+          value={`%${classAvgAttendance}`}
+          subtitle="Ders katılım & yoklama oranı"
+          trend={{ value: `${classAvgAttendance}% Aktif`, isPositive: classAvgAttendance >= 90 }}
+          badge={{ text: 'Yüksek Katılım', variant: 'indigo' }}
+          icon={<UserCheck size={20} />}
+          iconColor="from-indigo-500 to-blue-700"
+          glowColor="rgba(99, 102, 241, 0.18)"
+        />
+
+        <StatCounterCard
+          title="Rehberlik & Gözlem"
+          value={`${guidanceCount} Kayıt`}
+          subtitle="Öğretmen gözlem ve rehberlik notları"
+          badge={{ text: `${classStudents.length} Öğrenci`, variant: 'brand' }}
+          icon={<Sparkles size={20} />}
+          iconColor="from-[#D914C8] to-[#4B075F]"
+          glowColor="rgba(217, 20, 200, 0.2)"
+        />
+      </div>
+
       {/* ── SEARCH & STATS ── */}
       <div className="p-4 bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1">
@@ -242,58 +306,78 @@ export default function TeacherProgressView() {
       {/* ── STUDENTS CARDS GRID ── */}
       {filteredStudents.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredStudents.map((st) => (
-            <div
-              key={st.id}
-              onClick={() => setSelectedStudent(st)}
-              className="bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-3xl p-5 shadow-xs hover:border-[#4B075F] dark:hover:border-[#C58ADB] transition-all cursor-pointer flex flex-col justify-between space-y-4 group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-brand-gradient text-white font-black text-sm flex items-center justify-center shadow-sm shadow-purple-950/20">
-                      {st.name.slice(0, 2).toUpperCase()}
+          {filteredStudents.map((st) => {
+            const studentScore =
+              st.grades && st.grades.length > 0
+                ? Number((st.grades.reduce((sum: number, g: any) => sum + (Number(g.average) || 0), 0) / st.grades.length).toFixed(1))
+                : (st.gpa ?? 0)
+
+            return (
+              <InteractiveCard
+                key={st.id}
+                clickable
+                onClick={() => setSelectedStudent(st)}
+                glowColor="rgba(217, 20, 200, 0.16)"
+                className="p-5 flex flex-col justify-between space-y-4 group border-gray-200/80 dark:border-gray-800/80"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#D914C8] to-[#4B075F] text-white font-black text-sm flex items-center justify-center shadow-md shadow-[#D914C8]/20 border border-white/20">
+                        {st.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-extrabold text-gray-900 dark:text-white group-hover:text-[#D914C8] dark:group-hover:text-[#F0D8FA] transition-colors">
+                          {st.name}
+                        </h3>
+                        <p className="text-[11px] text-gray-400 font-mono mt-0.5">
+                          No: {st.studentNo} • T.C.: {st.tcNo}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-extrabold text-gray-900 dark:text-white group-hover:text-[#4B075F] dark:group-hover:text-[#C58ADB] transition-colors">
-                        {st.name}
-                      </h3>
-                      <p className="text-[11px] text-gray-400 font-mono mt-0.5">
-                        No: {st.studentNo} • T.C.: {st.tcNo}
-                      </p>
-                    </div>
+
+                    <GlowBadge
+                      variant={st.attendanceRate >= 95 ? 'emerald' : st.attendanceRate >= 85 ? 'indigo' : 'rose'}
+                      pulse={st.attendanceRate >= 98}
+                      size="sm"
+                    >
+                      %{st.attendanceRate} Devam
+                    </GlowBadge>
                   </div>
 
-                  <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
-                    %{st.attendanceRate} Devam
-                  </span>
+                  {/* Metrics Grid */}
+                  <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+                    <div className="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gray-400 text-[10px] block font-bold">Genel Başarı</span>
+                        <GlowBadge
+                          variant={studentScore >= 85 ? 'emerald' : studentScore >= 70 ? 'indigo' : 'amber'}
+                          size="sm"
+                        >
+                          {studentScore >= 85 ? 'Pekiyi' : studentScore >= 70 ? 'İyi' : 'Geliştirilmeli'}
+                        </GlowBadge>
+                      </div>
+                      <span className="font-black text-sm text-indigo-600 dark:text-indigo-400">
+                        {studentScore} Ort.
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 flex flex-col justify-between">
+                      <span className="text-gray-400 text-[10px] block font-bold">Rehberlik Kaydı</span>
+                      <span className="font-extrabold text-xs text-gray-800 dark:text-gray-200">
+                        {st.guidanceNotes?.length || 0} Gözlem
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60">
-                    <span className="text-gray-400 text-[10px] block">Genel Başarı</span>
-                    <span className="font-black text-sm text-indigo-600 dark:text-indigo-400">
-                      {st.grades && st.grades.length > 0
-                        ? Number((st.grades.reduce((sum: number, g: any) => sum + (Number(g.average) || 0), 0) / st.grades.length).toFixed(1))
-                        : (st.gpa ?? 0)}
-                    </span>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60">
-                    <span className="text-gray-400 text-[10px] block">Rehberlik Kaydı</span>
-                    <span className="font-extrabold text-xs text-gray-800 dark:text-gray-200">
-                      {st.guidanceNotes?.length || 0} Gözlem
-                    </span>
-                  </div>
+                <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>Gelişim & Not Detaylarını Gör</span>
+                  <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </div>
-              </div>
-
-              <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                <span>Gelişim & Not Detaylarını Gör</span>
-                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-          ))}
+              </InteractiveCard>
+            )
+          })}
         </div>
       ) : (
         <div className="bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-3xl p-12 text-center text-xs text-gray-400">
@@ -481,15 +565,16 @@ export default function TeacherProgressView() {
                       <span className="text-[10px] text-gray-400">
                         * Kaydedilen not öğrenci dosyasına kalıcı pedagojik kayıt olarak işlenir.
                       </span>
-                      <button
+                      <GlowButton
                         type="button"
                         onClick={handleAddGuidanceNote}
                         disabled={!newGuidanceNote.trim()}
-                        className="px-4 py-2 rounded-xl bg-brand-gradient hover:opacity-95 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-purple-950/20 transition-all cursor-pointer"
+                        variant="brand"
+                        size="sm"
+                        icon={<Send size={12} />}
                       >
-                        <Send size={12} />
-                        <span>Rehberlik Notunu Kaydet</span>
-                      </button>
+                        Rehberlik Notunu Kaydet
+                      </GlowButton>
                     </div>
                   </div>
 

@@ -46,6 +46,7 @@ import {
   Check,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { GlowBadge, GlowButton } from '@components/ui/21st'
 import {
   DEFAULT_STUDENT_PROFILE,
   STUDENT_COURSES,
@@ -1696,26 +1697,33 @@ export default function StudentDashboardView() {
 
               <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-[11px]">
                 <span className="text-slate-500 dark:text-slate-400">Akademik Durum:</span>
-                <span className={`font-bold ${academicStatusTheme.statusColor}`}>
+                <GlowBadge
+                  variant={profile.gpa >= 85 ? 'emerald' : profile.gpa >= 70 ? 'indigo' : 'amber'}
+                  size="sm"
+                  pulse={profile.gpa >= 95}
+                >
                   {academicStatusTheme.statusLabel}
-                </span>
+                </GlowBadge>
               </div>
             </div>
 
             {/* Attendance & Class Details */}
             <div className="grid grid-cols-2 gap-2 text-center">
-              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#15213B] border border-blue-50 dark:border-blue-900/30">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Devam Oranı</div>
-                <div className="text-base font-black text-emerald-600 mt-0.5">
-                  %{profile.attendanceRate}
-                </div>
+              <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-[#15213B] border border-blue-50 dark:border-blue-900/30 flex flex-col items-center justify-center">
+                <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">Devam Oranı</div>
+                <GlowBadge variant="emerald" size="sm" pulse={profile.attendanceRate >= 98}>
+                  %{profile.attendanceRate} Aktif
+                </GlowBadge>
               </div>
 
-              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#15213B] border border-blue-50 dark:border-blue-900/30">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Devamsızlık</div>
-                <div className="text-base font-black text-slate-800 dark:text-slate-100 mt-0.5">
+              <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-[#15213B] border border-blue-50 dark:border-blue-900/30 flex flex-col items-center justify-center">
+                <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">Devamsızlık</div>
+                <GlowBadge
+                  variant={profile.absentDays === 0 ? 'emerald' : profile.absentDays <= 3 ? 'indigo' : 'rose'}
+                  size="sm"
+                >
                   {profile.absentDays || 0} Gün
-                </div>
+                </GlowBadge>
               </div>
             </div>
           </div>

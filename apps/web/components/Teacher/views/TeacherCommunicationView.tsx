@@ -29,6 +29,12 @@ import {
   saveSynchronizedStudentAnnouncement,
 } from '@/lib/student/studentData'
 import { ALL_CLASSROOMS, getSingleSourceOfTruthStudents } from '@services/demo/schoolDirectory'
+import {
+  GlowBadge,
+  GlowButton,
+  InteractiveCard,
+  StatCounterCard,
+} from '@components/ui/21st'
 
 export interface TeacherAnnouncement {
   id: string
@@ -268,49 +274,59 @@ export default function TeacherCommunicationView() {
           </p>
         </div>
 
-        <button
+        <GlowButton
           type="button"
           onClick={() => setShowNewModal(true)}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs shadow-md shadow-purple-950/20 transition-all cursor-pointer self-start sm:self-center active:scale-95"
+          variant="brand"
+          size="md"
+          icon={<Plus size={16} strokeWidth={2.5} />}
+          className="self-start sm:self-center"
         >
-          <Plus size={16} strokeWidth={2.5} />
-          <span>+ Yeni Duyuru Yayınla</span>
-        </button>
+          + Yeni Duyuru Yayınla
+        </GlowButton>
       </div>
 
-      {/* ── STATS ROW ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800 shadow-xs">
-          <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Toplam Duyuru</div>
-          <div className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mt-1">
-            {announcements.length}
-          </div>
-          <span className="text-[10px] text-gray-500">Yayında aktif</span>
-        </div>
+      {/* ── 21ST STATS ROW ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <StatCounterCard
+          title="Toplam Duyuru"
+          value={announcements.length}
+          subtitle="Yayında aktif"
+          badge={{ text: 'Aktif', variant: 'emerald' }}
+          icon={<Megaphone size={18} />}
+          iconColor="from-indigo-600 to-indigo-800"
+          glowColor="rgba(99, 102, 241, 0.15)"
+        />
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800 shadow-xs">
-          <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Sınıf & Öğrenci</div>
-          <div className="text-xl sm:text-2xl font-black text-[#4B075F] dark:text-[#C58ADB] mt-1">
-            {classCount}
-          </div>
-          <span className="text-[10px] text-[#8D49A6]">Öğrenciye iletilen</span>
-        </div>
+        <StatCounterCard
+          title="Sınıf & Hedef"
+          value={classCount}
+          subtitle="Öğrencilere iletilen"
+          badge={{ text: 'Hedefli', variant: 'brand' }}
+          icon={<Users size={18} />}
+          iconColor="from-[#D914C8] to-[#4B075F]"
+          glowColor="rgba(217, 20, 200, 0.18)"
+        />
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800 shadow-xs">
-          <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Önemli & Acil</div>
-          <div className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">
-            {urgentCount}
-          </div>
-          <span className="text-[10px] text-amber-500 font-bold">Yüksek öncelikli</span>
-        </div>
+        <StatCounterCard
+          title="Önemli & Acil"
+          value={urgentCount}
+          subtitle="Yüksek öncelikli"
+          badge={{ text: 'Öncelikli', variant: 'rose' }}
+          icon={<AlertTriangle size={18} />}
+          iconColor="from-rose-500 to-amber-600"
+          glowColor="rgba(244, 63, 94, 0.18)"
+        />
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800 shadow-xs">
-          <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Okul Yönetimi</div>
-          <div className="text-xl sm:text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
-            {announcements.filter((a) => a.category === 'administrative').length}
-          </div>
-          <span className="text-[10px] text-indigo-500">Müdürlük bildirimleri</span>
-        </div>
+        <StatCounterCard
+          title="Okul Yönetimi"
+          value={announcements.filter((a) => a.category === 'administrative').length}
+          subtitle="Müdürlük bildirimleri"
+          badge={{ text: 'İdari', variant: 'purple' }}
+          icon={<ShieldCheck size={18} />}
+          iconColor="from-purple-600 to-indigo-800"
+          glowColor="rgba(168, 85, 247, 0.15)"
+        />
       </div>
 
       {/* ── FILTER TABS & SEARCH BAR ── */}
@@ -382,31 +398,35 @@ export default function TeacherCommunicationView() {
             let priorityBadge = null
             if (ann.priority === 'emergency') {
               priorityBadge = (
-                <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center gap-1">
-                  <Flame size={12} className="text-rose-500" />
-                  <span>Acil / Kritik</span>
-                </span>
+                <GlowBadge variant="rose" size="sm" pulse icon={<Flame size={12} className="text-rose-500" />}>
+                  Acil / Kritik
+                </GlowBadge>
               )
             } else if (ann.priority === 'important') {
               priorityBadge = (
-                <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
-                  <AlertTriangle size={12} className="text-amber-500" />
-                  <span>Önemli</span>
-                </span>
+                <GlowBadge variant="amber" size="sm" icon={<AlertTriangle size={12} className="text-amber-500" />}>
+                  Önemli
+                </GlowBadge>
               )
             } else {
               priorityBadge = (
-                <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                  <CheckCircle2 size={12} className="text-emerald-500" />
-                  <span>Normal</span>
-                </span>
+                <GlowBadge variant="emerald" size="sm" icon={<CheckCircle2 size={12} className="text-emerald-500" />}>
+                  Normal
+                </GlowBadge>
               )
             }
 
             return (
-              <div
+              <InteractiveCard
                 key={ann.id}
-                className={`p-6 rounded-3xl bg-white dark:bg-[#121826] border transition-all shadow-xs space-y-3 ${
+                glowColor={
+                  ann.priority === 'emergency'
+                    ? 'rgba(244, 63, 94, 0.18)'
+                    : ann.isPinned
+                    ? 'rgba(217, 20, 200, 0.18)'
+                    : 'rgba(99, 102, 241, 0.12)'
+                }
+                className={`p-6 space-y-3 ${
                   ann.priority === 'emergency'
                     ? 'border-rose-400/80 dark:border-rose-800/80 bg-rose-50/10'
                     : ann.isPinned
@@ -464,7 +484,7 @@ export default function TeacherCommunicationView() {
                     {ann.content}
                   </p>
                 </div>
-              </div>
+              </InteractiveCard>
             )
           })
         ) : (
@@ -732,13 +752,14 @@ export default function TeacherCommunicationView() {
                 >
                   Vazgeç
                 </button>
-                <button
+                <GlowButton
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-black cursor-pointer transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+                  variant="brand"
+                  size="md"
+                  icon={<Send size={14} />}
                 >
-                  <Send size={14} />
-                  <span>Duyuruyu Yayınla</span>
-                </button>
+                  Duyuruyu Yayınla
+                </GlowButton>
               </div>
             </form>
           </div>
