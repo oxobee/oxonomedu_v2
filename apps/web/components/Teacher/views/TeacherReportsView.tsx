@@ -26,6 +26,7 @@ import {
   ALL_CLASSROOMS,
   normalizeClassCode,
   getSingleSourceOfTruthStudents,
+  generateClassStudents,
 } from '@services/demo/schoolDirectory'
 
 export default function TeacherReportsView() {
@@ -90,6 +91,8 @@ export default function TeacherReportsView() {
   }, [])
 
   const classStudents = useMemo(() => {
+    const list = generateClassStudents(selectedClassId)
+    if (list && list.length > 0) return list
     const norm = normalizeClassCode(selectedClassId)
     return students.filter((s) => {
       const sNorm = normalizeClassCode(s.className || '')
@@ -99,18 +102,27 @@ export default function TeacherReportsView() {
 
   const targetStudent = classStudents[0] || students[0]
 
-  const studentGpa = useMemo(() => {
-    if (!targetStudent) return 0
-    if (targetStudent.grades && targetStudent.grades.length > 0) {
-      const valid = targetStudent.grades.filter(
-        (g) => g.average !== undefined && g.average !== null && !isNaN(Number(g.average)) && String(g.average) !== ''
-      )
-      if (valid.length > 0) {
-        return Number((valid.reduce((sum, g) => sum + Number(g.average), 0) / valid.length).toFixed(1))
-      }
-    }
-    return typeof targetStudent.gpa === 'number' ? targetStudent.gpa : (Number(targetStudent.gpa) || 0)
-  }, [targetStudent])
+  // Overall class average GPA computed across all students in the class
+  const classAvgGpa = useMemo(() => {
+    if (!classStudents || classStudents.length === 0) return 85
+    const total = classStudents.reduce((acc, st) => {
+      const stAvg =
+        st.grades && st.grades.length > 0
+          ? st.grades.reduce((sum: number, g: any) => sum + Number(g.average || 0), 0) / st.grades.length
+          : Number(st.gpa) || 85
+      return acc + stAvg
+    }, 0)
+    return Number((total / classStudents.length).toFixed(1))
+  }, [classStudents])
+
+  // Overall class attendance rate
+  const classAvgAttendance = useMemo(() => {
+    if (!classStudents || classStudents.length === 0) return 96
+    const total = classStudents.reduce((acc, st) => acc + (st.attendanceRate || 95), 0)
+    return Math.round(total / classStudents.length)
+  }, [classStudents])
+
+  const studentGpa = classAvgGpa
 
   const CLASSES = useMemo(() => {
     return ALL_CLASSROOMS.map((c) => {
@@ -121,20 +133,132 @@ export default function TeacherReportsView() {
         code: c.code,
         grade_level: c.grade_level,
         course: c.org_id === 10 ? 'Sınıf Öğretmenliği' : 'Türk Dili ve Edebiyatı',
-        studentCount: c.student_count || 1,
-        avgGrade: isSelected ? studentGpa : Math.floor(78 + (c.id % 16)),
-        attendanceRate: isSelected ? (targetStudent?.attendanceRate ?? 98) : 96,
-        homeworkRate: 100,
+        studentCount: isSelected ? classStudents.length : c.student_count || 24,
+        avgGrade: isSelected ? classAvgGpa : Math.floor(78 + (c.id % 16)),
+        attendanceRate: isSelected ? classAvgAttendance : 96,
+        homeworkRate: 98,
       }
     })
-  }, [studentGpa, targetStudent, selectedClassId])
+  }, [classAvgGpa, classAvgAttendance, classStudents.length, selectedClassId])
 
   const activeClass = CLASSES.find((c) => normalizeClassCode(c.code) === normalizeClassCode(selectedClassId)) || CLASSES[0]
 
+  // Category Based Success Analysis calculated dynamically from all student grades & homework in class
+  const academicCategories = useMemo(() => {
+    if (!classStudents || classStudents.length === 0) {
+      return [
+        { title: 'Türkçe & Okuduğunu Anlama', avg: 88, icon: BookOpen, color: 'indigo' },
+        { title: 'Matematik & Problem Çözme', avg: 84, icon: Award, color: 'emerald' },
+        { title: 'Hayat Bilgisi & Sosyal Gelişim', avg: 91, icon: TrendingUp, color: 'sky' },
+        { title: 'Sözlü, Performans & Görevler', avg: 89, icon: Sparkles, color: 'purple' },
+      ]
+    }
+
+    const calcCourseAvg = (keyword: string, fallback: number) => {
+      let sum = 0
+      let count = 0
+      classStudents.forEach((st) => {
+        const matched = st.grades?.find((g: any) => g.courseName?.toLowerCase().includes(keyword.toLowerCase()))
+        if (matched && matched.average) {
+          sum += Number(matched.average)
+          count++
+        }
+      })
+      return count > 0 ? Number((sum / count).toFixed(1)) : fallback
+    }
+
+    return [
+      { title: 'Türkçe & Okuduğunu Anlama', avg: calcCourseAvg('türkçe', 88), icon: BookOpen, color: 'indigo' },
+      { title: 'Matematik & Problem Çözme', avg: calcCourseAvg('matematik', 84), icon: Award, color: 'emerald' },
+      { title: 'Hayat Bilgisi & Sosyal Gelişim', avg: calcCourseAvg('hayat', 92), icon: TrendingUp, color: 'sky' },
+      { title: 'Sözlü, Performans & Görevler', avg: Math.min(100, Math.round(classAvgGpa * 1.04)), icon: Sparkles, color: 'purple' },
+    ]
+  }, [classStudents, classAvgGpa])
+
+  // Grade score distribution (Percentage of class calculated across all students)
+  const gradeDistribution = useMemo(() => {
+    if (!classStudents || classStudents.length === 0) return []
+    const total = classStudents.length
+
+    let cPekiyi = 0
+    let cIyi = 0
+    let cOrta = 0
+    let cGelistirilmeli = 0
+
+    classStudents.forEach((st) => {
+      const g =
+        st.grades && st.grades.length > 0
+          ? st.grades.reduce((sum: number, gr: any) => sum + Number(gr.average || 0), 0) / st.grades.length
+          : Number(st.gpa) || 85
+      if (g >= 85) cPekiyi++
+      else if (g >= 70) cIyi++
+      else if (g >= 55) cOrta++
+      else cGelistirilmeli++
+    })
+
+    return [
+      { range: '85 - 100 (Pekiyi)', percent: Math.round((cPekiyi / total) * 100), count: cPekiyi, color: 'bg-emerald-500' },
+      { range: '70 - 84 (İyi)', percent: Math.round((cIyi / total) * 100), count: cIyi, color: 'bg-indigo-500' },
+      { range: '55 - 69 (Orta)', percent: Math.round((cOrta / total) * 100), count: cOrta, color: 'bg-amber-500' },
+      { range: '0 - 54 (Geliştirilmeli)', percent: Math.round((cGelistirilmeli / total) * 100), count: cGelistirilmeli, color: 'bg-rose-500' },
+    ]
+  }, [classStudents])
+
+  // Attendance breakdown calculated across all students in class
+  const attendanceBreakdown = useMemo(() => {
+    if (!classStudents || classStudents.length === 0) return []
+    const total = classStudents.length
+
+    let c95 = 0
+    let c85 = 0
+    let cLess = 0
+
+    classStudents.forEach((st) => {
+      const att = st.attendanceRate || 95
+      if (att >= 95) c95++
+      else if (att >= 85) c85++
+      else cLess++
+    })
+
+    return [
+      { label: 'Düzenli Katılanlar (%95+)', count: c95, pct: `${Math.round((c95 / total) * 100)}%`, color: 'text-emerald-600 bg-emerald-500' },
+      { label: 'Normal Katılım (%85 - %94)', count: c85, pct: `${Math.round((c85 / total) * 100)}%`, color: 'text-indigo-600 bg-indigo-500' },
+      { label: 'Devamsızlık Takibinde (<%85)', count: cLess, pct: `${Math.round((cLess / total) * 100)}%`, color: 'text-rose-600 bg-rose-500' },
+    ]
+  }, [classStudents])
+
+  // Student summary roster (Comprehensive roster of all students in class)
+  const sampleStudents = useMemo(() => {
+    return classStudents
+      .map((st) => {
+        const studentAvg =
+          st.grades && st.grades.length > 0
+            ? Number((st.grades.reduce((sum: number, g: any) => sum + Number(g.average || 0), 0) / st.grades.length).toFixed(1))
+            : Number(st.gpa) || 85
+
+        const e1 = Number(st.grades?.[0]?.exam1) || 80
+        const e2 = Number(st.grades?.[0]?.exam2) || e1
+        const diff = e2 - e1
+        const trendStr = diff >= 0 ? `+${diff.toFixed(1)}` : `${diff.toFixed(1)}`
+
+        return {
+          id: st.id,
+          no: st.studentNo,
+          name: st.name,
+          avg: studentAvg,
+          attendance: `%${st.attendanceRate || 95}`,
+          hwRate: `%${Math.min(100, Math.round(studentAvg * 1.05))}`,
+          trend: trendStr,
+        }
+      })
+      .filter((s) => s.name.toLowerCase().includes(searchStudent.toLowerCase()) || s.no.includes(searchStudent))
+  }, [classStudents, searchStudent])
+
   const handleExportCSV = () => {
-    const csvContent =
-      `data:text/csv;charset=utf-8,Ogrenci No,Ad Soyad,Sube,Akademik Not Ortalamasi,Devam Orani,Odev Tamamlama\n` +
-      `${targetStudent?.studentNo || '101'},${targetStudent?.name || 'Ali Yağız DEMİREL'},${activeClass.name},${studentGpa},%${activeClass.attendanceRate},%100\n`
+    let csvContent = 'data:text/csv;charset=utf-8,Ogrenci No,Ad Soyad,Sube,Akademik Not Ortalamasi,Devam Orani,Odev Basarisi\n'
+    sampleStudents.forEach((st) => {
+      csvContent += `${st.no},"${st.name}",${activeClass.name},${st.avg},${st.attendance},${st.hwRate}\n`
+    })
 
     const encodedUri = encodeURI(csvContent)
     const link = document.createElement('a')
@@ -143,7 +267,7 @@ export default function TeacherReportsView() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    toast.success(`${activeClass.name} sınıf raporu CSV olarak indirildi.`)
+    toast.success(`${activeClass.name} sınıfının tüm (${sampleStudents.length}) öğrenci raporu CSV olarak indirildi.`)
   }
 
   const handlePrint = () => {
@@ -151,41 +275,6 @@ export default function TeacherReportsView() {
       window.print()
     }
   }
-
-  // Class specific academic records
-  const academicCategories = [
-    { title: 'Şiir & Metin Tahlili', avg: studentGpa, icon: BookOpen, color: 'indigo' },
-    { title: 'Kompozisyon & İfade', avg: studentGpa, icon: Award, color: 'emerald' },
-    { title: 'Dil Bilgisi & İmla', avg: studentGpa, icon: TrendingUp, color: 'sky' },
-    { title: 'Sözlü & Performans', avg: studentGpa, icon: Sparkles, color: 'purple' },
-  ]
-
-  // Grade score distribution (Percentage of class)
-  const gradeDistribution = [
-    { range: '85 - 100 (Pekiyi)', percent: studentGpa >= 85 ? 100 : 0, count: studentGpa >= 85 ? 1 : 0, color: 'bg-emerald-500' },
-    { range: '70 - 84 (İyi)', percent: studentGpa >= 70 && studentGpa < 85 ? 100 : 0, count: studentGpa >= 70 && studentGpa < 85 ? 1 : 0, color: 'bg-indigo-500' },
-    { range: '55 - 69 (Orta)', percent: studentGpa >= 55 && studentGpa < 70 ? 100 : 0, count: studentGpa >= 55 && studentGpa < 70 ? 1 : 0, color: 'bg-amber-500' },
-    { range: '0 - 54 (Geliştirilmeli)', percent: studentGpa < 55 ? 100 : 0, count: studentGpa < 55 ? 1 : 0, color: 'bg-rose-500' },
-  ]
-
-  // Attendance breakdown
-  const attendanceBreakdown = [
-    { label: 'Düzenli Katılanlar (%95+)', count: activeClass.attendanceRate >= 95 ? 1 : 0, pct: activeClass.attendanceRate >= 95 ? '100%' : '0%', color: 'text-emerald-600 bg-emerald-500' },
-    { label: 'Normal Katılım (%85 - %94)', count: activeClass.attendanceRate >= 85 && activeClass.attendanceRate < 95 ? 1 : 0, pct: activeClass.attendanceRate >= 85 && activeClass.attendanceRate < 95 ? '100%' : '0%', color: 'text-indigo-600 bg-indigo-500' },
-    { label: 'Devamsızlık Takibinde (<%85)', count: activeClass.attendanceRate < 85 ? 1 : 0, pct: activeClass.attendanceRate < 85 ? '100%' : '0%', color: 'text-rose-600 bg-rose-500' },
-  ]
-
-  // Student summary roster (authentic student from storage)
-  const sampleStudents = [
-    {
-      no: targetStudent?.studentNo || '101',
-      name: targetStudent?.name || 'Ali Yağız DEMİREL',
-      avg: studentGpa,
-      attendance: `%${activeClass.attendanceRate}`,
-      hwRate: '%100',
-      trend: studentGpa >= 85 ? '+4.5' : studentGpa >= 60 ? '0.0' : '-12.0',
-    },
-  ].filter((s) => s.name.toLowerCase().includes(searchStudent.toLowerCase()) || s.no.includes(searchStudent))
 
   return (
     <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 font-jakarta space-y-6">

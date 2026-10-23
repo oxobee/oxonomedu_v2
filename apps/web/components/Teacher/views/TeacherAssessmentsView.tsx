@@ -237,6 +237,72 @@ export default function TeacherAssessmentsView() {
     return { total, completed, upcoming }
   }, [exams])
 
+  // Date Parser & Helper
+  const parseExamDate = (dateStr: string): number => {
+    if (!dateStr) return 0
+    if (dateStr.includes('-')) {
+      const d = new Date(dateStr)
+      return isNaN(d.getTime()) ? 0 : d.getTime()
+    }
+    if (dateStr.includes('.')) {
+      const parts = dateStr.split('.')
+      if (parts.length === 3) {
+        const d = new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`)
+        return isNaN(d.getTime()) ? 0 : d.getTime()
+      }
+    }
+    const months: Record<string, string> = {
+      ocak: '01', şubat: '02', mart: '03', nisan: '04', mayıs: '05', haziran: '06',
+      temmuz: '07', ağustos: '08', eylül: '09', ekim: '10', kasım: '11', aralık: '12',
+    }
+    const parts = dateStr.trim().split(/\s+/)
+    if (parts.length === 3) {
+      const day = parts[0].padStart(2, '0')
+      const month = months[parts[1].toLowerCase()] || '01'
+      const year = parts[2]
+      const d = new Date(`${year}-${month}-${day}`)
+      return isNaN(d.getTime()) ? 0 : d.getTime()
+    }
+    return 0
+  }
+
+  const isExamPast = (dateStr: string): boolean => {
+    const ts = parseExamDate(dateStr)
+    if (!ts) return false
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
+    return ts < now.getTime()
+  }
+
+  // Split filtered exams into Past (Completed/Ready for Grading) and Upcoming (Future)
+  const { pastExams, upcomingExams } = useMemo(() => {
+    const past: SchoolExamItem[] = []
+    const upcoming: SchoolExamItem[] = []
+
+    filteredExams.forEach((exam) => {
+      const isPast =
+        isExamPast(exam.date) ||
+        exam.status === 'completed' ||
+        (exam.scores && Object.keys(exam.scores).length > 0)
+      if (isPast) {
+        past.push(exam)
+      } else {
+        upcoming.push(exam)
+      }
+    })
+
+    return { pastExams: past, upcomingExams: upcoming }
+  }, [filteredExams])
+
+  // Average score helper
+  const getExamAverage = (exam: SchoolExamItem) => {
+    if (!exam.scores) return null
+    const vals = Object.values(exam.scores).map(Number).filter((v) => !isNaN(v) && v > 0)
+    if (vals.length === 0) return null
+    const sum = vals.reduce((a, b) => a + b, 0)
+    return Math.round(sum / vals.length)
+  }
+
   // Helper for type details
   const getTypeMeta = (exam: SchoolExamItem) => {
     const t = (exam.type || '').toLowerCase()
@@ -286,6 +352,7 @@ export default function TeacherAssessmentsView() {
 
     const typeConfig = EXAM_TYPE_OPTIONS.find((o) => o.id === newType)
     const typeLabel = typeConfig ? typeConfig.label : 'Yazılı Sınav'
+    const isPast = isExamPast(newDate)
 
     const newExam: SchoolExamItem = {
       id: `exam-${Date.now()}-${Math.random().toString(36).substring(7)}`,
@@ -301,7 +368,7 @@ export default function TeacherAssessmentsView() {
       teacherName: teacherName,
       scope: newScope.trim() || undefined,
       isPublished: true,
-      status: 'upcoming',
+      status: isPast ? 'completed' : 'upcoming',
       scores: {},
       createdAt: new Date().toISOString(),
     }
@@ -502,6 +569,163 @@ export default function TeacherAssessmentsView() {
     setGradingExam(null)
   }
 
+  const renderExamCard = (exam: SchoolExamItem, isPastSection: boolean) => {
+    const meta = getTypeMeta(exam)
+    const hasScores = exam.scores && Object.keys(exam.scores).length > 0
+    const scoredCount = hasScores ? Object.keys(exam.scores!).length : 0
+    const avgScore = hasScores ? getExamAverage(exam) : null
+
+    // Style card based on whether it is past/graded/not-graded or upcoming
+    let cardBorder = 'border-gray-200/80 dark:border-gray-800/80 hover:border-indigo-400 dark:hover:border-indigo-600'
+    let cardBg = 'bg-white dark:bg-[#121826]'
+
+    if (isPastSection) {
+      if (hasScores) {
+        cardBorder = 'border-emerald-300 dark:border-emerald-700/70 ring-1 ring-emerald-500/20'
+        cardBg = 'bg-gradient-to-b from-emerald-50/20 to-white dark:from-emerald-950/10 dark:to-[#121826]'
+      } else {
+        cardBorder = 'border-amber-400 dark:border-amber-500/80 ring-2 ring-amber-400/30'
+        cardBg = 'bg-gradient-to-b from-amber-50/30 to-white dark:from-amber-950/15 dark:to-[#121826]'
+      }
+    }
+
+    return (
+      <div
+        key={exam.id}
+        className={`${cardBg} ${cardBorder} border rounded-3xl p-5 shadow-xs transition-all flex flex-col justify-between space-y-4 group`}
+      >
+        <div className="space-y-3">
+          {/* Top Bar: Exam Type Badge & Class */}
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`text-[10px] font-black px-2.5 py-1 rounded-xl border flex items-center gap-1.5 ${meta.badgeClass}`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+              <span>{meta.label}</span>
+            </span>
+
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+              {exam.className} Şubesi
+            </span>
+          </div>
+
+          {/* Course & Title */}
+          <div>
+            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+              {exam.courseName}
+            </div>
+            <h3 className="text-sm font-black text-gray-900 dark:text-white mt-0.5 leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+              {exam.title}
+            </h3>
+          </div>
+
+          {/* Metadata Box */}
+          <div className="p-3 rounded-2xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 space-y-1.5 text-xs">
+            <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+              <span className="flex items-center gap-1.5 text-gray-400">
+                <Calendar size={13} />
+                Tarih:
+              </span>
+              <span className="font-extrabold text-gray-900 dark:text-white font-mono">
+                {exam.date}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+              <span className="flex items-center gap-1.5 text-gray-400">
+                <Clock size={13} />
+                Saat:
+              </span>
+              <span className="font-bold text-gray-900 dark:text-white font-mono">
+                {exam.time} ({exam.durationMinutes} Dk)
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+              <span className="flex items-center gap-1.5 text-gray-400">
+                <MapPin size={13} />
+                Yer:
+              </span>
+              <span className="font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
+                {exam.location}
+              </span>
+            </div>
+          </div>
+
+          {/* Scope / Description */}
+          {exam.scope && (
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/30 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800 line-clamp-2">
+              <strong className="text-gray-700 dark:text-gray-300 font-bold">Kapsam: </strong>
+              {exam.scope}
+            </div>
+          )}
+
+          {/* Grading Status Badge */}
+          <div className="flex items-center justify-between pt-1">
+            {isPastSection ? (
+              hasScores ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 rounded-xl">
+                  <CheckCircle2 size={13} className="text-emerald-600 dark:text-emerald-400" />
+                  <span>Notlar Girildi {avgScore !== null && `(Ort: ${avgScore})`}</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11px] font-black text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800 px-2.5 py-1 rounded-xl animate-pulse">
+                  <Clock size={13} className="text-amber-600 dark:text-amber-400" />
+                  <span>Not Girişine Hazır</span>
+                </span>
+              )
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/50 px-2.5 py-1 rounded-xl">
+                <Calendar size={13} />
+                <span>Planlandı (Gelecek)</span>
+              </span>
+            )}
+
+            <span className="text-[11px] font-bold text-gray-400">
+              {exam.teacherName}
+            </span>
+          </div>
+        </div>
+
+        {/* Actions Footer */}
+        <div className="pt-3 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between gap-2">
+          {isPastSection && !hasScores ? (
+            <button
+              type="button"
+              onClick={() => handleOpenGrading(exam)}
+              className="flex-1 py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+            >
+              <Award size={15} />
+              <span>Not Girişini Başlat</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleOpenGrading(exam)}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                hasScores
+                  ? 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+              }`}
+            >
+              <Award size={14} />
+              <span>{hasScores ? `Notları Düzenle (${scoredCount})` : 'Sınav Notlarını Gir'}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => handleDeleteExam(exam.id, exam.title)}
+            title="Sınavı Sil"
+            className="p-2 rounded-xl text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+          >
+            <Trash2 size={15} />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 font-jakarta space-y-6">
       {/* ── HEADER BANNER ── */}
@@ -662,128 +886,68 @@ export default function TeacherAssessmentsView() {
         </div>
       </div>
 
-      {/* ── EXAMS CARDS GRID (MEVCUT SINAVLAR KART ŞEKLİNDE) ── */}
+      {/* ── EXAMS SECTIONS: PAST (NOT GİRİŞİNE HAZIR) & UPCOMING (PLANLANAN) ── */}
       {filteredExams.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredExams.map((exam) => {
-            const meta = getTypeMeta(exam)
-            const hasScores = exam.scores && Object.keys(exam.scores).length > 0
-            const scoredCount = hasScores ? Object.keys(exam.scores!).length : 0
-
-            return (
-              <div
-                key={exam.id}
-                className="bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 rounded-3xl p-5 shadow-xs hover:border-indigo-400 dark:hover:border-indigo-600 transition-all flex flex-col justify-between space-y-4 group"
-              >
-                <div className="space-y-3">
-                  {/* Top Bar: Exam Type Badge & Class */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`text-[10px] font-black px-2.5 py-1 rounded-xl border flex items-center gap-1.5 ${meta.badgeClass}`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
-                      <span>{meta.label}</span>
+        <div className="space-y-8">
+          {/* BÖLÜM 1: TARİHİ GEÇMİŞ / YAPILAN SINAVLAR (NOT GİRİŞİNE HAZIR) */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-gray-200 dark:border-gray-800">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-amber-500 animate-pulse" />
+                <div>
+                  <h2 className="text-base sm:text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>Tarihi Geçmiş / Yapılan Sınavlar</span>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-black border border-amber-300 dark:border-amber-800">
+                      Not Girişine Hazır ({pastExams.length})
                     </span>
-
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                      {exam.className} Şubesi
-                    </span>
-                  </div>
-
-                  {/* Course & Title */}
-                  <div>
-                    <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
-                      {exam.courseName}
-                    </div>
-                    <h3 className="text-sm font-black text-gray-900 dark:text-white mt-0.5 leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {exam.title}
-                    </h3>
-                  </div>
-
-                  {/* Metadata Box */}
-                  <div className="p-3 rounded-2xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 space-y-1.5 text-xs">
-                    <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                      <span className="flex items-center gap-1.5 text-gray-400">
-                        <Calendar size={13} />
-                        Tarih:
-                      </span>
-                      <span className="font-extrabold text-gray-900 dark:text-white font-mono">
-                        {exam.date}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                      <span className="flex items-center gap-1.5 text-gray-400">
-                        <Clock size={13} />
-                        Saat:
-                      </span>
-                      <span className="font-bold text-gray-900 dark:text-white font-mono">
-                        {exam.time} ({exam.durationMinutes} Dk)
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                      <span className="flex items-center gap-1.5 text-gray-400">
-                        <MapPin size={13} />
-                        Yer:
-                      </span>
-                      <span className="font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
-                        {exam.location}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Scope / Description */}
-                  {exam.scope && (
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/30 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800 line-clamp-2">
-                      <strong className="text-gray-700 dark:text-gray-300 font-bold">Kapsam: </strong>
-                      {exam.scope}
-                    </div>
-                  )}
-
-                  {/* Grading Status Badge */}
-                  <div className="flex items-center justify-between pt-1">
-                    {hasScores ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-xl">
-                        <CheckCircle2 size={13} />
-                        <span>Puanlandı ({scoredCount} Öğrenci)</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-xl">
-                        <Clock size={13} />
-                        <span>Not Girişi Bekliyor</span>
-                      </span>
-                    )}
-
-                    <span className="text-[11px] font-bold text-gray-400">
-                      {exam.teacherName}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Actions Footer */}
-                <div className="pt-3 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenGrading(exam)}
-                    className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <Award size={14} />
-                    <span>{hasScores ? 'Notları Düzenle' : 'Notları Gir'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteExam(exam.id, exam.title)}
-                    title="Sınavı Sil"
-                    className="p-2 rounded-xl text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Sınav tarihi tamamlanmış dersler. Not girilen sınavlar yeşil, not bekleyenler sarı renkle belirtilir.
+                  </p>
                 </div>
               </div>
-            )
-          })}
+            </div>
+
+            {pastExams.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {pastExams.map((exam) => renderExamCard(exam, true))}
+              </div>
+            ) : (
+              <div className="p-8 rounded-3xl bg-gray-50 dark:bg-gray-800/40 border border-dashed border-gray-200 dark:border-gray-700 text-center text-xs text-gray-400">
+                Tarihi geçmiş sınav kaydı bulunmuyor. Yeni bir geçmiş sınav eklediğinizde anında burada not girişine hazır olacaktır.
+              </div>
+            )}
+          </div>
+
+          {/* BÖLÜM 2: GELECEK / PLANLANAN SINAVLAR */}
+          <div className="space-y-4 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-gray-200 dark:border-gray-800">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-indigo-500" />
+                <div>
+                  <h2 className="text-base sm:text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>Gelecek / Planlanan Sınavlar</span>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black border border-indigo-200 dark:border-indigo-800">
+                      {upcomingExams.length} Planlanan Sınav
+                    </span>
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Tarihi henüz gelmemiş, planlama aşamasındaki resmi yazılı ve quiz sınavları.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {upcomingExams.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {upcomingExams.map((exam) => renderExamCard(exam, false))}
+              </div>
+            ) : (
+              <div className="p-8 rounded-3xl bg-gray-50 dark:bg-gray-800/40 border border-dashed border-gray-200 dark:border-gray-700 text-center text-xs text-gray-400">
+                Gelecekte planlanan sınav bulunmuyor.
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 text-xs text-gray-400 space-y-2">

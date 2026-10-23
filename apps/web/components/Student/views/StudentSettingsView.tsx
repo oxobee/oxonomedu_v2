@@ -26,6 +26,7 @@ import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import { signOut } from '@components/Contexts/AuthContext'
 import MockBadge from '@components/Common/MockBadge'
 import toast from 'react-hot-toast'
+import { submitProfileChangeRequest } from '@/lib/profile/profileChangeRequests'
 
 interface StudentSettingsViewProps {
   initialTab?: 'all' | 'profile' | 'notifications' | 'accessibility' | 'security'
@@ -61,6 +62,72 @@ export default function StudentSettingsView({
   const [notifHomework, setNotifHomework] = useState(true)
   const [notifExams, setNotifExams] = useState(true)
   const [notifAnnouncements, setNotifAnnouncements] = useState(true)
+
+  // Profile Change Request Modal State
+  const [isChangeModalOpen, setIsChangeModalOpen] = useState(false)
+  const [reqAddress, setReqAddress] = useState('')
+  const [reqParentPhone, setReqParentPhone] = useState('')
+  const [reqParentEmail, setReqParentEmail] = useState('')
+
+  const handleOpenChangeModal = () => {
+    setReqAddress(profile.address || '')
+    setReqParentPhone(profile.parentPhone || '')
+    setReqParentEmail(profile.parentEmail || '')
+    setIsChangeModalOpen(true)
+  }
+
+  const handleSubmitChangeRequest = (e: React.FormEvent) => {
+    e.preventDefault()
+    const changes: any[] = []
+    if (reqAddress.trim() && reqAddress.trim() !== profile.address) {
+      changes.push({
+        fieldKey: 'address',
+        fieldLabel: 'İkametgâh Adresi',
+        oldValue: profile.address || 'Kayıtlı Adres',
+        newValue: reqAddress.trim(),
+      })
+    }
+    if (reqParentPhone.trim() && reqParentPhone.trim() !== profile.parentPhone) {
+      changes.push({
+        fieldKey: 'parentPhone',
+        fieldLabel: 'Veli Cep Telefonu',
+        oldValue: profile.parentPhone || 'Kayıtlı Telefon',
+        newValue: reqParentPhone.trim(),
+      })
+    }
+    if (reqParentEmail.trim() && reqParentEmail.trim() !== profile.parentEmail) {
+      changes.push({
+        fieldKey: 'parentEmail',
+        fieldLabel: 'Veli E-Posta Adresi',
+        oldValue: profile.parentEmail || 'Kayıtlı E-Posta',
+        newValue: reqParentEmail.trim(),
+      })
+    }
+
+    if (changes.length === 0) {
+      toast.error('Lütfen güncellenmesini istediğiniz en az bir alan giriniz.')
+      return
+    }
+
+    submitProfileChangeRequest({
+      targetRole: 'student',
+      requesterId: profile.id || 's-1',
+      requesterName: profile.name || 'Ali Yağız DEMİREL',
+      requesterIdentifier: `${profile.className || '1/A'} Şubesi · No: ${profile.studentNo || '101'}`,
+      changes,
+      payload: {
+        ...(reqAddress.trim() ? { address: reqAddress.trim() } : {}),
+        ...(reqParentPhone.trim() ? { parentPhone: reqParentPhone.trim() } : {}),
+        ...(reqParentEmail.trim() ? { parentEmail: reqParentEmail.trim() } : {}),
+      },
+    })
+
+    toast.success('📋 Bilgi güncelleme talebiniz Okul Müdürlüğüne onaya iletildi! Müdürlük onayından sonra kütük kayıtlarınız güncellenecektir.', {
+      duration: 5000,
+      icon: '📋',
+    })
+    setIsChangeModalOpen(false)
+  }
 
   const handleSavePreferences = (e: React.FormEvent) => {
     e.preventDefault()
@@ -171,9 +238,19 @@ export default function StudentSettingsView({
               </div>
             </div>
 
-            <div className="px-4 py-2.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold shrink-0 text-white relative z-10 flex items-center gap-2">
-              <ShieldCheck size={16} className="text-emerald-300" />
-              <span>{profile.disciplineStatus}</span>
+            <div className="flex items-center gap-2.5 relative z-10 flex-wrap">
+              <button
+                type="button"
+                onClick={handleOpenChangeModal}
+                className="px-4 py-2.5 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-black transition-all cursor-pointer border border-white/30 active:scale-95 shadow-xs flex items-center gap-1.5"
+              >
+                <span>+ Bilgi Güncelleme Talebi</span>
+              </button>
+
+              <div className="px-4 py-2.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold shrink-0 text-white flex items-center gap-2">
+                <ShieldCheck size={16} className="text-emerald-300" />
+                <span>{profile.disciplineStatus}</span>
+              </div>
             </div>
           </div>
 
@@ -602,6 +679,92 @@ export default function StudentSettingsView({
               <LogOut size={14} />
               <span>Oturumu Kapat</span>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── BİLGİ GÜNCELLEME TALEBİ MODALI ── */}
+      {isChangeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg bg-white dark:bg-[#0E1526] rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+              <div>
+                <h3 className="text-base font-black text-gray-900 dark:text-white">
+                  Müdürlüğe Bilgi Değişiklik Talebi
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Öğrenci kütük bilgileriniz okul müdürlüğü onayı ile güncellenir.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsChangeModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitChangeRequest} className="space-y-3.5 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-gray-700 dark:text-gray-300">
+                  Yeni İkametgâh Adresi:
+                </label>
+                <textarea
+                  rows={2}
+                  value={reqAddress}
+                  onChange={(e) => setReqAddress(e.target.value)}
+                  placeholder="Cadde, sokak, no, ilçe/il..."
+                  className="w-full p-3 rounded-xl bg-gray-50 dark:bg-[#131C31] border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-gray-700 dark:text-gray-300">
+                  Yeni Veli Cep Telefonu:
+                </label>
+                <input
+                  type="text"
+                  value={reqParentPhone}
+                  onChange={(e) => setReqParentPhone(e.target.value)}
+                  placeholder="+90 (5XX) XXX XX XX"
+                  className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-[#131C31] border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-gray-700 dark:text-gray-300">
+                  Yeni Veli E-Posta Adresi:
+                </label>
+                <input
+                  type="email"
+                  value={reqParentEmail}
+                  onChange={(e) => setReqParentEmail(e.target.value)}
+                  placeholder="veli@ornek.com"
+                  className="w-full h-10 px-3 rounded-xl bg-gray-50 dark:bg-[#131C31] border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                ℹ️ Gönderdiğiniz değişiklik talebi okul müdürlüğü onay paneline iletilecektir. Müdürlük inceleyip onayladığında bilgileriniz sistemde otomatik güncellenecektir.
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setIsChangeModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-gray-500 font-bold hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-brand-gradient hover:opacity-95 text-white font-bold cursor-pointer transition-all shadow-md active:scale-95"
+                >
+                  Talebi Müdürlüğe Gönder
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -49,6 +49,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { submitProfileChangeRequest } from '@/lib/profile/profileChangeRequests'
 import MobileHeader from '@components/Mobile/MobileHeader'
 import MobileFloatingDock from '@components/Mobile/MobileFloatingDock'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -237,6 +238,20 @@ export default function MProfileClient({
         updatedAt: new Date().toISOString(),
       }
 
+      submitProfileChangeRequest({
+        targetRole: 'teacher',
+        requesterId: 'teacher-1',
+        requesterName: `${firstName} ${lastName}`.trim() || 'Bahar ÇETİN',
+        requesterIdentifier: `${homeroomClass || '1/A'} Sınıf Öğretmeni`,
+        changes: [
+          { fieldKey: 'phone', fieldLabel: 'Telefon Numarası', oldValue: '+90 (532) 111 22 33', newValue: phone },
+          { fieldKey: 'email', fieldLabel: 'E-Posta Adresi', oldValue: 'ogretmen@oxonom.com', newValue: email },
+          { fieldKey: 'address', fieldLabel: 'İkamet Adresi', oldValue: 'Kadıköy / İstanbul', newValue: address },
+          { fieldKey: 'branchTitle', fieldLabel: 'Branş / Görev', oldValue: 'Sınıf Öğretmeni', newValue: branchTitle },
+        ],
+        payload: fullProfile,
+      })
+
       if (typeof window !== 'undefined') {
         localStorage.setItem('oxonom_teacher_profile', JSON.stringify(fullProfile))
         window.dispatchEvent(
@@ -244,10 +259,10 @@ export default function MProfileClient({
         )
       }
 
-      toast.success('Öğretmen profili ve tüm özlük bilgileri başarıyla güncellendi!', {
+      toast.success('📋 Profil güncellemeleriniz kaydedildi ve onay için Okul Müdürlüğüne iletildi!', {
         id: 'teacher-profile-save-success',
-        duration: 4000,
-        icon: '✅',
+        duration: 5000,
+        icon: '📋',
       })
     } catch (e) {
       toast.error('Güncelleme sırasında bir hata oluştu. Lütfen tekrar deneyin.', {
@@ -469,24 +484,6 @@ export default function MProfileClient({
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            {/* Quick Contact Action Bar */}
-            <div className="grid grid-cols-2 gap-3">
-              <a
-                href={`tel:${phone.replace(/\s+/g, '')}`}
-                className="h-11 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 font-extrabold text-xs flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors"
-              >
-                <PhoneCall size={16} />
-                <span>Telefonla Ara</span>
-              </a>
-              <a
-                href={`mailto:${email}`}
-                className="h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-extrabold text-xs flex items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
-              >
-                <Mail size={16} />
-                <span>E-Posta Gönder</span>
-              </a>
-            </div>
-
             {/* Künye Bilgileri Tablosu / Kartları */}
             <div className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800 rounded-3xl p-5 shadow-sm divide-y divide-gray-100 dark:divide-gray-800/80">
               {/* T.C. Kimlik No */}

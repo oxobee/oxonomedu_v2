@@ -23,7 +23,7 @@ export default function StudentLiveClassPage() {
         </div>
       </div>
 
-      <LiveClassRadar role="student" initialClassCode="9-A" />
+      <LiveClassRadar role="student" initialClassCode="1/A" />
     </div>
   )
 }

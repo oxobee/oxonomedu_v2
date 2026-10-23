@@ -27,6 +27,7 @@ import {
   ALL_CLASSROOMS,
   normalizeClassCode,
   getSingleSourceOfTruthStudents,
+  generateClassStudents,
 } from '@services/demo/schoolDirectory'
 
 export default function TeacherProgressView() {
@@ -128,6 +129,8 @@ export default function TeacherProgressView() {
 
   // Filter students by selected class
   const classStudents = useMemo(() => {
+    const list = generateClassStudents(selectedClass)
+    if (list && list.length > 0) return list
     const norm = normalizeClassCode(selectedClass)
     return students.filter((s) => {
       const sNorm = normalizeClassCode(s.className || '')
@@ -272,7 +275,7 @@ export default function TeacherProgressView() {
                     <span className="text-gray-400 text-[10px] block">Genel Başarı</span>
                     <span className="font-black text-sm text-indigo-600 dark:text-indigo-400">
                       {st.grades && st.grades.length > 0
-                        ? Number((st.grades.reduce((sum, g) => sum + (Number(g.average) || 0), 0) / st.grades.length).toFixed(1))
+                        ? Number((st.grades.reduce((sum: number, g: any) => sum + (Number(g.average) || 0), 0) / st.grades.length).toFixed(1))
                         : (st.gpa ?? 0)}
                     </span>
                   </div>

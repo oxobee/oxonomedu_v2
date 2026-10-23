@@ -381,7 +381,7 @@ export default function TeacherAgendaView() {
           </div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-              Ajanda & Sınav Takvimi
+              Ajanda
             </h1>
             <MockBadge label="Canlı Senkronize" />
           </div>

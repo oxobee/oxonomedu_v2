@@ -21,6 +21,7 @@ import {
   BarChart3,
   Layers,
   GraduationCap,
+  Building2,
 } from 'lucide-react'
 
 interface SuperadminLayoutProps {
@@ -55,6 +56,19 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
   }
 
   const navItems = [
+    {
+      label: 'Genel Bakış (Dashboard)',
+      path: '/superadmin',
+      icon: LayoutDashboard,
+      description: 'Platform metrikleri, altyapı ve sistem özeti',
+    },
+    {
+      label: 'Okul Yönetimi',
+      path: '/superadmin/schools',
+      icon: Building2,
+      badge: 'Supabase',
+      description: 'Kayıtlı kurumlar, MEB kodları ve lisanslar',
+    },
     {
       label: 'Game Studio',
       path: '/superadmin/gamestudio',
@@ -97,21 +111,21 @@ export default function SuperadminLayout({ children }: SuperadminLayoutProps) {
             {isMobileNavOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
 
-          <Link href="/superadmin/gamestudio" className="flex items-center gap-3 group">
+          <Link href="/superadmin" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#D914C8] to-[#4B075F] flex items-center justify-center text-white shadow-lg shadow-[#D914C8]/25 border border-[#D914C8]/50 group-hover:scale-105 transition-transform">
-              <Gamepad2 size={22} />
+              <ShieldCheck size={22} />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-black text-lg tracking-tight bg-gradient-to-r from-white via-[#FCE8FA] to-[#D914C8] bg-clip-text text-transparent">
-                  OXONOM GAME STUDIO
+                  OXONOM SUPERADMIN
                 </span>
                 <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-[#D914C8]/25 text-[#F0D8FA] border border-[#D914C8]/40 tracking-wider">
-                  Superadmin
+                  SaaS Control
                 </span>
               </div>
               <p className="text-[11px] text-[#A898B0] hidden sm:block">
-                Eğitsel Oyun Yönetim & Prodüksiyon Merkezi
+                Merkezi Okul, Lisans & Game Studio Yönetimi
               </p>
             </div>
           </Link>

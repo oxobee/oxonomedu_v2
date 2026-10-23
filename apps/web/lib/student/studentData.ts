@@ -61,6 +61,7 @@ export interface StudentProfile {
   absentUnexcusedDays?: number
   parentName: string
   parentPhone: string
+  parentEmail?: string
   parentRelation: string
   secondParentName: string
   secondParentPhone: string

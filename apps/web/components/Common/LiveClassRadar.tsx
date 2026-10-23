@@ -188,7 +188,25 @@ export default function LiveClassRadar({
   titleOverride,
   initialExpanded = false,
 }: LiveClassRadarProps) {
-  const [selectedClass, setSelectedClass] = useState<string>(initialClassCode)
+  const isStudent = role === 'student'
+  const canSwitchClass = !isStudent
+
+  const [selectedClass, setSelectedClass] = useState<string>(() => {
+    if (isStudent) return '1/A'
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('oxonom_live_radar_class')
+      if (saved) return saved
+    }
+    return initialClassCode || '1/A'
+  })
+
+  const handleClassChange = (newClass: string) => {
+    if (isStudent) return
+    setSelectedClass(newClass)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('oxonom_live_radar_class', newClass)
+    }
+  }
   const [scheduleData, setScheduleData] = useState<ScheduleEntry[]>([])
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const [isExpanded, setIsExpanded] = useState<boolean>(initialExpanded)
@@ -643,8 +661,8 @@ export default function LiveClassRadar({
 
           {/* Right: Class Switcher (if principal) + Expand / Collapse Button */}
           <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-            {/* Principal Classroom Switcher */}
-            {(showClassSelector || role === 'principal') && (
+            {/* Teacher / Principal Classroom Switcher */}
+            {canSwitchClass && (
               <div
                 onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-1.5"
@@ -654,7 +672,7 @@ export default function LiveClassRadar({
                   value={selectedClass}
                   onChange={(e) => {
                     e.stopPropagation()
-                    setSelectedClass(e.target.value)
+                    handleClassChange(e.target.value)
                   }}
                   aria-label="Sınıf Seçimi"
                   className="h-8 px-2.5 rounded-xl text-xs font-black bg-white dark:bg-[#211729] text-[#4B075F] dark:text-[#E7C4F3] border border-[#E8DFEB] dark:border-[#49364F] shadow-xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#8D49A6]"
@@ -674,7 +692,7 @@ export default function LiveClassRadar({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
-                        setSelectedClass(bCls)
+                        handleClassChange(bCls)
                       }}
                       className={`px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                         selectedClass === bCls

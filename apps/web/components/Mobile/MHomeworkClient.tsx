@@ -280,9 +280,8 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     title: '1-A Matematik: Ritmik Sayma & Sayı Doğrusu Etkinliği',
     shortTitle: 'Ritmik Sayma & Sayı Doğrusu',
     subject: 'Matematik',
-    category: 'WHITEBOARD',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_ritmik_sayma_1a',
+    category: 'WORKSHEET',
+    tool_type: 'WORKSHEET',
     className: '1/A Şubesi',
     assignedDate: '12.10.2026',
     dueDate: '19.10.2026',
@@ -379,20 +378,19 @@ const INITIAL_HOMEWORKS: HomeworkItem[] = [
     teacher_name: 'Bahar ÇETİN',
   },
   {
-    id: 'hw-whiteboard-1',
-    assignment_uuid: 'asg_edebi_sanatlar_tahta',
-    title: 'Edebi Sanatlar & Teşbih-Mecaz Kavram Haritası Çizimi',
-    shortTitle: 'Edebi Sanatlar Çizimi',
+    id: 'hw-worksheet-edebi',
+    assignment_uuid: 'asg_edebi_sanatlar_calisma',
+    title: 'Edebi Sanatlar & Teşbih-Mecaz Çalışma Föyü',
+    shortTitle: 'Edebi Sanatlar Çalışması',
     subject: 'Türkçe',
-    category: 'WHITEBOARD',
-    tool_type: 'WHITEBOARD',
-    board_uuid: 'board_edebi_sanatlar_9a',
+    category: 'WORKSHEET',
+    tool_type: 'WORKSHEET',
     className: '1/A Şubesi',
     assignedDate: '08.10.2026',
     dueDate: '13.10.2026',
     assignedTimestamp: Date.now() - 4 * 86400000,
     dueTimestamp: Date.now() + 1 * 86400000,
-    description: 'Akıllı tahta üzerinde teşbih, istiare, teşhis ve tezat sanatlarını örnekleyen görsel kavram haritasının tamamlanması.',
+    description: 'Teşbih, istiare, teşhis ve tezat sanatlarını örnekleyen çalışma metninin incelenmesi.',
     period: 'this_week',
     periodLabel: 'Bu Hafta',
     accentColor: 'purple',
@@ -1527,34 +1525,7 @@ export default function MHomeworkClient({
                 </div>
 
                 {/* Controls */}
-                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                  {/* Sınıf Seçimi */}
-                  <button
-                    type="button"
-                    onClick={() => setIsBranchModalOpen(true)}
-                    className="h-9.5 px-3 rounded-xl bg-gray-100 hover:bg-gray-200/80 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
-                    title="Sınıf Değiştir"
-                  >
-                    <Users size={14} className="text-[#4B075F] dark:text-[#C58ADB]" />
-                    <span>{selectedBranch}</span>
-                    <ChevronDown size={13} className="text-gray-400" />
-                  </button>
-
-                  {/* Ödev Seç Butonu */}
-                  <button
-                    type="button"
-                    onClick={() => setIsHomeworkModalOpen(true)}
-                    className="h-9.5 px-3 rounded-xl bg-[#F0D8FA]/70 hover:bg-[#F0D8FA] dark:bg-[#2D2035] dark:hover:bg-[#350444]/60 border border-[#8D49A6]/30 text-[#4B075F] dark:text-[#C58ADB] text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
-                    title="Ödev Değiştir"
-                  >
-                    <BookOpenCheck size={14} className="text-[#4B075F] dark:text-[#C58ADB]" />
-                    <span>Ödev Seç</span>
-                    <span className="px-1.5 py-0.2 rounded-full bg-[#4B075F] text-[9.5px] font-black text-white">
-                      {classHomeworks.length}
-                    </span>
-                    <ChevronDown size={13} className="text-[#8D49A6]" />
-                  </button>
-
+                <div className="flex items-center gap-2">
                   {/* Yeni Ödev Ver Butonu */}
                   <button
                     type="button"
@@ -1614,8 +1585,53 @@ export default function MHomeworkClient({
         {/* ── MAIN CONTENT SECTIONS (RESPONSIVE WEB 2-COLUMN GRID) ── */}
         <main className="flex-1 px-4 py-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full items-start">
-            {/* SOL SÜTUN (5/12): ÖĞRENCİ SEÇİMİ, LİSTESİ & KÜNYESİ */}
-            <div className="lg:col-span-5 space-y-4">
+            {/* SOL SÜTUN (5/12): ÖĞRENCİ SEÇİMİ, LİSTESİ & KÜNYESİ (WEBDE SABİT / STICKY) */}
+            <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-4 self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto pr-1">
+
+              {/* Sınıf & Ödev Seçimi Kartı (Öğrenci Seçiminin Hemen Üstünde) */}
+              <div className="bg-white dark:bg-[#111624] border border-[#E7EBF2] dark:border-white/10 rounded-[20px] p-3.5 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between text-[11px] font-black text-gray-500 dark:text-gray-400 tracking-wider">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#4B075F] dark:bg-[#C58ADB]" />
+                    SINIF VE ÖDEV SEÇİMİ
+                  </span>
+                  <span className="text-[10px] text-[#4B075F] dark:text-[#C58ADB] font-black">{selectedBranch}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Sınıf Seç Butonu */}
+                  <button
+                    type="button"
+                    onClick={() => setIsBranchModalOpen(true)}
+                    className="h-10 px-3 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/80 dark:hover:bg-gray-700/80 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xs font-black flex items-center justify-between gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                    title="Sınıf Değiştir"
+                  >
+                    <div className="flex items-center gap-1.5 truncate">
+                      <Users size={14} className="text-[#4B075F] dark:text-[#C58ADB] shrink-0" />
+                      <span className="truncate">{selectedBranch}</span>
+                    </div>
+                    <ChevronDown size={13} className="text-gray-400 shrink-0" />
+                  </button>
+
+                  {/* Ödev Seç Butonu */}
+                  <button
+                    type="button"
+                    onClick={() => setIsHomeworkModalOpen(true)}
+                    className="h-10 px-3 rounded-xl bg-[#F0D8FA]/70 hover:bg-[#F0D8FA] dark:bg-[#2D2035] dark:hover:bg-[#350444]/60 border border-[#8D49A6]/30 text-[#4B075F] dark:text-[#C58ADB] text-xs font-black flex items-center justify-between gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                    title="Ödev Değiştir"
+                  >
+                    <div className="flex items-center gap-1.5 truncate">
+                      <BookOpenCheck size={14} className="text-[#4B075F] dark:text-[#C58ADB] shrink-0" />
+                      <span className="truncate">Ödev Seç</span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="px-1.5 py-0.2 rounded-full bg-[#4B075F] text-[9.5px] font-black text-white">
+                        {classHomeworks.length}
+                      </span>
+                      <ChevronDown size={12} className="text-[#8D49A6]" />
+                    </div>
+                  </button>
+                </div>
+              </div>
 
           {/* ── 3. SECTION: ÖĞRENCİ SEÇ (CAROUSEL & COLLAPSIBLE LIST) ── */}
           <div className="flex items-center gap-2.5 text-[11px] font-bold tracking-wider text-[#5B6577] dark:text-gray-400 mt-1">
@@ -2049,44 +2065,6 @@ export default function MHomeworkClient({
                     {selectedStudent?.name} bu görevi henüz teslim etmedi. Öğrenci kendi portalından ödevi teslim ettiğinde yanıtları ve ekleri anında burada görüntülenecektir.
                   </p>
                 </div>
-              </div>
-            )}
-
-            {/* Whiteboard solution button — opens specific board in new tab */}
-            {currentHomework.board_uuid ? (
-              <a
-                href={`/board/${currentHomework.board_uuid}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 px-3 rounded-[14px] bg-[#EEF0FF] dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-[#4338CA] dark:text-indigo-300 text-[12.5px] font-extrabold flex items-center justify-center gap-2 transition-colors border border-indigo-200 dark:border-indigo-800 shadow-xs cursor-pointer active:scale-98"
-              >
-                <ExternalLink size={15} />
-                <span>Akıllı Tahta Çözümünü & Çizimini İncele (Yeni Sekme)</span>
-              </a>
-            ) : currentHomework.tool_type === 'WHITEBOARD' || currentHomework.category === 'WHITEBOARD' ? (
-              <a
-                href="/board/board_6be7ebed-4c00-4243-9a9b-ffef9933803b"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 px-3 rounded-[14px] bg-[#EEF0FF] dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-[#4338CA] dark:text-indigo-300 text-[12.5px] font-extrabold flex items-center justify-center gap-2 transition-colors border border-indigo-200 dark:border-indigo-800 shadow-xs cursor-pointer active:scale-98"
-              >
-                <ExternalLink size={15} />
-                <span>Akıllı Tahta Çözümünü & Çizimini İncele (Yeni Sekme)</span>
-              </a>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <div className="bg-[#F8FAFC] dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[14px] p-2.5 text-center text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-                  Bu ödev okuma / çalışma yaprağı etkinliği olarak tanımlanmıştır.
-                </div>
-                <a
-                  href="/board/board_6be7ebed-4c00-4243-9a9b-ffef9933803b"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-2.5 px-3 rounded-[12px] bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-gray-200 text-[11.5px] font-bold flex items-center justify-center gap-1.5 transition-colors border border-gray-200 dark:border-white/10 cursor-pointer active:scale-98"
-                >
-                  <ExternalLink size={13} />
-                  <span>Akıllı Tahta Çizim Tuvalini Aç (Yeni Sekme)</span>
-                </a>
               </div>
             )}
           </section>
@@ -2597,7 +2575,6 @@ export default function MHomeworkClient({
                       >
                         <option value="WORKSHEET">Çalışma Kâğıdı / Metin</option>
                         <option value="QUIZ">Çoktan Seçmeli Quiz</option>
-                        <option value="WHITEBOARD">Akıllı Tahta / Çizim</option>
                         <option value="READING">Okuma & Tahlil</option>
                         <option value="PROJECT">Dönem Projesi</option>
                       </select>
@@ -3215,10 +3192,9 @@ export default function MHomeworkClient({
                     <label className="text-xs font-bold text-gray-700 dark:text-gray-300">
                       Ödev Çalışma Türü
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       {[
                         { id: 'WORKSHEET', label: 'Çalışma Kâğıdı', icon: FileText, desc: 'Metin, föy & döküman' },
-                        { id: 'WHITEBOARD', label: 'Akıllı Tahta', icon: PenTool, desc: 'Çizim & interaktif tuval' },
                         { id: 'READING', label: 'Okuma & Tahlil', icon: BookOpen, desc: 'Metin incelemesi & analiz' },
                         { id: 'QUIZ', label: 'Test & Quiz', icon: HelpCircle, desc: 'Çoktan seçmeli sorular' },
                       ].map((type) => {
@@ -3322,55 +3298,6 @@ export default function MHomeworkClient({
                           </button>
                         ))}
                       </div>
-                    </div>
-                  )}
-
-                  {createToolType === 'WHITEBOARD' && (
-                    <div className="p-3.5 rounded-2xl bg-teal-50/50 dark:bg-teal-950/30 border border-teal-200/70 dark:border-teal-800/50 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-teal-900 dark:text-teal-200 flex items-center gap-1.5">
-                          <PenTool size={15} className="text-teal-600 dark:text-teal-400" />
-                          <span>Akıllı Tahta Tuvali & Çizim Alanı</span>
-                        </span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300">
-                          İnteraktif Çözüm
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300">
-                            Tuval Şablonu
-                          </label>
-                          <select
-                            value={createWhiteboardCanvasType}
-                            onChange={(e) => setCreateWhiteboardCanvasType(e.target.value)}
-                            className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-bold text-gray-900 dark:text-white"
-                          >
-                            <option value="İnteraktif Çizim Tuvali">İnteraktif Çizim Tuvali</option>
-                            <option value="Kavram Haritası Şeması">Kavram Haritası Şeması</option>
-                            <option value="Kareli Problem Çözüm Izgarası">Kareli Problem Çözüm Izgarası</option>
-                            <option value="Çizgili Not ve Kompozisyon">Çizgili Not ve Kompozisyon</option>
-                          </select>
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300">
-                            Tahta Çizim Konusu
-                          </label>
-                          <input
-                            type="text"
-                            value={createWhiteboardTopic}
-                            onChange={(e) => setCreateWhiteboardTopic(e.target.value)}
-                            placeholder="Örn: Edebi Sanatlar Zihin Haritası"
-                            className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-bold text-gray-900 dark:text-white"
-                          />
-                        </div>
-                      </div>
-
-                      <p className="text-[11px] text-teal-800/80 dark:text-teal-300/80 leading-relaxed bg-white/70 dark:bg-gray-900/40 p-2.5 rounded-xl border border-teal-200/50 dark:border-teal-800/40">
-                        💡 <strong>Öğrenci Deneyimi:</strong> Öğrenci bu ödevi açtığında doğrudan akıllı tahta çizim tuvali açılarak kalem, şekiller ve metin araçlarıyla çözümünü yapabilecektir.
-                      </p>
                     </div>
                   )}
 

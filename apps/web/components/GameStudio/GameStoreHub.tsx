@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Gamepad2,
@@ -126,6 +127,24 @@ export default function GameStoreHub({
   }, [games, activeCategory, searchQuery, selectedGrade, selectedSubject, selectedAge, sortBy])
 
   const playRoutePrefix = role === 'student' ? '/student/gamestudio/play' : '/teacher/gamestudio/play'
+  const [comingSoonGame, setComingSoonGame] = useState<EducationalGame | null>(null)
+
+  const handleGamePlayClick = (e: React.MouseEvent, game: EducationalGame) => {
+    if (role === 'teacher') {
+      e.preventDefault()
+      e.stopPropagation()
+      setComingSoonGame(game)
+      toast('🎮 Çok yakında aktif olacaktır!', {
+        icon: '✨',
+        style: {
+          borderRadius: '16px',
+          background: '#4B075F',
+          color: '#fff',
+          fontWeight: 'bold',
+        },
+      })
+    }
+  }
 
   return (
     <div className="w-full max-w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 max-w-[1520px] mx-auto space-y-8 pb-20 font-jakarta selection:bg-[#D914C8]/30 selection:text-white select-none">
@@ -323,6 +342,7 @@ export default function GameStoreHub({
                       <div className="pt-2 flex flex-wrap items-center gap-3">
                         <Link
                           href={`${playRoutePrefix}/${game.id}`}
+                          onClick={(e) => handleGamePlayClick(e, game)}
                           className="h-12 px-7 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-black text-sm flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#D914C8]/30 cursor-pointer group"
                         >
                           <Play size={16} fill="currentColor" className="group-hover:scale-110 transition-transform" />
@@ -423,6 +443,7 @@ export default function GameStoreHub({
 
                 <Link
                   href={`${playRoutePrefix}/${game.id}`}
+                  onClick={(e) => handleGamePlayClick(e, game)}
                   className="h-8 px-4 rounded-full bg-[#FAF7FC] dark:bg-white/10 text-[#69237E] dark:text-white group-hover:bg-gradient-to-r group-hover:from-[#D914C8] group-hover:to-[#8D49A6] group-hover:text-white font-extrabold text-xs transition-all shrink-0 border border-[#E8DEF8] dark:border-white/15 flex items-center justify-center"
                 >
                   Oyna
@@ -487,6 +508,7 @@ export default function GameStoreHub({
                     {/* Floating Play Button on Hover */}
                     <Link
                       href={`${playRoutePrefix}/${game.id}`}
+                      onClick={(e) => handleGamePlayClick(e, game)}
                       className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 backdrop-blur-xs transition-opacity cursor-pointer z-10"
                     >
                       <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] flex items-center justify-center text-white shadow-xl shadow-[#D914C8]/50 transform scale-75 group-hover:scale-100 transition-transform">
@@ -546,6 +568,7 @@ export default function GameStoreHub({
 
                   <Link
                     href={`${playRoutePrefix}/${game.id}`}
+                    onClick={(e) => handleGamePlayClick(e, game)}
                     className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-extrabold text-xs shadow-md shadow-[#D914C8]/25 transition-all"
                   >
                     <Play size={12} fill="currentColor" />
@@ -606,6 +629,7 @@ export default function GameStoreHub({
 
                   <Link
                     href={`${playRoutePrefix}/${selectedGame.id}`}
+                    onClick={(e) => handleGamePlayClick(e, selectedGame)}
                     className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-extrabold text-sm shadow-xl shadow-[#D914C8]/30 transition-all cursor-pointer shrink-0"
                   >
                     <Play size={16} fill="currentColor" />
@@ -697,6 +721,52 @@ export default function GameStoreHub({
                   </div>
                 </div>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── ÇOK YAKINDA AKTİF OLACAKTIR UYARI MODALI ── */}
+      <AnimatePresence>
+        {comingSoonGame && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setComingSoonGame(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-sm bg-white dark:bg-[#1A1224] rounded-3xl p-6 border border-[#8D49A6]/30 shadow-2xl text-center space-y-4 z-10"
+            >
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] text-white flex items-center justify-center mx-auto shadow-lg shadow-purple-950/30 text-3xl animate-bounce">
+                🎮
+              </div>
+
+              <div>
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black bg-[#F0D8FA] dark:bg-[#2D2035] text-[#4B075F] dark:text-[#C58ADB] mb-2 border border-[#8D49A6]/30">
+                  <Sparkles size={12} />
+                  <span>Eğitici Oyun Stüdyosu</span>
+                </span>
+                <h3 className="text-xl font-black text-gray-900 dark:text-white">
+                  Çok Yakında Aktif Olacaktır!
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">
+                  <strong className="text-[#4B075F] dark:text-[#C58ADB] font-bold">{comingSoonGame.title}</strong> oyunu ve öğretmenler için sınıf içi canlı yarışma modu çok yakında aktif hale gelecektir.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setComingSoonGame(null)}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:opacity-95 text-white font-black text-xs shadow-md transition-all cursor-pointer active:scale-95"
+              >
+                Harika, Anladım! ✨
+              </button>
             </motion.div>
           </div>
         )}

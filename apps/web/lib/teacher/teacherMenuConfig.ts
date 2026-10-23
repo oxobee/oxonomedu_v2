@@ -136,7 +136,7 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
   },
   {
     id: 'agenda',
-    label: 'Ajanda & Sınav Takvimi',
+    label: 'Ajanda',
     path: '/teacher/agenda',
     icon: CalendarDays,
     status: 'active',
@@ -207,15 +207,14 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
     label: 'İletişim ve Duyurular',
     path: '/teacher/communication',
     icon: MessageSquare,
-    status: 'passive',
+    status: 'active',
     sortOrder: 12,
     category: 'KAYNAKLAR & İLETİŞİM',
     description: 'Sınıf duyuruları, veli bilgilendirme mesajları ve toplantı planlama merkezi.',
-    missingDependency: 'SMS Ağ Geçidi, E-posta Sunucusu ve Anlık Mesajlaşma Servisi',
     children: [
-      { id: 'communication-announcements', label: 'Sınıf Duyuruları', path: '/teacher/communication/announcements', status: 'passive', missingDependency: 'Push Bildirim Servisi' },
-      { id: 'communication-parent-meetings', label: 'Veli Toplantı Planı', path: '/teacher/communication/parent-meetings', status: 'passive', missingDependency: 'Randevu & Takvim Entegrasyonu' },
-      { id: 'communication-messages', label: 'Mesajlar', path: '/teacher/communication/messages', status: 'passive', missingDependency: 'Canlı Sohbet Sunucusu' },
+      { id: 'communication-announcements', label: 'Sınıf Duyuruları', path: '/teacher/communication', status: 'active' },
+      { id: 'communication-parent-meetings', label: 'Veli Toplantı Planı', path: '/teacher/communication', status: 'active' },
+      { id: 'communication-messages', label: 'Mesajlar', path: '/teacher/communication', status: 'active' },
     ],
   },
   {

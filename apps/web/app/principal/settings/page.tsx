@@ -30,6 +30,12 @@ import {
   saveSchoolInfo,
   getPrincipalInitials,
 } from '@/lib/principal/principalProfileStorage'
+import {
+  getProfileChangeRequests,
+  approveProfileChangeRequest,
+  rejectProfileChangeRequest,
+  type ProfileChangeRequest,
+} from '@/lib/profile/profileChangeRequests'
 
 export default function PrincipalSettingsPage() {
   // Principal Profile
@@ -58,6 +64,38 @@ export default function PrincipalSettingsPage() {
 
   const [twoFactor, setTwoFactor] = useState(true)
   const [smsNotifications, setSmsNotifications] = useState(true)
+
+  // Top Tabs & Profile Change Requests State
+  const [mainTab, setMainTab] = useState<'school_profile' | 'change_requests'>('school_profile')
+  const [requestSubTab, setRequestSubTab] = useState<'students' | 'teachers'>('students')
+  const [requests, setRequests] = useState<ProfileChangeRequest[]>(() => getProfileChangeRequests())
+
+  const syncRequests = () => {
+    setRequests(getProfileChangeRequests())
+  }
+
+  useEffect(() => {
+    syncRequests()
+    window.addEventListener('oxonom_profile_requests_updated', syncRequests)
+    return () => window.removeEventListener('oxonom_profile_requests_updated', syncRequests)
+  }, [])
+
+  const studentRequests = requests.filter((r) => r.targetRole === 'student')
+  const teacherRequests = requests.filter((r) => r.targetRole === 'teacher')
+  const pendingCount = requests.filter((r) => r.status === 'pending').length
+
+  const handleApprove = (id: string, name: string) => {
+    approveProfileChangeRequest(id)
+    syncRequests()
+    toast.success(`✓ "${name}" için profil değişiklik talebi onaylandı ve resmi kütüğe işlendi!`)
+  }
+
+  const handleReject = (id: string, name: string) => {
+    const reason = prompt(`"${name}" değişiklik talebini reddetme sebebini yazınız (opsiyonel):`)
+    rejectProfileChangeRequest(id, reason || undefined)
+    syncRequests()
+    toast.error(`"${name}" değişiklik talebi reddedildi.`)
+  }
 
   useEffect(() => {
     const loadData = () => {
@@ -164,7 +202,179 @@ export default function PrincipalSettingsPage() {
         </button>
       </div>
 
-      {/* Main Settings Form */}
+      {/* ── TOP NAVIGATION TABS: OKUL BİLGİLERİ VS DEĞİŞİKLİK TALEPLERİ ── */}
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-gray-100 dark:bg-gray-800/80 w-fit">
+        <button
+          type="button"
+          onClick={() => setMainTab('school_profile')}
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            mainTab === 'school_profile'
+              ? 'bg-white dark:bg-[#121826] text-gray-900 dark:text-white shadow-xs'
+              : 'text-gray-500 hover:text-gray-900 dark:text-gray-400'
+          }`}
+        >
+          Okul & Kurum Bilgileri
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMainTab('change_requests')}
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+            mainTab === 'change_requests'
+              ? 'bg-white dark:bg-[#121826] text-emerald-600 dark:text-emerald-400 shadow-xs'
+              : 'text-gray-500 hover:text-gray-900 dark:text-gray-400'
+          }`}
+        >
+          <span>Profil Değişiklik Talepleri</span>
+          {pendingCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-white animate-pulse">
+              {pendingCount} Bekleyen
+            </span>
+          )}
+        </button>
+      </div>
+
+      {mainTab === 'change_requests' ? (
+        <div className="space-y-6">
+          {/* Subtabs: Öğrenci vs Personel */}
+          <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-3">
+            <button
+              type="button"
+              onClick={() => setRequestSubTab('students')}
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+                requestSubTab === 'students'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
+              }`}
+            >
+              <User size={14} />
+              <span>Öğrenci Talepleri ({studentRequests.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setRequestSubTab('teachers')}
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+                requestSubTab === 'teachers'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
+              }`}
+            >
+              <Award size={14} />
+              <span>Personel / Öğretmen Talepleri ({teacherRequests.length})</span>
+            </button>
+          </div>
+
+          {/* Requests List */}
+          <div className="space-y-4">
+            {(requestSubTab === 'students' ? studentRequests : teacherRequests).length > 0 ? (
+              (requestSubTab === 'students' ? studentRequests : teacherRequests).map((req) => (
+                <div
+                  key={req.id}
+                  className="p-6 rounded-3xl bg-white dark:bg-[#121826] border border-gray-200/80 dark:border-gray-800/80 shadow-xs space-y-4"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-100 dark:border-gray-800/80">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-brand-gradient text-white flex items-center justify-center font-black text-sm shrink-0">
+                        {req.requesterName.slice(0, 1)}
+                      </div>
+                      <div>
+                        <div className="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
+                          <span>{req.requesterName}</span>
+                          <span className="text-xs px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold">
+                            {req.requesterIdentifier}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-gray-400 mt-0.5">
+                          Talep Tarihi: {req.requestDate}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      {req.status === 'pending' ? (
+                        <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1.5 animate-pulse">
+                          <span>⏳ Onay Bekliyor</span>
+                        </span>
+                      ) : req.status === 'approved' ? (
+                        <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1.5">
+                          <CheckCircle2 size={13} />
+                          <span>Onaylandı ({req.reviewDate})</span>
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800 flex items-center gap-1.5">
+                          <span>✕ Reddedildi</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Diff Table */}
+                  <div className="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-800">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-gray-50/80 dark:bg-gray-800/50 text-[10px] font-bold text-gray-400 uppercase">
+                          <th className="py-2.5 px-4">Değişen Alan</th>
+                          <th className="py-2.5 px-4">Eski Kayıtlı Bilgi</th>
+                          <th className="py-2.5 px-4 text-emerald-600 dark:text-emerald-400">Yeni İstenen Bilgi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800 font-medium">
+                        {req.changes.map((ch, idx) => (
+                          <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                            <td className="py-3 px-4 font-bold text-gray-900 dark:text-white">
+                              {ch.fieldLabel}
+                            </td>
+                            <td className="py-3 px-4 text-gray-400 line-through">
+                              {ch.oldValue || '—'}
+                            </td>
+                            <td className="py-3 px-4 font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/40 dark:bg-emerald-950/20">
+                              {ch.newValue}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Rejection Note if rejected */}
+                  {req.rejectionReason && (
+                    <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 text-xs">
+                      <strong>Red Sebebi:</strong> {req.rejectionReason}
+                    </div>
+                  )}
+
+                  {/* Action Buttons if pending */}
+                  {req.status === 'pending' && (
+                    <div className="flex items-center justify-end gap-2.5 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => handleReject(req.id, req.requesterName)}
+                        className="px-4 py-2 rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-black transition-colors cursor-pointer border border-rose-200 dark:border-rose-900/50"
+                      >
+                        ✕ Reddet
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleApprove(req.id, req.requesterName)}
+                        className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition-all cursor-pointer shadow-md shadow-emerald-600/20 active:scale-95 flex items-center gap-1.5"
+                      >
+                        <CheckCircle2 size={14} />
+                        <span>✓ Değişiklikleri Onayla</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#121826] border border-gray-200 dark:border-gray-800 text-xs text-gray-400">
+                Bu kategoride onay bekleyen değişiklik talebi bulunmuyor.
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* Main Settings Form */
       <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Quick Profile & Status Card */}
         <div className="lg:col-span-1 space-y-6">
@@ -493,6 +703,7 @@ export default function PrincipalSettingsPage() {
           </div>
         </div>
       </form>
+      )}
     </div>
   )
 }
