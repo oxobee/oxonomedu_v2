@@ -123,17 +123,30 @@ export default function OxonomPricingClient() {
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-gradient-to-b from-[#8D49A6]/20 via-[#D914C8]/10 to-transparent rounded-full blur-3xl pointer-events-none -z-10" />
 
       {/* ── 1. HERO SECTION WITH PROMINENT "14 GÜN ÜCRETSİZ DENE" GRAPHIC ── */}
-      <section className="pt-6 pb-8 sm:pt-10 sm:pb-12 px-4 sm:px-6 max-w-6xl mx-auto">
+      {/* On mobile: Image appears FIRST (above text), text appears SECOND. No background color behind the image. */}
+      <section className="pt-4 pb-8 sm:pt-8 sm:pb-12 px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="rounded-[32px] p-6 sm:p-10 lg:p-12 bg-white/70 dark:bg-[#1A1122]/70 backdrop-blur-md border border-[#E8DFEB] dark:border-[#3A2845] shadow-[0_15px_45px_rgba(75,7,95,0.06)] relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
-          {/* Subtle decorative glow behind mascot */}
-          <div className="absolute top-1/2 -right-16 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-[#8D49A6]/25 via-[#D914C8]/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+          {/* Mascot Image — Comes FIRST on mobile (order-1), SECOND on desktop (lg:order-2) */}
+          {/* Strictly NO background color or glow behind it per user request */}
+          <div className="order-1 lg:order-2 shrink-0 flex items-center justify-center w-full lg:w-auto">
+            <div className="relative w-80 sm:w-96 md:w-[460px] lg:w-[500px] xl:w-[540px] max-w-full">
+              <Image
+                src="/14-gun-ucretsiz-dene.png"
+                alt="14 Gün Ücretsiz Deneyin - Oxonom EDU"
+                width={600}
+                height={420}
+                priority
+                className="w-full h-auto object-contain select-none transition-transform hover:scale-[1.02] duration-300"
+              />
+            </div>
+          </div>
 
-          {/* Left Hero Content */}
-          <div className="space-y-4 sm:space-y-5 max-w-xl text-center lg:text-left z-10">
+          {/* Text Content — Comes SECOND on mobile (order-2), FIRST on desktop (lg:order-1) */}
+          <div className="order-2 lg:order-1 space-y-4 sm:space-y-5 max-w-xl text-center lg:text-left z-10">
             {/* Risk-free Pill */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FCE8FA] dark:bg-[#350444]/60 border border-[#D914C8]/35 text-[#8D49A6] dark:text-[#F17AE6] text-xs font-black shadow-xs">
               <Gift size={15} className="text-[#D914C8] dark:text-[#F17AE6]" />
-              <span>KREDİ KARTI GEREKMEDEN İLK 14 GÜN TAMAMEN ÜCRETSİZ</span>
+              <span>9 AY ÖDE 12 AY KULLAN · İLK 14 GÜN KARTSIZ ÜCRETSİZ</span>
             </div>
 
             {/* Title */}
@@ -147,7 +160,7 @@ export default function OxonomPricingClient() {
             {/* Description */}
             <p className="text-xs sm:text-sm text-[#514458] dark:text-[#D2C5D8] leading-relaxed font-medium">
               312 MEB ders kitabı, 7/24 kişisel yapay zekâ eğitmen desteği, yazılı sınav tahminleri ve
-              eğitsel oyunlar tek platformda. İlk 14 gün hiçbir ücret ödemeden ve kart gerekmeden deneyin.
+              eğitsel oyunlar tek platformda. <strong>9 ay ödeyip tam 12 ay kesintisiz kullanın</strong>, ilk 14 gün kredi kartı gerekmeden ücretsiz deneyin.
             </p>
 
             {/* Trust Checkmarks */}
@@ -187,20 +200,6 @@ export default function OxonomPricingClient() {
               </button>
             </div>
           </div>
-
-          {/* Right Hero Visual: 3D Mascot "14 Gün Ücretsiz Deneyin" Graphic */}
-          <div className="relative shrink-0 flex items-center justify-center z-10">
-            <div className="relative w-72 sm:w-84 md:w-96 lg:w-[420px] max-w-full">
-              <Image
-                src="/14-gun-ucretsiz-dene.png"
-                alt="14 Gün Ücretsiz Deneyin - Oxonom EDU"
-                width={500}
-                height={350}
-                priority
-                className="w-full h-auto object-contain drop-shadow-[0_20px_45px_rgba(75,7,95,0.35)] select-none transition-transform hover:scale-[1.02] duration-300"
-              />
-            </div>
-          </div>
         </div>
       </section>
 
@@ -218,7 +217,7 @@ export default function OxonomPricingClient() {
                 {/* 3D Metallic Badge */}
                 <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#D914C8] via-[#8D49A6] to-[#4B075F] text-white text-[11px] font-black uppercase tracking-wider shadow-lg shadow-[#D914C8]/30 border border-white/30">
                   <Flame size={14} className="text-amber-300 fill-amber-300" />
-                  <span>Büyük Yıl Kampanyası — %50 İndirim & 3 Ay Hediye</span>
+                  <span>Büyük Yıl Kampanyası — 9 Ay Öde 12 Ay Kullan</span>
                 </div>
 
                 <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
@@ -226,26 +225,24 @@ export default function OxonomPricingClient() {
                 </h2>
 
                 <p className="text-xs sm:text-sm text-[#FCF9FD]/90 font-medium leading-relaxed">
-                  Okul dönemi boyunca ve yaz tatilinde kesintisiz tam erişim! Toplam{' '}
-                  <strong className="text-[#F17AE6] font-black">3 ay ücretsiz hediye</strong> ediyoruz.{' '}
-                  400 ₺ yerine sadece{' '}
-                  <strong className="text-white font-black">200 ₺ / Ay</strong> ile yılda{' '}
-                  <strong className="text-emerald-300 font-black">2.400 ₺ tasarruf</strong> edin.
+                  Okul dönemi boyunca ve yaz tatilinde kesintisiz tam erişim! Yalnızca 9 ay için ödeme yaparsınız,{' '}
+                  <strong className="text-[#F17AE6] font-black">tam 12 ay (365 gün) boyunca</strong> tüm özelliklerden sınırsızca yararlanırsınız. Toplam{' '}
+                  <strong className="text-emerald-300 font-black">+3 ay yaz tatili ve telafi dönemi tamamen ücretsiz hediye</strong> edilir.
                 </p>
 
                 {/* Micro Perks Strip */}
                 <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-bold text-white/95">
                   <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15">
                     <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>9 Ay Öde 12 Ay Kullan</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
                     <span>İlk 14 Gün Ücretsiz</span>
                   </span>
                   <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15">
                     <CheckCircle2 size={15} className="text-emerald-400" />
-                    <span>Kredi Kartı Gerekmez</span>
-                  </span>
-                  <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl border border-white/15">
-                    <CheckCircle2 size={15} className="text-emerald-400" />
-                    <span>İstediğin An İptal</span>
+                    <span>Kart Bilgisi Gerekmez</span>
                   </span>
                 </div>
               </div>
@@ -365,7 +362,7 @@ export default function OxonomPricingClient() {
           </h2>
 
           <p className="text-xs sm:text-sm text-[#514458] dark:text-[#D2C5D8] max-w-lg mx-auto">
-            Her iki pakette de tüm özellikler eksiksiz ve sınırsızdır. 9 aylık paket ile %50 tasarruf edin ve 3 ayı hediye kazanın.
+            Her iki pakette de tüm özellikler eksiksiz ve sınırsızdır. 9 aylık paket ile 9 ay ödeyip 12 ay kesintisiz kullanın!
           </p>
         </div>
 
@@ -435,10 +432,10 @@ export default function OxonomPricingClient() {
 
           {/* ── PLAN 2: 9 AYLIK SÜPER PAKET (12 AY KULLANIM - 3D SHEEN & ÖNERİLEN) ── */}
           <div className="relative rounded-[32px] p-[2.5px] bg-gradient-to-br from-[#4B075F] via-[#8D49A6] to-[#D914C8] shadow-[0_25px_70px_-15px_rgba(217,20,200,0.4)] flex flex-col justify-between">
-            {/* Top 3D Badge */}
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-[11px] font-black uppercase tracking-wider shadow-md flex items-center gap-1.5 z-20">
-              <Crown size={13} className="fill-white" />
-              <span>EN ÇOK TERCİH EDİLEN & %50 İNDİRİM</span>
+            {/* Top 3D Badge — STRONGLY EMPHASIZES 9 AY ÖDE 12 AY KULLAN */}
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-[11px] font-black uppercase tracking-wider shadow-md flex items-center gap-1.5 z-20 whitespace-nowrap">
+              <Flame size={14} className="fill-amber-300 text-amber-300" />
+              <span>9 AY ÖDE, 12 AY KULLAN · %50 İNDİRİM</span>
             </div>
 
             <div className="rounded-[30px] bg-gradient-to-b from-[#FCF9FD] via-white to-[#F7F0FA] dark:from-[#211729] dark:via-[#1A1122] dark:to-[#2A1633] p-6 sm:p-8 flex flex-col justify-between space-y-6 h-full relative overflow-hidden">
@@ -449,7 +446,7 @@ export default function OxonomPricingClient() {
                 <div>
                   <div className="inline-flex items-center gap-1 text-[11px] font-black uppercase text-[#8D49A6] dark:text-[#F17AE6] tracking-wider">
                     <Sparkles size={13} />
-                    <span>9 Ay Öde 12 Ay Kesintisiz Kullan</span>
+                    <span>3 Ay Ücretsiz Hediye Kampanyası</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-black text-[#241329] dark:text-white mt-1">
                     9 Aylık Süper Paket
@@ -482,8 +479,19 @@ export default function OxonomPricingClient() {
                   </div>
                 </div>
 
+                {/* PROMINENT "9 AY ÖDE 12 AY KULLAN" VALUE CALLOUT BOX */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#FCE8FA] to-[#F0D8FA] dark:from-[#350444]/80 dark:to-[#4B075F]/60 border-2 border-[#D914C8]/60 shadow-sm space-y-1 text-left">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-[#4B075F] dark:text-[#F17AE6]">
+                    <Gift size={16} className="text-[#D914C8] shrink-0" />
+                    <span>9 Ay Ödeyin, 12 Ay (Tam 365 Gün) Kullanın!</span>
+                  </div>
+                  <p className="text-[11px] text-[#514458] dark:text-[#D2C5D8] font-semibold leading-tight">
+                    Sadece okul dönemi (9 ay) için 1.800 ₺ ödersiniz, yaz tatili telafi kampı dönemi olan <strong>+3 ay tamamen hediye</strong> edilir.
+                  </p>
+                </div>
+
                 {/* Feature Checklist — IDENTICAL CONTENTS TO MONTHLY */}
-                <div className="space-y-3 pt-2">
+                <div className="space-y-3 pt-1">
                   <div className="text-xs font-black text-[#241329] dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                     <CheckCircle2 size={14} className="text-[#D914C8]" />
                     <span>Paket İçeriği (Tam Erişim):</span>
@@ -503,7 +511,7 @@ export default function OxonomPricingClient() {
                 </div>
               </div>
 
-              {/* Primary CTA */}
+              {/* Primary CTA — Explicitly stating 9 Ay Öde 12 Ay Kullan */}
               <div className="space-y-2 pt-2 relative z-10">
                 <button
                   type="button"
@@ -511,7 +519,7 @@ export default function OxonomPricingClient() {
                   className="w-full py-4 px-6 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-[#4B075F]/35 transition-all cursor-pointer flex items-center justify-center gap-2 group border border-white/20"
                 >
                   <Sparkles size={16} className="text-[#FCE8FA]" />
-                  <span>12 Ay Avantajıyla 14 Gün Ücretsiz Başla</span>
+                  <span>9 Ay Öde, 12 Ay Kullan — 14 Gün Ücretsiz Başla</span>
                   <ChevronRight size={18} strokeWidth={2.8} className="text-[#FCE8FA] group-hover:translate-x-1 transition-transform" />
                 </button>
 
@@ -670,7 +678,7 @@ export default function OxonomPricingClient() {
             </div>
 
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight max-w-2xl mx-auto">
-              Başarınızı Şansa Bırakmayın. İlk 14 Gün Kredi Kartsız Ücretsiz Deneyin!
+              Başarınızı Şansa Bırakmayın. 9 Ay Ödeyin, 12 Ay Kullanın!
             </h2>
 
             <p className="text-xs sm:text-sm text-[#D2C5D8] max-w-xl mx-auto">
@@ -683,7 +691,7 @@ export default function OxonomPricingClient() {
                 onClick={() => handleStartTrial('9 Aylık Süper Paket (12 Ay Kullanım)')}
                 className="w-full sm:w-auto py-4 px-8 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-[#4B075F]/40 transition-all cursor-pointer flex items-center justify-center gap-2 border border-white/20"
               >
-                <span>Hemen 14 Gün Ücretsiz Başla</span>
+                <span>9 Ay Öde 12 Ay Kullan — 14 Gün Ücretsiz Başla</span>
                 <ChevronRight size={18} strokeWidth={2.8} />
               </button>
 
