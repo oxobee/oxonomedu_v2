@@ -156,6 +156,9 @@ export default function DashV2Client({
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('oxonom_selected_class', JSON.stringify(cls))
+        if (cls.code) {
+          localStorage.setItem('oxonom_live_radar_class', cls.code)
+        }
         window.dispatchEvent(new CustomEvent('oxonom_class_changed', { detail: cls }))
       } catch (_) {}
     }
@@ -1508,6 +1511,7 @@ export default function DashV2Client({
           ══════════════════════════════════════════════════════════════════════════ */}
           <motion.div variants={itemVariants}>
             <LiveClassRadar
+              key={selectedClass.code || '1/A'}
               role="teacher"
               initialClassCode={selectedClass.code || '1/A'}
             />

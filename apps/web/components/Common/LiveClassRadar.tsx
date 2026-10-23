@@ -207,6 +207,28 @@ export default function LiveClassRadar({
       localStorage.setItem('oxonom_live_radar_class', newClass)
     }
   }
+
+  // Synchronize when initialClassCode prop changes from parent (e.g. Hero class switcher)
+  useEffect(() => {
+    if (isStudent) return
+    if (initialClassCode && initialClassCode !== selectedClass) {
+      setSelectedClass(initialClassCode)
+    }
+  }, [initialClassCode, isStudent])
+
+  // Synchronize with global class changes
+  useEffect(() => {
+    if (isStudent) return
+    const handleClassChanged = (e: any) => {
+      const cls = e?.detail
+      const code = cls?.code || cls?.name || cls
+      if (typeof code === 'string' && code.trim()) {
+        setSelectedClass(code.trim())
+      }
+    }
+    window.addEventListener('oxonom_class_changed', handleClassChanged)
+    return () => window.removeEventListener('oxonom_class_changed', handleClassChanged)
+  }, [isStudent])
   const [scheduleData, setScheduleData] = useState<ScheduleEntry[]>([])
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const [isExpanded, setIsExpanded] = useState<boolean>(initialExpanded)

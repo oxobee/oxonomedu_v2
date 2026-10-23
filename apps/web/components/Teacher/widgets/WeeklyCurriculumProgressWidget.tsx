@@ -1338,7 +1338,7 @@ export default function WeeklyCurriculumProgressWidget({
               {isCurrentlyTaught ? (
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-black px-3 py-1 rounded-full bg-[#4B075F] text-white shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span>Şu An Aktif İşlenen Konu</span>
+                  <span>en son bu konuda kaldık...</span>
                 </span>
               ) : isPast ? (
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">

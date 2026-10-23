@@ -352,7 +352,7 @@ export default function GlobalLoginClient() {
       {/* ── SOL TARAF: GİRİŞ YAPMA FORMU (PANO BUTONU YOK, HIZLI DEMO YOK, KAYIT OL BUTONU VAR) ── */}
       <div className="w-full lg:w-[48%] xl:w-[44%] 2xl:w-[40%] h-full flex flex-col justify-between p-5 sm:p-7 lg:p-10 z-10 relative overflow-y-auto lg:overflow-hidden border-r border-white/5 bg-[#0A0512]/60 backdrop-blur-xl">
         {/* Masaüstünde sol üstte zarif logo */}
-        <header className="w-full hidden lg:flex items-center justify-start pb-2 shrink-0">
+        <header className="w-full hidden lg:flex items-center justify-between pb-2 shrink-0">
           <Link href="/login" className="group flex items-center gap-2 cursor-pointer">
             <img
               src="/oxonom-logo-dark.png"
@@ -360,19 +360,33 @@ export default function GlobalLoginClient() {
               className="h-9 w-auto object-contain transition-transform group-hover:scale-[1.02]"
             />
           </Link>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-bold text-[#F0D8FA]">
+            <Sparkles size={12} className="text-[#D914C8]" />
+            <span>v2.0 Portalı</span>
+          </div>
         </header>
 
         {/* Orta Kısım: Giriş Formu ve Rol Seçici */}
         <div className="flex-1 flex flex-col justify-center max-w-sm sm:max-w-md w-full mx-auto py-2">
-          {/* Mobilde Formun Tam Üstünde Ortalı, Dengeli ve 3x Büyük Logo */}
-          <div className="flex lg:hidden justify-center items-center mb-6 pt-1">
-            <Link href="/login" className="flex items-center justify-center cursor-pointer">
+          {/* Mobilde Formun Tam Üstünde Ortalı Logo ve Karakter */}
+          <div className="flex lg:hidden flex-col justify-center items-center mb-5 pt-1">
+            <Link href="/login" className="flex items-center justify-center cursor-pointer mb-2">
               <img
                 src="/oxonom-logo-dark.png"
                 alt="Oxonom EDU"
-                className="h-16 sm:h-20 w-auto max-w-[85vw] sm:max-w-[340px] object-contain drop-shadow-2xl transition-transform active:scale-95"
+                className="h-12 sm:h-14 w-auto max-w-[75vw] sm:max-w-[280px] object-contain drop-shadow-2xl transition-transform active:scale-95"
               />
             </Link>
+            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+              <img
+                src="/images/oxonom-mascot-welcome.png"
+                alt="Oxonom Mascot"
+                className="w-7 h-7 object-contain drop-shadow-md"
+              />
+              <span className="text-xs font-black bg-gradient-to-r from-white via-[#FCE8FA] to-[#D914C8] bg-clip-text text-transparent">
+                Oxonom EDU'ya Hoş Geldiniz! ✨
+              </span>
+            </div>
           </div>
           {/* Başlık */}
           <div className="mb-4">
@@ -543,16 +557,16 @@ export default function GlobalLoginClient() {
         </footer>
       </div>
 
-      {/* ── SAĞ TARAF: BÜYÜK LOGO (KUTU KALDIRILDI, LOGO DOĞRUDAN AURADA PARLIYOR) ── */}
-      <div className="hidden lg:flex flex-1 h-full items-center justify-center relative p-8 xl:p-12 overflow-hidden bg-gradient-to-br from-[#12081C]/90 via-[#0A0512] to-[#050208] z-10">
+      {/* ── SAĞ TARAF: BÜYÜK MASCOT VE PARILDAYAN AURA ── */}
+      <div className="hidden lg:flex flex-1 h-full items-center justify-center relative p-8 xl:p-12 overflow-hidden bg-gradient-to-br from-[#12081C]/95 via-[#0A0512] to-[#050208] z-10">
         {/* Sağ Alan Merkez Işık Küresi */}
-        <div className="absolute w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-[#D914C8]/25 via-[#8D49A6]/20 to-[#4B075F]/25 blur-[120px] pointer-events-none" />
+        <div className="absolute w-[560px] h-[560px] rounded-full bg-gradient-to-tr from-[#D914C8]/30 via-[#8D49A6]/25 to-[#4B075F]/35 blur-[130px] pointer-events-none" />
 
         {/* Dekoratif Yavaş Dönen Yörünge Çizgileri */}
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 160, repeat: Infinity, ease: 'linear' }}
-          className="absolute w-[680px] h-[680px] pointer-events-none opacity-20"
+          className="absolute w-[680px] h-[680px] pointer-events-none opacity-25"
         >
           <svg viewBox="0 0 680 680" fill="none" className="w-full h-full">
             <circle cx="340" cy="340" r="320" stroke="#D914C8" strokeWidth="1" strokeDasharray="6 12" />
@@ -561,23 +575,50 @@ export default function GlobalLoginClient() {
           </svg>
         </motion.div>
 
-        {/* Ekrana Uyumlu Büyük Logo (Arkasında dikdörtgen kutu olmadan serbest parıldayan yapı) */}
+        {/* Ana İçerik: Logo + 3D Karakter + Hoş Geldiniz Balonu */}
         <motion.div
           animate={{
             y: [-6, 6, -6],
-            scale: [1, 1.015, 1],
           }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           className="relative z-20 flex flex-col items-center justify-center max-w-xl w-full text-center px-4"
         >
           <img
             src="/oxonom-logo-dark.png"
             alt="Oxonom EDU"
-            className="w-full max-w-[460px] xl:max-w-[520px] 2xl:max-w-[580px] h-auto object-contain drop-shadow-[0_20px_50px_rgba(217,20,200,0.4)]"
+            className="w-full max-w-[340px] xl:max-w-[400px] h-auto object-contain drop-shadow-[0_15px_35px_rgba(217,20,200,0.35)] mb-4"
           />
 
+          {/* 3D Karakter / Mascot Container with glowing pedestal */}
+          <div className="relative flex flex-col items-center justify-center my-1 group">
+            {/* Mascot Işıma Zemini */}
+            <div className="absolute -bottom-3 w-48 h-8 bg-[#D914C8]/35 rounded-[100%] blur-xl pointer-events-none" />
+
+            {/* Hoş Geldin Konuşma Baloncuğu */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mb-2 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl shadow-[#4B075F]/30 flex items-center gap-2"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+              <span className="text-xs sm:text-sm font-black text-white">
+                Oxonom Ekosistemine Hoş Geldiniz! 👋
+              </span>
+            </motion.div>
+
+            {/* 3D Karakter Görseli */}
+            <motion.img
+              whileHover={{ scale: 1.05, rotate: [0, -1.5, 1.5, 0] }}
+              transition={{ duration: 0.4 }}
+              src="/images/oxonom-mascot-welcome.png"
+              alt="Oxonom Edu Karakteri"
+              className="w-56 sm:w-64 xl:w-72 h-auto object-contain drop-shadow-[0_20px_40px_rgba(75,7,95,0.7)] cursor-pointer select-none"
+            />
+          </div>
+
           {/* Alt Rozet Bilgileri */}
-          <div className="mt-8 flex items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
             <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#4B075F]/50 text-[#FCE8FA] border border-[#8D49A6]/40 shadow-sm flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#D914C8] animate-pulse" />
               <span>Geleceğin Akıllı Okul Ekosistemi</span>
