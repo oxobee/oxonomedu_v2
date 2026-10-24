@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
 import PromoHero from '@components/Promo/PromoHero';
-import StudentPortalShowcase from '@components/Promo/StudentPortalShowcase';
-import StudentInteractiveTabs from '@components/Promo/StudentInteractiveTabs';
 import PromoFeatures from '@components/Promo/PromoFeatures';
 import PricingTables from '@components/Promo/PricingTables';
-import PromoFAQ from '@components/Promo/PromoFAQ';
 import PromoCTASection from '@components/Promo/PromoCTASection';
 import JsonLd from '@components/Promo/JsonLd';
 
@@ -41,11 +38,8 @@ export default function HomePage() {
     <>
       <JsonLd data={jsonLdData} />
       <PromoHero />
-      <StudentPortalShowcase />
-      <StudentInteractiveTabs />
-      <PromoFeatures />
       <PricingTables />
-      <PromoFAQ />
+      <PromoFeatures />
       <PromoCTASection />
     </>
   );
