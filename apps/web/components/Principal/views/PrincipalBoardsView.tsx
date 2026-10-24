@@ -26,6 +26,12 @@ import {
   Layers,
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
+import {
+  getCurrentSchoolCode,
+  isDemoSchool,
+  getTenantBoards,
+  saveTenantBoards,
+} from '@/lib/schools/schoolTenantManager'
 
 export interface SchoolBoard {
   id: string
@@ -128,9 +134,23 @@ export default function PrincipalBoardsView() {
   const [newBoardLocation, setNewBoardLocation] = useState('')
   const [newBoardType, setNewBoardType] = useState<SchoolBoard['type']>('corridor')
 
-  // Load from localStorage on mount
+  // Load from isolated tenant storage on mount
   useEffect(() => {
     try {
+      const code = getCurrentSchoolCode()
+      const tenant = getTenantBoards(code)
+      if (tenant !== null) {
+        setBoards(tenant)
+        return
+      }
+
+      if (!isDemoSchool(code)) {
+        // Newly created school starts with zero boards
+        setBoards([])
+        return
+      }
+
+      // Demo school fallback
       const stored = localStorage.getItem('oxonom_school_digital_boards')
       if (stored) {
         setBoards(JSON.parse(stored))
@@ -139,12 +159,14 @@ export default function PrincipalBoardsView() {
         localStorage.setItem('oxonom_school_digital_boards', JSON.stringify(DEFAULT_BOARDS))
       }
     } catch (_) {
-      setBoards(DEFAULT_BOARDS)
+      setBoards([])
     }
   }, [])
 
   const saveBoards = (nextBoards: SchoolBoard[]) => {
     setBoards(nextBoards)
+    const code = getCurrentSchoolCode()
+    saveTenantBoards(nextBoards, code)
     try {
       localStorage.setItem('oxonom_school_digital_boards', JSON.stringify(nextBoards))
     } catch (_) {}
@@ -427,6 +449,32 @@ export default function PrincipalBoardsView() {
             </div>
           </div>
         ))}
+
+        {boards.length === 0 && (
+          <div className="col-span-full py-16 text-center rounded-3xl bg-white dark:bg-[#1A1222] border-2 border-dashed border-[#D914C8]/30 p-8 space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#D914C8]/15 to-[#8D49A6]/15 text-[#D914C8] flex items-center justify-center mx-auto shadow-sm">
+              <Tv size={32} />
+            </div>
+            <div className="space-y-1.5 max-w-md mx-auto">
+              <h3 className="text-base font-black text-[#241329] dark:text-white">
+                Henüz Dijital Okul Panosu Tanımlanmadı
+              </h3>
+              <p className="text-xs text-[#716779] dark:text-[#A898B0] leading-relaxed">
+                Okul girişi, kat koridorları ve öğretmenler odası dijital panolarını buradan ekleyerek ders programı, nöbetçi öğretmen, hava durumu ve duyuruları canlı olarak yayınlayabilirsiniz.
+              </p>
+            </div>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setIsNewBoardOpen(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-xs font-black shadow-lg shadow-[#D914C8]/25 hover:brightness-110 transition-all cursor-pointer"
+              >
+                <Plus size={16} strokeWidth={2.5} />
+                <span>+ İlk Dijital Panoyu Ekle</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── SETTINGS MODAL ── */}

@@ -84,6 +84,7 @@ export interface SchoolDetail {
   name: string
   shortName: string
   type: string // "Devlet Okulu (MEB)", "Özel K-12 Koleji", vb.
+  schoolSector?: 'devlet' | 'ozel' | 'kurs' // Devlet Okulu vs Özel Okul vs Özel Kurs
   level: string // "İlkokul (1-4)", "Ortaokul (5-8)", "K-12"
   city: string
   district: string
@@ -1084,6 +1085,7 @@ export function normalizeSchool(raw: any): SchoolDetail {
     name: String(raw.name || 'Oxonom İlkokulu'),
     shortName: String(raw.shortName || (raw.name ? String(raw.name).split(' ').slice(0, 2).join(' ') : 'Oxonom')),
     type: String(raw.type || 'MEB Resmi İlkokulu & Ortaokulu'),
+    schoolSector: raw.schoolSector || (String(raw.type || '').toLowerCase().includes('özel') ? 'ozel' : String(raw.type || '').toLowerCase().includes('kurs') ? 'kurs' : 'devlet'),
     level: String(raw.level || 'İlkokul (1-4) & Ortaokul (5-8)'),
     city: String(raw.city || 'İstanbul'),
     district: String(raw.district || 'Merkez'),
@@ -1217,6 +1219,7 @@ export function addNewSchool(data: {
   address?: string
   level: string
   type?: string
+  schoolSector?: 'devlet' | 'ozel' | 'kurs'
   principalName: string
   principalPhone: string
   principalEmail: string
@@ -1244,6 +1247,7 @@ export function addNewSchool(data: {
     name: data.name.trim(),
     shortName: data.name.trim().split(' ').slice(0, 2).join(' '),
     type: data.type || 'MEB Resmi İlkokulu',
+    schoolSector: data.schoolSector || (data.type?.toLowerCase().includes('özel') ? 'ozel' : data.type?.toLowerCase().includes('kurs') ? 'kurs' : 'devlet'),
     level: data.level,
     city: data.city,
     district: data.district,
@@ -1311,6 +1315,12 @@ export function addNewSchool(data: {
         status: 'success',
       },
     ],
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(`oxonom_school_sector_${newSchool.code}`, newSchool.schoolSector || 'devlet')
+    } catch (_) {}
   }
 
   const updated = [newSchool, ...all]

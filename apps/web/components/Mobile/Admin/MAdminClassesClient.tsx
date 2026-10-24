@@ -33,6 +33,8 @@ import {
   Send,
   Download,
   BookOpen,
+  List,
+  LayoutGrid,
   School,
   Activity,
   Award,
@@ -991,6 +993,7 @@ export default function MAdminClassesClient({
   // ── SUB-VIEW NAVIGATION: ŞUBELER & SINIFLAR | DÖNEM SONU ATLATMA & NAKİL ──
   type ClassesSubView = 'classes' | 'promotion'
   const [activeSubView, setActiveSubView] = useState<ClassesSubView>('classes')
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
 
   // ── DİNAMİK KADEME YÖNETİMİ STATES ──
   const [gradeLevels, setGradeLevels] = useState<string[]>(() => {
@@ -1087,6 +1090,19 @@ export default function MAdminClassesClient({
     }
     return []
   })
+
+  // Only display grades that exist in the school dataset to avoid false 9-grade sliders in fresh schools
+  const availableGrades = useMemo(() => {
+    if (classesList.length === 0) return []
+    return gradeLevels.filter((grade) => {
+      return classesList.some((c) => {
+        if (c.gradeLevel === grade) return true
+        const gNum = grade.match(/\d+/)
+        const cNum = c.gradeLevel?.match(/\d+/) || c.code?.match(/^\d+/)
+        return Boolean(gNum && cNum && gNum[0] === cNum[0])
+      })
+    })
+  }, [classesList, gradeLevels])
 
   // Synchronize when school org changes or load from localStorage
   useEffect(() => {
@@ -1897,10 +1913,10 @@ export default function MAdminClassesClient({
                         : 'bg-gray-100 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                     }`}
                   >
-                    Tüm Sınıflar ({classesList.length})
+                    Tüm Şubeler ({classesList.length})
                   </button>
 
-                  {gradeLevels.map((grade) => {
+                  {availableGrades.map((grade) => {
                     const count = classesList.filter((c) => {
                       if (c.gradeLevel === grade) return true
                       const gNum = grade.match(/\d+/)
@@ -1936,16 +1952,46 @@ export default function MAdminClassesClient({
                   </button>
                 </div>
 
-                {/* Search */}
-                <div className="relative w-full sm:w-72">
-                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Şube (örn. 9/A), öğretmen veya derslik ara..."
-                    className="w-full h-10 pl-9 pr-3 rounded-xl bg-gray-50 dark:bg-[#1A2234] border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
-                  />
+                {/* View Mode Toggle & Search */}
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="flex items-center p-1 rounded-xl bg-gray-100 dark:bg-[#1A2234] border border-gray-200 dark:border-gray-700 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('table')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        viewMode === 'table'
+                          ? 'bg-white dark:bg-[#20293D] text-purple-700 dark:text-purple-300 shadow-xs'
+                          : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <List size={14} />
+                      <span>Liste</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('grid')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        viewMode === 'grid'
+                          ? 'bg-white dark:bg-[#20293D] text-purple-700 dark:text-purple-300 shadow-xs'
+                          : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <LayoutGrid size={14} />
+                      <span>Kartlar</span>
+                    </button>
+                  </div>
+
+                  {/* Search */}
+                  <div className="relative w-full sm:w-64">
+                    <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Şube (örn. 9/A), öğretmen veya derslik ara..."
+                      className="w-full h-10 pl-9 pr-3 rounded-xl bg-gray-50 dark:bg-[#1A2234] border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -2100,7 +2146,7 @@ export default function MAdminClassesClient({
                       Tüm Sınıflar ({classesList.length})
                     </button>
 
-                    {gradeLevels.map((grade) => {
+                    {availableGrades.map((grade) => {
                       const count = classesList.filter((c) => {
                         if (c.gradeLevel === grade) return true
                         const gNum = grade.match(/\d+/)
@@ -2144,151 +2190,270 @@ export default function MAdminClassesClient({
         {/* ── 3. CLASSES VIEW WRAPPER ── */}
         {activeSubView === 'classes' && (
           <>
-            {/* ── 6. SINIF KARTLARI LİSTESİ ── */}
-            <section className={`px-4 mt-3 ${hideHeader ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 space-y-0' : 'space-y-2.5'}`}>
-              <div className={`flex items-center justify-between text-xs text-gray-500 font-bold px-1 ${hideHeader ? 'col-span-full' : ''}`}>
-                <span>Mevcut Şubeler ({filteredClasses.length})</span>
+            {/* ── 6. SINIFLAR LİSTESİ / TABLO & KART GÖRÜNÜMÜ ── */}
+            <section className="px-4 mt-3 space-y-3">
+              <div className="flex items-center justify-between text-xs text-gray-500 font-bold px-1">
+                <div className="flex items-center gap-2">
+                  <span>Mevcut Şubeler ({filteredClasses.length})</span>
+                  {selectedGradeFilter !== 'ALL' && (
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300">
+                      {selectedGradeFilter}
+                    </span>
+                  )}
+                </div>
                 <span>{activeOrg.name}</span>
               </div>
 
-          {filteredClasses.map((cls) => (
-            <motion.div
-              key={cls.id}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => {
-                setSelectedClassForDetail(cls)
-                setActiveDetailTab('genel')
-              }}
-              className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-2xl p-3.5 shadow-xs transition-all hover:border-purple-500/40 cursor-pointer"
-            >
-              <div className="flex items-start justify-between gap-3">
-                {/* Sol Kısım: Sınıf Rozeti & Ana Bilgiler */}
-                <div className="flex items-start gap-3 min-w-0 flex-1">
-                  <div className="relative shrink-0">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600/20 to-indigo-600/15 text-purple-700 dark:text-purple-300 font-black text-sm flex items-center justify-center border border-purple-500/20">
-                      {cls.code}
-                    </div>
-                    {cls.boardStatus === 'online' && (
-                      <span
-                        className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#121826]"
-                        title="Akıllı Tahta Çevrimiçi"
-                      />
-                    )}
+              {classesList.length === 0 ? (
+                <div className="py-14 text-center rounded-3xl bg-white dark:bg-[#121826] border-2 border-dashed border-purple-500/30 p-8 space-y-4">
+                  <div className="w-16 h-16 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mx-auto shadow-sm">
+                    <Building2 size={32} />
                   </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <h4 className="text-xs font-black text-gray-900 dark:text-white truncate">
-                        {cls.name}
-                      </h4>
-                      <span className="text-[10px] font-black px-1.5 py-0.2 rounded-md bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/40">
-                        {cls.gradeLevel}
-                      </span>
-                    </div>
-
-                    <div className="text-[11px] text-gray-600 dark:text-gray-300 font-semibold mt-0.5 truncate flex items-center gap-1">
-                      <User size={11} className="text-gray-400" />
-                      <span>Rehber: {cls.teacherName}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-[10.5px] text-gray-400 mt-1 flex-wrap">
-                      <span>{cls.roomName}</span>
-                      <span>·</span>
-                      <span className="font-bold text-gray-700 dark:text-gray-300">
-                        {cls.studentCount} / {cls.capacity} Öğrenci
-                      </span>
-                      <span>·</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                        %{cls.attendanceRate} Katılım
-                      </span>
-                    </div>
-
-                    {/* Kapasite Barı */}
-                    <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mt-2 overflow-hidden">
-                      <div
-                        className="bg-purple-600 h-full rounded-full"
-                        style={{
-                          width: `${Math.min(
-                            100,
-                            (cls.studentCount / cls.capacity) * 100
-                          )}%`,
-                        }}
-                      />
-                    </div>
+                  <div className="space-y-1 max-w-md mx-auto">
+                    <h3 className="text-base font-black text-gray-900 dark:text-white">
+                      Henüz Şube / Sınıf Tanımlanmadı
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                      Kurumunuza ait kayıtlı bir şube bulunmuyor. Yeni eğitim dönemine başlamak için ilk sınıfınızı (örneğin 1-A) oluşturarak öğrencilerinizi yerleştirebilirsiniz.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsNewClassModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-xs font-black shadow-lg shadow-[#D914C8]/25 hover:brightness-110 transition-all cursor-pointer"
+                  >
+                    <Plus size={16} strokeWidth={2.5} />
+                    <span>+ İlk Şubeyi / Sınıfı Ekle</span>
+                  </button>
+                </div>
+              ) : filteredClasses.length === 0 ? (
+                <div className="py-12 text-center text-xs text-gray-400 bg-white dark:bg-[#121826] rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+                  Arama kriterlerine uygun sınıf veya şube bulunamadı.
+                </div>
+              ) : viewMode === 'table' ? (
+                /* ── TABLO / LİSTE GÖRÜNÜMÜ ── */
+                <div className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-2xl overflow-hidden shadow-xs">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-900/40 text-[11px] font-black uppercase text-gray-500 dark:text-gray-400">
+                          <th className="py-3 px-4">Şube / Sınıf</th>
+                          <th className="py-3 px-3">Kademe</th>
+                          <th className="py-3 px-3">Rehber Öğretmen</th>
+                          <th className="py-3 px-3">Mevcut</th>
+                          <th className="py-3 px-3">Derslik</th>
+                          <th className="py-3 px-3">Akıllı Tahta</th>
+                          <th className="py-3 px-3">Katılım</th>
+                          <th className="py-3 px-4 text-right">İşlemler</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
+                        {filteredClasses.map((cls) => (
+                          <tr
+                            key={cls.id}
+                            onClick={() => {
+                              setSelectedClassForDetail(cls)
+                              setActiveDetailTab('genel')
+                            }}
+                            className="hover:bg-purple-500/5 transition-colors cursor-pointer group"
+                          >
+                            <td className="py-3 px-4 font-black text-gray-900 dark:text-white">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-700 dark:text-purple-300 font-black text-xs flex items-center justify-center shrink-0 border border-purple-500/20">
+                                  {cls.code}
+                                </div>
+                                <span className="font-bold">{cls.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/40">
+                                {cls.gradeLevel}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 font-semibold text-gray-700 dark:text-gray-300">
+                              <div className="flex items-center gap-1.5">
+                                <User size={12} className="text-gray-400" />
+                                <span>{cls.teacherName}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className="font-black text-gray-900 dark:text-white">{cls.studentCount}</span>
+                              <span className="text-gray-400"> / {cls.capacity}</span>
+                            </td>
+                            <td className="py-3 px-3 text-gray-600 dark:text-gray-300 font-medium">
+                              {cls.roomName}
+                            </td>
+                            <td className="py-3 px-3">
+                              {cls.boardStatus === 'online' ? (
+                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  Çevrimiçi
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-400">
+                                  Çevrimdışı
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-3 font-bold text-emerald-600 dark:text-emerald-400">
+                              %{cls.attendanceRate}
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <div className="inline-flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleOpenEdit(cls)
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+                                  title="Düzenle"
+                                >
+                                  <Edit3 size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setClassToDelete(cls)
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/50 text-rose-500 transition-colors cursor-pointer"
+                                  title="Sil"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedClassForDetail(cls)
+                                    setActiveDetailTab('genel')
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-950/50 text-purple-600 dark:text-purple-400 transition-colors cursor-pointer"
+                                  title="Detay"
+                                >
+                                  <ChevronRight size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
+              ) : (
+                /* ── KARTLAR (GRİD) GÖRÜNÜMÜ ── */
+                <div className={hideHeader ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-2.5'}>
+                  {filteredClasses.map((cls) => (
+                    <motion.div
+                      key={cls.id}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => {
+                        setSelectedClassForDetail(cls)
+                        setActiveDetailTab('genel')
+                      }}
+                      className="bg-white dark:bg-[#121826] border border-gray-200/90 dark:border-gray-800/80 rounded-2xl p-3.5 shadow-xs transition-all hover:border-purple-500/40 cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 min-w-0 flex-1">
+                          <div className="relative shrink-0">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600/20 to-indigo-600/15 text-purple-700 dark:text-purple-300 font-black text-sm flex items-center justify-center border border-purple-500/20">
+                              {cls.code}
+                            </div>
+                            {cls.boardStatus === 'online' && (
+                              <span
+                                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#121826]"
+                                title="Akıllı Tahta Çevrimiçi"
+                              />
+                            )}
+                          </div>
 
-                {/* Sağ Kısım: Aksiyon Butonları */}
-                <div className="shrink-0 flex items-center gap-1.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleOpenEdit(cls)
-                    }}
-                    className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition-colors cursor-pointer"
-                    title="Şube Bilgilerini Düzenle"
-                  >
-                    <Edit3 size={13} />
-                  </button>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h4 className="text-xs font-black text-gray-900 dark:text-white truncate">
+                                {cls.name}
+                              </h4>
+                              <span className="text-[10px] font-black px-1.5 py-0.2 rounded-md bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/40">
+                                {cls.gradeLevel}
+                              </span>
+                            </div>
 
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setClassToDelete(cls)
-                    }}
-                    className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer"
-                    title="Şubeyi Sil"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                            <div className="text-[11px] text-gray-600 dark:text-gray-300 font-semibold mt-0.5 truncate flex items-center gap-1">
+                              <User size={11} className="text-gray-400" />
+                              <span>Rehber: {cls.teacherName}</span>
+                            </div>
 
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedClassForDetail(cls)
-                      setActiveDetailTab('genel')
-                    }}
-                    className="w-8 h-8 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-400 flex items-center justify-center transition-colors cursor-pointer"
-                    title="Detayları İncele"
-                  >
-                    <ChevronRight size={15} />
-                  </button>
+                            <div className="flex items-center gap-2 text-[10.5px] text-gray-400 mt-1 flex-wrap">
+                              <span>{cls.roomName}</span>
+                              <span>·</span>
+                              <span className="font-bold text-gray-700 dark:text-gray-300">
+                                {cls.studentCount} / {cls.capacity} Öğrenci
+                              </span>
+                              <span>·</span>
+                              <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                %{cls.attendanceRate} Katılım
+                              </span>
+                            </div>
+
+                            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mt-2 overflow-hidden">
+                              <div
+                                className="bg-purple-600 h-full rounded-full"
+                                style={{
+                                  width: `${Math.min(
+                                    100,
+                                    (cls.studentCount / cls.capacity) * 100
+                                  )}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 flex items-center gap-1.5 pt-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenEdit(cls)
+                            }}
+                            className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Şube Bilgilerini Düzenle"
+                          >
+                            <Edit3 size={13} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setClassToDelete(cls)
+                            }}
+                            className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Şubeyi Sil"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedClassForDetail(cls)
+                              setActiveDetailTab('genel')
+                            }}
+                            className="w-8 h-8 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-400 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Detayları İncele"
+                          >
+                            <ChevronRight size={15} />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-              </div>
-            </motion.div>
-          ))}
-
-            {classesList.length === 0 ? (
-              <div className={`py-14 text-center rounded-3xl bg-white dark:bg-[#121826] border-2 border-dashed border-purple-500/30 p-8 space-y-4 ${hideHeader ? 'col-span-full' : ''}`}>
-                <div className="w-16 h-16 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mx-auto shadow-sm">
-                  <Building2 size={32} />
-                </div>
-                <div className="space-y-1 max-w-md mx-auto">
-                  <h3 className="text-base font-black text-gray-900 dark:text-white">
-                    Henüz Şube / Sınıf Tanımlanmadı
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                    Kurumunuza ait kayıtlı bir şube bulunmuyor. Yeni eğitim dönemine başlamak için ilk sınıfınızı (örneğin 1-A) oluşturarak öğrencilerinizi yerleştirebilirsiniz.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsNewClassModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-xs font-black shadow-lg shadow-[#D914C8]/25 hover:brightness-110 transition-all cursor-pointer"
-                >
-                  <Plus size={16} strokeWidth={2.5} />
-                  <span>+ İlk Şubeyi / Sınıfı Ekle</span>
-                </button>
-              </div>
-            ) : filteredClasses.length === 0 ? (
-              <div className={`py-12 text-center text-xs text-gray-400 bg-white dark:bg-[#121826] rounded-2xl border border-gray-200 dark:border-gray-800 p-6 ${hideHeader ? 'col-span-full' : ''}`}>
-                Arama kriterlerine uygun sınıf veya şube bulunamadı.
-              </div>
-            ) : null}
-          </section>
+              )}
+            </section>
         </>
       )}
 

@@ -66,6 +66,7 @@ export default function SuperadminSchoolsPage() {
   const [formAddress, setFormAddress] = useState('')
   const [formLevel, setFormLevel] = useState('İlkokul (1-4) & Ortaokul (5-8)')
   const [formType, setFormType] = useState('MEB Resmi İlkokulu & Ortaokulu')
+  const [formSector, setFormSector] = useState<'devlet' | 'ozel' | 'kurs'>('devlet')
   const [formPrincipal, setFormPrincipal] = useState('')
   const [formPhone, setFormPhone] = useState('')
   const [formEmail, setFormEmail] = useState('')
@@ -135,6 +136,7 @@ export default function SuperadminSchoolsPage() {
       address: formAddress.trim(),
       level: formLevel,
       type: formType,
+      schoolSector: formSector,
       principalName: formPrincipal.trim() || 'Okul Müdürü',
       principalPhone: formPhone.trim() || '+90 (212) 000 00 00',
       principalEmail: formEmail.trim() || 'bilgi@okul.k12.tr',
@@ -547,6 +549,76 @@ export default function SuperadminSchoolsPage() {
                       onChange={(e) => setFormCode(e.target.value)}
                       className="w-full h-10 px-3.5 rounded-xl bg-[#20152B] border border-[#2E1E3B] font-mono text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8]"
                     />
+                  </div>
+                </div>
+
+                {/* Kurum Statüsü & Mülkiyet Türü (Devlet vs Özel vs Kurs) */}
+                <div className="space-y-1.5 p-3.5 rounded-2xl bg-[#20152B] border border-[#2E1E3B]">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-gray-200">Kurum Statüsü & Mülkiyet Türü *</label>
+                    <span className="text-[10px] text-[#A998B3]">Finans & Maaş görünürlüğünü belirler</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormSector('devlet')
+                        setFormType('MEB Resmi İlkokulu & Ortaokulu')
+                      }}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        formSector === 'devlet'
+                          ? 'bg-purple-600/20 border-purple-500 text-white ring-2 ring-purple-500/30'
+                          : 'bg-[#17101E] border-[#2E1E3B] text-gray-400 hover:text-white hover:border-gray-700'
+                      }`}
+                    >
+                      <div className="font-black text-xs flex items-center gap-1.5 text-white">
+                        <span>🏛️ Devlet Okulu</span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-1 leading-snug">
+                        MEB Resmi · Finans & Öğretmen maaş modülleri gizlenir
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormSector('ozel')
+                        setFormType('Özel K-12 Koleji')
+                      }}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        formSector === 'ozel'
+                          ? 'bg-purple-600/20 border-purple-500 text-white ring-2 ring-purple-500/30'
+                          : 'bg-[#17101E] border-[#2E1E3B] text-gray-400 hover:text-white hover:border-gray-700'
+                      }`}
+                    >
+                      <div className="font-black text-xs flex items-center gap-1.5 text-white">
+                        <span>🏫 Özel Okul / Kolej</span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-1 leading-snug">
+                        Özel Sektör · Finans, muhasebe & öğretmen maaşı aktiftir
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormSector('kurs')
+                        setFormType('Özel Kurs & Etüt Merkezi')
+                      }}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        formSector === 'kurs'
+                          ? 'bg-purple-600/20 border-purple-500 text-white ring-2 ring-purple-500/30'
+                          : 'bg-[#17101E] border-[#2E1E3B] text-gray-400 hover:text-white hover:border-gray-700'
+                      }`}
+                    >
+                      <div className="font-black text-xs flex items-center gap-1.5 text-white">
+                        <span>🎓 Özel Kurs / Etüt</span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-1 leading-snug">
+                        Kurs / Etüt · Finans, kayıt ücreti & eğitmen maaşı aktiftir
+                      </p>
+                    </button>
                   </div>
                 </div>
 

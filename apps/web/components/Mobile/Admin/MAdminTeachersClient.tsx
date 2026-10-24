@@ -59,6 +59,7 @@ import {
   isDemoSchool,
   getTenantTeachers,
   saveTenantTeachers,
+  isFinanceEnabled,
 } from '@/lib/schools/schoolTenantManager'
 
 export interface MAdminTeachersClientProps {
@@ -346,6 +347,9 @@ export default function MAdminTeachersClient({
     if (isDemoSchool(code)) return getOrgTeachers(30)
     return []
   })
+
+  // School Sector Permission (Devlet Okulunda Finans ve Maaş Alanları Gizlidir)
+  const financeAllowed = isFinanceEnabled(getCurrentSchoolCode())
 
   // New Teacher Modal Form States
   const [newTeacherTab, setNewTeacherTab] = useState<'temel' | 'gorev' | 'ozluk' | 'finans'>('temel')
@@ -1278,7 +1282,7 @@ export default function MAdminTeachersClient({
                     { id: 'gorev', label: 'Görev & Dersler', icon: Briefcase },
                     { id: 'yetkiler', label: 'Yetkilendirme & Ekranlar', icon: ShieldCheck },
                     { id: 'izin', label: 'İzin Talepleri & Mesai', icon: CalendarClock },
-                    { id: 'maas', label: 'Maaş, Avans & Ek Ders', icon: CreditCard },
+                    ...(financeAllowed ? [{ id: 'maas', label: 'Maaş, Avans & Ek Ders', icon: CreditCard }] : []),
                     { id: 'bildirim', label: 'Bildirim Gönder', icon: Bell },
                     { id: 'belgeler', label: 'Özlük Belgeleri', icon: FileCheck },
                   ].map((tab) => {
@@ -1787,7 +1791,7 @@ export default function MAdminTeachersClient({
                 )}
 
                 {/* ── SEKME 4: MAAŞ & BORDRO / FİNANS ── */}
-                {activeDetailTab === 'maas' && (
+                {activeDetailTab === 'maas' && financeAllowed && (
                   <div className="space-y-3">
                     {/* Maaş Özeti Kartı */}
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-md">
@@ -2274,7 +2278,7 @@ export default function MAdminTeachersClient({
                 {[
                   { key: 'ozluk', label: 'Özlük & İletişim', icon: User },
                   { key: 'gorev', label: 'Görev & Nöbet', icon: Briefcase },
-                  { key: 'finans', label: 'Finans & İzin', icon: Wallet },
+                  ...(financeAllowed ? [{ key: 'finans', label: 'Finans & İzin', icon: Wallet }] : []),
                 ].map((tb) => {
                   const Icon = tb.icon
                   const isActive = editTeacherSection === tb.key
@@ -2809,17 +2813,19 @@ export default function MAdminTeachersClient({
                   >
                     3. Özlük
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setNewTeacherTab('finans')}
-                    className={`py-2 rounded-xl transition-all cursor-pointer ${
-                      newTeacherTab === 'finans'
-                        ? 'bg-white dark:bg-[#1E293B] text-[#4B075F] dark:text-[#C58ADB] shadow-sm font-black'
-                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    4. Finans
-                  </button>
+                  {financeAllowed && (
+                    <button
+                      type="button"
+                      onClick={() => setNewTeacherTab('finans')}
+                      className={`py-2 rounded-xl transition-all cursor-pointer ${
+                        newTeacherTab === 'finans'
+                          ? 'bg-white dark:bg-[#1E293B] text-[#4B075F] dark:text-[#C58ADB] shadow-sm font-black'
+                          : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                    >
+                      4. Finans
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -3131,14 +3137,24 @@ export default function MAdminTeachersClient({
                     </div>
 
                     <div className="pt-2">
-                      <button
-                        type="button"
-                        onClick={() => setNewTeacherTab('finans')}
-                        className="w-full h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-200 transition-colors cursor-pointer"
-                      >
-                        <span>Sonraki Adım: Finans & Maaş</span>
-                        <ChevronRight size={14} />
-                      </button>
+                      {financeAllowed ? (
+                        <button
+                          type="button"
+                          onClick={() => setNewTeacherTab('finans')}
+                          className="w-full h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-200 transition-colors cursor-pointer"
+                        >
+                          <span>Sonraki Adım: Finans & Maaş</span>
+                          <ChevronRight size={14} />
+                        </button>
+                      ) : (
+                        <button
+                          type="submit"
+                          className="w-full h-11 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-purple-900/20 transition-all cursor-pointer"
+                        >
+                          <span>Öğretmen Kaydını Tamamla</span>
+                          <Check size={15} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
