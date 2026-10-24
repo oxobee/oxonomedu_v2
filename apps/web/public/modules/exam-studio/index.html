@@ -764,10 +764,10 @@
         font-weight: 700 !important;
       }
 
-      /* Modallar & Dialoglar (Soru Tipi Seçimi, Şablonlar vb.) */
+      /* Modallar & Dialoglar (Soru Tipi Seçimi, Şablonlar vb. - Sadece Gerçek Açılır Dialoglar) */
       .composition-modal,
-      [class*="-modal"],
-      .dialog-content,
+      .confirm-dialog,
+      .draft-picker-modal,
       div[role="dialog"] {
         background: #FFFFFF !important;
         border-radius: 20px !important;
@@ -842,25 +842,17 @@
         display: none !important;
       }
 
-      /* ── 2. PENCERE MODUNDA LOGO GİZLİ, GENİŞLETİLMİŞ MODDA GÖRÜNÜR ── */
-      .ts-topbar-logo,
-      .ts-topbar-beta {
-        display: none !important;
-      }
-      body.oxonom-expanded-mode .ts-topbar-logo {
+      /* ── 2. LOGO GÖRÜNÜMÜ ── */
+      .ts-topbar-logo {
         display: inline-block !important;
-        animation: oxonomLogoFadeIn 0.35s ease forwards;
+        height: 28px !important;
+        vertical-align: middle !important;
       }
-      body.oxonom-expanded-mode .ts-topbar-beta {
+      .ts-topbar-beta {
         display: inline-flex !important;
-        animation: oxonomLogoFadeIn 0.35s ease forwards;
-      }
-      @keyframes oxonomLogoFadeIn {
-        from { opacity: 0; transform: scale(0.92); }
-        to { opacity: 1; transform: scale(1); }
       }
 
-      /* ── 3. ELASTİK ANİMASYONLU İKONİK YAN MENÜ ── */
+      /* ── 3. ELASTİK ANİMASYONLU YAN MENÜ (AÇILIP KAPANABİLİR) ── */
       .dash-sidebar {
         width: 72px !important;
         min-width: 72px !important;
@@ -871,34 +863,66 @@
         left: auto !important;
         bottom: auto !important;
         height: 100% !important;
-        transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), min-width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), max-width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), min-width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), max-width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
         will-change: width;
         overflow-x: hidden !important;
         overflow-y: auto !important;
         box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25) !important;
-        z-index: 10 !important;
-        padding: 12px 0 !important;
+        z-index: 20 !important;
+        padding: 12px 8px !important;
+        box-sizing: border-box !important;
       }
 
-      /* SADECE GENİŞLETİLMİŞ MODDA AÇILABİLİR */
-      body.oxonom-expanded-mode .dash-sidebar.oxonom-sidebar-open {
+      /* MENÜ AÇIKKEN (GENİŞ MOD - 280px): TÜM BAŞLIKLAR, METRİKLER VE BUTON METİNLERİ GÖRÜNÜR */
+      .dash-sidebar.oxonom-sidebar-open {
         width: 280px !important;
         min-width: 280px !important;
         max-width: 280px !important;
+        padding: 14px 14px 20px 14px !important;
+      }
+      .dash-sidebar.oxonom-sidebar-open .sidebar-stat-section,
+      .dash-sidebar.oxonom-sidebar-open .sidebar-stat-grid,
+      .dash-sidebar.oxonom-sidebar-open .oxonom-sidebar-card,
+      .dash-sidebar.oxonom-sidebar-open .sidebar-stat-label,
+      .dash-sidebar.oxonom-sidebar-open .dash-subtitle,
+      .dash-sidebar.oxonom-sidebar-open .oxonom-btn-text,
+      .dash-sidebar.oxonom-sidebar-open div[style*="font-size: 10px"],
+      .dash-sidebar.oxonom-sidebar-open div[style*="fontSize: 10px"],
+      .dash-sidebar.oxonom-sidebar-open div[style*="textTransform"],
+      .dash-sidebar.oxonom-sidebar-open div[style*="text-transform"],
+      .dash-sidebar.oxonom-sidebar-open div[style*="letterSpacing"],
+      .dash-sidebar.oxonom-sidebar-open div[style*="letter-spacing"] {
+        display: flex !important;
+      }
+      .dash-sidebar.oxonom-sidebar-open .sidebar-stat-grid {
+        display: grid !important;
+      }
+      .dash-sidebar.oxonom-sidebar-open .oxonom-btn-text {
+        display: inline !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: #FFFFEF !important;
+      }
+      .dash-sidebar.oxonom-sidebar-open div[style*="display: flex; gap: 8px"],
+      .dash-sidebar.oxonom-sidebar-open div[style*="display:flex;gap:8px"] {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+      }
+      .dash-sidebar.oxonom-sidebar-open button,
+      .dash-sidebar.oxonom-sidebar-open label {
+        width: 100% !important;
+        font-size: 11px !important;
+        text-indent: 0 !important;
+        color: #FFFFEF !important;
       }
 
-      /* PENCERE MODUNDA (Genişletilmiş ekranda değilse) SADECE İKON */
-      body:not(.oxonom-expanded-mode) .dash-sidebar {
-        width: 72px !important;
-        min-width: 72px !important;
-        max-width: 72px !important;
-      }
-
-      /* İKONİK MODDA TÜM METİNLER VE GEREKSİZ BAŞLIKLAR KESİNLİKLE GİZLİ */
+      /* MENÜ DARKEN (İKONİK MOD - 72px) */
       .dash-sidebar:not(.oxonom-sidebar-open) .sidebar-stat-section,
       .dash-sidebar:not(.oxonom-sidebar-open) .oxonom-sidebar-card,
       .dash-sidebar:not(.oxonom-sidebar-open) .sidebar-stat-label,
       .dash-sidebar:not(.oxonom-sidebar-open) .dash-subtitle,
+      .dash-sidebar:not(.oxonom-sidebar-open) .oxonom-btn-text,
       .dash-sidebar:not(.oxonom-sidebar-open) div[style*="font-size: 10px"],
       .dash-sidebar:not(.oxonom-sidebar-open) div[style*="fontSize: 10px"],
       .dash-sidebar:not(.oxonom-sidebar-open) div[style*="textTransform"],
@@ -908,7 +932,6 @@
         display: none !important;
       }
 
-      /* İkonik Modda Butonların Şık ve Ortalanmış Tasarımı */
       .dash-sidebar:not(.oxonom-sidebar-open) div[style*="display: flex; gap: 8px"],
       .dash-sidebar:not(.oxonom-sidebar-open) div[style*="display:flex;gap:8px"] {
         display: flex !important;
@@ -948,7 +971,6 @@
         box-shadow: 0 0 16px rgba(217, 20, 200, 0.45) !important;
       }
 
-      /* İkonların görünürlüğü ve ortalanması */
       .dash-sidebar:not(.oxonom-sidebar-open) button svg,
       .dash-sidebar:not(.oxonom-sidebar-open) label svg {
         text-indent: 0 !important;
@@ -959,27 +981,130 @@
         height: 22px !important;
       }
 
-      /* Optik Modülü: Tarama Başlat Ana Butonu İkonik Hali */
-      .dash-sidebar:not(.oxonom-sidebar-open) button[title*="Tarama" i],
-      .dash-sidebar:not(.oxonom-sidebar-open) button:has(svg.lucide-scan-line),
-      .dash-sidebar:not(.oxonom-sidebar-open) div[style*="marginTop: auto"] button:first-of-type {
-        background: linear-gradient(135deg, #4B075F 0%, #8D49A6 50%, #D914C8 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.35) !important;
-        box-shadow: 0 4px 16px rgba(217, 20, 200, 0.5) !important;
+      /* ── 4. PDF KIRPMA & MODAL TAM BOY KAPLAMA (SIFIR BOŞLUK) ── */
+      .modal-overlay {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100% !important;
+        max-height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        background: #FCF9FD !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        z-index: 100 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        margin: 0 !important;
       }
 
-      /* Dizgi Masası Butonu İkonik Hali */
-      .dash-sidebar:not(.oxonom-sidebar-open) .dizgi-btn {
-        background: linear-gradient(135deg, #4B075F 0%, #8D49A6 50%, #D914C8 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        box-shadow: 0 4px 16px rgba(217, 20, 200, 0.45) !important;
+      .modal-overlay > .modal-content {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100% !important;
+        max-height: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0% !important;
+        overflow: hidden !important;
+        background: #FCF9FD !important;
+        padding: 0 !important;
+        margin: 0 !important;
       }
 
-      .sidebar-backdrop {
-        display: none !important;
+      /* Modal Header (Mor Üst Bar) */
+      .modal-overlay .modal-header {
+        background: linear-gradient(135deg, #1C0524 0%, #2A0936 45%, #4B075F 100%) !important;
+        border-bottom: 1px solid rgba(217, 20, 200, 0.25) !important;
+        color: #FFFFEF !important;
+        padding: 8px 14px !important;
+        min-height: 44px !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        border-radius: 0 !important;
       }
 
-      /* ── 3 ÇİZGİ YERİNE ŞIK YAN MENÜ İKONU ── */
+      /* Modal İç Gövde (Sol Panel + Sağ Çalışma Alanı) Tam Boy */
+      .modal-overlay .modal-content > div:last-child {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        height: calc(100% - 44px) !important;
+        display: flex !important;
+        overflow: hidden !important;
+        background-color: #FCF9FD !important;
+        position: relative !important;
+      }
+
+      /* Modal Sol Paneli (Koyu Renk) */
+      .modal-overlay .modal-content div[style*="width: 300px"],
+      .modal-overlay .modal-content div[style*="width:300px"] {
+        width: 280px !important;
+        min-width: 240px !important;
+        max-width: 280px !important;
+        background: linear-gradient(180deg, #180320 0%, #120218 100%) !important;
+        border-right: 1px solid rgba(217, 20, 200, 0.2) !important;
+        flex-shrink: 0 !important;
+        overflow-y: auto !important;
+        height: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Modal Sağ Çalışma Alanı */
+      .modal-overlay .pdf-workspace,
+      .modal-overlay .modal-content > div:last-child > div:last-child {
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+        background-color: #FCF9FD !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      /* ── 5. EKRANDA TAŞMAYI ÖNLEYEN AKSİYON KARTLARI ── */
+      .empty-pool-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 24px 16px !important;
+        margin: auto 0 !important;
+      }
+
+      .empty-pool-actions .action-card {
+        flex: 1 1 180px !important;
+        max-width: 260px !important;
+        min-width: 140px !important;
+        height: auto !important;
+        min-height: 130px !important;
+        padding: 20px 14px !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+      }
+
+      .empty-pool-hint {
+        width: 100% !important;
+        text-align: center !important;
+        margin-bottom: 8px !important;
+        font-weight: 600 !important;
+        color: #514458 !important;
+        font-size: 13.5px !important;
+      }
+
+      /* ── 6. ÜST BAR YAN MENÜ İKONU ── */
       .ts-topbar-hamburger {
         display: inline-flex !important;
         cursor: pointer !important;
@@ -1001,7 +1126,7 @@
         box-shadow: 0 0 14px rgba(217, 20, 200, 0.5) !important;
       }
 
-      /* ── 4. MOBİL & GENEL OPTİMİZASYON ── */
+      /* ── 7. MOBİL EKRANLAR İÇİN KUSURSUZ UYUM ── */
       .mobile-warning-overlay,
       .mobile-warning-card,
       div[role="dialog"]:has-text("Beta"),
@@ -1010,12 +1135,37 @@
       }
 
       @media (max-width: 768px) {
+        /* Mobilde yan menü overlay drawer olarak çalışır */
         .dash-sidebar {
-          display: none !important;
+          position: fixed !important;
+          top: 48px !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          width: 280px !important;
+          min-width: 280px !important;
+          max-width: 280px !important;
+          z-index: 1000 !important;
+          transform: translateX(-100%) !important;
+          transition: transform 0.3s ease !important;
+          box-shadow: 4px 0 25px rgba(0, 0, 0, 0.5) !important;
+          display: flex !important;
         }
+        .dash-sidebar.oxonom-sidebar-open {
+          transform: translateX(0) !important;
+        }
+
+        .oxonom-mobile-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 999;
+          backdrop-filter: blur(4px);
+        }
+
         .ts-topbar {
-          padding: 6px 8px !important;
-          gap: 4px !important;
+          padding: 6px 10px !important;
+          gap: 6px !important;
+          min-height: 46px !important;
         }
         .ts-topbar-nav {
           display: flex !important;
@@ -1033,50 +1183,40 @@
           font-size: 11.5px !important;
           white-space: nowrap !important;
         }
-        .ts-topbar-link-suffix {
-          display: none !important;
+
+        /* Modal mobil dikey akış */
+        .modal-overlay .modal-content > div:last-child {
+          flex-direction: column !important;
+          overflow-y: auto !important;
         }
-        /* Optik Modülü & Kartlar */
-        div[style*="padding: 32px"],
-        div[style*="padding:32px"] {
-          padding: 8px !important;
-        }
-        div[style*="gridTemplateColumns: repeat(auto-fit"] {
-          grid-template-columns: 1fr 1fr !important;
-          gap: 8px !important;
-        }
-        /* Modal & Cropper Mobil Uyumu */
-        div[class*="cropper"],
-        div[class*="modal"] {
+        .modal-overlay .modal-content div[style*="width: 300px"],
+        .modal-overlay .modal-content div[style*="width:300px"] {
+          width: 100% !important;
           max-width: 100% !important;
-          width: 100% !important;
-          box-sizing: border-box !important;
-        }
-        .empty-pool-actions {
-          display: grid !important;
-          grid-template-columns: 1fr 1fr !important;
-          gap: 8px !important;
-          padding: 6px !important;
-          width: 100% !important;
-          box-sizing: border-box !important;
-        }
-        .action-card {
-          width: 100% !important;
-          min-width: 0 !important;
-          max-width: none !important;
+          min-width: 100% !important;
           height: auto !important;
-          min-height: 85px !important;
-          padding: 8px 6px !important;
-          gap: 4px !important;
+          max-height: 180px !important;
+          padding: 10px 14px !important;
+          gap: 8px !important;
+        }
+
+        .empty-pool-actions {
+          padding: 16px 8px !important;
+          gap: 10px !important;
+        }
+        .empty-pool-actions .action-card {
+          flex: 1 1 130px !important;
+          min-width: 120px !important;
+          min-height: 95px !important;
+          padding: 12px 8px !important;
         }
         .action-icon svg {
-          width: 24px !important;
-          height: 24px !important;
+          width: 28px !important;
+          height: 28px !important;
         }
         .action-text {
-          font-size: 10.5px !important;
+          font-size: 11px !important;
           line-height: 1.2 !important;
-          text-align: center !important;
         }
       }
     </style>
@@ -1096,7 +1236,7 @@
         sessionStorage.setItem("mobile-warning-ack", "1");
         sessionStorage.setItem("omrBetaAck_v1", "1");
 
-        // 1. Üst Bar 3 Çizgi Yerine Modern Yan Menü İkonu
+        // 1. Üst Bar Yan Menü Butonu & Dinamik Aç/Kapat
         function modernizeHamburgerIcon() {
           const hamburger = document.querySelector(".ts-topbar-hamburger");
           if (hamburger && !hamburger.dataset.modernized) {
@@ -1110,31 +1250,45 @@
                 <circle cx="6" cy="17" r="0.8" fill="currentColor"/>
               </svg>
             `;
-            hamburger.title = "Yan Menü Görünümü";
+            hamburger.title = "Menüyü Aç / Kapat";
 
             hamburger.addEventListener("click", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
               const sidebar = document.querySelector(".dash-sidebar");
               if (!sidebar) return;
-              const isExpandedMode = document.body.classList.contains("oxonom-expanded-mode");
-              if (isExpandedMode) {
-                sidebar.classList.toggle("oxonom-sidebar-open");
+              sidebar.classList.toggle("oxonom-sidebar-open");
+
+              // Mobilde backdrop yönetimi
+              if (window.innerWidth <= 768) {
+                let backdrop = document.querySelector(".oxonom-mobile-backdrop");
+                if (sidebar.classList.contains("oxonom-sidebar-open")) {
+                  if (!backdrop) {
+                    backdrop = document.createElement("div");
+                    backdrop.className = "oxonom-mobile-backdrop";
+                    backdrop.addEventListener("click", () => {
+                      sidebar.classList.remove("oxonom-sidebar-open");
+                      backdrop.remove();
+                    });
+                    document.body.appendChild(backdrop);
+                  }
+                } else if (backdrop) {
+                  backdrop.remove();
+                }
               }
             }, true);
           }
         }
-        setInterval(modernizeHamburgerIcon, 400);
+        setInterval(modernizeHamburgerIcon, 300);
 
-        // 2. Yan Menü İkonik Modda Butonları Temizle & Tooltip Ekle (Sıfır Yazı)
+        // 2. Buton Metinlerini oxonom-btn-text Span'ı ile Güvenle Sar
         function cleanSidebarButtons() {
           const sidebar = document.querySelector(".dash-sidebar");
           if (!sidebar) return;
 
-          // Tüm butonları ve etiketleri denetle
           const buttons = sidebar.querySelectorAll("button, label");
           buttons.forEach((btn) => {
             const txt = (btn.textContent || "").trim();
-
-            // Başlık / Tooltip ata
             if (txt && !btn.title) {
               btn.title = txt;
             }
@@ -1150,12 +1304,10 @@
               btn.title = "Taslak Yükle";
             }
 
-            // Metin düğümlerini ikon modunda gizlenebilir span'a sar
             Array.from(btn.childNodes).forEach((node) => {
               if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim()) {
                 const span = document.createElement("span");
                 span.className = "oxonom-btn-text";
-                span.style.display = "none";
                 span.textContent = node.nodeValue;
                 node.parentNode.replaceChild(span, node);
               }
@@ -1164,16 +1316,12 @@
         }
         setInterval(cleanSidebarButtons, 500);
 
-        // 3. Pencere / Genişletilmiş Görünüm Dinleyicisi
+        // 3. Pencere / Genişletilmiş Görünüm Mesaj Dinleyicisi
         window.addEventListener("message", (event) => {
           if (event.data && event.data.type === "OXONOM_VIEW_MODE") {
             const isFull = !!event.data.isFullscreen;
             document.body.classList.toggle("oxonom-expanded-mode", isFull);
             document.documentElement.classList.toggle("oxonom-expanded-mode", isFull);
-            const sidebar = document.querySelector(".dash-sidebar");
-            if (sidebar && !isFull) {
-              sidebar.classList.remove("oxonom-sidebar-open");
-            }
           }
         });
       } catch (e) {

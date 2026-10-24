@@ -398,7 +398,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
         </header>
 
         {/* ── MAIN CONTENT AREA ── */}
-        <main className="flex-1 min-w-0 pb-28 lg:pb-8 flex flex-col overflow-x-hidden">
+        <main className={`flex-1 min-w-0 flex flex-col overflow-x-hidden ${pathname.includes('/teacher/modules') ? 'pb-16 lg:pb-2' : 'pb-28 lg:pb-8'}`}>
           {children}
         </main>
       </div>

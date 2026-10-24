@@ -78,10 +78,10 @@ export default function ExamStudioModulePage() {
 
   return (
     <div
-      className={`font-jakarta flex flex-col transition-all duration-300 ${
+      className={`font-jakarta flex flex-col transition-all duration-300 w-full ${
         isFullscreen
-          ? 'fixed inset-0 z-50 bg-[#FCF9FD] dark:bg-[#17101C] p-1 sm:p-2.5'
-          : 'p-1.5 sm:p-3 lg:p-3.5 space-y-1.5 sm:space-y-2'
+          ? 'fixed inset-0 z-50 bg-[#FCF9FD] dark:bg-[#17101C] p-1 sm:p-2.5 h-screen'
+          : 'flex-1 min-h-0 h-[calc(100dvh-125px)] lg:h-[calc(100dvh-76px)] p-1.5 sm:p-3 lg:p-3.5 space-y-1.5 sm:space-y-2'
       }`}
     >
       {/* ── TOP ACTION BAR ── */}
@@ -153,13 +153,7 @@ export default function ExamStudioModulePage() {
       </div>
 
       {/* ── EMBEDDED MODULE CONTAINER (Ekrana Tam Oturan Yükseklik) ── */}
-      <div
-        className={`relative w-full rounded-2xl overflow-hidden border border-[#E8DFEB] dark:border-[#49364F] shadow-sm bg-[#FCF9FD] dark:bg-[#180320] flex-1 ${
-          isFullscreen
-            ? 'h-[calc(100dvh-54px)] sm:h-[calc(100dvh-64px)]'
-            : 'h-[calc(100dvh-200px)] sm:h-[calc(100dvh-115px)] min-h-[460px] sm:min-h-[600px]'
-        }`}
-      >
+      <div className="relative w-full rounded-2xl overflow-hidden border border-[#E8DFEB] dark:border-[#49364F] shadow-sm bg-[#FCF9FD] dark:bg-[#180320] flex-1 min-h-0 h-full">
         {/* Loading Spinner */}
         {isLoading && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#FCF9FD] dark:bg-[#180320]">
@@ -182,7 +176,7 @@ export default function ExamStudioModulePage() {
           src="/modules/exam-studio/index.html"
           title="Oxonom Edu Sınav Oluşturma Modülü"
           onLoad={handleIframeLoad}
-          className="w-full h-full border-0 select-none"
+          className="absolute inset-0 w-full h-full border-0 select-none"
           allow="clipboard-read; clipboard-write; fullscreen"
         />
       </div>
