@@ -1,0 +1,537 @@
+{
+  "common": {
+    "back": "Geri",
+    "reports": "Raporlar",
+    "loading": "Yükleniyor…",
+    "untitled": "(başlıksız)",
+    "students": "Öğrenci sayısı",
+    "studentsFmt": "{{n}} öğrenci",
+    "sessionsFmt": "{{n}} oturum",
+    "questionsFmt": "{{n}} soru",
+    "sortLabel": "Sırala:"
+  },
+  "tabs": {
+    "classes": "Sınıf Raporları",
+    "tests": "Test Raporları",
+    "students": "Öğrenci Raporları"
+  },
+  "breadcrumb": {
+    "institutions": "Kurumlar"
+  },
+  "empty": {
+    "noInstitutions": "Henüz kurum yok. Sınıf Yönetimi'nden ekleyebilirsin.",
+    "noClasses": "Bu kurumda sınıf yok.",
+    "noStudents": "Bu sınıfta öğrenci yok.",
+    "noMatchedStudents": "Filtreyle eşleşen öğrenci yok.",
+    "noSessions": "Bu sınıfa bağlı tarama oturumu henüz yok. Tarama yaparken sınıfı seçtiğinde burada listelenir.",
+    "noTests": "Henüz test kaydın yok. Test oluşturup tarama yapınca burada listelenir."
+  },
+  "errors": {
+    "loadInstitutions": "Kurumlar yüklenemedi: {{msg}}",
+    "loadClasses": "Sınıflar yüklenemedi: {{msg}}",
+    "loadStudents": "Öğrenciler alınamadı: {{msg}}",
+    "loadSessions": "Oturumlar alınamadı: {{msg}}",
+    "loadResults": "Sonuçlar alınamadı: {{msg}}",
+    "loadTests": "Testler yüklenemedi: {{msg}}"
+  },
+  "students": {
+    "searchPlaceholder": "Öğrenci ara (ad veya no)…"
+  },
+  "sort": {
+    "dateDesc": "Tarih (yeni → eski)",
+    "dateAsc": "Tarih (eski → yeni)",
+    "avgDesc": "Ortalama % (yüksek → düşük)",
+    "avgAsc": "Ortalama % (düşük → yüksek)",
+    "studentsDesc": "Öğrenci sayısı (çok → az)",
+    "sessionsDesc": "Oturum sayısı (çok → az)",
+    "titleAsc": "Başlık (A → Z)",
+    "nameAsc": "Ad (A → Z)",
+    "nameDesc": "Ad (Z → A)"
+  },
+  "sessionView": {
+    "back": "Geri",
+    "fallbackSessionTitle": "Oturum",
+    "sinifKarneBtn": "Sınıf Karnesi",
+    "sinifKarneTitle": "Sınıfın bu sınava ait basılabilir karnesi",
+    "errLoadSession": "Oturum yüklenemedi: {{msg}}",
+    "errLoadResults": "Sonuçlar alınamadı: {{msg}}",
+    "summary": {
+      "students": "Öğrenci",
+      "absentNote": "+{{n}} girmedi",
+      "avgPct": "Ort. %",
+      "avgNet": "Ort. Net",
+      "avgCorrect": "Ort. Doğru",
+      "avgWrong": "Ort. Yanlış",
+      "avgEmpty": "Ort. Boş",
+      "advanced": "İleri İstatistikler",
+      "median": "Medyan",
+      "mode": "Mod",
+      "stdDev": "Std. Sapma",
+      "min": "Min",
+      "q1": "Q1",
+      "q3": "Q3",
+      "max": "Max",
+      "noResults": "Bu sınıfa ait sonuç yok."
+    },
+    "section": {
+      "distribution": "Puan Dağılımı",
+      "category": "Kategori Bazlı Analiz",
+      "item": "Soru Bazlı Analiz"
+    },
+    "studentTable": {
+      "no": "No",
+      "fullName": "Ad Soyad",
+      "correctShort": "D",
+      "wrongShort": "Y",
+      "emptyShort": "B",
+      "net": "Net",
+      "percent": "%"
+    },
+    "categoryTable": {
+      "category": "Kategori",
+      "questions": "Soru",
+      "correctPct": "Doğru %",
+      "uncategorized": "Kategorisiz"
+    },
+    "itemTable": {
+      "header": "#",
+      "headerWithCat": "# / Kategori",
+      "correct": "Doğru",
+      "empty": "Boş",
+      "correctPct": "Doğru %",
+      "difficulty": "Zorluk"
+    },
+    "unmatched": {
+      "fallback": "(eşleşmedi)",
+      "title": "Eşleşmemiş Sonuçlar ({{n}})",
+      "description": "OMR yanlış okumuş olabilir. Doğru numarayı yazınca öğrenciye eşlenir ve raporlara katılır.",
+      "noLabel": "No: {{n}}",
+      "fixBtn": "Numarayı Düzelt",
+      "fixBusy": "..."
+    },
+    "missing": {
+      "title": "Sınava Girmeyenler ({{n}})"
+    },
+    "fixDialog": {
+      "prompt": "Bu form \"{{no}}\" olarak okundu ama eşleşmedi.\n\nDoğru öğrenci numarasını girin:",
+      "queryError": "Sorgu hatası: {{msg}}",
+      "notFound": "\"{{no}}\" numaralı öğrenci {{scope}}bulunamadı.",
+      "scopeInClass": "bu sınıfta ",
+      "multiMatch": "Birden fazla öğrenci eşleşti, bu desteklenmiyor. Sınıf yönetiminden kontrol edin.",
+      "confirm": "{{name}} (No: {{no}}) ile eşleştirilsin mi?",
+      "updateError": "Güncellenemedi: {{msg}}"
+    },
+    "deleteRow": {
+      "ariaLabel": "Bu sonucu sil",
+      "confirm": "{{name}} (No: {{no}}) sonucunu rapordan silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+      "error": "Silinemedi: {{msg}}"
+    },
+    "drill": {
+      "questionTitle": "Soru {{n}}",
+      "correctBadge": "Doğru: {{ans}}",
+      "correctRatio": "{{pct}} doğru ({{c}}/{{total}})",
+      "close": "Kapat",
+      "difficultyChip": "Zorluk: {{label}}",
+      "chipCorrect": "Doğru: {{pct}}",
+      "chipWrong": "Yanlış: {{pct}}",
+      "chipEmpty": "Boş: {{pct}}",
+      "discChipFmt": "Ayırt: {{val}} · {{label}}",
+      "discTooltip": "Ayırt edicilik (D) — üst %27 doğru oranı eksi alt %27 doğru oranı",
+      "discReason": "Ayırt edicilik: {{reason}}",
+      "discMinStudents": "En az 8 öğrenci gerekli",
+      "discQ": {
+        "veryGood": "Çok İyi",
+        "good": "İyi",
+        "acceptable": "Kabul edilebilir",
+        "weak": "Zayıf"
+      },
+      "correctSection": "Doğru ({{n}})",
+      "wrongSection": "Yanlış ({{n}})",
+      "choiceSection": "Şık {{c}} — {{n}} kişi",
+      "emptySection": "Boş ({{n}})",
+      "noResults": "Bu sınıfta sonuç yok."
+    },
+    "diffLabel": {
+      "veryEasy": "Çok Kolay",
+      "easy": "Kolay",
+      "medium": "Orta",
+      "hard": "Zor",
+      "veryHard": "Çok Zor"
+    }
+  },
+  "studentView": {
+    "back": "Geri",
+    "noStudent": "Öğrenci bulunamadı",
+    "errLoadResults": "Sonuçlar alınamadı: {{msg}}",
+    "namelessTest": "İsimsiz Test",
+    "studentNoFmt": "· No: {{no}}",
+    "tekliBtn": "Tekli",
+    "tekliBtnLong": "Tekli Karne",
+    "tekliBtnTitle": "Bir sınav seçip onun tekil karnesini aç",
+    "topluBtn": "Toplu",
+    "topluBtnLong": "Toplu Karne",
+    "topluBtnTitle": "Son {{n}} sınavın birleşik karnesi",
+    "meta": {
+      "class": "Sınıf:",
+      "term": "Dönem:"
+    },
+    "stat": {
+      "examCount": "Sınav Sayısı",
+      "average": "Ortalama Başarı",
+      "totalQuestions": "Toplam Soru",
+      "correctWrongEmpty": "Doğru / Yanlış / Boş",
+      "bestTopic": "En Başarılı Olduğu Konu",
+      "weakestTopic": "Geliştirebileceği Konu"
+    },
+    "noResults": "Bu öğrencinin henüz sınav sonucu yok.",
+    "section": {
+      "categories": "Konulara Göre Başarı",
+      "kazanim": "Kazanım Gelişimi",
+      "exams": "Girdiği Sınavlar"
+    },
+    "kazanimHint": "Her kazanımın sınavlar boyunca değişimi (kronolojik). Trend ilk ve son ölçümü karşılaştırır.",
+    "examsHint": "Sınav satırına tıklayarak o sınavın detaylı karnesini açabilirsiniz.",
+    "perfLabel": {
+      "veryGood": "Çok İyi",
+      "good": "İyi",
+      "average": "Orta",
+      "needsWork": "Geliştirmeli",
+      "weak": "Zayıf"
+    },
+    "category": {
+      "name": "Kategori",
+      "questions": "Soru",
+      "correctPct": "Doğru %",
+      "evaluation": "Değerlendirme"
+    },
+    "testList": {
+      "exam": "Sınav",
+      "date": "Tarih",
+      "correctShort": "D",
+      "wrongShort": "Y",
+      "emptyShort": "B",
+      "net": "Net",
+      "percent": "%",
+      "classRank": "Sınıf",
+      "schoolRank": "Okul"
+    },
+    "kazanim2": {
+      "name": "Kazanım",
+      "examShort": "S",
+      "progress": "Gelişim",
+      "trend": "Trend",
+      "improving": "İyileşme",
+      "declining": "Gerileme",
+      "stable": "Stabil",
+      "single": "Tek ölçüm",
+      "deltaFmt": "Δ {{sign}}{{val}} puan",
+      "singleMeasure": "Tek sınavda ölçülmüş",
+      "notMeasured": "Bu sınavda bu kazanım ölçülmedi",
+      "pointTooltip": "{{title}}: {{count}} soru, %{{pct}}"
+    },
+    "examPicker": {
+      "title": "Sınav seç — tekil karne aç",
+      "closeAria": "Kapat",
+      "empty": "Henüz sınav yok."
+    }
+  },
+  "testDetail": {
+    "crumbBack": "Testler",
+    "testKarne": "Test Karnesi",
+    "testKarneTitle": "Bu testin sınıflar arası basılabilir karnesi",
+    "stat": {
+      "questions": "Soru",
+      "classes": "Sınıf",
+      "sessions": "Oturum",
+      "totalStudents": "Toplam Öğrenci",
+      "overallAvg": "Genel Ort. %"
+    },
+    "section": {
+      "classAverages": "Sınıf Ortalamaları",
+      "sessions": "Oturumlar",
+      "itemMatrix": "Sınıflar Arası Soru Karşılaştırması"
+    },
+    "noResults": "Bu testin tarama sonucu yok.",
+    "errLoadSessions": "Oturumlar yüklenemedi: {{msg}}",
+    "errLoadResults": "Sonuçlar alınamadı: {{msg}}",
+    "filter": {
+      "dateLabel": "Tarih:",
+      "yearLabel": "Yıl:",
+      "classLabel": "Sınıf Filtresi:",
+      "rangeAll": "Tümü",
+      "range7": "7 gün",
+      "range30": "30 gün",
+      "range90": "90 gün",
+      "selectAll": "Hepsini seç",
+      "deselectAll": "Hepsini kaldır",
+      "remove": "Çıkar",
+      "add": "Ekle"
+    },
+    "chart": {
+      "overallLabel": "Genel: {{pct}}"
+    },
+    "session": {
+      "noClass": "(sınıfsız)",
+      "avgLabel": "Ort. %"
+    },
+    "unmatched": "(eşleşmedi)",
+    "matrix": {
+      "question": "Soru",
+      "correct": "Doğru",
+      "overall": "Genel"
+    }
+  },
+  "karnePdf": {
+    "common": {
+      "back": "Geri",
+      "share": "Paylaş",
+      "shareTitle": "Veliye gönderilebilir paylaşım linki oluştur",
+      "shareBusy": "Hazırlanıyor…",
+      "downloadPdfShort": "PDF",
+      "downloadPdf": "PDF İndir",
+      "downloadPdfBusy": "Hazırlanıyor…",
+      "downloadPdfTitle": "Sunucudan PDF olarak indir",
+      "print": "Yazdır",
+      "printTitle": "Tarayıcının yazdır diyaloğunu aç",
+      "pdfError": "PDF üretilemedi: {{msg}}",
+      "shareError": "Karne paylaşılamadı: {{msg}}",
+      "unknownError": "Bilinmeyen hata",
+      "fullName": "Ad Soyad",
+      "studentNo": "Numara",
+      "class": "Sınıf",
+      "term": "Dönem",
+      "examRange": "Sınav Aralığı",
+      "section": {
+        "overall": "GENEL TOPLAM",
+        "exams": "HESAPLANAN SINAVLAR",
+        "topicAnalysis": "KONU BAŞARI ANALİZİ"
+      },
+      "totalsBar": {
+        "examCount": "Sınav Sayısı",
+        "totalQ": "Toplam Soru",
+        "correct": "Doğru",
+        "wrong": "Yanlış",
+        "empty": "Boş",
+        "avgPct": "Ortalama Başarı"
+      },
+      "examsTable": {
+        "no": "No",
+        "examName": "Sınav Adı",
+        "date": "Tarih",
+        "correctShort": "D",
+        "wrongShort": "Y",
+        "emptyShort": "B",
+        "net": "Net",
+        "pct": "%"
+      },
+      "konuTable": {
+        "name": "Konu Adı",
+        "questionCount": "SS",
+        "correctShort": "D",
+        "wrongShort": "Y",
+        "emptyShort": "B",
+        "successPct": "Baş.(%)"
+      },
+      "namelessCategory": "(isimsiz kategori)",
+      "uncategorized": "Kategorisiz",
+      "namelessExam": "İsimsiz Sınav",
+      "studentNotFound": "Öğrenci bulunamadı",
+      "resultsLoadError": "Sonuçlar alınamadı: {{msg}}",
+      "noResults": "Bu öğrencinin henüz sınav sonucu yok.",
+      "generatedOn": "Bu karne {{date}} tarihinde otomatik üretilmiştir.",
+      "printTargetMissing": "Karne içeriği bulunamadı (print target yok).",
+      "shareInactive": "Karne paylaşımı şu an aktif değil.",
+      "defaultFilename": "karne"
+    },
+    "birlesik": {
+      "headerTitle": "{{n}}'Lİ BİRLEŞİK KARNE",
+      "menuTitle": "{{n}}'li Birleşik Karne",
+      "loading": "Birleşik karne hazırlanıyor…",
+      "footerNote": "Başarı %: doğru sayısının toplam soruya oranıdır. Konu başarısı, ilgili konuya ait soruların {{n}} sınav boyunca aldığı doğru oranıdır."
+    },
+    "test": {
+      "title": "Test Karnesi",
+      "headerTitle": "TEST KARNESİ",
+      "shareTitle": "Paylaşım linki oluştur (A4 yatay)",
+      "downloadPdfTitle": "Sunucudan PDF olarak indir (A4 yatay)",
+      "loading": "Test karnesi hazırlanıyor…",
+      "noResults": "Bu test için henüz tarama sonucu yok.",
+      "testNotFound": "Test bulunamadı",
+      "fields": {
+        "testName": "Test Adı",
+        "date": "Tarih",
+        "classCount": "Sınıf Sayısı",
+        "participantCount": "Katılımcı"
+      },
+      "section": {
+        "classCompare": "SINIFLAR ARASI KARŞILAŞTIRMA",
+        "categoryMatrix": "KONU × SINIF MATRİSİ",
+        "itemAnalysis": "SORU BAZLI GENEL ANALİZ"
+      },
+      "totalsBar": {
+        "classCount": "Sınıf Sayısı",
+        "participantCount": "Katılımcı",
+        "meanPct": "Genel Ortalama",
+        "best": "En Yüksek Sınıf",
+        "worst": "En Düşük Sınıf"
+      },
+      "classesTable": {
+        "class": "Sınıf",
+        "participation": "Katılım",
+        "correctShort": "D",
+        "wrongShort": "Y",
+        "emptyShort": "B",
+        "avgNet": "Net Ort.",
+        "avgPct": "Ort. %",
+        "deltaToOverall": "Genele Fark"
+      },
+      "matrix": {
+        "topic": "Konu",
+        "overall": "Genel"
+      },
+      "itemTable": {
+        "question": "Soru",
+        "topic": "Konu",
+        "correctPct": "Doğru %",
+        "wrongPct": "Yanlış %",
+        "emptyPct": "Boş %",
+        "difficulty": "Zorluk"
+      },
+      "unmatched": "(eşleşmedi)",
+      "namelessCategory": "(isimsiz)",
+      "footerNote": "Konu × Sınıf hücreleri o konunun ilgili sınıftaki doğru oranıdır. Genel sütun, tüm sınıflar birlikte hesaplanmıştır.",
+      "fallbackTitle": "sinav"
+    },
+    "sinif": {
+      "title": "Sınıf Karnesi",
+      "headerTitle": "SINIF KARNESİ",
+      "loading": "Sınıf karnesi hazırlanıyor…",
+      "sessionNotFound": "Oturum bulunamadı",
+      "fallbackClass": "sinif",
+      "fallbackExam": "sinav",
+      "fields": {
+        "class": "Sınıf",
+        "term": "Dönem",
+        "examName": "Sınav Adı",
+        "examDate": "Sınav Tarihi",
+        "participation": "Katılım"
+      },
+      "section": {
+        "overview": "GENEL DURUM",
+        "topicSuccess": "KONU BAZLI SINIF BAŞARISI",
+        "studentList": "ÖĞRENCİ LİSTESİ (Başarı sırasıyla)",
+        "missingStudents": "SINAVA GİRMEYENLER ({{n}})",
+        "itemAnalysis": "SORU BAZLI ANALİZ"
+      },
+      "statsBar": {
+        "participant": "Katılımcı",
+        "mean": "Ortalama",
+        "median": "Medyan",
+        "max": "En Yüksek",
+        "min": "En Düşük",
+        "stdDev": "Std Sapma",
+        "missing": "Girmeyen"
+      },
+      "konuTable": {
+        "topic": "Konu",
+        "questions": "Soru",
+        "correct": "Doğru",
+        "wrong": "Yanlış",
+        "empty": "Boş",
+        "success": "Başarı",
+        "total": "TOPLAM"
+      },
+      "studentsTable": {
+        "rank": "#",
+        "no": "No",
+        "fullName": "Ad Soyad",
+        "correctShort": "D",
+        "wrongShort": "Y",
+        "emptyShort": "B",
+        "net": "Net",
+        "percent": "%",
+        "rankCol": "Sıra"
+      },
+      "missingTable": {
+        "no": "No",
+        "fullName": "Ad Soyad"
+      },
+      "itemTable": {
+        "question": "Soru",
+        "topic": "Konu",
+        "correctPct": "Doğru %",
+        "wrongPct": "Yanlış %",
+        "emptyPct": "Boş %",
+        "difficulty": "Zorluk"
+      },
+      "unmatched": "(eşleşmedi)",
+      "footerNote": "Başarı %: doğru cevap sayısının toplam soruya oranı · Net: doğru − (yanlış / 4)"
+    },
+    "tekil": {
+      "title": "Tekil Karne",
+      "headerTitle": "ÖĞRENCİ KARNESİ",
+      "downloadPdfTitle": "Sunucudan PDF olarak indir (deterministik, tablet için önerilir)",
+      "loading": "Karne hazırlanıyor…",
+      "examResultNotFound": "Sınav sonucu bulunamadı",
+      "fallbackStudent": "ogrenci",
+      "fallbackExam": "sinav",
+      "fields": {
+        "fullName": "Ad Soyad",
+        "studentNo": "Numara",
+        "class": "Sınıf",
+        "term": "Dönem",
+        "examName": "Sınav Adı",
+        "examDate": "Sınav Tarihi"
+      },
+      "section": {
+        "topicAnalysis": "KONU ANALİZİ",
+        "scoresRanks": "PUAN VE SIRALAMALAR",
+        "trendTitle": "SON {{n}} SINAVIN BAŞARI %",
+        "history": "SINAV GEÇMİŞİ",
+        "itemDetail": "SORU DETAYI"
+      },
+      "konuTable": {
+        "topic": "Konu",
+        "questions": "Soru",
+        "correct": "Doğru",
+        "wrong": "Yanlış",
+        "empty": "Boş",
+        "success": "Başarı",
+        "classAvg": "Sınıf Ort.",
+        "total": "TOPLAM"
+      },
+      "ranksTable": {
+        "correct": "Doğru",
+        "wrong": "Yanlış",
+        "empty": "Boş",
+        "net": "Net",
+        "successPct": "Başarı %",
+        "classRank": "Sınıf Sırası",
+        "schoolRank": "Okul Sırası"
+      },
+      "historyTable": {
+        "no": "No",
+        "date": "Tarih",
+        "examName": "Sınav Adı",
+        "correctShort": "D",
+        "wrongShort": "Y",
+        "emptyShort": "B",
+        "net": "Net",
+        "percent": "%"
+      },
+      "namelessCategory": "(isimsiz)",
+      "footerLegend": "✓ doğru · ✗ yanlış · — boş bırakılmış"
+    }
+  },
+  "share": {
+    "title": "Karne Paylaşım Linki",
+    "hint": "Linki bilen herkes karneyi PDF olarak görüntüleyebilir. Veliye WhatsApp / e-posta ile gönderebilirsin.",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "whatsapp": "WhatsApp ile Paylaş",
+    "openNew": "Yeni Sekmede Aç",
+    "note": "Not: Link bilen herkes açabilir, sadece güvendiğin kişilerle paylaş.",
+    "expiry": "Karne <1>3 ay</1> boyunca aktif kalır, sonra otomatik silinir.",
+    "regenerated": "Aynı karneyi tekrar paylaşırsan yeni link üretilir."
+  }
+}

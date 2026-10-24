@@ -1,0 +1,331 @@
+{
+  "toc": "İçindekiler",
+  "hero": {
+    "title": "Nasıl Kullanılır?",
+    "subtitle": "TestStudio ile PDF soru bankalarından sorularınızı kırpın, havuzda düzenleyin ve profesyonel sınavlar oluşturun. Bu rehberde tüm özellikleri adım adım öğreneceksiniz."
+  },
+  "sections": {
+    "overview": "Genel Bakış",
+    "pdfCrop": "PDF Kırpma",
+    "pool": "Soru Havuzu",
+    "layout": "Dizgi Masası",
+    "written": "Yazılı Modülü",
+    "export": "Dışa Aktarma",
+    "shortcuts": "Kaydetme & Kısayollar"
+  },
+  "s1": {
+    "title": "Genel Bakış",
+    "desc": "TestStudio, öğretmenler için tasarlanmış bir sınav hazırlama platformudur. PDF dosyalarınızdaki soruları kırpın, soru havuzunda düzenleyin ve dizgi masasında profesyonel çıktılar oluşturun. İki ana modülü vardır: <strong>Test Modülü</strong> ve <strong>Yazılı Modülü</strong>.",
+    "subs": {
+      "interface": {
+        "title": "Arayüz Tanıtımı",
+        "body": "Uygulamaya giriş yaptığınızda sol tarafta <strong>kenar çubuğu (sidebar)</strong> ve sağ tarafta <strong>soru havuzu</strong> sizi karşılar. Kenar çubuğunda proje istatistikleriniz, PDF kaynaklarınız, kategorileriniz ve eylem butonlarınız yer alır.",
+        "imgAlt": "TestStudio ana arayüz görünümü",
+        "imgCaption": "Giriş sonrası ana ekran — sol kenar çubuğu ve soru havuzu"
+      },
+      "moduleSwitch": {
+        "title": "Modül Geçişi",
+        "body": "Kenar çubuğunun üst kısmında <strong>Test Modülü</strong> ve <strong>Yazılı Modülü</strong> arasında geçiş yapabilirsiniz. Test modülü çoktan seçmeli sınavlar için, yazılı modülü ise açık uçlu, doğru-yanlış, eşleştirme gibi farklı soru tipleri içeren klasik sınavlar için tasarlanmıştır.",
+        "imgAlt": "Test ve Yazılı modül geçişi",
+        "imgCaption": "Kenar çubuğundaki modül seçici ile Test ve Yazılı arasında geçiş yapın"
+      }
+    },
+    "tip": {
+      "label": "İpucu:",
+      "body": "Her iki modülün soruları birbirinden bağımsızdır. Test modülündeki sorularınız yazılı modülüne geçtiğinizde kaybolmaz."
+    }
+  },
+  "s2": {
+    "title": "PDF Kırpma",
+    "desc": "PDF dosyalarınızdaki soruları fare ile seçerek kırpın. Akıllı sınır algılama, AI destekli cevap tanıma ve çoklu PDF desteği ile soruları hızla havuza aktarın.",
+    "subs": {
+      "upload": {
+        "title": "2.1 PDF Yükleme",
+        "body": "Kenar çubuğundaki <strong>\"Akıllı PDF Kırpma\"</strong> butonuna tıklayın. Açılan pencereye PDF dosyalarınızı <strong>sürükleyip bırakın</strong> veya dosya seçiciyi kullanın. Birden fazla PDF'i aynı anda yükleyebilirsiniz — her biri ayrı bir sekmede açılır.",
+        "imgAlt": "PDF dosyası yükleme ekranı",
+        "imgCaption": "PDF'leri sürükleyip bırakın veya dosya seçici ile yükleyin"
+      },
+      "navZoom": {
+        "title": "2.2 Sayfa Gezinme ve Yakınlaştırma",
+        "body": "Sol paneldeki sayfa navigasyonu ile sayfalar arasında geçiş yapın. Yakınlaştırma kaydırıcısı ile PDF'i büyütüp küçültebilirsiniz.",
+        "imgAlt": "Sayfa navigasyonu ve yakınlaştırma kontrolleri",
+        "imgCaption": "Sol panelden sayfa gezinme ve yakınlaştırma kontrolleri"
+      },
+      "crop": {
+        "title": "2.3 Soru Kırpma",
+        "body": "PDF üzerinde <strong>fareyi sürükleyerek</strong> bir soru alanı seçin. Seçim kutusunun köşelerinden boyutunu ayarlayabilirsiniz. Seçim yaptığınızda bir araç çubuğu belirir:",
+        "items": [
+          "<strong>Cevap şıkları (A/B/C/D/E):</strong> Doğru cevabı işaretleyin",
+          "<strong>Onayla (✓):</strong> Soruyu kırpıp havuza ekleyin",
+          "<strong>İptal (✕):</strong> Seçimi iptal edin"
+        ],
+        "imgAlt": "Soru kırpma seçimi ve araç çubuğu",
+        "imgCaption": "Fare ile soru alanını seçin, cevabı işaretleyin ve onaylayın"
+      },
+      "magnet": {
+        "title": "2.4 Mıknatıslı Algılama",
+        "body": "<strong>Mıknatıs</strong> özelliğini açtığınızda, seçim kutunuz otomatik olarak soru sınırlarına yapışır. Bu sayede kırpma işlemi çok daha hızlı ve hassas olur. Sol panelden mıknatıs toggle'ını açıp kapatabilirsiniz.",
+        "imgAlt": "Mıknatıslı otomatik sınır algılama",
+        "imgCaption": "Mıknatıs açıkken seçim kutusu soru sınırlarına otomatik yapışır"
+      },
+      "aiAnswer": {
+        "title": "2.5 AI Cevap Tanıma",
+        "body": "<strong>AI Cevap</strong> özelliği açıkken, kırptığınız sorunun doğru cevabı yapay zeka tarafından otomatik olarak tespit edilir. Bu özellik özellikle cevap anahtarlı PDF'lerde büyük zaman kazandırır.",
+        "imgAlt": "AI destekli otomatik cevap tanıma",
+        "imgCaption": "AI, kırpılan sorunun doğru cevabını otomatik olarak tespit eder"
+      },
+      "category": {
+        "title": "2.6 Kategori Atama",
+        "body": "Sol paneldeki <strong>Kategori</strong> bölümünden bir kategori seçerek, kırptığınız soruları otomatik olarak o kategoriye atayabilirsiniz. Yeni kategori oluşturmak için kenar çubuğundaki kategori bölümünü kullanın.",
+        "imgAlt": "Kırpma sırasında kategori atama",
+        "imgCaption": "Kırpma yaparken aktif kategoriyi seçin — yeni sorular o kategoriye atanır"
+      }
+    },
+    "tip": {
+      "label": "İpucu:",
+      "body": "Birden fazla PDF'i sekmeler halinde açıp aralarında hızlıca geçiş yapabilirsiniz. Her sekmenin sayfa ve yakınlaştırma konumu bağımsız olarak korunur."
+    }
+  },
+  "s3": {
+    "title": "Soru Havuzu",
+    "desc": "Kırptığınız tüm sorular soru havuzunda toplanır. Burada soruları sıralayabilir, cevapları düzenleyebilir, kategorilere ayırabilir ve test grupları oluşturabilirsiniz.",
+    "subs": {
+      "dragDrop": {
+        "title": "3.1 Sürükle-Bırak Sıralama",
+        "body": "Soru kartlarındaki <strong>tutma noktasını (⋮⋮)</strong> sürükleyerek soruların sırasını değiştirin. Sorular dizgi masasında bu sırayla yerleştirilir.",
+        "imgAlt": "Sürükle-bırak ile soru sıralama",
+        "imgCaption": "Tutma noktasını sürükleyerek soruların sırasını ayarlayın"
+      },
+      "answerEdit": {
+        "title": "3.2 Cevap Düzenleme",
+        "body": "Her soru kartının alt kısmında doğru cevap gösterilir. Cevabı değiştirmek için üzerine tıklayın. A, B, C, D, E şıkları veya özel bir cevap yazabilirsiniz.",
+        "imgAlt": "Soru cevabını düzenleme",
+        "imgCaption": "Cevap alanına tıklayarak doğru cevabı değiştirin"
+      },
+      "categories": {
+        "title": "3.3 Kategoriler ve Renkler",
+        "body": "Kenar çubuğundaki <strong>Kategoriler</strong> bölümünden yeni kategoriler ekleyin ve renk atayın. Her soru kartında kategorisi bir etiket olarak görünür. Soruları kategori bazında filtreleyebilir ve gruplayabilirsiniz.",
+        "imgAlt": "Kategori yönetimi ve renk atama",
+        "imgCaption": "Kategoriler ile sorularınızı derse veya konuya göre organize edin"
+      },
+      "grouping": {
+        "title": "3.4 Gruplama Görünümleri",
+        "body": "Havuz üst çubuğundaki <strong>gruplama</strong> seçenekleri ile soruları farklı şekillerde görüntüleyin:",
+        "items": [
+          "<strong>Kategoriye göre:</strong> Her kategori kendi başlığı altında gruplanır",
+          "<strong>PDF kaynağına göre:</strong> Sorular hangi PDF'ten kırpıldığına göre gruplanır"
+        ],
+        "imgAlt": "Soruları kategoriye veya PDF kaynağına göre gruplama",
+        "imgCaption": "Gruplama görünümleri ile sorularınızı farklı perspektiflerden inceleyin"
+      },
+      "split": {
+        "title": "3.5 Testi Bölme (Test Grupları)",
+        "body": "<strong>\"Testi Böl\"</strong> butonu ile soru havuzunuzu birden fazla gruba ayırabilirsiniz. Her gruba ayrı bir başlık verilebilir ve numaralama yeniden başlatılabilir. Bu özellik aynı soru havuzundan farklı sınav grupları (A/B) oluşturmak için idealdir.",
+        "imgAlt": "Test gruplarına bölme",
+        "imgCaption": "Testi Böl ile A/B grupları veya farklı bölümler oluşturun"
+      },
+      "multiSelect": {
+        "title": "3.6 Çoklu Seçim",
+        "body": "Birden fazla soruyu aynı anda seçmek için:",
+        "items": [
+          "<strong>Ctrl + Tıklama:</strong> Tek tek soru ekleyip çıkarma",
+          "<strong>Shift + Tıklama:</strong> Aralıktaki tüm soruları seçme"
+        ],
+        "outro": "Seçili sorular üzerinde toplu silme, taşıma ve kategori değiştirme işlemleri yapabilirsiniz.",
+        "imgAlt": "Ctrl ve Shift ile çoklu soru seçimi",
+        "imgCaption": "Ctrl+Tıklama ile tekli, Shift+Tıklama ile aralık seçimi yapın"
+      },
+      "preview": {
+        "title": "3.7 Soru Önizleme",
+        "body": "Bir soru kartına çift tıklayarak veya önizleme butonuna basarak soruyu tam boyutta görüntüleyebilirsiniz. Önizleme penceresinde soruyu detaylı inceleyebilir ve düzenleyebilirsiniz.",
+        "imgAlt": "Soru önizleme penceresi",
+        "imgCaption": "Sorulara çift tıklayarak tam boyutlu önizleme açın"
+      }
+    },
+    "tip": {
+      "label": "İpucu:",
+      "body": "Tüm sıralama ve düzenleme işlemlerinde <kbd class=\"ln-guide-kbd\">Ctrl+Z</kbd> ile geri alabilir, <kbd class=\"ln-guide-kbd\">Ctrl+Y</kbd> ile yeniden yapabilirsiniz."
+    }
+  },
+  "s4": {
+    "title": "Dizgi Masası",
+    "desc": "Dizgi masası, sorularınızı profesyonel bir sınav düzenine dönüştürdüğünüz yerdir. Sayfa ayarları, başlık-altbilgi, şablonlar ve renk temaları ile tam istediğiniz gibi bir çıktı hazırlayın.",
+    "subs": {
+      "open": {
+        "title": "4.1 Dizgi Masasını Açma",
+        "body": "Kenar çubuğundaki <strong>\"Dizgi & Çıktı Masası\"</strong> butonuna tıklayarak dizgi masasını açın. Bu buton en az bir sorunuz olduğunda aktif hale gelir.",
+        "imgAlt": "Dizgi masası açılış ekranı",
+        "imgCaption": "Dizgi masası — sol panel ayarlar, orta alan önizleme, sağ panel dışa aktarma"
+      },
+      "docType": {
+        "title": "4.2 Doküman Tipi",
+        "body": "Üst bardaki <strong>doküman tipi</strong> seçeneklerinden birini seçin:",
+        "items": [
+          "<strong>Yaprak Test:</strong> Çoktan seçmeli sınav düzeni",
+          "<strong>Ders Notu:</strong> Soruları ders notu formatında yerleştirir",
+          "<strong>Deneme:</strong> Deneme sınavı düzeni",
+          "<strong>Yazılı:</strong> Yazılı sınav düzeni (yazılı modülündeki sorular için)"
+        ],
+        "imgAlt": "Doküman tipi seçimi",
+        "imgCaption": "Üst bardan Yaprak Test, Ders Notu, Deneme veya Yazılı doküman tipini seçin"
+      },
+      "pageSettings": {
+        "title": "4.3 Sayfa Ayarları",
+        "body": "Sol panelden sayfa yapılandırmasını ayarlayın:",
+        "items": [
+          "<strong>Kâğıt boyutu:</strong> A4, A5, Letter vb.",
+          "<strong>Yönlendirme:</strong> Dikey veya yatay",
+          "<strong>Sütun sayısı:</strong> 1, 2 veya 3 sütun",
+          "<strong>Kenar boşluğu:</strong> Dar, Normal veya Geniş"
+        ],
+        "imgAlt": "Sayfa ayarları paneli",
+        "imgCaption": "Kâğıt boyutu, yönlendirme, sütun ve kenar boşluğu ayarları"
+      },
+      "spacing": {
+        "title": "4.4 Soru Aralığı",
+        "body": "<strong>Soru aralığı kaydırıcısı</strong> ile sorular arasındaki boşluğu ayarlayın. Önizleme anında güncellenir, böylece sayfaya kaç soru sığdığını gerçek zamanlı görebilirsiniz.",
+        "imgAlt": "Soru aralığı kaydırıcısı",
+        "imgCaption": "Kaydırıcıyı hareket ettirerek soru aralığını ayarlayın"
+      },
+      "headerFooter": {
+        "title": "4.5 Başlık ve Altbilgi",
+        "body": "Sınav kâğıdınızın üst kısmında okul adı, sınav adı, öğrenci bilgi alanları, eğitim-öğretim yılı gibi bilgileri özelleştirin. Altbilgide sayfa numarası otomatik eklenir.",
+        "imgAlt": "Başlık ve altbilgi düzenleme",
+        "imgCaption": "Okul adı, sınav başlığı ve öğrenci bilgi alanlarını düzenleyin"
+      },
+      "templates": {
+        "title": "4.6 Şablonlar",
+        "body": "Sağ panelden <strong>Klasik</strong>, <strong>Modern</strong> veya <strong>Minimal</strong> şablon seçeneklerinden birini seçin. Her şablon farklı başlık düzeni, çizgi stili ve tipografi kullanır.",
+        "imgAlt": "Şablon seçenekleri",
+        "imgCaption": "Klasik, Modern ve Minimal şablon seçenekleri"
+      },
+      "colors": {
+        "title": "4.7 Renk Temaları",
+        "body": "Sağ paneldeki renk paletinden sınavınızın tema rengini seçin. Seçtiğiniz renk başlık, çizgiler ve vurgu alanlarına uygulanır.",
+        "imgAlt": "Renk teması seçimi",
+        "imgCaption": "Renk paletinden sınavınızın tema rengini belirleyin"
+      },
+      "watermark": {
+        "title": "4.8 Filigran",
+        "body": "Sayfanızın arka planına saydam bir <strong>filigran</strong> (watermark) ekleyebilirsiniz. Bu özellik sınav kâğıdının kopyalanmasını önlemek veya okul logosunu göstermek için kullanışlıdır.",
+        "imgAlt": "Filigran (watermark) ekleme",
+        "imgCaption": "Arka plana okul logosu veya metin filigranı ekleyin"
+      }
+    },
+    "tip": {
+      "label": "İpucu:",
+      "body": "Dizgi masasındaki tüm değişiklikler anında önizlemede görünür. Sayfa sayısı ve soru yerleşimini kontrol ederek çıktınızı mükemmelleştirin."
+    }
+  },
+  "s5": {
+    "title": "Yazılı Modülü",
+    "desc": "Yazılı modülü, klasik yazılı sınavlar için tasarlanmıştır. Açık uçlu sorular, doğru-yanlış, eşleştirme, boşluk doldurma gibi farklı soru tiplerini destekler.",
+    "subs": {
+      "switch": {
+        "title": "5.1 Modüle Geçiş",
+        "body": "Kenar çubuğundaki modül seçiciden <strong>\"Yazılı Modülü\"</strong> sekmesine tıklayın. Soru havuzu yazılı sorularına geçer ve farklı soru tipi seçenekleri görünür.",
+        "imgAlt": "Yazılı modülüne geçiş",
+        "imgCaption": "Kenar çubuğundaki modül seçici ile yazılı modülüne geçin"
+      },
+      "types": {
+        "title": "5.2 Soru Tipleri",
+        "body": "Yazılı modülünde aşağıdaki soru tiplerini oluşturabilirsiniz:",
+        "items": [
+          "<strong>Açık uçlu:</strong> Öğrencinin serbest yazacağı sorular",
+          "<strong>Doğru-Yanlış:</strong> D/Y işaretlemeli sorular",
+          "<strong>Çoktan Seçmeli:</strong> Şıklı sorular",
+          "<strong>Eşleştirme:</strong> İki sütunlu eşleştirme soruları",
+          "<strong>Boşluk Doldurma:</strong> Cümle içi boşluklu sorular"
+        ],
+        "imgAlt": "Yazılı soru tipleri",
+        "imgCaption": "Farklı soru tipleri ile zengin yazılı sınavlar hazırlayın"
+      },
+      "scoring": {
+        "title": "5.3 Puanlama",
+        "body": "Her soruya ayrı <strong>puan</strong> atayabilirsiniz. Toplam puan otomatik hesaplanır ve kenar çubuğundaki istatistik panelinde gösterilir. Dizgi masasında her sorunun yanında puan değeri görünür.",
+        "imgAlt": "Yazılı soru puanlama",
+        "imgCaption": "Her soruya puan atayın — toplam puan otomatik hesaplanır"
+      },
+      "edit": {
+        "title": "5.4 Yazılı Düzenleme",
+        "body": "Yazılı sorularını PDF'den kırpabilir veya <strong>elle</strong> oluşturabilirsiniz. Her soru tipinin kendine özel düzenleme arayüzü vardır. Soruların sırasını sürükle-bırak ile değiştirebilirsiniz.",
+        "imgAlt": "Yazılı soru düzenleme arayüzü",
+        "imgCaption": "Her soru tipinin kendine özel düzenleyicisi vardır"
+      }
+    },
+    "tip": {
+      "label": "Not:",
+      "body": "Yazılı modülündeki sorular dizgi masasında \"Yazılı\" doküman tipi seçildiğinde otomatik olarak yazılı sınav düzeninde yerleştirilir."
+    }
+  },
+  "s6": {
+    "title": "Dışa Aktarma",
+    "desc": "Dizgi masasındaki çıktınızı üç farklı formatta indirebilirsiniz. Sağ paneldeki dışa aktarma butonlarını kullanın.",
+    "subs": {
+      "pdf": {
+        "title": "6.1 PDF İndirme",
+        "body": "<strong>PDF İndir</strong> butonu ile sınavınızı yüksek kaliteli PDF olarak indirin. Baskıya hazır, vektörel çıktı elde edersiniz. Filigran, başlık ve tüm biçimlendirmeler PDF'e birebir yansır.",
+        "imgAlt": "PDF olarak dışa aktarma",
+        "imgCaption": "PDF İndir ile baskıya hazır çıktı alın"
+      },
+      "word": {
+        "title": "6.2 Word İndirme",
+        "body": "<strong>Word İndir</strong> butonu ile sınavınızı .docx formatında indirin. Daha sonra Word'de düzenleme yapmak istediğinizde bu format idealdir.",
+        "imgAlt": "Word olarak dışa aktarma",
+        "imgCaption": "Word İndir ile düzenlenebilir .docx çıktısı alın"
+      },
+      "pptx": {
+        "title": "6.3 PowerPoint İndirme",
+        "body": "<strong>PPTX İndir</strong> butonu ile sınavınızı PowerPoint sunusu olarak indirin. Bu format akıllı tahta veya projeksiyon ile soruları göstermek için uygundur.",
+        "imgAlt": "PowerPoint olarak dışa aktarma",
+        "imgCaption": "PPTX İndir ile sunuma hazır çıktı alın"
+      }
+    },
+    "tip": {
+      "label": "Not:",
+      "body": "Dışa aktarma işlemi soru sayısına bağlı olarak birkaç saniye sürebilir. İndirme tamamlanana kadar sayfayı kapatmayın."
+    }
+  },
+  "s7": {
+    "title": "Kaydetme & Kısayollar",
+    "desc": "Çalışmanızı kaybetmemek için otomatik kaydetme, taslak dosya sistemi ve klavye kısayollarını kullanın.",
+    "subs": {
+      "autosave": {
+        "title": "7.1 Otomatik Kaydetme",
+        "body": "Soru havuzundaki değişiklikler <strong>tarayıcı belleğine (localStorage)</strong> otomatik olarak kaydedilir. Sayfayı yenilediğinizde veya tarayıcıyı kapattığınızda sorularınız kaybolmaz."
+      },
+      "draft": {
+        "title": "7.2 Taslak Dosyası",
+        "body": "Havuzdaki <strong>kaydetme (💾)</strong> butonu ile sorularınızı bir taslak dosyası olarak bilgisayarınıza indirebilirsiniz. <strong>Yükleme (📂)</strong> butonu ile daha önce kaydettiğiniz taslağı geri yükleyebilirsiniz. Bu özellik farklı projeler arasında geçiş yapmak için idealdir.",
+        "imgAlt": "Taslak dosyası kaydetme ve yükleme",
+        "imgCaption": "Kaydetme ve yükleme butonları ile projelerinizi yönetin"
+      },
+      "shortcuts": {
+        "title": "7.3 Klavye Kısayolları",
+        "body": "İşlemleri hızlandırmak için aşağıdaki kısayolları kullanabilirsiniz:",
+        "tableHead": {
+          "shortcut": "Kısayol",
+          "action": "İşlev"
+        },
+        "rows": [
+          { "key": "<kbd class=\"ln-guide-kbd\">Ctrl</kbd> + <kbd class=\"ln-guide-kbd\">Z</kbd>", "action": "Geri al" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Ctrl</kbd> + <kbd class=\"ln-guide-kbd\">Y</kbd>", "action": "Yeniden yap" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Delete</kbd>", "action": "Seçili soruları sil" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Ctrl</kbd> + Tıklama", "action": "Tekli soru seçimi (ekle/çıkar)" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Shift</kbd> + Tıklama", "action": "Aralık seçimi" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Ctrl</kbd> + <kbd class=\"ln-guide-kbd\">A</kbd>", "action": "Tüm soruları seç" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Esc</kbd>", "action": "Seçimi temizle / Modalı kapat" }
+        ]
+      }
+    },
+    "tip": {
+      "label": "İpucu:",
+      "body": "Taslak dosyasını düzenli olarak kaydetmenizi öneririz. Tarayıcı belleği temizlenirse otomatik kayıt verisi silinebilir, ancak taslak dosyanız her zaman güvende kalır."
+    }
+  },
+  "cta": {
+    "title": "Hazır mısınız?",
+    "subtitle": "Hemen panele giderek ilk sınavınızı oluşturmaya başlayın.",
+    "btn": "Panele Git"
+  }
+}

@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <meta name="theme-color" content="#4B075F" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Oxonom Edu — Sınav & Test Stüdyosu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" crossorigin href="/assets/index-JKHeNQWQ.css">
+    <style>
+      /* Oxonom Edu Brand Identity & Design System */
+      :root {
+        --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-family: var(--font-sans) !important;
+
+        /* Ana Marka Renkleri */
+        --primary-color: #4B075F !important;
+        --primary-hover: #620B79 !important;
+        --primary-active: #350444 !important;
+        --primary-light: #8D49A6 !important;
+        --primary-tint: #FCE8FA !important;
+        --primary-tint-alpha: rgba(75, 7, 95, 0.08) !important;
+
+        --brand-deep-purple: #4B075F !important;
+        --brand-primary-hover: #620B79 !important;
+        --brand-primary-active: #350444 !important;
+        --brand-royal-orchid: #8D49A6 !important;
+        --brand-electric-magenta: #D914C8 !important;
+        --brand-accent-soft: #FCE8FA !important;
+
+        --accent-color: #D914C8 !important;
+        --accent-hover: #B80DA8 !important;
+        --accent-tint: #FCE8FA !important;
+
+        /* Açık Yüzey Renkleri */
+        --page-bg: #FCF9FD !important;
+        --bg-main: #FCF9FD !important;
+        --bg-surface: #FFFFFF !important;
+        --bg-surface-secondary: #F7F0FA !important;
+        --bg-surface-lavender: #F0D8FA !important;
+        --border-color: #E8DFEB !important;
+        --border-strong: #D5C5DC !important;
+        --ring-primary: #D914C8 !important;
+        --ring-primary-strong: #8D49A6 !important;
+
+        /* Metin Renkleri */
+        --text-primary: #241329 !important;
+        --text-secondary: #514458 !important;
+        --text-tertiary: #716779 !important;
+        --text-muted: #716779 !important;
+        --text-on-primary: #FFFFEF !important;
+        --text-disabled: #887D8E !important;
+
+        /* Sidebar & Koyu Tema Renkleri */
+        --bg-sidebar: #241329 !important;
+        --bg-sidebar-hover: #350444 !important;
+
+        /* Fonksiyonel Renkler */
+        --success-color: #16805D !important;
+        --success-bg: #E4F5ED !important;
+        --warning-color: #B86B00 !important;
+        --warning-bg: #FFF3D9 !important;
+        --danger-color: #C62848 !important;
+        --danger-bg: #FCE8ED !important;
+        --info-color: #2563EB !important;
+        --info-bg: #EAF1FF !important;
+      }
+
+      body {
+        background-color: #FCF9FD !important;
+        color: #241329 !important;
+        font-family: var(--font-sans) !important;
+      }
+
+      /* Gizli Çerez Banner'ı */
+      .meta-consent { display: none !important; }
+
+      /* Header'dan İstenmeyen Butonları Kaldır (Tam Ekran, Mesaj/Inbox, Yardım) */
+      .ts-topbar-fullscreen,
+      .inbox-btn,
+      .ts-topbar-help,
+      .help-menu-wrapper,
+      button[aria-label*="yardım" i],
+      button[aria-label*="help" i],
+      button[aria-label*="inbox" i],
+      button[aria-label*="mesaj" i] {
+        display: none !important;
+      }
+
+      /* Üst Bar (Topbar) - Oxonom Edu Koyu Premium Gradyan */
+      .ts-topbar {
+        background: linear-gradient(135deg, #1C0524 0%, #2A0936 45%, #4B075F 100%) !important;
+        border-bottom: 1px solid rgba(217, 20, 200, 0.25) !important;
+        box-shadow: 0 4px 20px rgba(36, 19, 41, 0.25) !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+      }
+
+      .ts-topbar-logo {
+        height: 32px !important;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+      .ts-topbar-logo:hover {
+        transform: scale(1.02);
+      }
+
+      .ts-topbar-beta {
+        background: linear-gradient(135deg, #8D49A6 0%, #D914C8 100%) !important;
+        color: #FFFFEF !important;
+        font-weight: 700 !important;
+        font-size: 10px !important;
+        letter-spacing: 0.05em !important;
+        border-radius: 999px !important;
+        padding: 2px 8px !important;
+        text-transform: uppercase !important;
+        box-shadow: 0 2px 8px rgba(217, 20, 200, 0.4) !important;
+      }
+
+      /* Üst Bar Navigasyon Sekmeleri */
+      .ts-topbar-link {
+        color: #D5C5DC !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease !important;
+      }
+      .ts-topbar-link:hover {
+        background: rgba(217, 20, 200, 0.15) !important;
+        color: #FFFFFF !important;
+        border-color: rgba(217, 20, 200, 0.3) !important;
+      }
+      .ts-topbar-link.is-active {
+        background: linear-gradient(135deg, rgba(75, 7, 95, 0.8) 0%, rgba(141, 73, 166, 0.7) 100%) !important;
+        color: #FFFFFF !important;
+        border: 1px solid #D914C8 !important;
+        box-shadow: 0 0 16px rgba(217, 20, 200, 0.4) !important;
+      }
+
+      /* ========================================================
+         ÖZEL OXONOM EDU YAN MENÜ (SIDEBAR) TASARIMI
+         ======================================================== */
+      .dash-sidebar {
+        width: 310px !important;
+        background: linear-gradient(180deg, #180320 0%, #120218 100%) !important;
+        border-right: 1px solid rgba(217, 20, 200, 0.16) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35) !important;
+      }
+
+      /* Proje Özeti Başlığı */
+      .dash-subtitle,
+      .dash-sidebar h3,
+      .dash-sidebar-title {
+        color: #FFFFEF !important;
+        font-size: 11.5px !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin: 18px 0 12px 0 !important;
+      }
+      .dash-subtitle::before {
+        content: "" !important;
+        display: inline-block !important;
+        width: 8px !important;
+        height: 8px !important;
+        border-radius: 50% !important;
+        background: #D914C8 !important;
+        box-shadow: 0 0 10px #D914C8, 0 0 4px #D914C8 !important;
+      }
+
+      /* Metrik Grid Kutuları (2x2) */
+      .sidebar-stat-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
+      }
+
+      /* Metrik Kartları */
+      .sidebar-stat-item {
+        background: linear-gradient(145deg, #24092b 0%, #1a0520 100%) !important;
+        border: 1px solid rgba(217, 20, 200, 0.18) !important;
+        border-radius: 14px !important;
+        padding: 14px 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+        overflow: hidden !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+      }
+      .sidebar-stat-item:hover {
+        border-color: #D914C8 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(217, 20, 200, 0.25) !important;
+      }
+
+      /* Sayı Değerleri */
+      .sidebar-stat-value {
+        font-size: 1.65rem !important;
+        font-weight: 800 !important;
+        line-height: 1.1 !important;
+        margin-bottom: 4px !important;
+      }
+      /* Etiketler */
+      .sidebar-stat-label {
+        font-size: 0.72rem !important;
+        color: #D5C5DC !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.02em !important;
+      }
+
+      /* Renkli Kart Çizgileri ve Işık Efektleri */
+      .sidebar-stat-item:nth-child(1) .sidebar-stat-value {
+        color: #FFFFEF !important;
+      }
+      .sidebar-stat-item:nth-child(1)::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #8D49A6, transparent);
+      }
+
+      .sidebar-stat-item:nth-child(2) .sidebar-stat-value {
+        color: #45C7A2 !important;
+        text-shadow: 0 0 12px rgba(69, 199, 162, 0.45) !important;
+      }
+      .sidebar-stat-item:nth-child(2)::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #45C7A2, transparent);
+      }
+
+      .sidebar-stat-item:nth-child(3) .sidebar-stat-value {
+        color: #F5C542 !important;
+        text-shadow: 0 0 12px rgba(245, 197, 66, 0.45) !important;
+      }
+      .sidebar-stat-item:nth-child(3)::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #F5C542, transparent);
+      }
+
+      .sidebar-stat-item:nth-child(4) .sidebar-stat-value {
+        color: #D914C8 !important;
+        text-shadow: 0 0 12px rgba(217, 20, 200, 0.45) !important;
+      }
+      .sidebar-stat-item:nth-child(4)::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #D914C8, transparent);
+      }
+
+      /* Yan Menü İpucu ve Asistan Kartı (Orta Alan) */
+      .oxonom-sidebar-card {
+        margin: 12px 0 16px 0;
+        padding: 16px;
+        background: linear-gradient(145deg, rgba(75, 7, 95, 0.25) 0%, rgba(36, 9, 44, 0.6) 100%);
+        border: 1px solid rgba(217, 20, 200, 0.2);
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+      .oxonom-sidebar-card::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #8D49A6, #D914C8);
+      }
+      .oxonom-card-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #D914C8;
+        background: rgba(217, 20, 200, 0.12);
+        padding: 3px 8px;
+        border-radius: 999px;
+        margin-bottom: 8px;
+      }
+      .oxonom-card-title {
+        color: #FFFFEF;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .oxonom-card-desc {
+        color: #B59EB8;
+        font-size: 11.5px;
+        line-height: 1.45;
+        margin-bottom: 12px;
+      }
+      .oxonom-card-progress {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 11px;
+        font-weight: 600;
+        color: #D5C5DC;
+        margin-bottom: 6px;
+      }
+      .oxonom-progress-track {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .oxonom-progress-bar {
+        height: 100%;
+        width: 15%;
+        background: linear-gradient(90deg, #8D49A6, #D914C8);
+        border-radius: 999px;
+        box-shadow: 0 0 8px #D914C8;
+      }
+
+      /* Alt Eylemler Alanı (SORU EKLE & TEST HAZIRLA) */
+      .dash-sidebar > div[style*="marginTop: auto"],
+      .dash-sidebar > div[style*="margin-top: auto"] {
+        background: linear-gradient(180deg, rgba(24, 3, 32, 0.5) 0%, rgba(14, 2, 20, 0.98) 100%) !important;
+        border-top: 1px solid rgba(217, 20, 200, 0.2) !important;
+        padding: 16px 14px 20px 14px !important;
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      /* Soru Ekle ve Test Hazırla Başlıkları */
+      .dash-sidebar div[style*="textTransform"],
+      .dash-sidebar div[style*="text-transform"] {
+        color: #D914C8 !important;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.1em !important;
+        margin-bottom: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+      }
+
+      /* 3 Adet Soru Ekle Butonu (PDF & Görsel Kırp, Görsel Ekle, Taslak Yükle) */
+      .dash-sidebar button[title*="Kırp"],
+      .dash-sidebar button[title*="kırp"],
+      .dash-sidebar label[title*="Görsel"],
+      .dash-sidebar label[title*="görsel"],
+      .dash-sidebar button[title*="Taslak"],
+      .dash-sidebar button[title*="taslak"] {
+        flex: 1 !important;
+        height: 82px !important;
+        background: linear-gradient(160deg, rgba(75, 7, 95, 0.4) 0%, rgba(26, 4, 34, 0.9) 100%) !important;
+        border: 1.5px solid rgba(217, 20, 200, 0.3) !important;
+        border-radius: 16px !important;
+        padding: 10px 4px !important;
+        color: #FFFFEF !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
+        position: relative !important;
+        overflow: hidden !important;
+      }
+
+      /* 1. PDF & Görsel Kırp */
+      .dash-sidebar button[title*="Kırp"],
+      .dash-sidebar button[title*="kırp"] {
+        border-color: rgba(217, 20, 200, 0.4) !important;
+      }
+      .dash-sidebar button[title*="Kırp"] svg,
+      .dash-sidebar button[title*="kırp"] svg {
+        color: #FCE8FA !important;
+        filter: drop-shadow(0 0 8px rgba(217, 20, 200, 0.6)) !important;
+      }
+      .dash-sidebar button[title*="Kırp"]:hover,
+      .dash-sidebar button[title*="kırp"]:hover {
+        background: linear-gradient(145deg, #4B075F 0%, #620B79 100%) !important;
+        border-color: #D914C8 !important;
+        box-shadow: 0 8px 24px rgba(217, 20, 200, 0.5) !important;
+        transform: translateY(-3px) scale(1.02) !important;
+      }
+
+      /* 2. Görsel Ekle */
+      .dash-sidebar label[title*="Görsel"],
+      .dash-sidebar label[title*="görsel"] {
+        border-color: rgba(69, 199, 162, 0.35) !important;
+      }
+      .dash-sidebar label[title*="Görsel"] svg,
+      .dash-sidebar label[title*="görsel"] svg {
+        color: #45C7A2 !important;
+        filter: drop-shadow(0 0 8px rgba(69, 199, 162, 0.6)) !important;
+      }
+      .dash-sidebar label[title*="Görsel"]:hover,
+      .dash-sidebar label[title*="görsel"]:hover {
+        background: linear-gradient(145deg, rgba(22, 128, 93, 0.7) 0%, #4B075F 100%) !important;
+        border-color: #45C7A2 !important;
+        box-shadow: 0 8px 24px rgba(69, 199, 162, 0.45) !important;
+        transform: translateY(-3px) scale(1.02) !important;
+      }
+
+      /* 3. Taslak Yükle */
+      .dash-sidebar button[title*="Taslak"],
+      .dash-sidebar button[title*="taslak"] {
+        border-color: rgba(245, 197, 66, 0.35) !important;
+      }
+      .dash-sidebar button[title*="Taslak"] svg,
+      .dash-sidebar button[title*="taslak"] svg {
+        color: #F5C542 !important;
+        filter: drop-shadow(0 0 8px rgba(245, 197, 66, 0.6)) !important;
+      }
+      .dash-sidebar button[title*="Taslak"]:hover,
+      .dash-sidebar button[title*="taslak"]:hover {
+        background: linear-gradient(145deg, #8D49A6 0%, #D914C8 100%) !important;
+        border-color: #F5C542 !important;
+        box-shadow: 0 8px 24px rgba(217, 20, 200, 0.45) !important;
+        transform: translateY(-3px) scale(1.02) !important;
+      }
+
+      /* Buton Metinleri */
+      .dash-sidebar button span,
+      .dash-sidebar label span {
+        color: #FFFFEF !important;
+        font-weight: 800 !important;
+        font-size: 10px !important;
+        letter-spacing: 0.02em !important;
+        line-height: 1.2 !important;
+        text-align: center !important;
+      }
+
+      /* ========================================================
+         DİZGİ MASASI (LAYOUT DESK) KURUMSAL RENK VE STİL GELİŞTİRMELERİ
+         ======================================================== */
+      /* Dizgi Masası Sol ve Sağ Panelleri */
+      div[style*="width: 280px"],
+      div[style*="width:280px"],
+      div[style*="background: #1e293b"],
+      div[style*="background:#1e293b"],
+      div[style*="background: rgb(30, 41, 59)"],
+      div[style*="flexShrink: 0"][style*="background: #1e293b"],
+      div[style*="flex-shrink: 0"][style*="background: #1e293b"],
+      div[style*="flex-shrink: 0"][style*="background:#1e293b"],
+      div[style*="flexShrink: 0"][style*="background:#1e293b"] {
+        background: linear-gradient(180deg, #180320 0%, #110217 100%) !important;
+        border-color: rgba(217, 20, 200, 0.18) !important;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.4) !important;
+      }
+
+      /* Dizgi Masası Üst Mod Çubuğu (Yaprak Test, Ders Notu, Deneme, Yazılı) */
+      div[style*="background: #0f172a"],
+      div[style*="background:#0f172a"],
+      div[style*="background: rgb(15, 23, 42)"] {
+        background: linear-gradient(135deg, #1C0524 0%, #2A0936 50%, #4B075F 100%) !important;
+        border-bottom: 1px solid rgba(217, 20, 200, 0.22) !important;
+      }
+
+      /* Bölüm Başlıkları (SAYFA YAPISI, ŞABLON & RENK vb.) */
+      div[style*="width: 280px"] h3,
+      div[style*="width:280px"] h3,
+      div[style*="width: 280px"] [class*="title"],
+      div[style*="width:280px"] [class*="title"],
+      div[style*="padding: 14px"] > span:first-child {
+        color: #D914C8 !important;
+        font-weight: 800 !important;
+        font-size: 11px !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+      }
+
+      /* Section Kutuları */
+      div[style*="padding: 14px"][style*="display: flex"] {
+        background: linear-gradient(145deg, rgba(46, 21, 53, 0.5) 0%, rgba(26, 6, 33, 0.7) 100%) !important;
+        border: 1px solid rgba(217, 20, 200, 0.18) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+      }
+
+      /* Dizgi Masası Seçenek Butonları (Dikey/Yatay, Sütun 1-6, Dar/Normal/Geniş) */
+      div[style*="width: 280px"] button,
+      div[style*="width:280px"] button {
+        border-radius: 8px !important;
+        font-family: inherit !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease !important;
+      }
+
+      /* Aktif Butonlar (Daha önce parlak mavi #38bdf8 olanlar) */
+      button[style*="background: rgb(56, 189, 248)"],
+      button[style*="background: #38bdf8"],
+      button[style*="background:#38bdf8"],
+      button[style*="background-color: #38bdf8"],
+      button[style*="background-color: rgb(56, 189, 248)"],
+      div[style*="width: 280px"] button[style*="background: rgb(56, 189, 248)"],
+      div[style*="width: 280px"] button[style*="background: #38bdf8"],
+      div[style*="width:280px"] button[style*="background: rgb(56, 189, 248)"],
+      div[style*="width:280px"] button[style*="background: #38bdf8"] {
+        background: linear-gradient(135deg, #4B075F 0%, #8D49A6 50%, #D914C8 100%) !important;
+        color: #FFFFEF !important;
+        box-shadow: 0 2px 10px rgba(217, 20, 200, 0.45) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      }
+
+      /* Pasif Butonlar (Daha önce koyu gri #334155 olanlar) */
+      button[style*="background: rgb(51, 65, 85)"],
+      button[style*="background: #334155"],
+      button[style*="background:#334155"],
+      div[style*="width: 280px"] button[style*="background: rgb(51, 65, 85)"],
+      div[style*="width: 280px"] button[style*="background: #334155"],
+      div[style*="width:280px"] button[style*="background: rgb(51, 65, 85)"],
+      div[style*="width:280px"] button[style*="background: #334155"] {
+        background: #25092c !important;
+        color: #D5C5DC !important;
+        border: 1px solid rgba(217, 20, 200, 0.15) !important;
+      }
+      button[style*="background: rgb(51, 65, 85)"]:hover,
+      button[style*="background: #334155"]:hover,
+      div[style*="width: 280px"] button[style*="background: rgb(51, 65, 85)"]:hover,
+      div[style*="width: 280px"] button[style*="background: #334155"]:hover {
+        background: #3a0e44 !important;
+        color: #FFFFEF !important;
+        border-color: #D914C8 !important;
+      }
+
+      /* Akıllı Yerleştir Butonu (Sol Panel) */
+      button[class*="smart-layout"],
+      button:has(svg[data-icon="wand"]),
+      button:has-text("Akıllı yerleştir") {
+        background: linear-gradient(135deg, #4B075F 0%, #8D49A6 100%) !important;
+        border: 1px solid #D914C8 !important;
+        color: #FFFFEF !important;
+        font-weight: 700 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 14px rgba(217, 20, 200, 0.35) !important;
+      }
+
+      /* Dizgi Masası Üst Mod Butonları (Yaprak Test, Ders Notu, Deneme, Yazılı) */
+      div[style*="background: #0f172a"] button,
+      div[style*="background:#0f172a"] button,
+      [class*="layout-mode-tab"] {
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease !important;
+      }
+      div[style*="background: #0f172a"] button[style*="background: rgb(56, 189, 248)"],
+      div[style*="background: #0f172a"] button[style*="background: #38bdf8"],
+      div[style*="background:#0f172a"] button[style*="background: rgb(56, 189, 248)"],
+      div[style*="background:#0f172a"] button[style*="background: #38bdf8"] {
+        background: linear-gradient(135deg, #4B075F 0%, #8D49A6 60%, #D914C8 100%) !important;
+        color: #FFFFEF !important;
+        box-shadow: 0 0 14px rgba(217, 20, 200, 0.5) !important;
+        border: 1px solid #D914C8 !important;
+      }
+
+      /* Sağ Panel TESTİ DIŞA AKTAR Butonları */
+      div[style*="width: 280px"] button:has(svg):has-text,
+      div[style*="width:280px"] button:has(svg) {
+        border-radius: 10px !important;
+      }
+      /* Online Test Yayınla */
+      button[title*="online test" i],
+      button[title*="yayınla" i] {
+        background: linear-gradient(135deg, #4B075F 0%, #8D49A6 100%) !important;
+        color: #FFFFEF !important;
+        border: 1px solid rgba(217, 20, 200, 0.4) !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 14px rgba(217, 20, 200, 0.3) !important;
+      }
+      /* PDF Butonu */
+      button[title*="PDF" i],
+      button[title*="pdf" i] {
+        background: linear-gradient(135deg, #8D49A6 0%, #D914C8 100%) !important;
+        color: #FFFFEF !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        box-shadow: 0 4px 14px rgba(217, 20, 200, 0.35) !important;
+      }
+      /* SUNUM PDF Butonu */
+      button[title*="SUNUM" i],
+      button[title*="sunum" i] {
+        background: linear-gradient(135deg, #620B79 0%, #8D49A6 100%) !important;
+        color: #FFFFEF !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+      }
+      /* PPT Butonu */
+      button[title*="PPT" i],
+      button[title*="PowerPoint" i],
+      button[title*="ppt" i] {
+        background: linear-gradient(135deg, #350444 0%, #620B79 100%) !important;
+        color: #FFFFEF !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+      }
+
+      /* Toggle Switch Çubukları (Açıkken Fuşya/Mor) */
+      span[style*="background: rgb(56, 189, 248)"],
+      span[style*="background: #38bdf8"],
+      div[style*="background: rgb(56, 189, 248)"],
+      div[style*="background: #38bdf8"],
+      span[style*="background: rgb(2, 132, 199)"],
+      span[style*="background: #0284c7"] {
+        background: linear-gradient(90deg, #8D49A6, #D914C8) !important;
+        box-shadow: 0 0 10px rgba(217, 20, 200, 0.5) !important;
+      }
+
+      /* Slider Çubuğu */
+      input[type="range"] {
+        accent-color: #D914C8 !important;
+      }
+
+      /* DİZGİ & ÇIKTI MASASI (Ana Kahraman Buton) */
+      .dash-sidebar button[title*="Dizgi"],
+      .dash-sidebar button[title*="dizgi"] {
+        width: 100% !important;
+        margin-top: 6px !important;
+        background: linear-gradient(135deg, #4B075F 0%, #8D49A6 50%, #D914C8 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        border-radius: 14px !important;
+        padding: 13px 18px !important;
+        color: #FFFFEF !important;
+        font-size: 13px !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.04em !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        box-shadow: 0 6px 20px rgba(217, 20, 200, 0.4) !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
+      }
+      .dash-sidebar button[title*="Dizgi"]:hover,
+      .dash-sidebar button[title*="dizgi"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 26px rgba(217, 20, 200, 0.6) !important;
+        filter: brightness(1.1) !important;
+      }
+
+      /* Ana Çalışma Alanı (Soru Havuzu Zemin) */
+      main, .dash-main, .workspace-content, div[class*="workspace"] {
+        background-color: #FCF9FD !important;
+      }
+
+      /* 4 Seçenek Kartı (Akıllı PDF Kırpma, Görsel Ekle, Taslak, Drive) */
+      .action-card {
+        background-color: #FFFFFF !important;
+        border: 2px dashed #D5C5DC !important;
+        border-radius: 20px !important;
+        box-shadow: 0 6px 20px rgba(75, 7, 95, 0.05) !important;
+        opacity: 1 !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
+      .action-card:hover {
+        border-color: #D914C8 !important;
+        background-color: #FCE8FA !important;
+        box-shadow: 0 12px 32px rgba(217, 20, 200, 0.16) !important;
+        transform: translateY(-4px) !important;
+      }
+      .action-text {
+        color: #241329 !important;
+        font-weight: 600 !important;
+        font-size: 1.05em !important;
+      }
+
+      /* Birincil Butonlar (Primary Buttons) */
+      .btn-primary,
+      button[class*="primary"],
+      [class*="btn-confirm"] {
+        background: linear-gradient(135deg, #4B075F 0%, #8D49A6 60%, #D914C8 100%) !important;
+        color: #FFFFEF !important;
+        border: none !important;
+        font-weight: 600 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 14px rgba(217, 20, 200, 0.3) !important;
+        transition: all 0.2s ease !important;
+      }
+      .btn-primary:hover,
+      button[class*="primary"]:hover {
+        opacity: 0.95 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 18px rgba(217, 20, 200, 0.45) !important;
+      }
+
+      /* Alt Araç Çubuğu (Footer Toolbar) */
+      [class*="bottom-bar"],
+      [class*="action-bar"],
+      [class*="dash-footer"] {
+        background: rgba(255, 255, 255, 0.94) !important;
+        backdrop-filter: blur(14px) !important;
+        border-top: 1px solid #E8DFEB !important;
+        box-shadow: 0 -4px 20px rgba(75, 7, 95, 0.04) !important;
+      }
+
+      /* Kullanıcı Avatarı */
+      .user-avatar-fallback {
+        background: linear-gradient(135deg, #8D49A6, #D914C8) !important;
+        color: #FFFFEF !important;
+        font-weight: 700 !important;
+      }
+
+      /* Modallar & Dialoglar (Soru Tipi Seçimi, Şablonlar vb.) */
+      .composition-modal,
+      [class*="-modal"],
+      .dialog-content,
+      div[role="dialog"] {
+        background: #FFFFFF !important;
+        border-radius: 20px !important;
+        border: 1px solid #E8DFEB !important;
+        box-shadow: 0 20px 50px rgba(36, 19, 41, 0.2) !important;
+      }
+
+      /* Modal Başlıkları */
+      [class*="modal-header"],
+      [class*="modal-title"] {
+        color: #241329 !important;
+        font-weight: 700 !important;
+        border-bottom-color: #E8DFEB !important;
+      }
+
+      /* Soru Tipi Seçim Kartları (10 Soru Tipi ve 6 Şablon) */
+      [class*="type-card"],
+      [class*="template-card"],
+      [class*="picker-card"],
+      [class*="question-type-item"] {
+        background: #FFFFFF !important;
+        border: 1.5px solid #E8DFEB !important;
+        border-radius: 14px !important;
+        transition: all 0.2s ease !important;
+      }
+      [class*="type-card"]:hover,
+      [class*="template-card"]:hover,
+      [class*="picker-card"]:hover,
+      [class*="question-type-item"]:hover {
+        border-color: #D914C8 !important;
+        background: #FCE8FA !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(217, 20, 200, 0.15) !important;
+      }
+
+      /* Aktif / Seçili Kart */
+      [class*="type-card"].is-selected,
+      [class*="picker-card"].selected,
+      [class*="question-type-item"].active {
+        border-color: #D914C8 !important;
+        background: #F0D8FA !important;
+        box-shadow: 0 0 0 2px rgba(217, 20, 200, 0.25) !important;
+      }
+
+      /* A4 Kağıt / Dizgi Masası Önizleme */
+      .paper, [class*="paper-container"], [class*="a4-sheet"] {
+        background: #FFFFFF !important;
+        box-shadow: 0 8px 30px rgba(36, 19, 41, 0.12) !important;
+        border-radius: 4px !important;
+      }
+
+      /* Form Elemanları & Girişler */
+      input[type="text"], input[type="number"], select, textarea {
+        border: 1.5px solid #E8DFEB !important;
+        border-radius: 10px !important;
+        color: #241329 !important;
+        background: #FFFFFF !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+      }
+      input[type="text"]:focus, select:focus, textarea:focus {
+        border-color: #D914C8 !important;
+        box-shadow: 0 0 0 3px rgba(217, 20, 200, 0.15) !important;
+        outline: none !important;
+      }
+    </style>
+
+    <script>
+      try {
+        if (window.location.pathname !== '/app' && !window.location.pathname.startsWith('/online') && !window.location.pathname.startsWith('/hesabim')) {
+          history.replaceState(null, '', '/app');
+        }
+        const session = {"access_token":"eyJhbGciOiJFUzI1NiIsImtpZCI6IjZmYjc3MzgzLWM5MjctNDIxMS05MTJmLWQxN2Q3NDEzNWJkNCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3JtaXFxb3lrbGxxZHZlcmRxZHF0LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI0NzU3MGZjMS1mODgwLTQ0ZTQtOTYxMC02NjU5YmE4MzViZWIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzkyODEyNDE5LCJpYXQiOjE3OTI4MDg4MTksImVtYWlsIjoiaW5mby51Z3VyY21AZ21haWwuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbCI6ImluZm8udWd1cmNtQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJVxJ91ciBVxJ5VUkxVIiwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJzdWIiOiI0NzU3MGZjMS1mODgwLTQ0ZTQtOTYxMC02NjU5YmE4MzViZWIiLCJ0ZXJtc19hY2NlcHRhbmNlIjp7ImFjY2VwdGVkIjp0cnVlLCJhY2NlcHRlZF9hdCI6IjIwMjYtMTAtMjRUMDE6NTI6MDQuMjM5WiIsImxvY2FsZSI6InRyIiwidmVyc2lvbiI6IjIwMjYtMDktMjguNSJ9fSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc5MjgwODgxOX1dLCJzZXNzaW9uX2lkIjoiYTM4MmJjNmUtMDU4YS00NzE0LTkxNjgtYTgxYTNjMmY1MDMwIiwiaXNfYW5vbnltb3VzIjpmYWxzZX0._cT1P7g784LXrUzlGGLM9QdQXMzMzarFMuhGW3bZqCW4RiNHLayK3J-rg59R4biSxcXwNcAOmmL5Z8bH6ZHKZg","token_type":"bearer","expires_in":3600,"expires_at":1792812419,"refresh_token":"mrl73q6zl6yd","user":{"id":"47570fc1-f880-44e4-9610-6659ba835beb","aud":"authenticated","role":"authenticated","email":"info.ugurcm@gmail.com","email_confirmed_at":"2026-10-24T01:52:04.584962Z","phone":"","confirmed_at":"2026-10-24T01:52:04.584962Z","last_sign_in_at":"2026-10-24T02:26:59.266864702Z","app_metadata":{"provider":"email","providers":["email"]},"user_metadata":{"email":"info.ugurcm@gmail.com","email_verified":true,"full_name":"Uğur UĞURLU","phone_verified":false,"sub":"47570fc1-f880-44e4-9610-6659ba835beb","terms_acceptance":{"accepted":true,"accepted_at":"2026-10-24T01:52:04.239Z","locale":"tr","version":"2026-09-28.5"}},"identities":[{"identity_id":"d0890b86-b35e-4605-96fa-b54dbf8048f4","id":"47570fc1-f880-44e4-9610-6659ba835beb","user_id":"47570fc1-f880-44e4-9610-6659ba835beb","identity_data":{"email":"info.ugurcm@gmail.com","email_verified":false,"full_name":"Uğur UĞURLU","phone_verified":false,"sub":"47570fc1-f880-44e4-9610-6659ba835beb","terms_acceptance":{"accepted":true,"accepted_at":"2026-10-24T01:52:04.239Z","locale":"tr","version":"2026-09-28.5"}},"provider":"email","last_sign_in_at":"2026-10-24T01:52:04.578632Z","created_at":"2026-10-24T01:52:04.578689Z","updated_at":"2026-10-24T01:52:04.578689Z","email":"info.ugurcm@gmail.com"}],"created_at":"2026-10-24T01:52:04.571307Z","updated_at":"2026-10-24T02:26:59.273985Z","is_anonymous":false},"weak_password":null};
+        localStorage.setItem("sb-rmiqqoykllqdverdqdqt-auth-token", JSON.stringify(session));
+        localStorage.setItem("ts_locale", "tr");
+        localStorage.setItem("ts_analytics_consent", "true");
+        localStorage.setItem("ts_marketing_consent", "true");
+        localStorage.setItem("ts_cookie_consent", "accepted");
+
+        // Oxonom Edu Yan Menü Asistanı & İpucu Kartı Entegrasyonu
+        function injectOxonomSidebarCard() {
+          const statsEl = document.querySelector(".sidebar-stats");
+          if (statsEl && !document.querySelector(".oxonom-sidebar-card")) {
+            const card = document.createElement("div");
+            card.className = "oxonom-sidebar-card";
+            card.innerHTML = `
+              <div class="oxonom-card-tag">⚡ Oxonom Edu Asistan</div>
+              <div class="oxonom-card-title">Akıllı Sınav & Test Dizgisi</div>
+              <div class="oxonom-card-desc">PDF veya görsellerinizi havuza aktarın; sorularınız otomatik olarak A4 formatında 2 sütunlu sınav kağıdına dizilsin.</div>
+              <div class="oxonom-card-progress">
+                <span>Hazırlık Durumu</span>
+                <span style="color: #D914C8; font-weight: 700;">%0</span>
+              </div>
+              <div class="oxonom-progress-track">
+                <div class="oxonom-progress-bar"></div>
+              </div>
+            `;
+            statsEl.appendChild(card);
+          }
+        }
+        setInterval(injectOxonomSidebarCard, 600);
+      } catch (e) {
+        console.error("Auth injection error:", e);
+      }
+    </script>
+    <script type="module" crossorigin src="/assets/index-Bs6JjurR.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

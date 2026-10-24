@@ -28,7 +28,7 @@ import {
   ShieldCheck,
   ExternalLink,
 } from 'lucide-react'
-import { TEACHER_MENU_CONFIG, getMenuItemByPath } from '@/lib/teacher/teacherMenuConfig'
+import { TEACHER_MENU_CONFIG, getMenuItemByPath, getSubMenuItemByPath } from '@/lib/teacher/teacherMenuConfig'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { signOut } from '@components/Contexts/AuthContext'
@@ -43,6 +43,7 @@ interface TeacherLayoutProps {
 export default function TeacherLayout({ children }: TeacherLayoutProps) {
   const pathname = usePathname() || '/teacher/dashboard'
   const currentItem = getMenuItemByPath(pathname)
+  const currentSub = getSubMenuItemByPath(pathname)
   const { theme, toggleTheme } = useMobileTheme()
   const session = useLHSession() as any
   const user = session?.data?.user
@@ -149,6 +150,7 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
   const CATEGORIES = [
     'DERSLER & YÖNETİM',
     'ÖLÇME & DEĞERLENDİRME',
+    'MODÜLLER & ARAÇLAR',
     'KAYNAKLAR & İLETİŞİM',
     'DİĞER',
   ] as const
@@ -292,10 +294,27 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-xs">
               <span className="text-[#716779] font-medium">Öğretmen</span>
-              <ChevronRight size={13} className="text-[#716779]" />
-              <span className="font-extrabold text-[#241329] dark:text-white">
-                {currentItem?.label || 'Dersler & Yoklama'}
-              </span>
+              {currentItem && (
+                <>
+                  <ChevronRight size={13} className="text-[#716779]" />
+                  <Link
+                    href={currentItem.path}
+                    className={`font-semibold hover:text-[#4B075F] dark:hover:text-[#D914C8] transition-colors ${
+                      currentSub ? 'text-[#716779]' : 'font-extrabold text-[#241329] dark:text-white'
+                    }`}
+                  >
+                    {currentItem.label}
+                  </Link>
+                </>
+              )}
+              {currentSub && (
+                <>
+                  <ChevronRight size={13} className="text-[#716779]" />
+                  <span className="font-extrabold text-[#241329] dark:text-white">
+                    {currentSub.label}
+                  </span>
+                </>
+              )}
             </div>
           </div>
 

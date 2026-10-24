@@ -7,6 +7,15 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   async rewrites() {
     return [
+      // Oxonom Test Studio module static assets & locales
+      {
+        source: '/assets/:path*',
+        destination: '/modules/exam-studio/assets/:path*',
+      },
+      {
+        source: '/locales/:path*',
+        destination: '/modules/exam-studio/locales/:path*',
+      },
       // PostHog reverse proxy (EU cloud) — served same-origin so adblockers
       // don't strip ingestion. The client SDK points at api_host: '/ingest'.
       {

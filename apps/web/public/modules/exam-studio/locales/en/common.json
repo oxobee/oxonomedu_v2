@@ -1,0 +1,67 @@
+{
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "create": "Create",
+    "update": "Update",
+    "send": "Send",
+    "download": "Download",
+    "upload": "Upload",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "apply": "Apply",
+    "confirm": "Confirm",
+    "preview": "Preview",
+    "copy": "Copy",
+    "share": "Share",
+    "print": "Print",
+    "export": "Export",
+    "import": "Import",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "loading": "Loading…"
+  },
+  "language": {
+    "switch": "Change language",
+    "current": "Current language"
+  },
+  "status": {
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "error": "Error",
+    "success": "Success"
+  },
+  "network": {
+    "noInternet": "No internet connection. Check your connection and try again.",
+    "serverUnreachable": "Could not reach the server. The cause may be your internet connection, a school/office network restriction, or a temporary outage. Try again in a few minutes.",
+    "sessionExpired": "Your session has expired. Refresh the page and sign in again.",
+    "rateLimited": "Too many requests. Please wait a moment.",
+    "emailServiceDown": "Email service is not configured.",
+    "serverError": "Server error"
+  },
+  "marketingConsent": {
+    "ariaLabel": "Cookie and visit statistics preferences",
+    "title": "Cookie preferences",
+    "body": "Choose visit statistics and Meta marketing measurement separately. Your choices do not affect access to the site.",
+    "privacyLink": "Read our privacy policy.",
+    "reject": "Reject all",
+    "accept": "Accept all",
+    "settings": "Cookie settings",
+    "analytics": "Visit statistics",
+    "marketing": "Meta marketing measurement",
+    "save": "Save my choices",
+    "saveError": "Your preference could not be saved. Check your browser site data settings and try again."
+  }
+}

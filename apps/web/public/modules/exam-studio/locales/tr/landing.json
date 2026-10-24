@@ -1,0 +1,211 @@
+{
+  "seo": {
+    "title": "Test Studio — Online Sınav, Test, Yazılı Hazırla | Optik Okuma & AI",
+    "description": "Online sınav, test ve yazılı hazırla. PDF'den soru kırp, yapay zeka ile cevap anahtarı tara, optik okuma ile telefonla cevap kâğıdı oku. Öğretmenler için ücretsiz.",
+    "keywords": "optik okuma, optik okuyucu, optik form okuma, cevap kâğıdı okuma, online sınav hazırlama, online test hazırlama, sınav hazırla, test hazırla, yazılı hazırla, yapay zeka ile sınav hazırlama, yapay zeka ile test hazırlama, AI sınav, AI test, soru kırpma, PDF soru bankası, cevap anahtarı tarama, öğretmen aracı, OMR"
+  },
+  "nav": {
+    "features": "Özellikler",
+    "how": "Nasıl Çalışır",
+    "guide": "Nasıl Kullanılır",
+    "videos": "Kullanım Videoları",
+    "home": "Anasayfa",
+    "goToApp": "Panele Git",
+    "account": "Hesabım",
+    "logout": "Çıkış Yap",
+    "login": "Giriş Yap",
+    "signupFree": "Ücretsiz Başla",
+    "menu": "Menü",
+    "close": "Kapat"
+  },
+  "hero": {
+    "badge": "Şu anda erken erişimde",
+    "title": "Sınavlarını<br /><1>dakikalar</1> içinde oluştur",
+    "subtitle": "PDF'den soru kırp, kendi tasarımında profesyonel sınavlar oluştur, optik formla okut. Word'de saatler süren hazırlık artık dakikalar sürüyor.",
+    "ctaLoggedIn": "Panele Git",
+    "ctaLoggedOut": "Hemen Deneyin — Ücretsiz",
+    "howCta": "Nasıl Çalışır? ↓"
+  },
+  "features": {
+    "label": "Özellikler",
+    "title": "Sınav hazırlamanın en kolay yolu",
+    "items": {
+      "crop": {
+        "title": "PDF'den Soru Kırpma",
+        "desc": "Mevcut PDF dosyalarından soruları seç, otomatik sınır algılama ile kırp ve soru bankana ekle."
+      },
+      "solutionTest": {
+        "title": "Çözüm Alanlı Testler",
+        "desc": "Her sorunun altında çözüm yazma alanı bulunan test düzeni. Öğrenciler sınav kâğıdına direkt çözüm yazsın, ayrı kâğıda gerek kalmasın."
+      },
+      "fascicle": {
+        "title": "Kendi Konu Anlatım Fasikülün",
+        "desc": "Konu anlatımı, örnek soru ve çözümlü uygulamaları kendi fasikülünde topla. Yayınevi kalitesinde dizgiyle dakikalar içinde dağıtıma hazır."
+      },
+      "writtenExam": {
+        "title": "Yazılı Sınav Modülü",
+        "desc": "Açık uçlu, doğru-yanlış, eşleştirme, boşluk doldurma ve daha birçok soru tipini zengin metin editörüyle oluştur."
+      },
+      "pptx": {
+        "title": "Otomatik PowerPoint Sunumu",
+        "desc": "Test hazırla, PowerPoint sunum dosyası kendiliğinden oluşsun. Sınıfta projeksiyona yansıt, soruları slayt slayt anlat — ekstra hazırlık yok."
+      },
+      "omr": {
+        "title": "Optik Okuma",
+        "desc": "Tek tıkla optik form oluştur, telefon kameranla cevap kâğıtlarını tara, sonuçları ve sınıf karnelerini anında al."
+      },
+      "aiKey": {
+        "title": "AI ile Cevap Anahtarı Tarama",
+        "desc": "PDF'indeki cevap anahtarını yapay zeka ile otomatik tara. Cevapları tek tek yazmakla uğraşma."
+      },
+      "layout": {
+        "title": "Esnek Sayfa Düzeni",
+        "desc": "Dikey veya yatay sayfa yönü, sütun sayısı, kenar boşlukları — her şeyi kendi tasarımına göre özelleştir."
+      },
+      "print": {
+        "title": "Baskıya Hazır Çıktı",
+        "desc": "Profesyonel kalitede PDF ve Word çıktıları. Toplu baskı için optimize edilmiş yüksek DPI."
+      }
+    }
+  },
+  "how": {
+    "label": "Nasıl Çalışır",
+    "title": "Üç adımda sınavın hazır",
+    "step1": {
+      "title": "PDF'lerden Soruları Kırp",
+      "desc": "PDF dosyalarını sürükleyip bırak. Soruları fare ile seç, otomatik sınır algılama ile kırp. Cevap anahtarını AI ile taratabilirsin."
+    },
+    "step2": {
+      "title": "Havuzda Düzenle",
+      "desc": "Soruları sürükle-bırak ile sırala. Kategorilere ayır, cevapları düzenle, test grupları oluştur."
+    },
+    "step3": {
+      "title": "Dizgi Masasında Bitir",
+      "desc": "Test, ders notu veya yazılı seç; sayfa düzenini ve şablonu kendi tarzına göre ayarla. PDF ve Word çıktının yanında <1>PowerPoint sunum dosyası da otomatik üretilir</1>."
+    },
+    "mockup": {
+      "newPdf": "+ Yeni PDF",
+      "pdfMath": "📄 Matematik_9.pdf",
+      "pdfPhysics": "📄 Fizik_10.pdf",
+      "pageNav": "Sayfa Navigasyonu",
+      "zoom": "Yakınlaştırma",
+      "category": "Kategori",
+      "catMath": "Matematik",
+      "catGeometry": "Geometri",
+      "catPhysics": "Fizik",
+      "magnet": "🧲 Mıknatıs",
+      "aiAnswer": "🤖 AI Cevap",
+      "poolCount": "Havuzdaki Soru: 24",
+      "question": "Soru {{n}}",
+      "poolTitle": "Soru Havuzu",
+      "poolBadge": "24 soru",
+      "sort": "Sıralama ▾",
+      "split": "Testi Böl",
+      "answer": "Cevap: {{a}}",
+      "layoutTitle": "Dizgi Masası",
+      "docType": "Doküman Tipi",
+      "docTest": "Test",
+      "docNotes": "Ders Notu",
+      "docWritten": "Yazılı",
+      "pageStructure": "Sayfa Yapısı",
+      "paper": "Kâğıt",
+      "orientation": "Yönlendirme",
+      "portrait": "Dikey",
+      "column": "Sütun",
+      "margin": "Kenar Boşluğu",
+      "normal": "Normal",
+      "questionSpacing": "Soru Aralığı",
+      "pageInfo": "Sayfa Bilgisi",
+      "schoolName": "Test Studio Koleji",
+      "examName": "Matematik 1. Yazılı",
+      "a4School": "TEST STUDIO KOLEJİ",
+      "a4Exam": "MATEMATİK 1. YAZILI SINAVI",
+      "a4Year": "2025-2026 Eğitim Öğretim Yılı",
+      "studentName": "Adı Soyadı: _______________",
+      "studentClass": "Sınıf: ____",
+      "studentNo": "No: ____",
+      "page": "Sayfa 1 / 2",
+      "template": "Şablon",
+      "tplClassic": "Klasik",
+      "tplModern": "Modern",
+      "tplMinimal": "Minimal",
+      "color": "Renk",
+      "export": "Dışa Aktar",
+      "exportPdf": "PDF İndir",
+      "exportWord": "Word İndir",
+      "exportPptx": "PPTX İndir"
+    }
+  },
+  "videos": {
+    "label": "Test Studio Kullanım Rehberi",
+    "title": "Kullanım Videoları",
+    "description": "Yakında eklenecek",
+    "categoryLabel": "Video kategorileri",
+    "resultCount": "{{count}} video",
+    "episode": "Bölüm #{{number}}",
+    "closeVideo": "Videoyu kapat",
+    "watchVideo": "{{title}} videosunu izle",
+    "categories": {
+      "all": "Tüm Videolar",
+      "gettingStarted": "Başlangıç",
+      "pdfCropping": "PDF Kırpma",
+      "questionPool": "Soru Havuzu",
+      "pdfExport": "PDF İndirme",
+      "liveLayout": "Canlı Dizgi"
+    },
+    "items": {
+      "membership": "Test Studio Kullanım Rehberi #01 | Nasıl Ücretsiz Üye Olunur?",
+      "homepage": "Test Studio Kullanım Rehberi #02 | Ana Sayfayı Tanıyalım",
+      "smartCrop": "Test Studio Kullanım Rehberi #03 | PDF'den Akıllı Soru Kırpma ve AI Cevap Bulma",
+      "questionPool": "Test Studio Kullanım Rehberi #04 | Soru Havuzu Temel Kullanım",
+      "quickPdfExport": "Test Studio Kullanım Rehberi #05 | Havuzdan Hızlıca PDF Çıktısı Alma",
+      "pageLayout": "Test Studio Kullanım Rehberi #06 | Sayfa Düzeni ve Canlı Dizgi",
+      "designSettings": "Test Studio Kullanım Rehberi #07 | Başlık, Şablon, Font, Filigran ve Renk Ayarları"
+    }
+  },
+  "stats": {
+    "speed": "Daha hızlı sınav hazırlama",
+    "dpi": "DPI baskı kalitesi",
+    "formats": "Farklı dışa aktarma formatı",
+    "docTypes": "Farklı doküman tipi desteği"
+  },
+  "social": {
+    "label": "Sosyal Medya",
+    "title": "Test Studio’yu takip edin",
+    "instagram": {
+      "title": "Gelişmeleri Instagram’dan takip edin",
+      "description": "Yeni özellikler, güncellemeler ve kısa duyurular.",
+      "cta": "Instagram’da takip et"
+    },
+    "youtube": {
+      "title": "Test Studio’yu videolarla keşfedin",
+      "description": "Kullanım rehberleri, özellik anlatımları ve öğretici videolar.",
+      "cta": "YouTube kanalına git"
+    }
+  },
+  "cta": {
+    "titleLoggedIn": "Bir sonraki sınavını <1>dakikalar içinde</1> hazırla",
+    "titleLoggedOut": "Bir sonraki sınavını <1>15 dakikada</1> hazırla",
+    "subtitleLoggedIn": "Panele dön, kaldığın yerden devam et. Yeni soruları kırp, dizgini bitir, sınavını teslim et.",
+    "subtitleLoggedOut": "Ücretsiz hesap oluştur, soruları kırp, sürükle-bırak düzenle, baskıya hazır PDF'i indir. Kredi kartı gerekmiyor.",
+    "btnLoggedIn": "Panele Git →",
+    "btnLoggedOut": "Ücretsiz Hesap Oluştur →"
+  },
+  "footer": {
+    "tagline": "Öğretmenler için profesyonel sınav hazırlama platformu.",
+    "product": "Ürün",
+    "legal": "Yasal",
+    "contact": "İletişim",
+    "features": "Özellikler",
+    "how": "Nasıl Çalışır",
+    "guide": "Kullanım Kılavuzu",
+    "privacy": "Gizlilik Politikası",
+    "terms": "Kullanım Şartları",
+    "cookieSettings": "Çerez Ayarları",
+    "contactUs": "Bize Yazın",
+    "telegramSupport": "Telegram Destek",
+    "instagram": "Instagram · @teststud.io",
+    "youtube": "YouTube · @teststud-io",
+    "copyright": "© {{year}} TestStudio. Tüm hakları saklıdır."
+  }
+}

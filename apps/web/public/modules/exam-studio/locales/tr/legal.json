@@ -1,0 +1,202 @@
+{
+  "privacy": {
+    "title": "Gizlilik Politikası",
+    "lastUpdated": "Son güncelleme: 28 Eylül 2026 · Sürüm 2026-09-28.5 (yayın öncesi taslak)",
+    "s1": {
+      "title": "1. Veri Sorumlusu",
+      "body": "Test Studio üzerinden sunulan hizmette kişisel verilerin işlenmesine ilişkin bilgiler aşağıdadır. Test Studio marka adıdır. Veri sorumlusu: Fatih Durmuş. Başvuru ve iletişim: destek@teststud.io. Hizmetin ücretsiz olması kişisel verilerin korunmasına ilişkin yükümlülükleri kaldırmaz."
+    },
+    "s2": {
+      "title": "2. Toplanan Kişisel Veriler",
+      "intro": "Platform üzerinden aşağıdaki kişisel veriler toplanmaktadır:",
+      "items": [
+        "<strong>Kimlik bilgileri:</strong> Ad, soyad",
+        "<strong>İletişim bilgileri:</strong> E-posta adresi",
+        "<strong>Hesap bilgileri:</strong> Kimlik doğrulama kayıtları ve hesap oluşturma tarihi",
+        "<strong>Google OAuth bilgileri:</strong> Google hesabı üzerinden giriş yapılması durumunda Google profil bilgileri (ad, e-posta, profil fotoğrafı)",
+        "<strong>Kullanım verileri:</strong> Platform üzerindeki işlemler, oluşturulan testler ve kullanım istatistikleri",
+        "<strong>Teknik veriler:</strong> IP adresi, tarayıcı türü, cihaz bilgileri, çerez verileri",
+        "<strong>İçerik ve eğitim kayıtları:</strong> Seçtiğiniz işlevlere göre soru görselleri, belge içeriği, sınıf/öğrenci bilgileri, optik tarama ve sonuçlar işlenebilir. İşleme yetkiniz olmayan kişisel verileri yüklemeyin.",
+        "<strong>Başvuru kayıtları:</strong> Destek ve telif başvurularında paylaştığınız iletişim bilgileri, eser, içerik konumu, dayanak ve ilgili yazışmalar.",
+        "<strong>Toplama yöntemi:</strong> Hesap ve başvuru formları, Google ile giriş, kullanıcı tarafından seçilen içerik işlemleri ve onay verilen çerezler üzerinden elektronik olarak."
+      ]
+    },
+    "s3": {
+      "title": "3. Verilerin İşlenme Amaçları",
+      "intro": "Kişisel verileriniz aşağıdaki amaçlarla işlenmektedir:",
+      "items": [
+        "Hesap oluşturma ve kimlik doğrulama işlemlerinin yürütülmesi",
+        "Platform hizmetlerinin sunulması ve iyileştirilmesi",
+        "Kullanıcı deneyiminin kişiselleştirilmesi",
+        "Teknik sorunların tespit edilmesi ve giderilmesi",
+        "Yasal yükümlülüklerin yerine getirilmesi",
+        "Platform güvenliğinin sağlanması"
+      ]
+    },
+    "s4": {
+      "title": "4. Verilerin İşlenme Hukuki Sebebi",
+      "intro": "Kişisel verileriniz, KVKK'nın 5. maddesi kapsamında aşağıdaki hukuki sebeplere dayanılarak işlenmektedir:",
+      "items": [
+        "Hesap, kimlik doğrulama ve talep ettiğiniz belge işlemleri: sözleşmenin kurulması veya ifasıyla doğrudan ilgili olması ve veri işlemenin gerekli olması.",
+        "Telif ve destek başvuruları: ilgili duruma göre bir hakkın tesisi, kullanılması veya korunması ile hukuki yükümlülüklerin yerine getirilmesi.",
+        "Güvenlik kayıtları: temel hak ve özgürlüklerinize zarar vermemek kaydıyla güvenliğin sağlanmasına yönelik meşru menfaat.",
+        "Pazarlama çerezleri: ayrıca ve isteğe bağlı verdiğiniz açık rıza. Şart kabulü bu rıza yerine geçmez."
+      ]
+    },
+    "s5": {
+      "title": "5. Çerezler ve Üçüncü Taraf Hizmetler",
+      "intro": "Platform, aşağıdaki üçüncü taraf hizmetleri kullanmaktadır:",
+      "items": [
+        "<strong>Supabase:</strong> Hesap, kimlik doğrulama ve kayıtlı uygulama verileri.",
+        "<strong>Cloudflare:</strong> Web arayüzü dağıtımı, bağlantı ve güvenlik hizmetleri.",
+        "<strong>Hetzner:</strong> Sunucu üzerinde belge üretimi, görsel işleme ve paylaşılan karne PDF hizmeti.",
+        "<strong>Google OAuth / Drive:</strong> Seçtiğiniz giriş ve dosya seçme işlevleri için yetkilendirdiğiniz bilgiler.",
+        "<strong>Google Gemini:</strong> AI cevap/numara taramasını kullandığınızda ilgili görsel, sunucu üzerinden analiz hizmetine iletilir.",
+        "<strong>Resend:</strong> E-posta ile gönderimi seçtiğinizde alıcı adresi ve ilgili belge/ileti içeriği.",
+        "<strong>Meta Pixel / Conversions API:</strong> Pazarlama çerezi onayından sonra ilgili dönüşüm ölçümü. Diğer kabul kutuları pazarlama onayı değildir.",
+        "<strong>Ziyaret istatistikleri:</strong> Ayrı ve isteğe bağlı tercihinizden sonra tarayıcıdaki ziyaretçi/oturum kimliği, sayfa yolu, yönlendiren sitenin alan adı, tarayıcı bilgisi ve varsa hesap kimliği Supabase üzerinde istatistik amacıyla işlenir. Meta pazarlama izni bu tercihi otomatik açmaz."
+      ],
+      "outro": "Zorunlu çerezler oturum yönetimi ve kimlik doğrulama için kullanılır. Meta Pixel pazarlama çerezleri ise yalnızca açık onayınızdan sonra etkinleştirilir. Ziyaret istatistiklerini ve Meta pazarlama ölçümünü Çerez ayarları üzerinden ayrı ayrı seçebilir veya geri alabilirsiniz. Geri alma gelecekteki ziyaret kaydını durdurur ve bu tarayıcıdaki sayaç kimliklerini temizler; daha önce sunucuya iletilen kayıtları otomatik silmez. Hesapla ilişkili çıktı kullanım istatistikleri bu ziyaret sayacından ayrıdır."
+    },
+    "s6": {
+      "title": "6. Verilerin Saklanma Süresi",
+      "p1": "Veri türüne göre saklama değişir. Tarayıcı taslakları cihazınızda kalabilir; hesabın kapanması bunları otomatik silmez. Belge üretiminde geçici sunucu dosyaları oluşabilir; normal tamamlanan işlemlerde temizleme çalışır. Paylaşım bağlantısıyla oluşturulan karne PDF’leri sunucuda süreli tutulur; bağlantı süresi ve temizleme sunucu yapılandırmasına bağlıdır. Destek ve telif başvurusu kayıtları ilgili işlemin yürütülmesi, hakların korunması ve kanuni yükümlülükler için gereken süreyle sınırlı tutulmalıdır.",
+      "p2": "PDF görüntüleme ve bazı düzenlemeler tarayıcıda yapılır; bütün işlemler yerel değildir. Seçilen özelliklerde görseller veya belge içeriği sunucuya ve yukarıda belirtilen hizmetlere aktarılır. TASLAK: Üretim ayarları, yedekler ve üçüncü taraf saklama süreleri doğrulanarak veri türüne göre kesin saklama/temizleme takvimi yayın öncesinde tamamlanacaktır."
+    },
+    "s7": {
+      "title": "7. Verilerin Aktarılması",
+      "body": "Veriler, seçtiğiniz işlemler için gerekli hizmet sağlayıcılarla ve hukuken gerekli hâllerde yetkili mercilerle paylaşılabilir. Telif başvurularında inceleme için gerekli bilgiler ilgili kullanıcıya iletilebilir. Bazı hizmet sağlayıcıların altyapıları yurt dışında bulunabilir. TASLAK: Sağlayıcıların ülke/bölge bilgileri ve KVKK madde 9 kapsamındaki aktarım mekanizmaları yayın öncesinde doğrulanmalıdır; kullanım şartlarının kabulü yurt dışı aktarımı için genel bir açık rıza değildir."
+    },
+    "s8": {
+      "title": "8. Veri Güvenliği",
+      "body": "Kimlik doğrulama Supabase üzerinden yürütülür. Yetkisiz erişim şüphesini destek@teststud.io adresine bildirebilirsiniz. TASLAK: Üretimdeki erişim, iletim güvenliği, yedekleme ve olay müdahalesi önlemleri yayın öncesinde doğrulanmalıdır."
+    },
+    "s9": {
+      "title": "9. Kullanıcı Hakları",
+      "intro": "KVKK'nın 11. maddesi kapsamında aşağıdaki haklara sahipsiniz:",
+      "items": [
+        "Kişisel verilerinizin işlenip işlenmediğini öğrenme",
+        "Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme",
+        "Kişisel verilerinizin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme",
+        "Yurt içinde veya yurt dışında kişisel verilerinizin aktarıldığı üçüncü kişileri bilme",
+        "Kişisel verilerinizin eksik veya yanlış işlenmiş olması hâlinde bunların düzeltilmesini isteme",
+        "KVKK'nın 7. maddesinde öngörülen şartlar çerçevesinde kişisel verilerinizin silinmesini veya yok edilmesini isteme",
+        "İşlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme",
+        "Kişisel verilerinizin kanuna aykırı olarak işlenmesi sebebiyle zarara uğramanız hâlinde zararın giderilmesini talep etme"
+      ]
+    },
+    "s10": {
+      "title": "10. İletişim",
+      "intro": "Kişisel veri başvuruları ve sorular için destek@teststud.io adresine yazabilirsiniz. Başvurunuzun değerlendirilmesi için gerekli kimlik doğrulaması ayrıca yapılabilir; ilk mesajda kimlik belgesi veya parola göndermeyin.",
+      "websiteLabel": "Web sitesi:",
+      "websiteValue": "teststud.io"
+    },
+    "s11": {
+      "title": "11. Politika Değişiklikleri",
+      "body": "Bu Gizlilik Politikası zaman zaman güncellenebilir. Önemli değişiklikler yapıldığında platform üzerinden bildirim yapılacaktır. Güncel politikayı bu sayfadan takip edebilirsiniz."
+    }
+  },
+  "terms": {
+    "title": "Kullanım Şartları",
+    "lastUpdated": "Son güncelleme: 28 Eylül 2026 · Sürüm 2026-09-28.5 (yayın öncesi taslak)",
+    "s1": {
+      "title": "1. Hizmet Tanımı",
+      "p1": "Test Studio, öğretmenlerin kullanım yetkisine sahip oldukları içeriklerle test ve eğitim materyali hazırlamasını sağlayan ücretsiz bir araçtır. Word, PowerPoint ve PDF çıktıları üretir. Test Studio adı bir marka adıdır; şirket unvanı olduğu anlamına gelmez.",
+      "p2": "Hizmet sağlayıcı: Fatih Durmuş. İletişim: destek@teststud.io. Hesap oluştururken Kullanım Şartları ve Gizlilik Politikası sunulur. PDF kırpıcı açılırken içerik kullanımına ilişkin bir uyarı gösterilir; bu uyarının kabulü üçüncü kişilere ait içerikler üzerinde kullanım izni sağlamaz."
+    },
+    "s2": {
+      "title": "2. Hesap Sorumlulukları",
+      "intro": "Platformu kullanabilmek için bir hesap oluşturmanız gerekmektedir. Hesap oluştururken:",
+      "items": [
+        "Doğru ve güncel bilgiler sağlamakla yükümlüsünüz",
+        "Hesap bilgilerinizin ve şifrenizin güvenliğinden siz sorumlusunuz",
+        "Hesap erişimini korumak ve yetkiniz dahilindeki işlemleri yapmak için gerekli özeni göstermelisiniz; tarafların kanuni sorumlulukları saklıdır",
+        "Hesabınıza yetkisiz erişim tespit ettiğinizde derhal bizi bilgilendirmelisiniz"
+      ]
+    },
+    "s3": {
+      "title": "3. Telif Hakları ve İçerik Sorumluluğu",
+      "intro": "Yüklediğiniz içerikler üzerinde üçüncü kişilerin hakları bulunabilir. Platformun kullanılması bu hakları size devretmez ve içeriklerin telifsiz olduğunu göstermez.",
+      "items": [
+        "Yalnızca gerekli hak veya izne sahip olduğunuz ya da kullanımınızın kanuni bir istisnanın şartlarını karşıladığı içerikleri yükleyin, işleyin ve paylaşın. Bir kopyayı satın almak veya ücretsiz indirmek sınırsız çoğaltma ve dağıtım izni değildir.",
+        "Eğitim amacı tek başına sınırsız kullanım hakkı vermez. Kullanım kapsamını, ilgili mevzuatı ve varsa lisansın atıf, değişiklik, paylaşım ve ticari kullanım şartlarını kontrol edin. Kaynak belirtmek izin yerine geçmez.",
+        "Yazar, eser ve yayınevi bilgilerini ve gerekli lisans bildirimlerini koruyun. Arka Plan Silici dahil hiçbir aracı hak sahipliği veya kullanım şartlarını gösteren işaretleri izinsiz kaldırmak ya da değiştirmek için kullanmayın.",
+        "PDF görüntüleme ve bazı düzenlemeler tarayıcıda yapılır. Seçilen işleve göre soru görselleri veya belge içeriği çıktı üretimi, arka plan alanı seçimi, cevap taraması ve e-posta gönderimi için sunucuya ve ilgili hizmet sağlayıcılara aktarılabilir. Ayrıntılar Gizlilik Politikası’ndadır.",
+        "İçeriğin kullanımına ilişkin hak ve izinleri değerlendirmeniz gerekir. Platformun kanundan doğan yükümlülükleri bu hükümle kaldırılmaz; tarafların sorumluluğu somut işlem ve uygulanacak hukuk çerçevesinde belirlenir.",
+        "Hak sahibi veya yetkili temsilcisi destek@teststud.io adresinden bildirim yapabilir. Eser, hak sahipliği dayanağı, içerik konumu ve talep açıklanmalıdır. Başvurular incelenir; gerektiğinde ek bilgi istenir ve kontrolümüzdeki içerik veya erişim üzerinde uygun işlem uygulanır. Kullanıcıların indirdiği dosyalara ya da üçüncü taraf platformlara doğrudan müdahale edemeyiz. Kanuni süreler ve başvuru yolları saklıdır."
+      ]
+    },
+    "s4": {
+      "title": "4. Kabul Edilebilir Kullanım",
+      "intro": "Platformu kullanırken aşağıdaki kurallara uymanız gerekmektedir:",
+      "items": [
+        "Yasalara ve düzenlemelere aykırı içerik yüklemeyiniz",
+        "Platformun güvenliğini tehlikeye atacak girişimlerde bulunmayınız",
+        "Diğer kullanıcıların hizmetlerini engelleyecek şekilde davranmayınız",
+        "Platformu otomatik araçlarla (bot, scraper vb.) izinsiz kullanmayınız",
+        "Zararlı yazılım veya kod yüklemeyiniz"
+      ]
+    },
+    "s5": {
+      "title": "5. Fikri Mülkiyet",
+      "items": [
+        "Test Studio’nun özgün yazılım ve tasarım unsurları üzerindeki haklar ilgili hak sahiplerine aittir. Açık kaynak ve üçüncü taraf bileşenler kendi lisanslarına tabidir.",
+        "Kendi oluşturduğunuz özgün içerikler üzerindeki haklarınız korunur. Başkasından yüklediğiniz içerikler üzerindeki haklar size geçmez. İçerikler talep ettiğiniz hizmetin sunulması için gerekli kapsamda işlenir; bu hüküm üçüncü kişilerin haklarını ortadan kaldırmaz."
+      ]
+    },
+    "s6": {
+      "title": "6. Hizmet Değişiklikleri",
+      "body": "TestStudio, platformun özelliklerini, işlevlerini ve kapsamını önceden bildirimde bulunarak veya bulunmaksızın değiştirme, güncelleme veya geçici olarak askıya alma hakkını saklı tutar. Hizmetin kalıcı olarak sonlandırılması durumunda kullanıcılar makul bir süre öncesinden bilgilendirilir."
+    },
+    "s7": {
+      "title": "7. Sorumluluk Sınırı",
+      "intro": "Hizmette teknik kesintiler veya hatalar yaşanabilir. Aşağıdaki hususlar kullanım sırasında dikkate alınmalıdır; bu açıklamalar emredici hukuk kurallarından doğan sorumlulukları ve vazgeçilemeyen hakları ortadan kaldırmaz:",
+      "items": [
+        "Çıktıları doğruluk, kaynak bilgileri ve kullanım izinleri bakımından kontrol edin.",
+        "Yerel dosyalarınızın ve taslaklarınızın yedeğini alın.",
+        "Telif bildirimleri ve platformun somut işlemlerinden doğan sorumluluklar ilgili mevzuata göre değerlendirilir.",
+        "Üçüncü taraf hizmetlerinde kesinti yaşanması hâlinde ilgili işlem tamamlanamayabilir."
+      ]
+    },
+    "s8": {
+      "title": "8. Hesap Askıya Alma ve Fesih",
+      "intro": "İhlal iddiaları değerlendirilir; gerekli ve ölçülü olduğu durumda içerik veya hesap erişimi kısıtlanabilir. Bir bildirim tek başına ihlalin kesinleştiği anlamına gelmez. Kullanıcıya açıklama ve izin belgesi sunma imkânı sağlanır; acil veya kanunen gerekli önlemler saklıdır. Örnek durumlar:",
+      "items": [
+        "İzinsiz içerik kullanımı veya hak sahipliği bilgilerini izinsiz kaldırma tespiti",
+        "Platformu kötüye kullanan hesaplar",
+        "Yasadışı faaliyetlerde bulunan hesaplar"
+      ],
+      "outroBefore": "Kullanıcı, dilediği zaman hesabını silme talebinde bulunabilir. Hesap silme işlemi sonrasında kişisel veriler, ",
+      "outroLink": "Gizlilik Politikası",
+      "outroAfter": "'nda belirtilen süre içinde silinir."
+    },
+    "s9": {
+      "title": "9. Uygulanacak Hukuk ve Uyuşmazlıklar",
+      "body": "Bu Kullanım Şartları Türkiye Cumhuriyeti hukukuna tabidir. Bu şartlardan doğabilecek uyuşmazlıklarda Türkiye Cumhuriyeti mahkemeleri yetkilidir."
+    },
+    "s10": {
+      "title": "10. Değişiklikler",
+      "body": "TestStudio, bu Kullanım Şartları'nı zaman zaman güncelleme hakkını saklı tutar. Önemli değişiklikler yapıldığında platform üzerinden bildirim yapılacaktır. Güncel şartları bu sayfadan takip edebilirsiniz."
+    }
+  },
+  "contact": {
+    "title": "İletişim",
+    "subtitle": "Sorularınız, önerileriniz veya geri bildirimleriniz için bize ulaşın.",
+    "form": {
+      "name": "Adınız",
+      "namePlaceholder": "Adınızı giriniz",
+      "email": "E-posta",
+      "emailPlaceholder": "ornek@mail.com",
+      "message": "Mesajınız",
+      "messagePlaceholder": "Mesajınızı buraya yazınız...",
+      "submit": "Gönder",
+      "sending": "Gönderiliyor...",
+      "error": "Mesaj gönderilemedi. Lütfen tekrar deneyin."
+    },
+    "success": {
+      "title": "Mesajınız iletildi",
+      "detail": "En kısa sürede size dönüş yapacağız.",
+      "newMessage": "Yeni mesaj gönder"
+    }
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "seo": {
+    "title": "Test Studio — Online Exam, Test & Worksheet Maker (AI + OMR)",
+    "description": "Online exam, test and worksheet maker for teachers. Crop PDF questions, extract answer keys with AI, scan sheets with built-in OMR (optical reader). Free to start.",
+    "keywords": "online exam maker, online test maker, exam maker, test maker, online exam, online test, AI exam maker, AI test maker, AI worksheet builder, OMR scanner, optical mark reader, optical reader, PDF question cropper, answer key extraction, worksheet generator, teacher tools"
+  },
+  "nav": {
+    "features": "Features",
+    "how": "How It Works",
+    "guide": "How to Use",
+    "videos": "Tutorial Videos",
+    "home": "Home",
+    "goToApp": "Go to App",
+    "account": "My Account",
+    "logout": "Log out",
+    "login": "Log in",
+    "signupFree": "Get Started Free",
+    "menu": "Menu",
+    "close": "Close"
+  },
+  "hero": {
+    "badge": "Currently in early access",
+    "title": "Build your exams<br /><1>in minutes</1>",
+    "subtitle": "Crop questions from PDFs, design professional exams in your own style, and scan answer sheets with the OMR module. Hours of work in Word now take minutes.",
+    "ctaLoggedIn": "Go to App",
+    "ctaLoggedOut": "Try Now — Free",
+    "howCta": "How does it work? ↓"
+  },
+  "features": {
+    "label": "Features",
+    "title": "The easiest way to prepare exams",
+    "items": {
+      "crop": {
+        "title": "Crop Questions from PDFs",
+        "desc": "Select questions from existing PDFs, crop them with automatic boundary detection, and add them to your question bank."
+      },
+      "solutionTest": {
+        "title": "Tests with Solution Space",
+        "desc": "Test layouts with a solution-writing area below each question. Students write their solutions directly on the exam paper — no extra sheets needed."
+      },
+      "fascicle": {
+        "title": "Your Own Topic Booklet",
+        "desc": "Combine topic explanations, sample questions, and solved examples into your own booklet. Publisher-quality typesetting, ready to distribute in minutes."
+      },
+      "writtenExam": {
+        "title": "Written Exam Module",
+        "desc": "Create open-ended, true/false, matching, fill-in-the-blank, and many more question types using the rich text editor."
+      },
+      "pptx": {
+        "title": "Automatic PowerPoint Slides",
+        "desc": "Prepare a test and a PowerPoint file is generated automatically. Project it in class and walk through questions slide by slide — no extra prep."
+      },
+      "omr": {
+        "title": "Optical Mark Reader (OMR)",
+        "desc": "Create an optical answer sheet with one click, scan student forms with your phone camera, and get results and class report cards instantly."
+      },
+      "aiKey": {
+        "title": "AI-Powered Answer Key Extraction",
+        "desc": "Let AI automatically extract the answer key from your PDF. No more typing answers one by one."
+      },
+      "layout": {
+        "title": "Flexible Page Layout",
+        "desc": "Portrait or landscape orientation, column count, margins — customize everything to match your design."
+      },
+      "print": {
+        "title": "Print-Ready Output",
+        "desc": "Professional-quality PDF and Word output. High DPI optimized for batch printing."
+      }
+    }
+  },
+  "how": {
+    "label": "How It Works",
+    "title": "Your exam is ready in three steps",
+    "step1": {
+      "title": "Crop Questions from PDFs",
+      "desc": "Drag and drop PDF files. Select questions with your mouse, crop them with automatic boundary detection. You can even extract the answer key with AI."
+    },
+    "step2": {
+      "title": "Organize in the Pool",
+      "desc": "Reorder questions with drag and drop. Sort by category, edit answers, create test groups."
+    },
+    "step3": {
+      "title": "Finish on the Layout Desk",
+      "desc": "Pick test, lecture notes, or written exam; tweak the page layout and template to match your style. Alongside PDF and Word, a <1>PowerPoint presentation is also generated automatically</1>."
+    },
+    "mockup": {
+      "newPdf": "+ New PDF",
+      "pdfMath": "📄 Math_9.pdf",
+      "pdfPhysics": "📄 Physics_10.pdf",
+      "pageNav": "Page Navigation",
+      "zoom": "Zoom",
+      "category": "Category",
+      "catMath": "Math",
+      "catGeometry": "Geometry",
+      "catPhysics": "Physics",
+      "magnet": "🧲 Magnet",
+      "aiAnswer": "🤖 AI Answer",
+      "poolCount": "Questions in Pool: 24",
+      "question": "Question {{n}}",
+      "poolTitle": "Question Pool",
+      "poolBadge": "24 questions",
+      "sort": "Sort ▾",
+      "split": "Split Test",
+      "answer": "Answer: {{a}}",
+      "layoutTitle": "Layout Desk",
+      "docType": "Document Type",
+      "docTest": "Test",
+      "docNotes": "Lecture Notes",
+      "docWritten": "Written",
+      "pageStructure": "Page Setup",
+      "paper": "Paper",
+      "orientation": "Orientation",
+      "portrait": "Portrait",
+      "column": "Columns",
+      "margin": "Margins",
+      "normal": "Normal",
+      "questionSpacing": "Question Spacing",
+      "pageInfo": "Page Info",
+      "schoolName": "Test Studio College",
+      "examName": "Math First Exam",
+      "a4School": "TEST STUDIO COLLEGE",
+      "a4Exam": "MATH FIRST WRITTEN EXAM",
+      "a4Year": "2025-2026 Academic Year",
+      "studentName": "Name: _______________",
+      "studentClass": "Class: ____",
+      "studentNo": "No: ____",
+      "page": "Page 1 / 2",
+      "template": "Template",
+      "tplClassic": "Classic",
+      "tplModern": "Modern",
+      "tplMinimal": "Minimal",
+      "color": "Color",
+      "export": "Export",
+      "exportPdf": "Download PDF",
+      "exportWord": "Download Word",
+      "exportPptx": "Download PPTX"
+    }
+  },
+  "videos": {
+    "label": "Test Studio User Guide",
+    "title": "Tutorial Videos",
+    "description": "Coming soon",
+    "categoryLabel": "Video categories",
+    "resultCount": "{{count}} videos",
+    "episode": "Episode #{{number}}",
+    "closeVideo": "Close video",
+    "watchVideo": "Watch {{title}}",
+    "categories": {
+      "all": "All Videos",
+      "gettingStarted": "Getting Started",
+      "pdfCropping": "PDF Cropping",
+      "questionPool": "Question Pool",
+      "pdfExport": "PDF Download",
+      "liveLayout": "Live Layout"
+    },
+    "items": {
+      "membership": "Test Studio User Guide #01 | How to Create a Free Account",
+      "homepage": "Test Studio User Guide #02 | Getting to Know the Home Page",
+      "smartCrop": "Test Studio User Guide #03 | Smart PDF Question Cropping and AI Answer Detection",
+      "questionPool": "Test Studio User Guide #04 | Question Pool Basics",
+      "quickPdfExport": "Test Studio User Guide #05 | Quickly Exporting a PDF from the Question Pool",
+      "pageLayout": "Test Studio User Guide #06 | Page Layout and Live Typesetting",
+      "designSettings": "Test Studio User Guide #07 | Title, Template, Font, Watermark, and Color Settings"
+    }
+  },
+  "stats": {
+    "speed": "Faster exam preparation",
+    "dpi": "DPI print quality",
+    "formats": "Export formats",
+    "docTypes": "Document type options"
+  },
+  "social": {
+    "label": "Social Media",
+    "title": "Follow Test Studio",
+    "instagram": {
+      "title": "Follow our progress on Instagram",
+      "description": "New features, product updates, and quick announcements.",
+      "cta": "Follow on Instagram"
+    },
+    "youtube": {
+      "title": "Explore Test Studio through video",
+      "description": "Step-by-step guides, feature walkthroughs, and tutorials.",
+      "cta": "Visit our YouTube channel"
+    }
+  },
+  "cta": {
+    "titleLoggedIn": "Build your next exam in <1>minutes</1>",
+    "titleLoggedOut": "Build your next exam in <1>15 minutes</1>",
+    "subtitleLoggedIn": "Jump back into the app and pick up where you left off. Crop new questions, finish the layout, hand in your exam.",
+    "subtitleLoggedOut": "Create a free account, crop questions, edit by drag and drop, download a print-ready PDF. No credit card required.",
+    "btnLoggedIn": "Go to App →",
+    "btnLoggedOut": "Create Free Account →"
+  },
+  "footer": {
+    "tagline": "Professional exam preparation platform for teachers.",
+    "product": "Product",
+    "legal": "Legal",
+    "contact": "Contact",
+    "features": "Features",
+    "how": "How It Works",
+    "guide": "User Guide",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookieSettings": "Cookie Settings",
+    "contactUs": "Get in Touch",
+    "telegramSupport": "Telegram Support",
+    "instagram": "Instagram · @teststud.io",
+    "youtube": "YouTube · @teststud-io",
+    "copyright": "© {{year}} TestStudio. All rights reserved."
+  }
+}

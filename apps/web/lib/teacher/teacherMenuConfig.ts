@@ -17,6 +17,7 @@ import {
   CalendarDays,
   Monitor,
   Gamepad2,
+  LayoutGrid,
 } from 'lucide-react'
 
 export type FeatureStatus = 'active' | 'passive' | 'restricted'
@@ -43,7 +44,7 @@ export interface TeacherMenuItem {
   children?: TeacherSubMenuItem[]
   openInNewTab?: boolean
   badge?: string
-  category?: 'DERSLER & YÖNETİM' | 'ÖLÇME & DEĞERLENDİRME' | 'KAYNAKLAR & İLETİŞİM' | 'DİĞER'
+  category?: 'DERSLER & YÖNETİM' | 'ÖLÇME & DEĞERLENDİRME' | 'MODÜLLER & ARAÇLAR' | 'KAYNAKLAR & İLETİŞİM' | 'DİĞER'
 }
 
 export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
@@ -188,6 +189,28 @@ export const TEACHER_MENU_CONFIG: TeacherMenuItem[] = [
       { id: 'progress-overview', label: 'Sınıf Başarı Özeti', path: '/teacher/student-progress/overview', status: 'active' },
       { id: 'progress-guidance', label: 'Rehberlik Servisi Kayıtları', path: '/teacher/student-progress/guidance', status: 'active' },
       { id: 'progress-learning-gaps', label: 'Kazanım Eksiği Tespiti', path: '/teacher/student-progress/learning-gaps', status: 'passive', missingDependency: 'Kazanım bazlı otomatik analiz algoritması' },
+    ],
+  },
+
+  // ── MODÜLLER & ARAÇLAR ──
+  {
+    id: 'modules',
+    label: 'Modüller',
+    path: '/teacher/modules',
+    icon: LayoutGrid,
+    status: 'active',
+    sortOrder: 11,
+    category: 'MODÜLLER & ARAÇLAR',
+    badge: '1 Aktif',
+    description: 'Öğretmenler için dijital sınav hazırlama, akıllı dizgi ve entegre eğitim modülleri.',
+    children: [
+      {
+        id: 'modules-sinav-olusturma',
+        label: 'Sınav Oluşturma',
+        path: '/teacher/modules/sinav-olusturma',
+        status: 'active',
+        description: 'Akıllı A4 dizgi masası, PDF/görsel soru kırpma ve test stüdyosu',
+      },
     ],
   },
 

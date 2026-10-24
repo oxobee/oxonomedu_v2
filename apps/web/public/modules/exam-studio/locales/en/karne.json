@@ -1,0 +1,537 @@
+{
+  "common": {
+    "back": "Back",
+    "reports": "Reports",
+    "loading": "Loading…",
+    "untitled": "(untitled)",
+    "students": "Number of students",
+    "studentsFmt": "{{n}} students",
+    "sessionsFmt": "{{n}} sessions",
+    "questionsFmt": "{{n}} questions",
+    "sortLabel": "Sort:"
+  },
+  "tabs": {
+    "classes": "Class Reports",
+    "tests": "Test Reports",
+    "students": "Student Reports"
+  },
+  "breadcrumb": {
+    "institutions": "Institutions"
+  },
+  "empty": {
+    "noInstitutions": "No institutions yet. You can add one from Class Management.",
+    "noClasses": "No classes in this institution.",
+    "noStudents": "No students in this class.",
+    "noMatchedStudents": "No students match the filter.",
+    "noSessions": "No scan sessions for this class yet. When you select the class while scanning, sessions will appear here.",
+    "noTests": "No test records yet. After you create a test and scan, they will be listed here."
+  },
+  "errors": {
+    "loadInstitutions": "Could not load institutions: {{msg}}",
+    "loadClasses": "Could not load classes: {{msg}}",
+    "loadStudents": "Could not load students: {{msg}}",
+    "loadSessions": "Could not load sessions: {{msg}}",
+    "loadResults": "Could not load results: {{msg}}",
+    "loadTests": "Could not load tests: {{msg}}"
+  },
+  "students": {
+    "searchPlaceholder": "Search student (name or ID)…"
+  },
+  "sort": {
+    "dateDesc": "Date (newest → oldest)",
+    "dateAsc": "Date (oldest → newest)",
+    "avgDesc": "Average % (high → low)",
+    "avgAsc": "Average % (low → high)",
+    "studentsDesc": "Student count (most → least)",
+    "sessionsDesc": "Session count (most → least)",
+    "titleAsc": "Title (A → Z)",
+    "nameAsc": "Name (A → Z)",
+    "nameDesc": "Name (Z → A)"
+  },
+  "sessionView": {
+    "back": "Back",
+    "fallbackSessionTitle": "Session",
+    "sinifKarneBtn": "Class Report Card",
+    "sinifKarneTitle": "Printable report card of this class for this exam",
+    "errLoadSession": "Could not load session: {{msg}}",
+    "errLoadResults": "Could not load results: {{msg}}",
+    "summary": {
+      "students": "Students",
+      "absentNote": "+{{n}} absent",
+      "avgPct": "Avg. %",
+      "avgNet": "Avg. Net",
+      "avgCorrect": "Avg. Correct",
+      "avgWrong": "Avg. Wrong",
+      "avgEmpty": "Avg. Blank",
+      "advanced": "Advanced Stats",
+      "median": "Median",
+      "mode": "Mode",
+      "stdDev": "Std. Dev",
+      "min": "Min",
+      "q1": "Q1",
+      "q3": "Q3",
+      "max": "Max",
+      "noResults": "No results for this class."
+    },
+    "section": {
+      "distribution": "Score Distribution",
+      "category": "Category Analysis",
+      "item": "Item Analysis"
+    },
+    "studentTable": {
+      "no": "No",
+      "fullName": "Full Name",
+      "correctShort": "C",
+      "wrongShort": "W",
+      "emptyShort": "B",
+      "net": "Net",
+      "percent": "%"
+    },
+    "categoryTable": {
+      "category": "Category",
+      "questions": "Questions",
+      "correctPct": "Correct %",
+      "uncategorized": "Uncategorized"
+    },
+    "itemTable": {
+      "header": "#",
+      "headerWithCat": "# / Category",
+      "correct": "Correct",
+      "empty": "Blank",
+      "correctPct": "Correct %",
+      "difficulty": "Difficulty"
+    },
+    "unmatched": {
+      "fallback": "(unmatched)",
+      "title": "Unmatched Results ({{n}})",
+      "description": "OMR may have read incorrectly. When you enter the correct number, it will be matched to the student and included in reports.",
+      "noLabel": "No: {{n}}",
+      "fixBtn": "Fix Number",
+      "fixBusy": "..."
+    },
+    "missing": {
+      "title": "Absent Students ({{n}})"
+    },
+    "fixDialog": {
+      "prompt": "This form was read as \"{{no}}\" but didn't match.\n\nEnter the correct student number:",
+      "queryError": "Query error: {{msg}}",
+      "notFound": "Student with number \"{{no}}\" was not found {{scope}}.",
+      "scopeInClass": "in this class",
+      "multiMatch": "Multiple students matched — this is not supported. Please check Class Management.",
+      "confirm": "Match with {{name}} (No: {{no}})?",
+      "updateError": "Could not update: {{msg}}"
+    },
+    "deleteRow": {
+      "ariaLabel": "Delete this result",
+      "confirm": "Are you sure you want to delete {{name}} (No: {{no}})'s result from the report? This action cannot be undone.",
+      "error": "Could not delete: {{msg}}"
+    },
+    "drill": {
+      "questionTitle": "Question {{n}}",
+      "correctBadge": "Correct: {{ans}}",
+      "correctRatio": "{{pct}} correct ({{c}}/{{total}})",
+      "close": "Close",
+      "difficultyChip": "Difficulty: {{label}}",
+      "chipCorrect": "Correct: {{pct}}",
+      "chipWrong": "Wrong: {{pct}}",
+      "chipEmpty": "Blank: {{pct}}",
+      "discChipFmt": "Disc: {{val}} · {{label}}",
+      "discTooltip": "Discrimination (D) — top 27% correct rate minus bottom 27% correct rate",
+      "discReason": "Discrimination: {{reason}}",
+      "discMinStudents": "At least 8 students required",
+      "discQ": {
+        "veryGood": "Very Good",
+        "good": "Good",
+        "acceptable": "Acceptable",
+        "weak": "Weak"
+      },
+      "correctSection": "Correct ({{n}})",
+      "wrongSection": "Wrong ({{n}})",
+      "choiceSection": "Choice {{c}} — {{n}} people",
+      "emptySection": "Blank ({{n}})",
+      "noResults": "No results in this class."
+    },
+    "diffLabel": {
+      "veryEasy": "Very Easy",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "veryHard": "Very Hard"
+    }
+  },
+  "studentView": {
+    "back": "Back",
+    "noStudent": "Student not found",
+    "errLoadResults": "Could not load results: {{msg}}",
+    "namelessTest": "Unnamed Test",
+    "studentNoFmt": "· No: {{no}}",
+    "tekliBtn": "Single",
+    "tekliBtnLong": "Single Card",
+    "tekliBtnTitle": "Pick an exam and open its single report card",
+    "topluBtn": "Combined",
+    "topluBtnLong": "Combined Card",
+    "topluBtnTitle": "Combined report card of the last {{n}} exams",
+    "meta": {
+      "class": "Class:",
+      "term": "Term:"
+    },
+    "stat": {
+      "examCount": "Number of Exams",
+      "average": "Average Success",
+      "totalQuestions": "Total Questions",
+      "correctWrongEmpty": "Correct / Wrong / Blank",
+      "bestTopic": "Strongest Topic",
+      "weakestTopic": "Topic to Improve"
+    },
+    "noResults": "This student has no exam results yet.",
+    "section": {
+      "categories": "Performance by Topic",
+      "kazanim": "Skill Progress",
+      "exams": "Exams Taken"
+    },
+    "kazanimHint": "Change of each skill across exams (chronological). Trend compares the first and last measurement.",
+    "examsHint": "Click an exam row to open its detailed report card.",
+    "perfLabel": {
+      "veryGood": "Very Good",
+      "good": "Good",
+      "average": "Average",
+      "needsWork": "Needs Work",
+      "weak": "Weak"
+    },
+    "category": {
+      "name": "Category",
+      "questions": "Questions",
+      "correctPct": "Correct %",
+      "evaluation": "Evaluation"
+    },
+    "testList": {
+      "exam": "Exam",
+      "date": "Date",
+      "correctShort": "C",
+      "wrongShort": "W",
+      "emptyShort": "B",
+      "net": "Net",
+      "percent": "%",
+      "classRank": "Class",
+      "schoolRank": "School"
+    },
+    "kazanim2": {
+      "name": "Skill",
+      "examShort": "E",
+      "progress": "Progress",
+      "trend": "Trend",
+      "improving": "Improving",
+      "declining": "Declining",
+      "stable": "Stable",
+      "single": "Single measure",
+      "deltaFmt": "Δ {{sign}}{{val}} pts",
+      "singleMeasure": "Measured in a single exam",
+      "notMeasured": "This skill was not measured in this exam",
+      "pointTooltip": "{{title}}: {{count}} questions, {{pct}}%"
+    },
+    "examPicker": {
+      "title": "Pick an exam — open single report card",
+      "closeAria": "Close",
+      "empty": "No exams yet."
+    }
+  },
+  "testDetail": {
+    "crumbBack": "Tests",
+    "testKarne": "Test Report Card",
+    "testKarneTitle": "Printable cross-class report card for this test",
+    "stat": {
+      "questions": "Questions",
+      "classes": "Classes",
+      "sessions": "Sessions",
+      "totalStudents": "Total Students",
+      "overallAvg": "Overall Avg. %"
+    },
+    "section": {
+      "classAverages": "Class Averages",
+      "sessions": "Sessions",
+      "itemMatrix": "Cross-class Question Comparison"
+    },
+    "noResults": "No scan results for this test.",
+    "errLoadSessions": "Could not load sessions: {{msg}}",
+    "errLoadResults": "Could not load results: {{msg}}",
+    "filter": {
+      "dateLabel": "Date:",
+      "yearLabel": "Year:",
+      "classLabel": "Class Filter:",
+      "rangeAll": "All",
+      "range7": "7 days",
+      "range30": "30 days",
+      "range90": "90 days",
+      "selectAll": "Select all",
+      "deselectAll": "Clear all",
+      "remove": "Remove",
+      "add": "Add"
+    },
+    "chart": {
+      "overallLabel": "Overall: {{pct}}"
+    },
+    "session": {
+      "noClass": "(no class)",
+      "avgLabel": "Avg. %"
+    },
+    "unmatched": "(unmatched)",
+    "matrix": {
+      "question": "Question",
+      "correct": "Correct",
+      "overall": "Overall"
+    }
+  },
+  "karnePdf": {
+    "common": {
+      "back": "Back",
+      "share": "Share",
+      "shareTitle": "Create a share link to send to the parent",
+      "shareBusy": "Preparing…",
+      "downloadPdfShort": "PDF",
+      "downloadPdf": "Download PDF",
+      "downloadPdfBusy": "Preparing…",
+      "downloadPdfTitle": "Download as PDF from the server",
+      "print": "Print",
+      "printTitle": "Open the browser print dialog",
+      "pdfError": "Could not generate PDF: {{msg}}",
+      "shareError": "Could not share report card: {{msg}}",
+      "unknownError": "Unknown error",
+      "fullName": "Full Name",
+      "studentNo": "No",
+      "class": "Class",
+      "term": "Term",
+      "examRange": "Exam Range",
+      "section": {
+        "overall": "OVERALL TOTAL",
+        "exams": "EXAMS INCLUDED",
+        "topicAnalysis": "TOPIC PERFORMANCE"
+      },
+      "totalsBar": {
+        "examCount": "Exam Count",
+        "totalQ": "Total Questions",
+        "correct": "Correct",
+        "wrong": "Wrong",
+        "empty": "Blank",
+        "avgPct": "Average Success"
+      },
+      "examsTable": {
+        "no": "#",
+        "examName": "Exam",
+        "date": "Date",
+        "correctShort": "C",
+        "wrongShort": "W",
+        "emptyShort": "B",
+        "net": "Net",
+        "pct": "%"
+      },
+      "konuTable": {
+        "name": "Topic",
+        "questionCount": "Q",
+        "correctShort": "C",
+        "wrongShort": "W",
+        "emptyShort": "B",
+        "successPct": "Score (%)"
+      },
+      "namelessCategory": "(unnamed category)",
+      "uncategorized": "Uncategorized",
+      "namelessExam": "Unnamed Exam",
+      "studentNotFound": "Student not found",
+      "resultsLoadError": "Could not load results: {{msg}}",
+      "noResults": "This student has no exam results yet.",
+      "generatedOn": "This report card was generated automatically on {{date}}.",
+      "printTargetMissing": "Report card content not found (print target missing).",
+      "shareInactive": "Report card sharing is not active right now.",
+      "defaultFilename": "report-card"
+    },
+    "birlesik": {
+      "headerTitle": "{{n}}-EXAM COMBINED REPORT CARD",
+      "menuTitle": "{{n}}-Exam Combined Report Card",
+      "loading": "Preparing combined report card…",
+      "footerNote": "Success %: ratio of correct answers to total questions. Topic success: the correct ratio for questions in that topic across {{n}} exams."
+    },
+    "test": {
+      "title": "Test Report Card",
+      "headerTitle": "TEST REPORT CARD",
+      "shareTitle": "Create a share link (A4 landscape)",
+      "downloadPdfTitle": "Download as PDF (A4 landscape)",
+      "loading": "Preparing test report card…",
+      "noResults": "No scan results for this test yet.",
+      "testNotFound": "Test not found",
+      "fields": {
+        "testName": "Test Name",
+        "date": "Date",
+        "classCount": "Class Count",
+        "participantCount": "Participants"
+      },
+      "section": {
+        "classCompare": "CLASS COMPARISON",
+        "categoryMatrix": "TOPIC × CLASS MATRIX",
+        "itemAnalysis": "OVERALL ITEM ANALYSIS"
+      },
+      "totalsBar": {
+        "classCount": "Class Count",
+        "participantCount": "Participants",
+        "meanPct": "Overall Average",
+        "best": "Top Class",
+        "worst": "Bottom Class"
+      },
+      "classesTable": {
+        "class": "Class",
+        "participation": "Attendance",
+        "correctShort": "C",
+        "wrongShort": "W",
+        "emptyShort": "B",
+        "avgNet": "Avg. Net",
+        "avgPct": "Avg. %",
+        "deltaToOverall": "Δ vs Overall"
+      },
+      "matrix": {
+        "topic": "Topic",
+        "overall": "Overall"
+      },
+      "itemTable": {
+        "question": "Q#",
+        "topic": "Topic",
+        "correctPct": "Correct %",
+        "wrongPct": "Wrong %",
+        "emptyPct": "Blank %",
+        "difficulty": "Difficulty"
+      },
+      "unmatched": "(unmatched)",
+      "namelessCategory": "(unnamed)",
+      "footerNote": "Topic × Class cells show the correct-answer rate for that topic in the given class. The Overall column is computed across all classes together.",
+      "fallbackTitle": "exam"
+    },
+    "sinif": {
+      "title": "Class Report Card",
+      "headerTitle": "CLASS REPORT CARD",
+      "loading": "Preparing class report card…",
+      "sessionNotFound": "Session not found",
+      "fallbackClass": "class",
+      "fallbackExam": "exam",
+      "fields": {
+        "class": "Class",
+        "term": "Term",
+        "examName": "Exam Name",
+        "examDate": "Exam Date",
+        "participation": "Attendance"
+      },
+      "section": {
+        "overview": "OVERVIEW",
+        "topicSuccess": "CLASS PERFORMANCE BY TOPIC",
+        "studentList": "STUDENTS (Sorted by score)",
+        "missingStudents": "ABSENT STUDENTS ({{n}})",
+        "itemAnalysis": "ITEM ANALYSIS"
+      },
+      "statsBar": {
+        "participant": "Participants",
+        "mean": "Average",
+        "median": "Median",
+        "max": "Highest",
+        "min": "Lowest",
+        "stdDev": "Std Dev",
+        "missing": "Absent"
+      },
+      "konuTable": {
+        "topic": "Topic",
+        "questions": "Q",
+        "correct": "Correct",
+        "wrong": "Wrong",
+        "empty": "Blank",
+        "success": "Score",
+        "total": "TOTAL"
+      },
+      "studentsTable": {
+        "rank": "#",
+        "no": "No",
+        "fullName": "Full Name",
+        "correctShort": "C",
+        "wrongShort": "W",
+        "emptyShort": "B",
+        "net": "Net",
+        "percent": "%",
+        "rankCol": "Rank"
+      },
+      "missingTable": {
+        "no": "No",
+        "fullName": "Full Name"
+      },
+      "itemTable": {
+        "question": "Q#",
+        "topic": "Topic",
+        "correctPct": "Correct %",
+        "wrongPct": "Wrong %",
+        "emptyPct": "Blank %",
+        "difficulty": "Difficulty"
+      },
+      "unmatched": "(unmatched)",
+      "footerNote": "Score %: ratio of correct answers to total questions · Net: correct − (wrong / 4)"
+    },
+    "tekil": {
+      "title": "Student Report Card",
+      "headerTitle": "STUDENT REPORT CARD",
+      "downloadPdfTitle": "Download as PDF (deterministic, recommended for tablets)",
+      "loading": "Preparing report card…",
+      "examResultNotFound": "Exam result not found",
+      "fallbackStudent": "student",
+      "fallbackExam": "exam",
+      "fields": {
+        "fullName": "Full Name",
+        "studentNo": "No",
+        "class": "Class",
+        "term": "Term",
+        "examName": "Exam Name",
+        "examDate": "Exam Date"
+      },
+      "section": {
+        "topicAnalysis": "TOPIC ANALYSIS",
+        "scoresRanks": "SCORES & RANKINGS",
+        "trendTitle": "SUCCESS % OVER LAST {{n}} EXAMS",
+        "history": "EXAM HISTORY",
+        "itemDetail": "QUESTION DETAIL"
+      },
+      "konuTable": {
+        "topic": "Topic",
+        "questions": "Q",
+        "correct": "Correct",
+        "wrong": "Wrong",
+        "empty": "Blank",
+        "success": "Score",
+        "classAvg": "Class Avg.",
+        "total": "TOTAL"
+      },
+      "ranksTable": {
+        "correct": "Correct",
+        "wrong": "Wrong",
+        "empty": "Blank",
+        "net": "Net",
+        "successPct": "Score %",
+        "classRank": "Class Rank",
+        "schoolRank": "School Rank"
+      },
+      "historyTable": {
+        "no": "#",
+        "date": "Date",
+        "examName": "Exam",
+        "correctShort": "C",
+        "wrongShort": "W",
+        "emptyShort": "B",
+        "net": "Net",
+        "percent": "%"
+      },
+      "namelessCategory": "(unnamed)",
+      "footerLegend": "✓ correct · ✗ wrong · — blank"
+    }
+  },
+  "share": {
+    "title": "Report Card Share Link",
+    "hint": "Anyone with the link can view the report card as PDF. You can send it via WhatsApp / email to the parent.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "whatsapp": "Share on WhatsApp",
+    "openNew": "Open in New Tab",
+    "note": "Note: Anyone with the link can open it — share only with trusted people.",
+    "expiry": "The report card stays active for <1>3 months</1>, then is deleted automatically.",
+    "regenerated": "If you share the same report card again, a new link is generated."
+  }
+}

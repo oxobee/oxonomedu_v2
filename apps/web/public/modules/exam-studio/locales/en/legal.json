@@ -1,0 +1,202 @@
+{
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: 28 September 2026 · Version 2026-09-28.5 (pre-publication draft)",
+    "s1": {
+      "title": "1. Data Controller",
+      "body": "This notice describes personal data processing in the Test Studio service. Test Studio is a brand name. Data controller: Fatih Durmuş. Contact and requests: destek@teststud.io. Providing the service free of charge does not remove data protection duties."
+    },
+    "s2": {
+      "title": "2. Personal Data Collected",
+      "intro": "The following personal data is collected through the Platform:",
+      "items": [
+        "<strong>Identity information:</strong> First name, last name",
+        "<strong>Contact information:</strong> Email address",
+        "<strong>Account information:</strong> Authentication records and account creation date",
+        "<strong>Google OAuth information:</strong> If you sign in with Google, your Google profile information (name, email, profile picture)",
+        "<strong>Usage data:</strong> Activity on the Platform, tests created, and usage statistics",
+        "<strong>Technical data:</strong> IP address, browser type, device information, cookie data",
+        "<strong>Content and education records:</strong> Depending on the selected functions, question images, document content, class/student information, optical scans and results may be processed. Do not upload personal data you are not authorised to process.",
+        "<strong>Request records:</strong> Contact information, work details, content location, supporting information and correspondence you provide in support and copyright requests.",
+        "<strong>Collection methods:</strong> Electronic collection through account and request forms, Google sign-in, user-selected content operations and approved cookies."
+      ]
+    },
+    "s3": {
+      "title": "3. Purposes of Data Processing",
+      "intro": "Your personal data is processed for the following purposes:",
+      "items": [
+        "Account creation and authentication",
+        "Providing and improving Platform services",
+        "Personalizing the user experience",
+        "Detecting and resolving technical issues",
+        "Fulfilling legal obligations",
+        "Ensuring Platform security"
+      ]
+    },
+    "s4": {
+      "title": "4. Legal Basis for Data Processing",
+      "intro": "Your personal data is processed on the following legal grounds under Article 5 of the KVKK:",
+      "items": [
+        "Account, authentication and requested document operations: processing necessary and directly related to entering into or performing a contract.",
+        "Copyright and support requests: establishing, exercising or protecting a right and compliance with legal obligations, as applicable.",
+        "Security records: legitimate security interests, subject to protecting your fundamental rights and freedoms.",
+        "Marketing cookies: separate, optional explicit consent. Accepting the terms does not provide this consent."
+      ]
+    },
+    "s5": {
+      "title": "5. Cookies and Third-Party Services",
+      "intro": "The Platform uses the following third-party services:",
+      "items": [
+        "<strong>Supabase:</strong> Accounts, authentication and saved application data.",
+        "<strong>Cloudflare:</strong> Web delivery, connection and security services.",
+        "<strong>Hetzner:</strong> Server-side document generation, image processing and shared report PDFs.",
+        "<strong>Google OAuth / Drive:</strong> Information authorised for the sign-in and file selection functions you choose.",
+        "<strong>Google Gemini:</strong> When using AI answer/number scanning, the relevant image is sent through the server to the analysis service.",
+        "<strong>Resend:</strong> Recipient address and relevant document/message content when you choose email delivery.",
+        "<strong>Meta Pixel / Conversions API:</strong> Relevant conversion measurements after marketing cookie consent. Other acceptance checkboxes do not provide marketing consent.",
+        "<strong>Visit statistics:</strong> After your separate optional choice, browser visitor/session identifiers, page path, referring site origin, browser information and account ID when signed in are processed in Supabase for statistics. Meta marketing permission does not enable this choice automatically."
+      ],
+      "outro": "Essential cookies are used for session management and authentication. Meta Pixel marketing cookies are enabled only after your explicit consent. You can choose or withdraw visit statistics and Meta marketing measurement separately in Cookie settings. Withdrawing visit statistics stops future visit records and clears counter identifiers in this browser; it does not automatically erase records already sent to the server. Account-linked export usage statistics are separate from this visit counter."
+    },
+    "s6": {
+      "title": "6. Data Retention",
+      "p1": "Retention varies by data type. Browser drafts may remain on your device and are not automatically removed by account closure. Document generation may create temporary server files; cleanup runs after normally completed operations. PDFs created for report sharing are stored for a limited period governed by server configuration. Support and copyright request records must be retained only as needed to handle the matter, protect rights and meet legal obligations.",
+      "p2": "PDF viewing and some editing occur in the browser; not all processing is local. Selected features transmit images or document content to the server and the services listed above. DRAFT: Production settings, backups and third-party retention must be verified and a data-specific retention/deletion schedule completed before publication."
+    },
+    "s7": {
+      "title": "7. Data Transfers",
+      "body": "Data may be shared with providers necessary for selected operations and competent authorities where legally required. Details needed to review a copyright report may be shared with the relevant user. Some provider infrastructure may be abroad. DRAFT: Provider countries/regions and transfer mechanisms under Article 9 of Turkish data protection law must be verified before publication. Acceptance of the terms is not blanket explicit consent for international transfers."
+    },
+    "s8": {
+      "title": "8. Data Security",
+      "body": "Authentication is handled through Supabase. Suspected unauthorised access can be reported to destek@teststud.io. DRAFT: Production access, transport security, backup and incident-response measures must be verified before publication."
+    },
+    "s9": {
+      "title": "9. Your Rights",
+      "intro": "Under Article 11 of the KVKK, you have the following rights:",
+      "items": [
+        "To learn whether your personal data is being processed",
+        "To request information if your personal data has been processed",
+        "To learn the purpose of processing and whether your data is used in line with that purpose",
+        "To learn the third parties (domestic or abroad) to whom your data has been transferred",
+        "To request correction of incomplete or incorrect data",
+        "To request deletion or destruction of your personal data within the conditions of Article 7",
+        "To object to outcomes that disadvantage you when produced solely through automated analysis",
+        "To request compensation for damages caused by unlawful processing of your data"
+      ]
+    },
+    "s10": {
+      "title": "10. Contact",
+      "intro": "For personal data requests or questions, contact destek@teststud.io. Necessary identity verification may be requested separately; do not send identity documents or passwords in your initial message.",
+      "websiteLabel": "Website:",
+      "websiteValue": "teststud.io"
+    },
+    "s11": {
+      "title": "11. Policy Changes",
+      "body": "This Privacy Policy may be updated from time to time. Significant changes will be announced on the Platform. You can always review the current policy on this page."
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: 28 September 2026 · Version 2026-09-28.5 (pre-publication draft)",
+    "s1": {
+      "title": "1. Service Description",
+      "p1": "Test Studio is a free tool for teachers to prepare tests and learning materials using content they are authorised to use. It produces Word, PowerPoint and PDF exports. Test Studio is a brand name, not a representation that it is a company.",
+      "p2": "Service provider: Fatih Durmuş. Contact: destek@teststud.io. The Terms of Service and Privacy Policy are presented during registration. A content-use notice is shown when opening the PDF cropper; accepting this notice does not grant permission to use third-party content."
+    },
+    "s2": {
+      "title": "2. Account Responsibilities",
+      "intro": "You must create an account to use the Platform. When creating an account:",
+      "items": [
+        "You are responsible for providing accurate and up-to-date information",
+        "You are responsible for the security of your account details and password",
+        "You must take reasonable care to protect account access and perform authorised actions; the parties’ statutory responsibilities remain applicable",
+        "You must notify us immediately if you detect unauthorized access to your account"
+      ]
+    },
+    "s3": {
+      "title": "3. Copyright and Content Liability",
+      "intro": "Third parties may hold rights in the content you upload. Using the platform does not transfer those rights to you or make content copyright-free.",
+      "items": [
+        "Upload, process and share only content for which you hold the required rights or permission, or where your use meets the conditions of a statutory exception. Buying a copy or downloading it for free does not grant unrestricted reproduction or distribution rights.",
+        "An educational purpose alone does not grant unrestricted use. Check applicable law and any licence conditions concerning attribution, modification, sharing and commercial use. Attribution does not replace permission.",
+        "Preserve author, work, publisher and required licence information. Do not use any tool, including Background Remover, to remove or alter rights ownership or usage information without permission.",
+        "PDF viewing and some editing take place in the browser. Depending on the selected function, question images or document content may be sent to the server and relevant providers for export, background area selection, answer scanning and email delivery. See the Privacy Policy.",
+        "You must assess the rights and permissions relevant to your use. This clause does not exclude the platform’s statutory duties. Each party’s responsibility depends on the actual processing and applicable law.",
+        "Rights holders or authorised representatives can report at destek@teststud.io. Identify the work, basis of ownership, reported content location and request. Reports are reviewed; additional information may be requested and appropriate measures taken for content or access under our control. We cannot directly change downloaded files or third-party platforms. Statutory deadlines and remedies remain applicable."
+      ]
+    },
+    "s4": {
+      "title": "4. Acceptable Use",
+      "intro": "When using the Platform, you must follow these rules:",
+      "items": [
+        "Do not upload content that violates laws or regulations",
+        "Do not attempt to compromise the security of the Platform",
+        "Do not behave in a way that interferes with other users' service",
+        "Do not use the Platform with automated tools (bots, scrapers, etc.) without permission",
+        "Do not upload malware or harmful code"
+      ]
+    },
+    "s5": {
+      "title": "5. Intellectual Property",
+      "items": [
+        "Rights in original Test Studio software and design elements belong to their respective holders. Open-source and third-party components remain subject to their own licences.",
+        "Your rights in original content you create are preserved. Uploading third-party content does not transfer its rights to you. Content is processed to the extent needed to provide the service you request; this does not override third-party rights."
+      ]
+    },
+    "s6": {
+      "title": "6. Service Changes",
+      "body": "TestStudio reserves the right to modify, update, or temporarily suspend the Platform's features, functionality, and scope, with or without prior notice. If the service is permanently discontinued, users will be notified a reasonable time in advance."
+    },
+    "s7": {
+      "title": "7. Limitation of Liability",
+      "intro": "Technical interruptions or errors may occur. Consider the following when using the service; these statements do not exclude mandatory legal duties or rights that cannot be waived:",
+      "items": [
+        "Check exported materials for accuracy, attribution and permission.",
+        "Keep backups of local files and drafts.",
+        "Copyright reports and responsibility for actual platform actions are assessed under applicable law.",
+        "Interruptions at third-party providers may prevent a requested operation from completing."
+      ]
+    },
+    "s8": {
+      "title": "8. Account Suspension and Termination",
+      "intro": "Allegations are reviewed and content or account access may be restricted where necessary and proportionate. A report alone is not a final finding of infringement. Users may provide an explanation or permission evidence; urgent or legally required measures remain possible. Examples:",
+      "items": [
+        "Unauthorised content use or removal of rights ownership information",
+        "Accounts that misuse the Platform",
+        "Accounts engaged in illegal activity"
+      ],
+      "outroBefore": "Users may request account deletion at any time. After account deletion, personal data is deleted within the period stated in the ",
+      "outroLink": "Privacy Policy",
+      "outroAfter": "."
+    },
+    "s9": {
+      "title": "9. Governing Law and Disputes",
+      "body": "These Terms of Service are governed by the laws of the Republic of Türkiye. Any disputes arising under these terms are subject to the jurisdiction of the courts of the Republic of Türkiye."
+    },
+    "s10": {
+      "title": "10. Changes",
+      "body": "TestStudio reserves the right to update these Terms of Service from time to time. Significant changes will be announced on the Platform. You can always review the current terms on this page."
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Get in touch with us for questions, suggestions, or feedback.",
+    "form": {
+      "name": "Your Name",
+      "namePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "message": "Your Message",
+      "messagePlaceholder": "Type your message here…",
+      "submit": "Send",
+      "sending": "Sending…",
+      "error": "Failed to send the message. Please try again."
+    },
+    "success": {
+      "title": "Your message has been sent",
+      "detail": "We'll get back to you as soon as possible.",
+      "newMessage": "Send another message"
+    }
+  }
+}

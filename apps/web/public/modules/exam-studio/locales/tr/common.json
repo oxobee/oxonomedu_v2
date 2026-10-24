@@ -1,0 +1,67 @@
+{
+  "buttons": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "close": "Kapat",
+    "ok": "Tamam",
+    "yes": "Evet",
+    "no": "Hayır",
+    "back": "Geri",
+    "next": "İleri",
+    "continue": "Devam",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "add": "Ekle",
+    "create": "Oluştur",
+    "update": "Güncelle",
+    "send": "Gönder",
+    "download": "İndir",
+    "upload": "Yükle",
+    "search": "Ara",
+    "filter": "Filtrele",
+    "reset": "Sıfırla",
+    "apply": "Uygula",
+    "confirm": "Onayla",
+    "preview": "Önizle",
+    "copy": "Kopyala",
+    "share": "Paylaş",
+    "print": "Yazdır",
+    "export": "Dışa Aktar",
+    "import": "İçe Aktar",
+    "refresh": "Yenile",
+    "retry": "Tekrar Dene",
+    "loading": "Yükleniyor…"
+  },
+  "language": {
+    "switch": "Dili değiştir",
+    "current": "Mevcut dil"
+  },
+  "status": {
+    "loading": "Yükleniyor…",
+    "saving": "Kaydediliyor…",
+    "saved": "Kaydedildi",
+    "error": "Hata",
+    "success": "Başarılı"
+  },
+  "network": {
+    "noInternet": "İnternet bağlantısı bulunamadı. Bağlantınızı kontrol edip tekrar deneyin.",
+    "serverUnreachable": "Sunucuya ulaşılamadı. Sebep internet bağlantınız, kurum/okul ağ engeli veya geçici bir sunucu kesintisi olabilir. Birkaç dakika sonra tekrar deneyin.",
+    "sessionExpired": "Oturumunuz sona ermiş. Sayfayı yenileyip tekrar giriş yapın.",
+    "rateLimited": "Çok fazla istek gönderildi. Lütfen biraz bekleyin.",
+    "emailServiceDown": "E-posta servisi yapılandırılmamış.",
+    "serverError": "Sunucu hatası"
+  },
+  "marketingConsent": {
+    "ariaLabel": "Çerez ve ziyaret istatistiği tercihleri",
+    "title": "Çerez tercihleri",
+    "body": "Ziyaret istatistiklerini ve Meta pazarlama ölçümünü ayrı ayrı seçebilirsiniz. Tercihleriniz siteyi kullanmanızı etkilemez.",
+    "privacyLink": "Gizlilik politikasını inceleyin.",
+    "reject": "Tümünü reddet",
+    "accept": "Tümünü kabul et",
+    "settings": "Çerez ayarları",
+    "analytics": "Ziyaret istatistikleri",
+    "marketing": "Meta pazarlama ölçümü",
+    "save": "Seçimlerimi kaydet",
+    "saveError": "Tercihiniz kaydedilemedi. Tarayıcınızın site verisi ayarını kontrol edip tekrar deneyin."
+  }
+}

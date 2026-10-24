@@ -1,0 +1,331 @@
+{
+  "toc": "Contents",
+  "hero": {
+    "title": "How to Use",
+    "subtitle": "With TestStudio, crop questions from PDF question banks, organize them in the pool, and build professional exams. This guide walks you through every feature step by step."
+  },
+  "sections": {
+    "overview": "Overview",
+    "pdfCrop": "PDF Cropping",
+    "pool": "Question Pool",
+    "layout": "Layout Desk",
+    "written": "Written Module",
+    "export": "Export",
+    "shortcuts": "Saving & Shortcuts"
+  },
+  "s1": {
+    "title": "Overview",
+    "desc": "TestStudio is an exam preparation platform designed for teachers. Crop questions from your PDF files, organize them in the question pool, and produce professional output on the Layout Desk. It has two main modules: <strong>Test Module</strong> and <strong>Written Module</strong>.",
+    "subs": {
+      "interface": {
+        "title": "Interface Overview",
+        "body": "When you log in, the <strong>sidebar</strong> appears on the left and the <strong>question pool</strong> on the right. The sidebar holds your project stats, PDF sources, categories, and action buttons.",
+        "imgAlt": "TestStudio main interface view",
+        "imgCaption": "Main screen after login — sidebar on the left, question pool on the right"
+      },
+      "moduleSwitch": {
+        "title": "Module Switcher",
+        "body": "At the top of the sidebar you can switch between the <strong>Test Module</strong> and the <strong>Written Module</strong>. The Test Module is for multiple-choice exams; the Written Module is for classic exams with open-ended, true/false, matching, and similar question types.",
+        "imgAlt": "Switching between Test and Written modules",
+        "imgCaption": "Use the module switcher in the sidebar to move between Test and Written"
+      }
+    },
+    "tip": {
+      "label": "Tip:",
+      "body": "Questions in each module are kept separate. Questions in the Test Module aren't lost when you switch to the Written Module."
+    }
+  },
+  "s2": {
+    "title": "PDF Cropping",
+    "desc": "Crop questions from your PDFs by selecting them with the mouse. With smart boundary detection, AI-powered answer recognition, and multi-PDF support, you can move questions into the pool quickly.",
+    "subs": {
+      "upload": {
+        "title": "2.1 Uploading PDFs",
+        "body": "Click the <strong>\"Smart PDF Crop\"</strong> button in the sidebar. In the dialog that opens, <strong>drag and drop</strong> your PDF files or use the file picker. You can upload multiple PDFs at once — each one opens in its own tab.",
+        "imgAlt": "PDF upload screen",
+        "imgCaption": "Drag and drop PDFs or upload them with the file picker"
+      },
+      "navZoom": {
+        "title": "2.2 Page Navigation and Zoom",
+        "body": "Move between pages using the page navigation on the left panel. Use the zoom slider to enlarge or shrink the PDF.",
+        "imgAlt": "Page navigation and zoom controls",
+        "imgCaption": "Page navigation and zoom controls in the left panel"
+      },
+      "crop": {
+        "title": "2.3 Cropping a Question",
+        "body": "Select a question area by <strong>dragging the mouse</strong> on the PDF. You can resize the selection box from its corners. When you make a selection, a toolbar appears:",
+        "items": [
+          "<strong>Answer choices (A/B/C/D/E):</strong> Mark the correct answer",
+          "<strong>Confirm (✓):</strong> Crop the question and add it to the pool",
+          "<strong>Cancel (✕):</strong> Discard the selection"
+        ],
+        "imgAlt": "Question crop selection and toolbar",
+        "imgCaption": "Select the question area with the mouse, mark the answer, and confirm"
+      },
+      "magnet": {
+        "title": "2.4 Magnetic Detection",
+        "body": "When you turn on the <strong>Magnet</strong> feature, the selection box automatically snaps to question boundaries. This makes cropping much faster and more precise. Toggle the magnet in the left panel.",
+        "imgAlt": "Magnetic automatic boundary detection",
+        "imgCaption": "With the magnet on, the selection box snaps to question boundaries"
+      },
+      "aiAnswer": {
+        "title": "2.5 AI Answer Recognition",
+        "body": "When <strong>AI Answer</strong> is on, the correct answer of the cropped question is detected automatically by AI. This is a huge time-saver, especially on PDFs that include an answer key.",
+        "imgAlt": "AI-assisted automatic answer recognition",
+        "imgCaption": "AI detects the correct answer of the cropped question automatically"
+      },
+      "category": {
+        "title": "2.6 Assigning a Category",
+        "body": "By picking a category in the <strong>Category</strong> section of the left panel, every question you crop is assigned to it automatically. To create a new category, use the Categories section of the sidebar.",
+        "imgAlt": "Assigning a category while cropping",
+        "imgCaption": "Pick the active category while cropping — new questions land in it"
+      }
+    },
+    "tip": {
+      "label": "Tip:",
+      "body": "You can open multiple PDFs as tabs and switch between them quickly. Each tab keeps its own page and zoom position."
+    }
+  },
+  "s3": {
+    "title": "Question Pool",
+    "desc": "All cropped questions land in the question pool. From here you can reorder questions, edit answers, sort by category, and create test groups.",
+    "subs": {
+      "dragDrop": {
+        "title": "3.1 Drag-and-Drop Reordering",
+        "body": "Drag the <strong>handle (⋮⋮)</strong> on a question card to change its order. The Layout Desk lays questions out in this order.",
+        "imgAlt": "Drag-and-drop reordering of questions",
+        "imgCaption": "Drag the handle to adjust the question order"
+      },
+      "answerEdit": {
+        "title": "3.2 Editing Answers",
+        "body": "Each question card shows the correct answer at the bottom. Click on it to change the answer. You can pick A, B, C, D, or E, or type a custom answer.",
+        "imgAlt": "Editing a question's answer",
+        "imgCaption": "Click the answer field to change the correct answer"
+      },
+      "categories": {
+        "title": "3.3 Categories and Colors",
+        "body": "Add new categories and assign colors in the <strong>Categories</strong> section of the sidebar. Each question card shows its category as a tag. You can filter and group questions by category.",
+        "imgAlt": "Category management and color assignment",
+        "imgCaption": "Use categories to organize questions by lesson or topic"
+      },
+      "grouping": {
+        "title": "3.4 Grouping Views",
+        "body": "Use the <strong>grouping</strong> options in the pool toolbar to view questions different ways:",
+        "items": [
+          "<strong>By category:</strong> Each category is grouped under its own heading",
+          "<strong>By PDF source:</strong> Questions are grouped by the PDF they were cropped from"
+        ],
+        "imgAlt": "Grouping questions by category or PDF source",
+        "imgCaption": "Grouping views let you look at your questions from different angles"
+      },
+      "split": {
+        "title": "3.5 Splitting the Test (Groups)",
+        "body": "Use the <strong>\"Split Test\"</strong> button to split the question pool into multiple groups. You can give each group its own heading and restart numbering. This is ideal for creating different exam variants (A/B) from the same pool.",
+        "imgAlt": "Splitting into test groups",
+        "imgCaption": "Use Split Test to create A/B groups or distinct sections"
+      },
+      "multiSelect": {
+        "title": "3.6 Multi-Select",
+        "body": "To select multiple questions at once:",
+        "items": [
+          "<strong>Ctrl + Click:</strong> Add or remove individual questions",
+          "<strong>Shift + Click:</strong> Select a range of questions"
+        ],
+        "outro": "On selected questions you can bulk-delete, move, or change category.",
+        "imgAlt": "Multi-select with Ctrl and Shift",
+        "imgCaption": "Use Ctrl+Click for individual picks, Shift+Click for a range"
+      },
+      "preview": {
+        "title": "3.7 Question Preview",
+        "body": "Double-click a question card, or click the preview button, to see the question at full size. From the preview window you can inspect and edit the question in detail.",
+        "imgAlt": "Question preview window",
+        "imgCaption": "Double-click a question to open the full-size preview"
+      }
+    },
+    "tip": {
+      "label": "Tip:",
+      "body": "For every reorder and edit operation, <kbd class=\"ln-guide-kbd\">Ctrl+Z</kbd> undoes the action and <kbd class=\"ln-guide-kbd\">Ctrl+Y</kbd> redoes it."
+    }
+  },
+  "s4": {
+    "title": "Layout Desk",
+    "desc": "The Layout Desk is where you turn your questions into a professional exam. Use page settings, header/footer, templates, and color themes to get the exact output you want.",
+    "subs": {
+      "open": {
+        "title": "4.1 Opening the Layout Desk",
+        "body": "Click <strong>\"Layout & Export Desk\"</strong> in the sidebar to open the Layout Desk. The button becomes active as soon as you have at least one question.",
+        "imgAlt": "Layout Desk opening view",
+        "imgCaption": "Layout Desk — settings on the left, preview in the middle, export on the right"
+      },
+      "docType": {
+        "title": "4.2 Document Type",
+        "body": "Pick one of the <strong>document type</strong> options in the top bar:",
+        "items": [
+          "<strong>Worksheet Test:</strong> Multiple-choice exam layout",
+          "<strong>Lecture Notes:</strong> Lays questions out in a notes format",
+          "<strong>Mock Exam:</strong> Mock-exam layout",
+          "<strong>Written:</strong> Written-exam layout (for questions from the Written Module)"
+        ],
+        "imgAlt": "Document type selection",
+        "imgCaption": "Pick Worksheet Test, Lecture Notes, Mock Exam, or Written in the top bar"
+      },
+      "pageSettings": {
+        "title": "4.3 Page Settings",
+        "body": "Configure the page from the left panel:",
+        "items": [
+          "<strong>Paper size:</strong> A4, A5, Letter, and more",
+          "<strong>Orientation:</strong> Portrait or landscape",
+          "<strong>Number of columns:</strong> 1, 2, or 3 columns",
+          "<strong>Margins:</strong> Narrow, Normal, or Wide"
+        ],
+        "imgAlt": "Page settings panel",
+        "imgCaption": "Paper size, orientation, columns, and margin settings"
+      },
+      "spacing": {
+        "title": "4.4 Question Spacing",
+        "body": "Adjust the gap between questions with the <strong>question spacing slider</strong>. The preview updates instantly, so you can see how many questions fit on a page in real time.",
+        "imgAlt": "Question spacing slider",
+        "imgCaption": "Move the slider to adjust the spacing between questions"
+      },
+      "headerFooter": {
+        "title": "4.5 Header and Footer",
+        "body": "Customize the top of your exam sheet — school name, exam name, student info fields, academic year, and more. The footer adds the page number automatically.",
+        "imgAlt": "Editing header and footer",
+        "imgCaption": "Edit the school name, exam title, and student info fields"
+      },
+      "templates": {
+        "title": "4.6 Templates",
+        "body": "Pick one of the <strong>Classic</strong>, <strong>Modern</strong>, or <strong>Minimal</strong> templates in the right panel. Each template uses a different header layout, line style, and typography.",
+        "imgAlt": "Template options",
+        "imgCaption": "Classic, Modern, and Minimal template options"
+      },
+      "colors": {
+        "title": "4.7 Color Themes",
+        "body": "Pick the theme color of your exam from the color palette in the right panel. The chosen color is applied to headings, lines, and highlight areas.",
+        "imgAlt": "Color theme selection",
+        "imgCaption": "Pick the theme color of your exam from the color palette"
+      },
+      "watermark": {
+        "title": "4.8 Watermark",
+        "body": "You can add a transparent <strong>watermark</strong> to the background of the page. This is useful for preventing copies of the exam sheet or for displaying your school logo.",
+        "imgAlt": "Adding a watermark",
+        "imgCaption": "Add a school logo or text watermark to the background"
+      }
+    },
+    "tip": {
+      "label": "Tip:",
+      "body": "All changes on the Layout Desk appear instantly in the preview. Watch the page count and question placement to fine-tune your output."
+    }
+  },
+  "s5": {
+    "title": "Written Module",
+    "desc": "The Written Module is designed for classic written exams. It supports open-ended questions, true/false, matching, fill-in-the-blank, and more.",
+    "subs": {
+      "switch": {
+        "title": "5.1 Switching Modules",
+        "body": "Click the <strong>\"Written Module\"</strong> tab in the module switcher in the sidebar. The pool switches to written questions and different question type options appear.",
+        "imgAlt": "Switching to the Written Module",
+        "imgCaption": "Switch to the Written Module from the module switcher in the sidebar"
+      },
+      "types": {
+        "title": "5.2 Question Types",
+        "body": "In the Written Module you can create the following question types:",
+        "items": [
+          "<strong>Open-ended:</strong> Free-response questions where students write their answers",
+          "<strong>True/False:</strong> T/F questions",
+          "<strong>Multiple choice:</strong> Questions with answer choices",
+          "<strong>Matching:</strong> Two-column matching questions",
+          "<strong>Fill in the Blank:</strong> In-sentence blanks"
+        ],
+        "imgAlt": "Written question types",
+        "imgCaption": "Mix different question types to create rich written exams"
+      },
+      "scoring": {
+        "title": "5.3 Scoring",
+        "body": "You can assign separate <strong>points</strong> to each question. The total score is calculated automatically and shown in the stats panel in the sidebar. On the Layout Desk, the point value appears next to each question.",
+        "imgAlt": "Scoring of written questions",
+        "imgCaption": "Assign points to each question — the total is calculated automatically"
+      },
+      "edit": {
+        "title": "5.4 Editing Written Questions",
+        "body": "You can crop written questions from a PDF or create them <strong>by hand</strong>. Each question type has its own editor. You can change the order of questions by drag and drop.",
+        "imgAlt": "Written question editor",
+        "imgCaption": "Each question type has its own dedicated editor"
+      }
+    },
+    "tip": {
+      "label": "Note:",
+      "body": "Questions in the Written Module are placed automatically in the written exam layout when you pick the \"Written\" document type on the Layout Desk."
+    }
+  },
+  "s6": {
+    "title": "Export",
+    "desc": "You can download your Layout Desk output in three different formats. Use the export buttons in the right panel.",
+    "subs": {
+      "pdf": {
+        "title": "6.1 Download PDF",
+        "body": "Use <strong>Download PDF</strong> to download your exam as a high-quality PDF. You get a print-ready, vector output. Watermarks, headers, and all formatting are reflected in the PDF exactly.",
+        "imgAlt": "Exporting as PDF",
+        "imgCaption": "Use Download PDF to get a print-ready output"
+      },
+      "word": {
+        "title": "6.2 Download Word",
+        "body": "Use <strong>Download Word</strong> to download your exam as a .docx file. This format is ideal if you want to keep editing in Word later.",
+        "imgAlt": "Exporting as Word",
+        "imgCaption": "Use Download Word to get an editable .docx output"
+      },
+      "pptx": {
+        "title": "6.3 Download PowerPoint",
+        "body": "Use <strong>Download PPTX</strong> to download your exam as a PowerPoint presentation. This format is great for showing questions on a smartboard or projector.",
+        "imgAlt": "Exporting as PowerPoint",
+        "imgCaption": "Use Download PPTX to get a presentation-ready output"
+      }
+    },
+    "tip": {
+      "label": "Note:",
+      "body": "Export may take a few seconds depending on the number of questions. Don't close the page until the download is complete."
+    }
+  },
+  "s7": {
+    "title": "Saving & Shortcuts",
+    "desc": "Use auto-save, draft files, and keyboard shortcuts to keep your work safe.",
+    "subs": {
+      "autosave": {
+        "title": "7.1 Auto-Save",
+        "body": "Changes in the question pool are saved automatically to your <strong>browser storage (localStorage)</strong>. Your questions don't disappear when you refresh the page or close the browser."
+      },
+      "draft": {
+        "title": "7.2 Draft File",
+        "body": "Use the <strong>save (💾)</strong> button in the pool to download your questions as a draft file to your computer. Use the <strong>load (📂)</strong> button to restore a previously saved draft. This is ideal for switching between different projects.",
+        "imgAlt": "Saving and loading a draft file",
+        "imgCaption": "Manage your projects with the save and load buttons"
+      },
+      "shortcuts": {
+        "title": "7.3 Keyboard Shortcuts",
+        "body": "Use the following shortcuts to speed up your workflow:",
+        "tableHead": {
+          "shortcut": "Shortcut",
+          "action": "Action"
+        },
+        "rows": [
+          { "key": "<kbd class=\"ln-guide-kbd\">Ctrl</kbd> + <kbd class=\"ln-guide-kbd\">Z</kbd>", "action": "Undo" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Ctrl</kbd> + <kbd class=\"ln-guide-kbd\">Y</kbd>", "action": "Redo" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Delete</kbd>", "action": "Delete selected questions" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Ctrl</kbd> + Click", "action": "Toggle individual question (add/remove)" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Shift</kbd> + Click", "action": "Range select" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Ctrl</kbd> + <kbd class=\"ln-guide-kbd\">A</kbd>", "action": "Select all questions" },
+          { "key": "<kbd class=\"ln-guide-kbd\">Esc</kbd>", "action": "Clear selection / close modal" }
+        ]
+      }
+    },
+    "tip": {
+      "label": "Tip:",
+      "body": "We recommend saving your draft file regularly. If browser storage is cleared, the auto-save data may be lost — but your draft file stays safe."
+    }
+  },
+  "cta": {
+    "title": "Ready?",
+    "subtitle": "Head to the app and start building your first exam.",
+    "btn": "Go to App"
+  }
+}
