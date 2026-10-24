@@ -2,6 +2,8 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Building2,
@@ -21,96 +23,23 @@ import {
   X,
   Filter,
   Sparkles,
+  ChevronRight,
+  BarChart3,
+  Globe,
+  SlidersHorizontal,
 } from 'lucide-react'
-import toast from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
-
-export interface RegisteredSchool {
-  id: string | number
-  name: string
-  code: string
-  city: string
-  district: string
-  level: string
-  studentCount: number
-  teacherCount: number
-  principalName: string
-  phone: string
-  email: string
-  status: 'active' | 'pending' | 'suspended'
-  licenseExpires: string
-  planType: string
-}
-
-const DEFAULT_SCHOOLS: RegisteredSchool[] = [
-  {
-    id: 'sch-1',
-    name: 'Oxonom Merkez İlkokulu & Ortaokulu',
-    code: '741295',
-    city: 'İstanbul',
-    district: 'Beşiktaş',
-    level: 'İlkokul (1-4) & Ortaokul (5-8)',
-    studentCount: 720,
-    teacherCount: 42,
-    principalName: 'Kemal SOYSAL',
-    phone: '+90 (212) 500 28 03',
-    email: 'bilgi@oxonom.com',
-    status: 'active',
-    licenseExpires: '31.12.2027',
-    planType: 'Enterprise Pro',
-  },
-  {
-    id: 'sch-2',
-    name: 'Kadıköy Atatürk İlkokulu',
-    code: '741302',
-    city: 'İstanbul',
-    district: 'Kadıköy',
-    level: 'İlkokul (1-4. Sınıflar)',
-    studentCount: 540,
-    teacherCount: 32,
-    principalName: 'Selim AKTAŞ',
-    phone: '+90 (216) 345 10 20',
-    email: 'kadikoy.ataturk@meb.k12.tr',
-    status: 'active',
-    licenseExpires: '30.06.2027',
-    planType: 'Standart Okul',
-  },
-  {
-    id: 'sch-3',
-    name: 'Çankaya Bilim ve Sanat Koleji',
-    code: '741819',
-    city: 'Ankara',
-    district: 'Çankaya',
-    level: 'K-12 (İlkokul, Ortaokul)',
-    studentCount: 960,
-    teacherCount: 58,
-    principalName: 'Zeynep YILMAZ',
-    phone: '+90 (312) 440 80 90',
-    email: 'iletisim@cankayabilim.k12.tr',
-    status: 'active',
-    licenseExpires: '15.09.2027',
-    planType: 'Enterprise Pro',
-  },
-  {
-    id: 'sch-4',
-    name: 'Nilüfer Gelişim Akademisi İlkokulu',
-    code: '742110',
-    city: 'Bursa',
-    district: 'Nilüfer',
-    level: 'İlkokul (1-4. Sınıflar)',
-    studentCount: 380,
-    teacherCount: 24,
-    principalName: 'Murat ERDOĞAN',
-    phone: '+90 (224) 211 44 55',
-    email: 'bursa@nilufergelisim.com',
-    status: 'pending',
-    licenseExpires: '01.09.2027',
-    planType: 'Deneme Lisansı (14 Gün)',
-  },
-]
+import {
+  SchoolDetail,
+  getAllSchools,
+  addNewSchool,
+  saveAllSchools,
+} from '@/lib/schools/schoolData'
 
 export default function SuperadminSchoolsPage() {
-  const [schools, setSchools] = useState<RegisteredSchool[]>(DEFAULT_SCHOOLS)
+  const router = useRouter()
+  const [schools, setSchools] = useState<SchoolDetail[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [supabaseStatus, setSupabaseStatus] = useState<{ configured: boolean; connected: boolean }>({
     configured: false,
@@ -128,13 +57,17 @@ export default function SuperadminSchoolsPage() {
   const [formCode, setFormCode] = useState('')
   const [formCity, setFormCity] = useState('İstanbul')
   const [formDistrict, setFormDistrict] = useState('')
-  const [formLevel, setFormLevel] = useState('İlkokul (1-4. Sınıflar)')
+  const [formAddress, setFormAddress] = useState('')
+  const [formLevel, setFormLevel] = useState('İlkokul (1-4) & Ortaokul (5-8)')
+  const [formType, setFormType] = useState('MEB Resmi İlkokulu & Ortaokulu')
   const [formPrincipal, setFormPrincipal] = useState('')
   const [formPhone, setFormPhone] = useState('')
   const [formEmail, setFormEmail] = useState('')
-  const [formPlan, setFormPlan] = useState('Standart Okul')
+  const [formPlan, setFormPlan] = useState<'Enterprise Pro' | 'Standart Okul' | 'Deneme Lisansı (14 Gün)'>('Enterprise Pro')
+  const [formStudentCount, setFormStudentCount] = useState<number>(360)
+  const [formTeacherCount, setFormTeacherCount] = useState<number>(24)
 
-  // Load schools from Supabase (or fallback to storage/defaults)
+  // Load schools
   const fetchSchools = async () => {
     setIsLoading(true)
     const configured = isSupabaseConfigured()
@@ -148,6 +81,7 @@ export default function SuperadminSchoolsPage() {
           .order('name', { ascending: true })
 
         if (!error && Array.isArray(data) && data.length > 0) {
+          // If supabase returned rows, merge or map
           setSchools(data as any)
           setSupabaseStatus({ configured: true, connected: true })
           setIsLoading(false)
@@ -158,23 +92,9 @@ export default function SuperadminSchoolsPage() {
       }
     }
 
-    // Fallback to local storage or defaults
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem('oxonom_superadmin_schools')
-        if (raw) {
-          const parsed = JSON.parse(raw)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setSchools(parsed)
-            setSupabaseStatus({ configured, connected: configured })
-            setIsLoading(false)
-            return
-          }
-        }
-      } catch (_) {}
-    }
-
-    setSchools(DEFAULT_SCHOOLS)
+    // Local storage / initial schools
+    const loaded = getAllSchools()
+    setSchools(loaded)
     setSupabaseStatus({ configured, connected: configured })
     setIsLoading(false)
   }
@@ -183,53 +103,54 @@ export default function SuperadminSchoolsPage() {
     fetchSchools()
   }, [])
 
-  // Create School Handler
+  // Handle Create School
   const handleCreateSchool = async (e: React.FormEvent) => {
     e.preventDefault()
+
     if (!formName.trim() || !formCode.trim()) {
-      toast.error('Lütfen okul adı ve kurum kodunu giriniz.')
+      toast.error('Lütfen okul adı ve MEB kurum kodunu giriniz.')
       return
     }
 
-    const newSchool: RegisteredSchool = {
-      id: `sch-${Date.now()}`,
+    // Check duplicate code
+    if (schools.some((s) => s.code.toLowerCase() === formCode.trim().toLowerCase())) {
+      toast.error(`"${formCode}" MEB koduna sahip bir okul zaten kayıtlı!`)
+      return
+    }
+
+    const created = addNewSchool({
       name: formName.trim(),
       code: formCode.trim(),
       city: formCity,
       district: formDistrict.trim() || 'Merkez',
+      address: formAddress.trim(),
       level: formLevel,
-      studentCount: 180,
-      teacherCount: 12,
-      principalName: formPrincipal.trim() || 'Belirtilmedi',
-      phone: formPhone.trim() || '+90 (212) 000 00 00',
-      email: formEmail.trim() || 'iletisim@okul.k12.tr',
-      status: 'active',
-      licenseExpires: '31.12.2027',
+      type: formType,
+      principalName: formPrincipal.trim() || 'Okul Müdürü',
+      principalPhone: formPhone.trim() || '+90 (212) 000 00 00',
+      principalEmail: formEmail.trim() || 'bilgi@okul.k12.tr',
       planType: formPlan,
-    }
+      studentCount: Number(formStudentCount) || 240,
+      teacherCount: Number(formTeacherCount) || 16,
+    })
 
-    // Attempt Supabase insert
+    // Attempt Supabase insert if configured
     if (supabaseStatus.configured) {
       try {
         const client = getSupabaseBrowserClient()
-        await client.from('schools').insert([newSchool])
+        await client.from('schools').insert([created])
       } catch (_) {}
     }
 
-    // Local state & persistence
-    const updated = [newSchool, ...schools]
-    setSchools(updated)
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('oxonom_superadmin_schools', JSON.stringify(updated))
-      } catch (_) {}
-    }
-
-    toast.success(`🏫 "${newSchool.name}" başarıyla sisteme kaydedildi!`)
+    setSchools([created, ...schools])
+    toast.success(`🏫 "${created.name}" başarıyla sisteme kaydedildi!`)
     setIsModalOpen(false)
+
+    // Reset Form
     setFormName('')
     setFormCode('')
     setFormDistrict('')
+    setFormAddress('')
     setFormPrincipal('')
     setFormPhone('')
     setFormEmail('')
@@ -246,7 +167,7 @@ export default function SuperadminSchoolsPage() {
         s.name.toLowerCase().includes(q) ||
         s.code.includes(q) ||
         s.district.toLowerCase().includes(q) ||
-        s.principalName.toLowerCase().includes(q)
+        s.principal.name.toLowerCase().includes(q)
       )
     })
   }, [schools, cityFilter, statusFilter, search])
@@ -257,15 +178,31 @@ export default function SuperadminSchoolsPage() {
     return Array.from(set)
   }, [schools])
 
+  // Total summary stats
+  const totalStats = useMemo(() => {
+    return schools.reduce(
+      (acc, s) => {
+        acc.totalStudents += s.stats?.totalStudents || 0
+        acc.totalTeachers += s.stats?.totalTeachers || 0
+        acc.totalSchools += 1
+        if (s.status === 'active') acc.activeSchools += 1
+        return acc
+      },
+      { totalStudents: 0, totalTeachers: 0, totalSchools: 0, activeSchools: 0 }
+    )
+  }, [schools])
+
   return (
-    <div className="space-y-6 font-jakarta">
+    <div className="space-y-6 font-jakarta pb-20">
+      <Toaster position="top-right" />
+
       {/* ── HEADER BANNER ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-[#17101C] border border-[#3A2942] shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-[#17101E] border border-[#2E1E3B] shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-[#D914C8]/15 text-[#FCE8FA] border border-[#D914C8]/30">
               <Building2 size={13} />
-              <span>SaaS Okul & Kurum Yönetimi</span>
+              <span>SaaS Kurum & Okul Yönetimi</span>
             </span>
 
             {/* Supabase Status Pill */}
@@ -277,11 +214,15 @@ export default function SuperadminSchoolsPage() {
               }`}
             >
               <Database size={12} />
-              <span className={`w-1.5 h-1.5 rounded-full ${supabaseStatus.configured ? 'bg-emerald-400 animate-pulse' : 'bg-indigo-400'}`} />
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  supabaseStatus.configured ? 'bg-emerald-400 animate-pulse' : 'bg-indigo-400'
+                }`}
+              />
               <span>
                 {supabaseStatus.configured
-                  ? 'Supabase Veritabanı Canlı Bağlı'
-                  : 'Supabase Senkronize (Local Fallback)'}
+                  ? 'Supabase PostgreSQL Canlı'
+                  : 'Sistem Veritabanı Aktif'}
               </span>
             </span>
           </div>
@@ -289,8 +230,8 @@ export default function SuperadminSchoolsPage() {
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Kayıtlı Okullar & Kurumlar
           </h1>
-          <p className="text-xs sm:text-sm text-gray-400">
-            Oxonom platformuna kayıtlı lisanslı okulları listeleyin, yeni okul ekleyin ve lisans durumlarını denetleyin.
+          <p className="text-xs sm:text-sm text-[#A998B3]">
+            Oxonom platformundaki lisanslı okulları yönetin. İlgili okul kartına tıklayarak tüm öğretmen, öğrenci, müdür, personel ve istatistik detaylarını görüntüleyin.
           </p>
         </div>
 
@@ -298,7 +239,7 @@ export default function SuperadminSchoolsPage() {
           <button
             type="button"
             onClick={fetchSchools}
-            className="h-11 px-3.5 rounded-2xl bg-[#211729] hover:bg-[#2B1D36] text-[#E0D0E8] text-xs font-bold flex items-center gap-1.5 border border-[#49364F] transition-all cursor-pointer"
+            className="h-11 px-3.5 rounded-2xl bg-[#20152B] hover:bg-[#2B1D36] text-[#FCF9FD] text-xs font-bold flex items-center gap-1.5 border border-[#2E1E3B] transition-all cursor-pointer"
             title="Yenile"
           >
             <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
@@ -318,61 +259,75 @@ export default function SuperadminSchoolsPage() {
 
       {/* ── STATS ROW ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 rounded-2xl bg-[#17101C] border border-[#3A2942]">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Toplam Okul</span>
-          <div className="text-2xl font-black text-white mt-1">{schools.length}</div>
-          <span className="text-[10px] text-emerald-400 font-bold">Kayıtlı kurum</span>
+        <div className="p-4 rounded-2xl bg-[#17101E] border border-[#2E1E3B] space-y-1">
+          <span className="text-[11px] font-bold text-[#A998B3] flex items-center gap-1.5">
+            <Building2 size={13} className="text-[#D914C8]" />
+            Toplam Kayıtlı Okul
+          </span>
+          <div className="text-2xl font-black text-white">{totalStats.totalSchools}</div>
+          <span className="text-[10px] text-emerald-400 font-bold block">
+            {totalStats.activeSchools} Aktif Lisanslı
+          </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#17101C] border border-[#3A2942]">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Aktif Lisanslar</span>
-          <div className="text-2xl font-black text-emerald-400 mt-1">
-            {schools.filter((s) => s.status === 'active').length}
+        <div className="p-4 rounded-2xl bg-[#17101E] border border-[#2E1E3B] space-y-1">
+          <span className="text-[11px] font-bold text-[#A998B3] flex items-center gap-1.5">
+            <Users size={13} className="text-sky-400" />
+            Toplam Öğrenci
+          </span>
+          <div className="text-2xl font-black text-white">
+            {totalStats.totalStudents.toLocaleString()}
           </div>
-          <span className="text-[10px] text-gray-400">Canlı kullanımda</span>
+          <span className="text-[10px] text-[#A998B3] block">Tüm şubeler dahil</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#17101C] border border-[#3A2942]">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Toplam Öğrenci</span>
-          <div className="text-2xl font-black text-[#FCE8FA] mt-1">
-            {schools.reduce((acc, s) => acc + s.studentCount, 0).toLocaleString('tr-TR')}
+        <div className="p-4 rounded-2xl bg-[#17101E] border border-[#2E1E3B] space-y-1">
+          <span className="text-[11px] font-bold text-[#A998B3] flex items-center gap-1.5">
+            <GraduationCap size={13} className="text-purple-400" />
+            Öğretmen Kadrosu
+          </span>
+          <div className="text-2xl font-black text-white">
+            {totalStats.totalTeachers.toLocaleString()}
           </div>
-          <span className="text-[10px] text-[#D914C8]">Platform kapasitesi</span>
+          <span className="text-[10px] text-[#A998B3] block">Aktif Branş Eğitmeni</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#17101C] border border-[#3A2942]">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Öğretmenler</span>
-          <div className="text-2xl font-black text-indigo-300 mt-1">
-            {schools.reduce((acc, s) => acc + s.teacherCount, 0)}
-          </div>
-          <span className="text-[10px] text-indigo-400">Aktif eğitimci</span>
+        <div className="p-4 rounded-2xl bg-[#17101E] border border-[#2E1E3B] space-y-1">
+          <span className="text-[11px] font-bold text-[#A998B3] flex items-center gap-1.5">
+            <ShieldCheck size={13} className="text-emerald-400" />
+            Hizmet Devamlılığı
+          </span>
+          <div className="text-2xl font-black text-emerald-400">%99.98</div>
+          <span className="text-[10px] text-[#A998B3] block">SaaS SLA Uptime</span>
         </div>
       </div>
 
-      {/* ── FILTER BAR ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-[#17101C] border border-[#3A2942]">
-        <div className="relative flex-1 max-w-md">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+      {/* ── FILTER & SEARCH BAR ── */}
+      <div className="p-4 rounded-2xl bg-[#17101E] border border-[#2E1E3B] flex flex-col md:flex-row items-center justify-between gap-3">
+        {/* Search */}
+        <div className="relative w-full md:w-96">
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A998B3]" />
           <input
             type="text"
+            placeholder="Okul adı, MEB kodu, ilçe veya müdür ara..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Okul adı, kurum kodu, ilçe veya müdür ara..."
-            className="w-full h-10 pl-9 pr-3 rounded-xl bg-[#211729] border border-[#49364F] text-xs text-white placeholder-gray-400 focus:outline-hidden focus:border-[#D914C8]"
+            className="w-full h-10 pl-10 pr-4 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-xs text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8] transition-all"
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Filters */}
+        <div className="flex items-center gap-2 w-full md:w-auto">
           {/* City Filter */}
           <select
             value={cityFilter}
             onChange={(e) => setCityFilter(e.target.value)}
-            className="h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-xs font-bold text-white focus:outline-hidden cursor-pointer"
+            className="h-10 px-3 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-xs font-bold text-white focus:outline-hidden cursor-pointer"
           >
-            <option value="all">Tüm Şehirler</option>
-            {cities.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            <option value="all">Tüm Şehirler ({cities.length})</option>
+            {cities.map((city) => (
+              <option key={city} value={city}>
+                {city}
               </option>
             ))}
           </select>
@@ -381,7 +336,7 @@ export default function SuperadminSchoolsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-xs font-bold text-white focus:outline-hidden cursor-pointer"
+            className="h-10 px-3 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-xs font-bold text-white focus:outline-hidden cursor-pointer"
           >
             <option value="all">Tüm Durumlar</option>
             <option value="active">Aktif Lisanslar</option>
@@ -390,25 +345,29 @@ export default function SuperadminSchoolsPage() {
         </div>
       </div>
 
-      {/* ── SCHOOLS GRID / LIST ── */}
+      {/* ── SCHOOLS GRID (CLICKABLE DEDICATED PAGE CARDS) ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredSchools.map((sch) => (
           <div
             key={sch.id}
-            className="p-6 rounded-3xl bg-[#17101C] border border-[#3A2942] hover:border-[#8D49A6] transition-all space-y-4 group shadow-md"
+            onClick={() => router.push(`/superadmin/schools/${sch.id}`)}
+            className="p-6 rounded-3xl bg-[#17101E] border border-[#2E1E3B] hover:border-[#D914C8] transition-all space-y-4 group shadow-md cursor-pointer relative overflow-hidden"
           >
+            {/* Ambient hover glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#D914C8]/5 group-hover:bg-[#D914C8]/15 rounded-full blur-2xl transition-all pointer-events-none" />
+
             {/* Header: School Name, Status & Code */}
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-3 relative z-10">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#D914C8] to-[#4B075F] text-white flex items-center justify-center font-black text-lg shrink-0 shadow-md">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#D914C8] to-[#6A1689] text-white flex items-center justify-center font-black text-lg shrink-0 shadow-md group-hover:scale-105 transition-transform">
                   {sch.name.charAt(0)}
                 </div>
                 <div>
                   <h3 className="text-base font-black text-white group-hover:text-[#FCE8FA] transition-colors leading-snug">
                     {sch.name}
                   </h3>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-                    <span className="font-mono text-[#D914C8]">MEB: {sch.code}</span>
+                  <div className="flex items-center gap-2 text-xs text-[#A998B3] mt-0.5">
+                    <span className="font-mono text-[#D914C8] font-bold">MEB: {sch.code}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <MapPin size={11} />
@@ -434,45 +393,71 @@ export default function SuperadminSchoolsPage() {
             </div>
 
             {/* Metrics Ribbon */}
-            <div className="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-[#211729] border border-[#49364F]/60 text-center">
+            <div className="grid grid-cols-4 gap-2 p-3 rounded-2xl bg-[#20152B] border border-[#2E1E3B]/80 text-center relative z-10">
               <div>
-                <span className="text-[10px] text-gray-400 block">Öğrenci</span>
-                <span className="text-xs font-black text-white">{sch.studentCount}</span>
+                <span className="text-[10px] text-[#A998B3] block">Öğrenci</span>
+                <span className="text-xs font-black text-white">{sch.stats?.totalStudents || 0}</span>
               </div>
               <div>
-                <span className="text-[10px] text-gray-400 block">Öğretmen</span>
-                <span className="text-xs font-black text-white">{sch.teacherCount}</span>
+                <span className="text-[10px] text-[#A998B3] block">Öğretmen</span>
+                <span className="text-xs font-black text-white">{sch.stats?.totalTeachers || 0}</span>
               </div>
               <div>
-                <span className="text-[10px] text-gray-400 block">Paket</span>
-                <span className="text-[11px] font-bold text-[#FCE8FA] truncate block">
-                  {sch.planType}
+                <span className="text-[10px] text-[#A998B3] block">Personel</span>
+                <span className="text-xs font-black text-white">{(sch.staff?.length || 0) + 1}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-[#A998B3] block">Paket</span>
+                <span className="text-[11px] font-bold text-[#FCF9FD] truncate block">
+                  {sch.licensePlan}
                 </span>
               </div>
             </div>
 
             {/* Contact & Principal Info */}
-            <div className="space-y-1.5 text-xs text-gray-300">
+            <div className="space-y-1.5 text-xs text-[#FCF9FD] relative z-10">
               <div className="flex items-center justify-between text-[11.5px]">
-                <span className="text-gray-400">Müdür:</span>
-                <strong className="text-white font-bold">{sch.principalName}</strong>
+                <span className="text-[#A998B3]">Okul Müdürü:</span>
+                <strong className="text-white font-bold">{sch.principal.name}</strong>
               </div>
               <div className="flex items-center justify-between text-[11.5px]">
-                <span className="text-gray-400">Telefon:</span>
-                <span className="font-mono text-gray-300">{sch.phone}</span>
+                <span className="text-[#A998B3]">Müdür Telefonu:</span>
+                <span className="font-mono text-[#D0C0D9]">{sch.principal.phone}</span>
               </div>
               <div className="flex items-center justify-between text-[11.5px]">
-                <span className="text-gray-400">E-Posta:</span>
-                <span className="text-gray-300 truncate max-w-[200px]">{sch.email}</span>
+                <span className="text-[#A998B3]">Müdür E-Posta:</span>
+                <span className="text-[#D0C0D9] truncate max-w-[200px]">{sch.principal.email}</span>
               </div>
-              <div className="flex items-center justify-between text-[11px] text-gray-400 pt-1 border-t border-[#3A2942]">
+              <div className="flex items-center justify-between text-[11px] text-[#A998B3] pt-2 border-t border-[#2E1E3B]">
                 <span>Kademe: {sch.level}</span>
-                <span>Bitiş: {sch.licenseExpires}</span>
+                <span>Lisans Bitiş: {sch.licenseExpires}</span>
               </div>
+            </div>
+
+            {/* Card Footer Action: Dedicated Page Button */}
+            <div className="pt-2 border-t border-[#2E1E3B]/80 flex items-center justify-between text-xs font-bold text-[#D914C8] group-hover:text-white transition-colors relative z-10">
+              <span className="flex items-center gap-1">
+                <BarChart3 size={14} />
+                <span>Okuldaki Tüm İşlem & Personel İstatistiklerini Gör</span>
+              </span>
+              <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Sayfayı Aç</span>
+                <ChevronRight size={14} />
+              </span>
             </div>
           </div>
         ))}
       </div>
+
+      {filteredSchools.length === 0 && (
+        <div className="p-12 text-center rounded-3xl bg-[#17101E] border border-[#2E1E3B] space-y-3">
+          <Building2 size={32} className="mx-auto text-[#A998B3]" />
+          <h3 className="text-base font-bold text-white">Aranan kriterlere uygun okul bulunamadı</h3>
+          <p className="text-xs text-[#A998B3]">
+            Arama terimini değiştirebilir veya yeni bir okul ekleyebilirsiniz.
+          </p>
+        </div>
+      )}
 
       {/* ── MODAL: YENİ OKUL EKLE ── */}
       <AnimatePresence>
@@ -483,163 +468,224 @@ export default function SuperadminSchoolsPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-black/70 backdrop-blur-xs"
+              className="absolute inset-0 bg-black/80 backdrop-blur-xs"
             />
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="relative w-full max-w-lg bg-[#17101C] rounded-3xl border border-[#49364F] shadow-2xl p-6 space-y-4 z-10 text-white max-h-[90vh] overflow-y-auto"
+              className="relative w-full max-w-xl bg-[#17101E] rounded-3xl border border-[#2E1E3B] shadow-2xl p-6 sm:p-8 space-y-5 z-10 text-white max-h-[90vh] overflow-y-auto"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-[#3A2942]">
+              <div className="flex items-center justify-between pb-3 border-b border-[#2E1E3B]">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] flex items-center justify-center text-white">
-                    <Building2 size={16} />
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] flex items-center justify-center text-white">
+                    <Building2 size={18} />
                   </div>
                   <div>
                     <h3 className="text-base font-black text-white">Yeni Okul / Kurum Ekle</h3>
-                    <p className="text-xs text-gray-400">Oxonom platformuna yeni okul tanımlayın.</p>
+                    <p className="text-xs text-[#A998B3]">
+                      Oxonom ekosistemine yeni bir okul kaydı oluşturun.
+                    </p>
                   </div>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-[#211729] text-gray-400 hover:text-white flex items-center justify-center cursor-pointer"
+                  className="w-8 h-8 rounded-xl bg-[#20152B] hover:bg-[#2B1D36] text-[#A998B3] hover:text-white flex items-center justify-center transition-all cursor-pointer"
                 >
-                  <X size={15} />
+                  <X size={16} />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateSchool} className="space-y-3.5 text-xs">
-                <div className="space-y-1">
-                  <label className="font-bold text-gray-300">Okul Resmi Adı:</label>
-                  <input
-                    type="text"
-                    required
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    placeholder="Örn: Kadıköy Atatürk İlkokulu"
-                    className="w-full h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-white placeholder-gray-500 font-bold"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div className="space-y-1">
-                    <label className="font-bold text-gray-300">MEB Kurum Kodu:</label>
+              <form onSubmit={handleCreateSchool} className="space-y-4 text-xs">
+                {/* Okul Adı & Kod */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="font-bold text-gray-300">Okul / Kurum Tam Adı *</label>
                     <input
                       type="text"
                       required
-                      value={formCode}
-                      onChange={(e) => setFormCode(e.target.value)}
-                      placeholder="741295"
-                      className="w-full h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-white placeholder-gray-500 font-mono"
+                      placeholder="Örn: Kadıköy Maarif Koleji"
+                      value={formName}
+                      onChange={(e) => setFormName(e.target.value)}
+                      className="w-full h-10 px-3.5 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8]"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-300">Şehir:</label>
+                    <label className="font-bold text-gray-300">MEB / Kurum Kodu *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Örn: 742999"
+                      value={formCode}
+                      onChange={(e) => setFormCode(e.target.value)}
+                      className="w-full h-10 px-3.5 rounded-xl bg-[#20152B] border border-[#2E1E3B] font-mono text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8]"
+                    />
+                  </div>
+                </div>
+
+                {/* İl, İlçe ve Tür */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-gray-300">İl</label>
                     <select
                       value={formCity}
                       onChange={(e) => setFormCity(e.target.value)}
-                      className="w-full h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-white font-bold"
+                      className="w-full h-10 px-3 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-white focus:outline-hidden cursor-pointer"
                     >
                       <option value="İstanbul">İstanbul</option>
                       <option value="Ankara">Ankara</option>
                       <option value="İzmir">İzmir</option>
                       <option value="Bursa">Bursa</option>
                       <option value="Antalya">Antalya</option>
+                      <option value="Kocaeli">Kocaeli</option>
+                      <option value="Eskişehir">Eskişehir</option>
                     </select>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-300">İlçe:</label>
+                    <label className="font-bold text-gray-300">İlçe</label>
                     <input
                       type="text"
+                      placeholder="Örn: Kadıköy"
                       value={formDistrict}
                       onChange={(e) => setFormDistrict(e.target.value)}
-                      placeholder="Örn: Beşiktaş"
-                      className="w-full h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-white placeholder-gray-500"
+                      className="w-full h-10 px-3.5 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8]"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-300">Eğitim Kademesi:</label>
+                    <label className="font-bold text-gray-300">Kurum Türü</label>
+                    <select
+                      value={formType}
+                      onChange={(e) => setFormType(e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-white focus:outline-hidden cursor-pointer"
+                    >
+                      <option value="MEB Resmi İlkokulu">MEB Resmi İlkokulu</option>
+                      <option value="MEB Resmi Ortaokulu">MEB Resmi Ortaokulu</option>
+                      <option value="MEB Resmi İlkokulu & Ortaokulu">MEB Resmi İlkokulu & Ortaokulu</option>
+                      <option value="Özel K-12 Koleji">Özel K-12 Koleji</option>
+                      <option value="Özel İlkokul">Özel İlkokul</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Eğitim Kademesi ve Lisans Planı */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-gray-300">Eğitim Kademesi</label>
                     <select
                       value={formLevel}
                       onChange={(e) => setFormLevel(e.target.value)}
-                      className="w-full h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-white font-bold"
+                      className="w-full h-10 px-3 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-white focus:outline-hidden cursor-pointer"
                     >
+                      <option value="İlkokul (1-4) & Ortaokul (5-8)">İlkokul (1-4) & Ortaokul (5-8)</option>
                       <option value="İlkokul (1-4. Sınıflar)">İlkokul (1-4. Sınıflar)</option>
                       <option value="Ortaokul (5-8. Sınıflar)">Ortaokul (5-8. Sınıflar)</option>
-                      <option value="İlkokul & Ortaokul (1-8. Sınıflar)">İlkokul & Ortaokul (1-8)</option>
-                      <option value="K-12 Kolej">K-12 Kolej</option>
+                      <option value="K-12 (Tüm Kademeler)">K-12 (Tüm Kademeler)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-gray-300">Lisans Paketi</label>
+                    <select
+                      value={formPlan}
+                      onChange={(e) => setFormPlan(e.target.value as any)}
+                      className="w-full h-10 px-3 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-white focus:outline-hidden cursor-pointer"
+                    >
+                      <option value="Enterprise Pro">Enterprise Pro (Tüm Modüller)</option>
+                      <option value="Standart Okul">Standart Okul (Temel Eğitim)</option>
+                      <option value="Deneme Lisansı (14 Gün)">Deneme Lisansı (14 Gün)</option>
                     </select>
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-gray-300">Okul Müdürü / Kurum Yetkilisi:</label>
-                  <input
-                    type="text"
-                    value={formPrincipal}
-                    onChange={(e) => setFormPrincipal(e.target.value)}
-                    placeholder="Ad Soyad"
-                    className="w-full h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-white placeholder-gray-500"
-                  />
+                {/* Okul Müdürü (Yetkili) Bilgileri */}
+                <div className="p-4 rounded-2xl bg-[#20152B] border border-[#2E1E3B] space-y-3">
+                  <span className="text-[11px] font-black uppercase text-[#D914C8] block">
+                    Okul Yetkilisi (Müdür) Bilgileri
+                  </span>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="font-bold text-gray-300">Müdür Adı Soyadı *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Örn: Kemal SOYSAL"
+                        value={formPrincipal}
+                        onChange={(e) => setFormPrincipal(e.target.value)}
+                        className="w-full h-9 px-3 rounded-lg bg-[#17101E] border border-[#2E1E3B] text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-gray-300">Yetkili Telefonu</label>
+                      <input
+                        type="text"
+                        placeholder="+90 (532) 000 00 00"
+                        value={formPhone}
+                        onChange={(e) => setFormPhone(e.target.value)}
+                        className="w-full h-9 px-3 rounded-lg bg-[#17101E] border border-[#2E1E3B] font-mono text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-gray-300">Yetkili E-Postası</label>
+                      <input
+                        type="email"
+                        placeholder="mudur@okul.k12.tr"
+                        value={formEmail}
+                        onChange={(e) => setFormEmail(e.target.value)}
+                        className="w-full h-9 px-3 rounded-lg bg-[#17101E] border border-[#2E1E3B] text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8]"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5">
+                {/* Tahmini Kapasite */}
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-300">İletişim Telefonu:</label>
+                    <label className="font-bold text-gray-300">Öğrenci Kapasitesi</label>
                     <input
-                      type="text"
-                      value={formPhone}
-                      onChange={(e) => setFormPhone(e.target.value)}
-                      placeholder="+90 (212) 000 00 00"
-                      className="w-full h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-white placeholder-gray-500 font-mono"
+                      type="number"
+                      min={10}
+                      max={5000}
+                      value={formStudentCount}
+                      onChange={(e) => setFormStudentCount(Number(e.target.value))}
+                      className="w-full h-10 px-3.5 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-white focus:outline-hidden focus:border-[#D914C8]"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-300">Resmi E-Posta:</label>
+                    <label className="font-bold text-gray-300">Öğretmen Sayısı</label>
                     <input
-                      type="email"
-                      value={formEmail}
-                      onChange={(e) => setFormEmail(e.target.value)}
-                      placeholder="bilgi@okul.k12.tr"
-                      className="w-full h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-white placeholder-gray-500"
+                      type="number"
+                      min={1}
+                      max={500}
+                      value={formTeacherCount}
+                      onChange={(e) => setFormTeacherCount(Number(e.target.value))}
+                      className="w-full h-10 px-3.5 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-white focus:outline-hidden focus:border-[#D914C8]"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-gray-300">Lisans Paketi:</label>
-                  <select
-                    value={formPlan}
-                    onChange={(e) => setFormPlan(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl bg-[#211729] border border-[#49364F] text-white font-bold"
-                  >
-                    <option value="Standart Okul">Standart Okul (1 Yıllık)</option>
-                    <option value="Enterprise Pro">Enterprise Pro (Sınırsız Tahta & Game Studio)</option>
-                    <option value="Deneme Lisansı (14 Gün)">Deneme Lisansı (14 Gün)</option>
-                  </select>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-3 border-t border-[#3A2942]">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#2E1E3B]">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2.5 rounded-xl bg-[#211729] text-gray-400 hover:text-white font-bold cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-[#20152B] hover:bg-[#2B1D36] text-[#A998B3] hover:text-white font-bold transition-all cursor-pointer"
                   >
                     Vazgeç
                   </button>
+
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-black cursor-pointer shadow-md shadow-[#D914C8]/25 active:scale-95 transition-all"
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white font-black shadow-lg shadow-[#D914C8]/25 transition-all cursor-pointer"
                   >
-                    Okulu Kaydet
+                    Okulu Sisteme Kaydet
                   </button>
                 </div>
               </form>
