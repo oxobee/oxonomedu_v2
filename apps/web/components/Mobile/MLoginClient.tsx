@@ -26,7 +26,7 @@ import {
 import { useAuth } from '@components/Contexts/AuthContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import toast, { Toaster } from 'react-hot-toast'
-import { getStoredPrincipalProfile, savePrincipalProfile } from '@/lib/principal/principalProfileStorage'
+import { getStoredPrincipalProfile, savePrincipalProfile, saveSchoolInfo } from '@/lib/principal/principalProfileStorage'
 
 interface MLoginClientProps {
   org?: any
@@ -115,7 +115,25 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
     try {
       const activeOrgSlug = orgslug || org?.slug || 'oxonom'
       const lowerIdent = rawIdent.toLowerCase()
+      // Check if identifier matches any registered school's principal
+      let matchedSchool: any = null
+      if (typeof window !== 'undefined') {
+        try {
+          const rawSchools = localStorage.getItem('oxonom_superadmin_schools')
+          if (rawSchools) {
+            const sList = JSON.parse(rawSchools)
+            matchedSchool = sList.find((s: any) =>
+              s.principal?.email?.toLowerCase() === lowerIdent ||
+              s.email?.toLowerCase() === lowerIdent ||
+              s.principal?.phone?.replace(/\s+/g, '') === rawIdent.replace(/\s+/g, '') ||
+              s.code === rawIdent
+            )
+          }
+        } catch (_) {}
+      }
+
       const isAdmin =
+        Boolean(matchedSchool) ||
         lowerIdent.includes('idare') ||
         lowerIdent.includes('mudur') ||
         lowerIdent.includes('admin') ||
@@ -167,11 +185,41 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
           localStorage.removeItem('oxonom_teacher_profile_completed')
           localStorage.setItem('oxonom_current_role', 'admin')
 
-          const existingProfile = getStoredPrincipalProfile()
-          savePrincipalProfile({
-            ...existingProfile,
-            loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
-          })
+          if (matchedSchool) {
+            localStorage.setItem('oxonom_active_school_code', matchedSchool.code)
+            savePrincipalProfile({
+              name: matchedSchool.principal?.name || 'Okul Müdürü',
+              title: matchedSchool.principal?.title || 'Okul Müdürü · Kurum Baş Yetkilisi',
+              email: matchedSchool.principal?.email || matchedSchool.email,
+              tcNo: matchedSchool.principal?.tcNo || '10000000099',
+              phone: matchedSchool.principal?.phone || matchedSchool.phone,
+              username: matchedSchool.principal?.email?.split('@')[0] || 'mudur',
+              role: '1. Derece Kurum Müdürü (Baş Yönetici)',
+              schoolName: matchedSchool.name,
+              institutionCode: matchedSchool.code,
+              initialPassword: matchedSchool.principal?.loginPassword,
+              currentPassword: matchedSchool.principal?.loginPassword,
+              mustChangePassword: Boolean(matchedSchool.principal?.mustChangePassword),
+              isFirstLogin: Boolean(matchedSchool.principal?.isFirstLogin),
+              isNewEmptySchool: Boolean(matchedSchool.principal?.isNewEmptySchool),
+              loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+              twoFactorActive: false,
+            })
+            saveSchoolInfo({
+              officialName: matchedSchool.name,
+              institutionCode: matchedSchool.code,
+              address: matchedSchool.address,
+              schoolPhone: matchedSchool.phone,
+              schoolEmail: matchedSchool.email,
+              website: matchedSchool.website,
+            })
+          } else {
+            const existingProfile = getStoredPrincipalProfile()
+            savePrincipalProfile({
+              ...existingProfile,
+              loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+            })
+          }
         } catch (_) {}
       }
 

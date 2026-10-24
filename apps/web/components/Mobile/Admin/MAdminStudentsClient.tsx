@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   GraduationCap,
+  Users,
   Search,
   Plus,
   ArrowLeftRight,
@@ -63,6 +64,12 @@ import {
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getStoredPrincipalProfile } from '@/lib/principal/principalProfileStorage'
 import { getStudentAttendanceSummary } from '@services/demo/attendanceService'
+import {
+  getCurrentSchoolCode,
+  isDemoSchool,
+  getTenantStudents,
+  saveTenantStudents,
+} from '@/lib/schools/schoolTenantManager'
 
 export interface MAdminStudentsClientProps {
   orgSlug?: string
@@ -263,14 +270,39 @@ export default function MAdminStudentsClient({
     return String(maxNo + 1)
   }
 
-  // ── STUDENTS LIST WITH STRICT MULTI-TENANT ISOLATION (OXONOM OKULLARI) ──
+  // ── STUDENTS LIST WITH STRICT MULTI-TENANT ISOLATION ──
   const [studentsList, setStudentsList] = useState<any[]>(() => {
-    const baseList = getSingleSourceOfTruthStudents(30)
-    return baseList.map(enrichStudentWithRealData)
+    const code = getCurrentSchoolCode()
+    const tenant = getTenantStudents(code)
+    if (tenant !== null) return tenant.map(enrichStudentWithRealData)
+    if (isDemoSchool(code)) {
+      const baseList = getSingleSourceOfTruthStudents(30)
+      return baseList.map(enrichStudentWithRealData)
+    }
+    return []
   })
 
   // Synchronize when school org changes or load from isolated localStorage partition
   const loadStudents = () => {
+    const code = getCurrentSchoolCode()
+    const tenant = getTenantStudents(code)
+    if (tenant !== null) {
+      const enrichedList = tenant.map(enrichStudentWithRealData)
+      setStudentsList(enrichedList)
+      setSelectedStudentForDetail((prev: any) => {
+        if (!prev) return null
+        const updated = enrichedList.find((s) => s.id === prev.id || s.studentNo === prev.studentNo)
+        return updated ? enrichStudentWithRealData(updated) : prev
+      })
+      return
+    }
+
+    if (!isDemoSchool(code)) {
+      setStudentsList([])
+      setSelectedStudentForDetail(null)
+      return
+    }
+
     const baseList = getSingleSourceOfTruthStudents(selectedOrgId)
     const enrichedList = baseList.map(enrichStudentWithRealData)
     setStudentsList(enrichedList)
@@ -310,6 +342,7 @@ export default function MAdminStudentsClient({
 
   // Sync to isolated localStorage partition whenever studentsList changes
   const updateStudentsList = (newList: any[]) => {
+    saveTenantStudents(newList, getCurrentSchoolCode())
     saveSingleSourceOfTruthStudents(newList, selectedOrgId)
     const enriched = newList.map(enrichStudentWithRealData)
     setStudentsList(enriched)
@@ -950,11 +983,35 @@ export default function MAdminStudentsClient({
             </motion.div>
           ))}
 
-          {filteredStudents.length === 0 && (
+          {studentsList.length === 0 ? (
+            <div className="py-14 text-center rounded-3xl bg-white dark:bg-[#121826] border-2 border-dashed border-emerald-500/30 p-8 space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-sm">
+                <Users size={32} />
+              </div>
+              <div className="space-y-1 max-w-md mx-auto">
+                <h3 className="text-base font-black text-gray-900 dark:text-white">
+                  Henüz Öğrenci Kaydı Bulunmuyor
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Kurumunuz bünyesinde kayıtlı öğrenci bulunmuyor. Yeni öğrenci kaydı oluşturabilir veya e-Okul formatında Excel ile toplu yükleme yapabilirsiniz.
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-2.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setIsNewStudentModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black shadow-lg shadow-emerald-500/25 hover:brightness-110 transition-all cursor-pointer"
+                >
+                  <Plus size={16} strokeWidth={2.5} />
+                  <span>+ Yeni Öğrenci Ekle</span>
+                </button>
+              </div>
+            </div>
+          ) : filteredStudents.length === 0 ? (
             <div className="py-12 text-center text-xs text-gray-400 bg-white dark:bg-[#121826] rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
               Arama kriterlerine uygun öğrenci kaydı bulunamadı.
             </div>
-          )}
+          ) : null}
         </section>
       </motion.div>
 

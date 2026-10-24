@@ -58,6 +58,13 @@ import {
   DEMO_STUDENT,
 } from '@services/demo/schoolDirectory'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import {
+  getCurrentSchoolCode,
+  isDemoSchool,
+  getTenantClasses,
+  saveTenantClasses,
+  isCurrentSchoolEmpty,
+} from '@/lib/schools/schoolTenantManager'
 
 export interface MAdminClassesClientProps {
   orgSlug?: string
@@ -1067,50 +1074,40 @@ export default function MAdminClassesClient({
     return getOrgTeachers(selectedOrgId)
   }, [selectedOrgId])
 
-  // Classrooms dataset with localStorage sync
+  // Classrooms dataset with strict multi-tenant school isolation
   const [classesList, setClassesList] = useState<AdminClassroom[]>(() => {
-    const initialOrgId = user?.school_org_id || 30
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(`oxonom_admin_classes_${initialOrgId}`)
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed) && parsed.length >= 10) {
-            return reconcileClassesWithRealData(parsed.map(normalizeClassroom), initialOrgId)
-          }
-        }
-      } catch (_) {}
+    const code = getCurrentSchoolCode()
+    const tenant = getTenantClasses(code)
+    if (tenant !== null) {
+      return tenant.map(normalizeClassroom)
     }
-    return reconcileClassesWithRealData(DEFAULT_OXONOM_CLASSES.map(normalizeClassroom), initialOrgId)
+    // Only pre-seeded demo school loads default classes!
+    if (isDemoSchool(code)) {
+      return reconcileClassesWithRealData(DEFAULT_OXONOM_CLASSES.map(normalizeClassroom), 30)
+    }
+    return []
   })
 
   // Synchronize when school org changes or load from localStorage
   useEffect(() => {
-    const defaultClasses = DEFAULT_OXONOM_CLASSES.map(normalizeClassroom)
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(
-          `oxonom_admin_classes_${selectedOrgId}`
-        )
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed) && parsed.length >= 10) {
-            const normalized = reconcileClassesWithRealData(parsed.map(normalizeClassroom), selectedOrgId)
-            setClassesList(normalized)
-            setSelectedGradeFilter('ALL')
-            return
-          }
-        }
-        // Initialize with 1 to 8 (A to D) classes
-        const reconciled = reconcileClassesWithRealData(defaultClasses, selectedOrgId)
-        localStorage.setItem(`oxonom_admin_classes_${selectedOrgId}`, JSON.stringify(reconciled))
-        localStorage.setItem('oxonom_admin_classes_30', JSON.stringify(reconciled))
-        setClassesList(reconciled)
-        setSelectedGradeFilter('ALL')
-        return
-      } catch (_) {}
+    const code = getCurrentSchoolCode()
+    const tenant = getTenantClasses(code)
+    if (tenant !== null) {
+      setClassesList(tenant.map(normalizeClassroom))
+      setSelectedGradeFilter('ALL')
+      return
     }
-    const reconciled = reconcileClassesWithRealData(defaultClasses, selectedOrgId)
+
+    if (!isDemoSchool(code)) {
+      // Newly created schools are 100% empty
+      setClassesList([])
+      setSelectedGradeFilter('ALL')
+      return
+    }
+
+    // Demo school fallback
+    const defaultClasses = DEFAULT_OXONOM_CLASSES.map(normalizeClassroom)
+    const reconciled = reconcileClassesWithRealData(defaultClasses, 30)
     setClassesList(reconciled)
     setSelectedGradeFilter('ALL')
   }, [selectedOrgId])
@@ -1119,6 +1116,8 @@ export default function MAdminClassesClient({
   const persistClasses = (updatedList: AdminClassroom[]) => {
     const normalized = updatedList.map(normalizeClassroom)
     setClassesList(normalized)
+    const code = getCurrentSchoolCode()
+    saveTenantClasses(normalized, code)
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(
@@ -2262,11 +2261,33 @@ export default function MAdminClassesClient({
             </motion.div>
           ))}
 
-            {filteredClasses.length === 0 && (
+            {classesList.length === 0 ? (
+              <div className={`py-14 text-center rounded-3xl bg-white dark:bg-[#121826] border-2 border-dashed border-purple-500/30 p-8 space-y-4 ${hideHeader ? 'col-span-full' : ''}`}>
+                <div className="w-16 h-16 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mx-auto shadow-sm">
+                  <Building2 size={32} />
+                </div>
+                <div className="space-y-1 max-w-md mx-auto">
+                  <h3 className="text-base font-black text-gray-900 dark:text-white">
+                    Henüz Şube / Sınıf Tanımlanmadı
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    Kurumunuza ait kayıtlı bir şube bulunmuyor. Yeni eğitim dönemine başlamak için ilk sınıfınızı (örneğin 1-A) oluşturarak öğrencilerinizi yerleştirebilirsiniz.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewClassModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-xs font-black shadow-lg shadow-[#D914C8]/25 hover:brightness-110 transition-all cursor-pointer"
+                >
+                  <Plus size={16} strokeWidth={2.5} />
+                  <span>+ İlk Şubeyi / Sınıfı Ekle</span>
+                </button>
+              </div>
+            ) : filteredClasses.length === 0 ? (
               <div className={`py-12 text-center text-xs text-gray-400 bg-white dark:bg-[#121826] rounded-2xl border border-gray-200 dark:border-gray-800 p-6 ${hideHeader ? 'col-span-full' : ''}`}>
                 Arama kriterlerine uygun sınıf veya şube bulunamadı.
               </div>
-            )}
+            ) : null}
           </section>
         </>
       )}

@@ -81,6 +81,14 @@ import {
   saveSchoolInfo,
   getPrincipalInitials,
 } from '@/lib/principal/principalProfileStorage'
+import {
+  getCurrentSchoolCode,
+  isDemoSchool,
+  getTenantClasses,
+  getTenantTeachers,
+  getTenantStudents,
+  isCurrentSchoolEmpty,
+} from '@/lib/schools/schoolTenantManager'
 
 export interface MAdminClientProps {
   orgSlug?: string
@@ -199,42 +207,39 @@ export default function MAdminClient({
           setEditSchoolName(stored.schoolName || storedSchool.officialName)
 
           // Check if this school is an empty fresh school (no mock data)
-          const isEmpty =
-            Boolean(stored.isNewEmptySchool) ||
-            localStorage.getItem('oxonom_is_empty_profile') === 'true'
+          const isFreshEmpty = isCurrentSchoolEmpty()
 
-          if (isEmpty) {
+          // Get tenant isolated data
+          const tenantTeachers = getTenantTeachers()
+          const tenantStudents = getTenantStudents()
+          const tenantClasses = getTenantClasses()
+
+          if (isFreshEmpty || (!isDemoSchool() && (!tenantTeachers || tenantTeachers.length === 0) && (!tenantStudents || tenantStudents.length === 0) && (!tenantClasses || tenantClasses.length === 0))) {
             setRealStats({
-              studentCount: 0,
-              studentName: 'Henüz Öğrenci Yok',
-              teacherCount: 0,
-              teacherName: 'Henüz Öğretmen Yok',
-              classCount: 0,
-              className: 'Şube Tanımsız',
-              parentCount: 0,
+              studentCount: tenantStudents ? tenantStudents.length : 0,
+              studentName: (tenantStudents && tenantStudents.length > 0) ? tenantStudents[0]?.name : 'Henüz Öğrenci Yok',
+              teacherCount: tenantTeachers ? tenantTeachers.length : 0,
+              teacherName: (tenantTeachers && tenantTeachers.length > 0) ? tenantTeachers[0]?.name : 'Henüz Öğretmen Yok',
+              classCount: tenantClasses ? tenantClasses.length : 0,
+              className: (tenantClasses && tenantClasses.length > 0) ? tenantClasses[0]?.name : 'Şube Tanımsız',
+              parentCount: tenantStudents ? tenantStudents.length : 0,
               activeBoardsCount: 0,
             })
             return
           }
 
-          // Real counts for selectedOrgId
-          const rawTeachers = localStorage.getItem(`oxonom_admin_teachers_${selectedOrgId}`)
-          const teachers = rawTeachers ? JSON.parse(rawTeachers) : null
-          const tCount = Array.isArray(teachers) && teachers.length > 0 ? teachers.length : 16
-          const tName = Array.isArray(teachers) && teachers.length > 0 ? teachers[0].name : 'Bahar ÇETİN'
+          // Real counts for selectedOrgId or tenant
+          const teachers = tenantTeachers ?? (localStorage.getItem(`oxonom_admin_teachers_${selectedOrgId}`) ? JSON.parse(localStorage.getItem(`oxonom_admin_teachers_${selectedOrgId}`)!) : null)
+          const tCount = Array.isArray(teachers) && teachers.length > 0 ? teachers.length : (isDemoSchool() ? 16 : 0)
+          const tName = Array.isArray(teachers) && teachers.length > 0 ? teachers[0].name : (isDemoSchool() ? 'Bahar ÇETİN' : 'Henüz Öğretmen Yok')
 
-          const rawStudents =
-            localStorage.getItem(`oxonom_admin_students_list_${selectedOrgId}`) ||
-            localStorage.getItem('oxonom_admin_students_list_30') ||
-            localStorage.getItem('oxonom_m_students_v3')
-          const students = rawStudents ? JSON.parse(rawStudents) : null
-          const sCount = Array.isArray(students) && students.length > 0 ? students.length : 1
-          const sName = Array.isArray(students) && students.length > 0 ? (students[0]?.name || 'Ali Yağız DEMİREL') : 'Ali Yağız DEMİREL'
-          const sClass = Array.isArray(students) && students.length > 0 ? (students[0]?.className || '1/A') : '1/A'
+          const students = tenantStudents ?? (localStorage.getItem(`oxonom_admin_students_list_${selectedOrgId}`) ? JSON.parse(localStorage.getItem(`oxonom_admin_students_list_${selectedOrgId}`)!) : null)
+          const sCount = Array.isArray(students) && students.length > 0 ? students.length : (isDemoSchool() ? 1 : 0)
+          const sName = Array.isArray(students) && students.length > 0 ? (students[0]?.name || 'Ali Yağız DEMİREL') : (isDemoSchool() ? 'Ali Yağız DEMİREL' : 'Henüz Öğrenci Yok')
+          const sClass = Array.isArray(students) && students.length > 0 ? (students[0]?.className || '1/A') : (isDemoSchool() ? '1/A' : 'Şube Tanımsız')
 
-          const rawClasses = localStorage.getItem(`oxonom_admin_classes_${selectedOrgId}`)
-          const classes = rawClasses ? JSON.parse(rawClasses) : null
-          const cCount = Array.isArray(classes) && classes.length >= 10 ? classes.length : 32
+          const classes = tenantClasses ?? (localStorage.getItem(`oxonom_admin_classes_${selectedOrgId}`) ? JSON.parse(localStorage.getItem(`oxonom_admin_classes_${selectedOrgId}`)!) : null)
+          const cCount = Array.isArray(classes) && classes.length > 0 ? classes.length : (isDemoSchool() ? 32 : 0)
           const cName = sClass.includes('/') ? sClass : sClass.replace('-', '/')
 
           const rawBoards = localStorage.getItem('oxonom_principal_active_boards')
@@ -252,7 +257,7 @@ export default function MAdminClient({
             teacherCount: tCount,
             teacherName: tName,
             classCount: cCount,
-            className: cName || '1/A',
+            className: cName || (isDemoSchool() ? '1/A' : 'Şube Tanımsız'),
             parentCount: sCount,
             activeBoardsCount,
           })
@@ -268,6 +273,7 @@ export default function MAdminClient({
       window.addEventListener('oxonom_school_updated', loadPrincipalAndStats)
       window.addEventListener('oxonom_teachers_updated', loadPrincipalAndStats)
       window.addEventListener('oxonom_classes_updated', loadPrincipalAndStats)
+      window.addEventListener('oxonom_students_updated', loadPrincipalAndStats)
       window.addEventListener('storage', loadPrincipalAndStats)
 
       // Automatically open account modal if redirected from login with query param
@@ -288,6 +294,7 @@ export default function MAdminClient({
         window.removeEventListener('oxonom_school_updated', loadPrincipalAndStats)
         window.removeEventListener('oxonom_teachers_updated', loadPrincipalAndStats)
         window.removeEventListener('oxonom_classes_updated', loadPrincipalAndStats)
+        window.removeEventListener('oxonom_students_updated', loadPrincipalAndStats)
         window.removeEventListener('storage', loadPrincipalAndStats)
       }
     }

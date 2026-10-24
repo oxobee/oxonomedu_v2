@@ -54,6 +54,12 @@ import MobileAdminDock from './MobileAdminDock'
 import MobileAdminMoreSheet from './MobileAdminMoreSheet'
 import { useMobileTheme } from '@components/Mobile/useMobileTheme'
 import { getOrgTeachers, SCHOOL_ORGS, ALL_CLASSROOMS } from '@services/demo/schoolDirectory'
+import {
+  getCurrentSchoolCode,
+  isDemoSchool,
+  getTenantTeachers,
+  saveTenantTeachers,
+} from '@/lib/schools/schoolTenantManager'
 
 export interface MAdminTeachersClientProps {
   orgSlug?: string
@@ -332,9 +338,13 @@ export default function MAdminTeachersClient({
   const [editAnnualLeave, setEditAnnualLeave] = useState<number>(16)
   const [editCasualLeave, setEditCasualLeave] = useState<number>(8)
 
-  // Initial teacher dataset
+  // Initial teacher dataset with strict multi-tenant school isolation
   const [teachersList, setTeachersList] = useState<any[]>(() => {
-    return getOrgTeachers(30)
+    const code = getCurrentSchoolCode()
+    const tenant = getTenantTeachers(code)
+    if (tenant !== null) return tenant
+    if (isDemoSchool(code)) return getOrgTeachers(30)
+    return []
   })
 
   // New Teacher Modal Form States
@@ -470,6 +480,7 @@ export default function MAdminTeachersClient({
 
     const updatedList = [newTeacherObj, ...teachersList]
     setTeachersList(updatedList)
+    saveTenantTeachers(updatedList, getCurrentSchoolCode())
 
     if (typeof window !== 'undefined') {
       try {
@@ -501,23 +512,21 @@ export default function MAdminTeachersClient({
     toast.success(`${newTeacherObj.name} başarıyla sisteme eklendi!`, { duration: 4000 })
   }
 
-  // Sync when school changes or load overrides
+  // Sync when school changes or load overrides with strict isolation
   useEffect(() => {
-    const defaultList = getOrgTeachers(selectedOrgId)
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem(
-          `oxonom_admin_teachers_${selectedOrgId}`
-        )
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setTeachersList(parsed)
-            return
-          }
-        }
-      } catch (_) {}
+    const code = getCurrentSchoolCode()
+    const tenant = getTenantTeachers(code)
+    if (tenant !== null) {
+      setTeachersList(tenant)
+      return
     }
+
+    if (!isDemoSchool(code)) {
+      setTeachersList([])
+      return
+    }
+
+    const defaultList = getOrgTeachers(30)
     setTeachersList(defaultList)
   }, [selectedOrgId])
 
@@ -619,6 +628,7 @@ export default function MAdminTeachersClient({
     })
 
     setTeachersList(updatedList)
+    saveTenantTeachers(updatedList, getCurrentSchoolCode())
 
     if (typeof window !== 'undefined') {
       try {
@@ -774,6 +784,7 @@ export default function MAdminTeachersClient({
       return t
     })
     setTeachersList(updated)
+    saveTenantTeachers(updated, getCurrentSchoolCode())
     if (selectedTeacherForDetail?.id === teacher.id) {
       setSelectedTeacherForDetail({ ...selectedTeacherForDetail, isFrozen: newStatus })
     }
@@ -794,6 +805,7 @@ export default function MAdminTeachersClient({
     if (!teacherToDelete) return
     const updated = teachersList.filter((t) => t.id !== teacherToDelete.id)
     setTeachersList(updated)
+    saveTenantTeachers(updated, getCurrentSchoolCode())
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(`oxonom_admin_teachers_${selectedOrgId}`, JSON.stringify(updated))
@@ -858,6 +870,7 @@ export default function MAdminTeachersClient({
       return t
     })
     setTeachersList(updated)
+    saveTenantTeachers(updated, getCurrentSchoolCode())
     setSelectedTeacherForDetail({
       ...selectedTeacherForDetail,
       roleTemplate: selectedRoleTemplate,
@@ -1144,11 +1157,35 @@ export default function MAdminTeachersClient({
             </motion.div>
           ))}
 
-          {filteredTeachers.length === 0 && (
+          {teachersList.length === 0 ? (
+            <div className={`py-14 text-center rounded-3xl bg-white dark:bg-[#121826] border-2 border-dashed border-indigo-500/30 p-8 space-y-4 ${hideHeader ? 'col-span-full' : ''}`}>
+              <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-sm">
+                <GraduationCap size={32} />
+              </div>
+              <div className="space-y-1 max-w-md mx-auto">
+                <h3 className="text-base font-black text-gray-900 dark:text-white">
+                  Kayıtlı Öğretmen Bulunmuyor
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Kurumunuz bünyesinde henüz tanımlanmış öğretmen bulunmuyor. Yeni bir öğretmen ekleyerek branş ve ders atamalarını yapabilirsiniz.
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-2.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setIsNewTeacherModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-black shadow-lg shadow-indigo-500/25 hover:brightness-110 transition-all cursor-pointer"
+                >
+                  <Plus size={16} strokeWidth={2.5} />
+                  <span>+ İlk Öğretmeni Ekle</span>
+                </button>
+              </div>
+            </div>
+          ) : filteredTeachers.length === 0 ? (
             <div className={`py-12 text-center text-xs text-gray-400 bg-white dark:bg-[#121826] rounded-2xl border border-gray-200 dark:border-gray-800 p-6 ${hideHeader ? 'col-span-full' : ''}`}>
               Arama kriterlerine uygun öğretmen bulunamadı.
             </div>
-          )}
+          ) : null}
         </section>
       </motion.div>
 
