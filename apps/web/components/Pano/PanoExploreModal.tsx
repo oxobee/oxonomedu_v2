@@ -52,6 +52,58 @@ interface PanoExploreModalProps {
 
 type ActiveView = 'menu' | 'browser' | 'youtube' | 'tv_coming_soon'
 
+// 1. ve 2. Sınıflara Uygun Türkçe Eğitici Video Kısayolları
+const FIRST_SECOND_GRADE_VIDEOS = [
+  {
+    id: 'D0Wp2n0eGjY',
+    category: '1. Sınıf Türkçe',
+    title: '🔤 Harfleri & Sesleri Öğreniyorum',
+    desc: 'ELAKİN grubu harf sesleri animasyonlu eğitim şarkısı',
+  },
+  {
+    id: '2Vv-BfVoq4g',
+    category: '1. Sınıf Matematik',
+    title: '🔢 Ritmik Sayma Şarkısı',
+    desc: '10’ar, 5’er ve 2’şer eğlenceli ritmik sayma',
+  },
+  {
+    id: 'libKVRa01L8',
+    category: '2. Sınıf Matematik',
+    title: '✖️ Çarpım Tablosu Şarkısı',
+    desc: '2’ler, 3’ler, 4’ler ve 5’ler ritimli kolay ezber',
+  },
+  {
+    id: 'QdcI5_e-WwU',
+    category: 'Hayat Bilgisi',
+    title: '🍎 Sağlıklı Yaşam ve Hijyen',
+    desc: 'El yıkama, diş fırçalama ve dengeli beslenme',
+  },
+  {
+    id: 'jfKfPfyJRdk',
+    category: 'Değerler Eğitimi',
+    title: '🤝 Sihirli Nezaket Kelimeleri',
+    desc: 'Lütfen, teşekkür ederim, özür dilerim eğitimi',
+  },
+  {
+    id: 'Z1BCujX3pw8',
+    category: 'Fen & Deney',
+    title: '🧪 TÜBİTAK Meraklı Minik Deneyleri',
+    desc: 'İlkokul öğrencileri için güvenli ev/okul deneyleri',
+  },
+  {
+    id: 'zxIpA5nF_LY',
+    category: 'İngilizce',
+    title: '🇬🇧 Renkler & Sayılar (Colors & Numbers)',
+    desc: '1-2. Sınıf eğlenceli İngilizce çocuk şarkısı',
+  },
+  {
+    id: '8y_mY3K7Fvg',
+    category: 'Müzik & Hareket',
+    title: '🏃‍♂️ Beden Eğitimi & Isınma Dansı',
+    desc: 'Sınıfta ve tahta önünde hareketli ritim oyunu',
+  },
+]
+
 export default function PanoExploreModal({ isOpen, onClose }: PanoExploreModalProps) {
   const [activeView, setActiveView] = useState<ActiveView>('menu')
 
@@ -62,9 +114,10 @@ export default function PanoExploreModal({ isOpen, onClose }: PanoExploreModalPr
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [iframeKey, setIframeKey] = useState(0)
 
-  // YouTube State
+  // YouTube State (In-App Search & 1-2. Sınıf Eğitici Kısayollar)
   const [ytQuery, setYtQuery] = useState('')
-  const [ytVideoId, setYtVideoId] = useState('jfKfPfyJRdk') // Default pleasant relaxing/educational stream
+  const [ytSearchQuery, setYtSearchQuery] = useState('')
+  const [ytVideoId, setYtVideoId] = useState('D0Wp2n0eGjY') // 1. Sınıf Türkçe harf şarkısı
 
   const navigateTo = (input: string) => {
     let target = input.trim()
@@ -462,12 +515,12 @@ export default function PanoExploreModal({ isOpen, onClose }: PanoExploreModalPr
                 </span>
               </div>
 
-              {/* YouTube Search Form */}
+              {/* YouTube Search Form (In-Modal Search) */}
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
                   if (ytQuery.trim()) {
-                    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(ytQuery)}`, '_blank')
+                    setYtSearchQuery(ytQuery.trim())
                   }
                 }}
                 className="flex-1 max-w-lg relative"
@@ -497,37 +550,61 @@ export default function PanoExploreModal({ isOpen, onClose }: PanoExploreModalPr
               </button>
             </div>
 
-            {/* YouTube Video Player & Suggested Educational Topics */}
-            <div className="flex-1 p-4 overflow-y-auto bg-black flex flex-col items-center justify-center relative">
+            {/* YouTube Video Player & 1-2. Sınıf Eğitici İçerikler */}
+            <div className="flex-1 p-4 overflow-y-auto bg-black flex flex-col items-center justify-between relative">
               <iframe
-                src={`https://www.youtube.com/embed/${ytVideoId}?autoplay=1&rel=0`}
+                src={
+                  ytSearchQuery
+                    ? `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(ytSearchQuery)}&autoplay=1&rel=0`
+                    : `https://www.youtube.com/embed/${ytVideoId || 'D0Wp2n0eGjY'}?autoplay=1&rel=0`
+                }
                 title="YouTube Video Player"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                className="w-full max-w-4xl h-[65vh] rounded-2xl shadow-2xl"
+                className="w-full max-w-4xl h-[50vh] sm:h-[55vh] rounded-2xl shadow-2xl shrink-0"
               />
 
-              {/* Quick Topic Chips */}
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                {[
-                  { title: '🧪 Eğlenceli Fen Deneyleri', id: 'jfKfPfyJRdk' },
-                  { title: '📐 Pratik Matematik Oyunları', id: '2Vv-BfVoq4g' },
-                  { title: '🚀 Uzay & Güneş Sistemi', id: 'libKVRa01L8' },
-                  { title: '🌍 Dünya ve Coğrafya', id: 'QdcI5_e-WwU' },
-                ].map((item) => (
-                  <button
-                    key={item.title}
-                    type="button"
-                    onClick={() => setYtVideoId(item.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      ytVideoId === item.id
-                        ? 'bg-red-600 text-white shadow-md'
-                        : 'bg-white/10 hover:bg-white/20 text-slate-200'
-                    }`}
-                  >
-                    {item.title}
-                  </button>
-                ))}
+              {/* 1. ve 2. Sınıflara Uygun Türkçe Eğitici Video Kısayolları */}
+              <div className="w-full max-w-4xl mt-3 space-y-2">
+                <div className="flex items-center justify-between text-xs text-white/90 font-bold px-1">
+                  <span>🎯 1. ve 2. Sınıf Eğitici Video Kısayolları</span>
+                  {ytSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setYtSearchQuery('')
+                        setYtVideoId('D0Wp2n0eGjY')
+                      }}
+                      className="text-[11px] text-red-400 hover:underline cursor-pointer"
+                    >
+                      Aramayı Sıfırla & Kısayollara Dön
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {FIRST_SECOND_GRADE_VIDEOS.map((v) => (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => {
+                        setYtSearchQuery('')
+                        setYtVideoId(v.id)
+                      }}
+                      className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col justify-between gap-1 ${
+                        !ytSearchQuery && ytVideoId === v.id
+                          ? 'bg-red-600/40 border-red-500 text-white shadow-md'
+                          : 'bg-white/10 hover:bg-white/15 border-white/10 text-slate-200'
+                      }`}
+                    >
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-red-400 block">{v.category}</span>
+                        <h4 className="text-xs font-bold text-white line-clamp-1 leading-tight">{v.title}</h4>
+                      </div>
+                      <span className="text-[10px] text-white/60 line-clamp-1">{v.desc}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </motion.div>

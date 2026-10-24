@@ -487,14 +487,29 @@ export default function WhiteboardClient() {
       filesIndexRef.current = newIdx
       setFilesIndex(newIdx)
 
+      const formattedNum = String(target.boardNumber || 1).padStart(2, '0')
+      try {
+        localStorage.setItem('oxonom_last_active_tahta_no', formattedNum)
+        localStorage.setItem('oxonom_active_board_id', `${boardInfo.pano}-${formattedNum}`)
+        const curPaired = localStorage.getItem('oxonom_paired_board_session')
+        if (curPaired) {
+          try {
+            const p = JSON.parse(curPaired)
+            p.activeBoardNo = formattedNum
+            localStorage.setItem('oxonom_paired_board_session', JSON.stringify(p))
+          } catch (_) {}
+        }
+        window.dispatchEvent(new CustomEvent('oxonom_tahta_switched', { detail: { boardNo: formattedNum } }))
+      } catch (_) {}
+
       try {
         localStorage.setItem(indexKey, JSON.stringify(newIdx))
         if (typeof window !== 'undefined') {
           const url = new URL(window.location.href)
           url.searchParams.set('sheet', String(target.boardNumber))
-          url.searchParams.set('id', boardInfo.fullId)
+          url.searchParams.set('id', `${boardInfo.pano}-${formattedNum}`)
           url.searchParams.set('panoId', boardInfo.pano)
-          url.searchParams.set('tahtaId', boardInfo.board)
+          url.searchParams.set('tahtaId', formattedNum)
           window.history.replaceState({}, '', url.toString())
         }
       } catch {}
@@ -675,6 +690,20 @@ export default function WhiteboardClient() {
     const cur = currentFile()
     if (cur) {
       setCurrentFileName(cur.name)
+      const formattedNum = String(cur.boardNumber || 1).padStart(2, '0')
+      try {
+        localStorage.setItem('oxonom_last_active_tahta_no', formattedNum)
+        localStorage.setItem('oxonom_active_board_id', `${boardInfo.pano}-${formattedNum}`)
+        const curPaired = localStorage.getItem('oxonom_paired_board_session')
+        if (curPaired) {
+          try {
+            const p = JSON.parse(curPaired)
+            p.activeBoardNo = formattedNum
+            localStorage.setItem('oxonom_paired_board_session', JSON.stringify(p))
+          } catch (_) {}
+        }
+        window.dispatchEvent(new CustomEvent('oxonom_tahta_switched', { detail: { boardNo: formattedNum } }))
+      } catch (_) {}
       let snap = null
       try {
         const raw = localStorage.getItem(getFileKey(cur.id))

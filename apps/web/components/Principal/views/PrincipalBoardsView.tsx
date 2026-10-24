@@ -30,6 +30,8 @@ import {
   WifiOff,
   Power,
   RotateCcw,
+  Lock,
+  Quote,
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import {
@@ -48,11 +50,12 @@ import {
   unregisterBoardFromGlobal,
   setBoardLiveStatus,
   BOARD_SYNC_CHANNEL_NAME,
+  DEFAULT_PANO_QUOTES,
 } from '@/lib/pano/boardPairingManager'
 
 export interface SchoolBoard {
   id: string
-  code: string // Benzersiz Eşleştirme Kodu (Örn: PANO-4A-8392)
+  code: string // Benzersiz Eşleştirme Kodu (Örn: 1234)
   name: string
   location: string
   type: 'lobby' | 'corridor' | 'teachers_lounge' | 'cafeteria' | 'classroom'
@@ -69,9 +72,33 @@ export interface SchoolBoard {
   anthemEnabled: boolean
   lastSeen: string
   resolution: string
+  pin?: string // 4 Haneli Kilit Parolası
+  autoLockMinutes?: number // Kaç dakika sonra kilitlenecek
+  quotes?: string[] // Ekranda çıkacak eğitimle ilgili sözler
 }
 
 const DEFAULT_BOARDS: SchoolBoard[] = [
+  {
+    id: 'board-demo-1234',
+    code: '1234',
+    name: '1-A Sınıfı Akıllı Tahta',
+    location: 'B Blok · 1. Kat 101 Nolu Derslik',
+    type: 'classroom',
+    status: 'offline',
+    classroom: '1-A',
+    slideDuration: 10,
+    dutyTeacherTicker: true,
+    weatherWidget: true,
+    bellSoundEnabled: true,
+    announcementTicker: true,
+    mealMenuEnabled: true,
+    anthemEnabled: true,
+    lastSeen: 'Bağlantı Bekliyor',
+    resolution: '1920x1080 (FHD)',
+    pin: '1234',
+    autoLockMinutes: 5,
+    quotes: DEFAULT_PANO_QUOTES,
+  },
   {
     id: 'board-1',
     code: '0368',
@@ -164,6 +191,13 @@ export default function PrincipalBoardsView() {
   const [newBoardLocation, setNewBoardLocation] = useState('')
   const [newBoardType, setNewBoardType] = useState<SchoolBoard['type']>('classroom')
   const [newBoardClassroom, setNewBoardClassroom] = useState<string>('')
+  const [newBoardPin, setNewBoardPin] = useState('1234')
+  const [newBoardAutoLock, setNewBoardAutoLock] = useState<number>(5)
+  const [newBoardQuotes, setNewBoardQuotes] = useState<string[]>(DEFAULT_PANO_QUOTES)
+  const [newQuoteInput, setNewQuoteInput] = useState('')
+
+  // Settings Modal - Add Quote Input
+  const [editQuoteInput, setEditQuoteInput] = useState('')
 
   // Load School Identity and Tenant Data
   const loadSchoolBoards = useCallback(() => {
@@ -364,6 +398,9 @@ export default function PrincipalBoardsView() {
       anthemEnabled: true,
       lastSeen: 'Bağlantı Bekliyor',
       resolution: '1920x1080 (FHD)',
+      pin: newBoardPin.trim().slice(0, 4) || '1234',
+      autoLockMinutes: newBoardAutoLock,
+      quotes: newBoardQuotes.length > 0 ? newBoardQuotes : DEFAULT_PANO_QUOTES,
     }
 
     // Register globally for cross-tenant /pano lookups
@@ -376,6 +413,10 @@ export default function PrincipalBoardsView() {
     setNewBoardCode('')
     setNewBoardLocation('')
     setNewBoardClassroom('')
+    setNewBoardPin('1234')
+    setNewBoardAutoLock(5)
+    setNewBoardQuotes(DEFAULT_PANO_QUOTES)
+    setNewQuoteInput('')
     toast.success(
       `"${newBoard.name}" panosu oluşturuldu! Eşleştirme Kodu: ${newBoard.code}`,
       { duration: 5000 }
@@ -807,6 +848,54 @@ export default function PrincipalBoardsView() {
                   />
                 </div>
 
+                {/* 4 Haneli Kilit Parolası */}
+                <div>
+                  <label className="block text-xs font-bold text-[#241329] dark:text-[#E0D0E8] mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Lock size={13} className="text-[#8D49A6]" />
+                      <span>Pano Kilit Parolası (4 Hane)</span>
+                    </span>
+                    <span className="text-[10px] text-[#8D49A6] dark:text-[#C58ADB]">Varsayılan: 1234</span>
+                  </label>
+                  <input
+                    type="password"
+                    maxLength={4}
+                    value={selectedBoard.pin || '1234'}
+                    onChange={(e) => setSelectedBoard({ ...selectedBoard, pin: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+                    placeholder="1234"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#F7F0FA] dark:bg-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] font-mono text-center tracking-widest text-sm font-bold text-[#4B075F] dark:text-[#F0D8FA] focus:outline-none focus:border-[#D914C8]"
+                  />
+                </div>
+
+                {/* Otomatik Kilitlenme Süresi */}
+                <div>
+                  <label className="block text-xs font-bold text-[#241329] dark:text-[#E0D0E8] mb-1.5 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Clock size={13} className="text-[#16805D]" />
+                      <span>Otomatik Kilitlenme Süresi</span>
+                    </span>
+                    <span className="text-xs font-black text-[#D914C8]">
+                      {(selectedBoard.autoLockMinutes ?? 5) === 0 ? 'Asla' : `${selectedBoard.autoLockMinutes ?? 5} Dakika`}
+                    </span>
+                  </label>
+                  <div className="grid grid-cols-6 gap-1.5">
+                    {[1, 2, 5, 10, 15, 0].map((min) => (
+                      <button
+                        key={min}
+                        type="button"
+                        onClick={() => setSelectedBoard({ ...selectedBoard, autoLockMinutes: min })}
+                        className={`py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          (selectedBoard.autoLockMinutes ?? 5) === min
+                            ? 'bg-brand-gradient text-white border-transparent shadow-xs'
+                            : 'bg-[#F7F0FA] dark:bg-[#17101C] border-[#E8DFEB] dark:border-[#3A2942] text-[#716779] dark:text-[#A898B0]'
+                        }`}
+                      >
+                        {min === 0 ? 'Asla' : `${min} dk`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Slayt Geçiş Hızı */}
                 <div>
                   <label className="block text-xs font-bold text-[#241329] dark:text-[#E0D0E8] mb-1.5">
@@ -826,6 +915,80 @@ export default function PrincipalBoardsView() {
                       >
                         {sec} sn
                       </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Ekranda Çıkacak Eğitim Sözleri */}
+                <div className="pt-2 border-t border-[#E8DFEB] dark:border-[#3A2942]">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-[#241329] dark:text-[#E0D0E8] flex items-center gap-1.5">
+                      <Quote size={13} className="text-[#D914C8]" />
+                      <span>Ekranda Gösterilecek Eğitim Sözleri ({(selectedBoard.quotes || DEFAULT_PANO_QUOTES).length})</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBoard({ ...selectedBoard, quotes: DEFAULT_PANO_QUOTES })}
+                      className="text-[10px] text-[#8D49A6] dark:text-[#C58ADB] hover:underline font-bold cursor-pointer"
+                    >
+                      10 Varsayılanı Yükle
+                    </button>
+                  </div>
+
+                  {/* Add quote input */}
+                  <div className="flex gap-2 mb-2.5">
+                    <input
+                      type="text"
+                      placeholder="Yeni eğitim sözü ekleyin..."
+                      value={editQuoteInput}
+                      onChange={(e) => setEditQuoteInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          if (editQuoteInput.trim()) {
+                            const cur = selectedBoard.quotes || DEFAULT_PANO_QUOTES
+                            setSelectedBoard({ ...selectedBoard, quotes: [...cur, editQuoteInput.trim()] })
+                            setEditQuoteInput('')
+                          }
+                        }
+                      }}
+                      className="flex-1 px-3 py-1.5 rounded-xl bg-[#F7F0FA] dark:bg-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-medium text-[#241329] dark:text-white focus:outline-none focus:border-[#D914C8]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (editQuoteInput.trim()) {
+                          const cur = selectedBoard.quotes || DEFAULT_PANO_QUOTES
+                          setSelectedBoard({ ...selectedBoard, quotes: [...cur, editQuoteInput.trim()] })
+                          setEditQuoteInput('')
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-[#4B075F] text-white text-xs font-bold hover:bg-[#350444] transition-colors cursor-pointer"
+                    >
+                      Ekle
+                    </button>
+                  </div>
+
+                  {/* Quotes list */}
+                  <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                    {(selectedBoard.quotes || DEFAULT_PANO_QUOTES).map((q, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start justify-between gap-2 p-2 rounded-xl bg-[#F7F0FA] dark:bg-[#17101C] border border-[#E8DFEB] dark:border-[#3A2942] text-[11px] text-[#514458] dark:text-slate-300"
+                      >
+                        <span className="flex-1 leading-snug">{q}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const cur = selectedBoard.quotes || DEFAULT_PANO_QUOTES
+                            setSelectedBoard({ ...selectedBoard, quotes: cur.filter((_, i) => i !== idx) })
+                          }}
+                          className="text-rose-500 hover:text-rose-700 p-0.5 cursor-pointer shrink-0"
+                          title="Sözü Sil"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -964,7 +1127,7 @@ export default function PrincipalBoardsView() {
                 </button>
               </div>
 
-              <form onSubmit={handleCreateBoard} className="py-4 space-y-3.5">
+              <form onSubmit={handleCreateBoard} className="py-4 space-y-3.5 max-h-[72vh] overflow-y-auto pr-1">
                 {/* Pano Türü */}
                 <div>
                   <label className="block text-xs font-bold text-[#241329] dark:text-[#E0D0E8] mb-1">
@@ -1085,6 +1248,123 @@ export default function PrincipalBoardsView() {
                     onChange={(e) => setNewBoardLocation(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F0FA] dark:bg-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-semibold text-[#241329] dark:text-white focus:outline-none focus:border-[#D914C8]"
                   />
+                </div>
+
+                {/* 4 Haneli Kilit Parolası */}
+                <div>
+                  <label className="block text-xs font-bold text-[#241329] dark:text-[#E0D0E8] mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Lock size={13} className="text-[#8D49A6]" />
+                      <span>Pano Kilit Parolası (4 Hane) *</span>
+                    </span>
+                    <span className="text-[10px] text-[#8D49A6] dark:text-[#C58ADB]">Varsayılan: 1234</span>
+                  </label>
+                  <input
+                    type="password"
+                    maxLength={4}
+                    value={newBoardPin}
+                    onChange={(e) => setNewBoardPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="1234"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F0FA] dark:bg-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] font-mono text-center tracking-widest text-sm font-bold text-[#4B075F] dark:text-[#F0D8FA] focus:outline-none focus:border-[#D914C8]"
+                  />
+                </div>
+
+                {/* Otomatik Kilitlenme Süresi */}
+                <div>
+                  <label className="block text-xs font-bold text-[#241329] dark:text-[#E0D0E8] mb-1.5 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Clock size={13} className="text-[#16805D]" />
+                      <span>Otomatik Kilitlenme Süresi</span>
+                    </span>
+                    <span className="text-xs font-black text-[#D914C8]">
+                      {newBoardAutoLock === 0 ? 'Asla' : `${newBoardAutoLock} Dakika`}
+                    </span>
+                  </label>
+                  <div className="grid grid-cols-6 gap-1.5">
+                    {[1, 2, 5, 10, 15, 0].map((min) => (
+                      <button
+                        key={min}
+                        type="button"
+                        onClick={() => setNewBoardAutoLock(min)}
+                        className={`py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          newBoardAutoLock === min
+                            ? 'bg-brand-gradient text-white border-transparent shadow-xs'
+                            : 'bg-[#F7F0FA] dark:bg-[#17101C] border-[#E8DFEB] dark:border-[#3A2942] text-[#716779] dark:text-[#A898B0]'
+                        }`}
+                      >
+                        {min === 0 ? 'Asla' : `${min} dk`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Ekranda Gösterilecek Eğitim Sözleri */}
+                <div className="pt-2 border-t border-[#E8DFEB] dark:border-[#3A2942]">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-[#241329] dark:text-[#E0D0E8] flex items-center gap-1.5">
+                      <Quote size={13} className="text-[#D914C8]" />
+                      <span>Ekranda Gösterilecek Eğitim Sözleri ({newBoardQuotes.length})</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setNewBoardQuotes(DEFAULT_PANO_QUOTES)}
+                      className="text-[10px] text-[#8D49A6] dark:text-[#C58ADB] hover:underline font-bold cursor-pointer"
+                    >
+                      10 Varsayılanı Yükle
+                    </button>
+                  </div>
+
+                  {/* Add quote input */}
+                  <div className="flex gap-2 mb-2.5">
+                    <input
+                      type="text"
+                      placeholder="Yeni eğitim sözü ekleyin..."
+                      value={newQuoteInput}
+                      onChange={(e) => setNewQuoteInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          if (newQuoteInput.trim()) {
+                            setNewBoardQuotes((prev) => [...prev, newQuoteInput.trim()])
+                            setNewQuoteInput('')
+                          }
+                        }
+                      }}
+                      className="flex-1 px-3 py-1.5 rounded-xl bg-[#F7F0FA] dark:bg-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-medium text-[#241329] dark:text-white focus:outline-none focus:border-[#D914C8]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newQuoteInput.trim()) {
+                          setNewBoardQuotes((prev) => [...prev, newQuoteInput.trim()])
+                          setNewQuoteInput('')
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-[#4B075F] text-white text-xs font-bold hover:bg-[#350444] transition-colors cursor-pointer"
+                    >
+                      Ekle
+                    </button>
+                  </div>
+
+                  {/* Quotes list */}
+                  <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1">
+                    {newBoardQuotes.map((q, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start justify-between gap-2 p-2 rounded-xl bg-[#F7F0FA] dark:bg-[#17101C] border border-[#E8DFEB] dark:border-[#3A2942] text-[11px] text-[#514458] dark:text-slate-300"
+                      >
+                        <span className="flex-1 leading-snug">{q}</span>
+                        <button
+                          type="button"
+                          onClick={() => setNewBoardQuotes((prev) => prev.filter((_, i) => i !== idx))}
+                          className="text-rose-500 hover:text-rose-700 p-0.5 cursor-pointer shrink-0"
+                          title="Sözü Sil"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="pt-3 border-t border-[#E8DFEB] dark:border-[#3A2942] flex items-center justify-end gap-2">

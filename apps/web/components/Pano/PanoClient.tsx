@@ -63,6 +63,7 @@ import {
   FileQuestion,
   UploadCloud,
   Power,
+  BookOpen,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import {
@@ -3140,32 +3141,35 @@ export default function PanoClient() {
 
 
   const resolveBoardIdentity = useCallback((rawInput?: string, pInput?: string, tInput?: string): { panoId: string; boardNo: string } => {
+    let lastTahtaNo = '01'
     if (typeof window !== 'undefined') {
+      const storedLastTahta = localStorage.getItem('oxonom_last_active_tahta_no')
+      if (storedLastTahta) lastTahtaNo = storedLastTahta
       const activePaired = getActivePairedBoardSession()
       if (activePaired?.code) {
         return {
           panoId: activePaired.code,
-          boardNo: activePaired.activeBoardNo || '01',
+          boardNo: activePaired.activeBoardNo || lastTahtaNo,
         }
       }
     }
-    let pano = '0368'
-    let board = '01'
-    const candidate = (rawInput || (typeof window !== 'undefined' ? localStorage.getItem('oxonom_active_board_id') : '') || '0368-01').trim()
+    let pano = '1234'
+    let board = lastTahtaNo
+    const candidate = (rawInput || (typeof window !== 'undefined' ? localStorage.getItem('oxonom_active_board_id') : '') || '1234-01').trim()
     const clean = decodeURIComponent(candidate).toUpperCase()
 
     if (clean.includes('-')) {
       const parts = clean.split('-').filter(Boolean)
       if (parts.length >= 2) {
         pano = parts[0]
-        board = parts.slice(1).join('-') || '01'
+        board = parts.slice(1).join('-') || lastTahtaNo
       } else {
-        pano = parts[0] || '0368'
-        board = '01'
+        pano = parts[0] || '1234'
+        board = lastTahtaNo
       }
     } else if (clean) {
       pano = clean
-      board = '01'
+      board = lastTahtaNo
     }
 
     if (pInput) pano = pInput.trim().toUpperCase()
@@ -3178,17 +3182,59 @@ export default function PanoClient() {
     return resolveBoardIdentity(rawIdParam, panoIdParam, tahtaIdParam)
   })
 
+  // Real-time synchronization when user switches whiteboards (e.g. 01 -> 02 -> 03)
+  useEffect(() => {
+    const handleTahtaSwitched = (e: any) => {
+      const switchedNo = e?.detail?.boardNo || (typeof window !== 'undefined' ? localStorage.getItem('oxonom_last_active_tahta_no') : '01')
+      if (switchedNo) {
+        setBoardIdentity((prev) => ({ ...prev, boardNo: switchedNo }))
+      }
+    }
+    window.addEventListener('oxonom_tahta_switched', handleTahtaSwitched)
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'oxonom_last_active_tahta_no' && e.newValue) {
+        setBoardIdentity((prev) => ({ ...prev, boardNo: e.newValue || '01' }))
+      }
+    }
+    window.addEventListener('storage', handleStorage)
+    return () => {
+      window.removeEventListener('oxonom_tahta_switched', handleTahtaSwitched)
+      window.removeEventListener('storage', handleStorage)
+    }
+  }, [])
+
   // Synchronize boardIdentity strictly whenever pairedBoard changes
   useEffect(() => {
     if (pairedBoard?.code) {
+      let lastTahtaNo = '01'
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('oxonom_last_active_tahta_no')
+        if (stored) lastTahtaNo = stored
+      }
       const updatedIdentity = {
         panoId: pairedBoard.code,
-        boardNo: pairedBoard.activeBoardNo || '01',
+        boardNo: pairedBoard.activeBoardNo || lastTahtaNo,
       }
       setBoardIdentity(updatedIdentity)
       if (typeof window !== 'undefined') {
         localStorage.setItem('oxonom_active_board_id', `${updatedIdentity.panoId}-${updatedIdentity.boardNo}`)
       }
+    }
+  }, [pairedBoard])
+
+  // Synchronize PIN, auto-lock timeout, and educational quotes from pairedBoard
+  useEffect(() => {
+    if (pairedBoard) {
+      setSettings((prev) => ({
+        ...prev,
+        pin: pairedBoard.pin || prev.pin || '1234',
+        idleTimeout: typeof pairedBoard.autoLockMinutes === 'number'
+          ? (pairedBoard.autoLockMinutes === 0 ? 9999999 : pairedBoard.autoLockMinutes * 60)
+          : prev.idleTimeout,
+        quotes: Array.isArray(pairedBoard.quotes) && pairedBoard.quotes.length > 0
+          ? pairedBoard.quotes.map(normalizeQuote)
+          : prev.quotes,
+      }))
     }
   }, [pairedBoard])
 
@@ -3685,13 +3731,8 @@ export default function PanoClient() {
 
       const initialClass = foundClass || classrooms[0] || null
       setSelectedClass(initialClass)
-      if (initialClass) {
-        const targetBoard = getClassBoardIdentity(initialClass)
-        setBoardIdentity(targetBoard)
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('oxonom_active_board_id', `${targetBoard.panoId}-${targetBoard.boardNo}`)
-          localStorage.setItem('oxonom_pano_selected_class_id', String(initialClass.id))
-        }
+      if (initialClass && typeof window !== 'undefined') {
+        localStorage.setItem('oxonom_pano_selected_class_id', String(initialClass.id))
       }
     }
   }, [])
@@ -3932,8 +3973,9 @@ export default function PanoClient() {
     })
   }
 
-  // TopBar Profile Dropdown State
+  // TopBar Profile Dropdown & Logout Confirmation State
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false)
   const popupRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -3946,19 +3988,24 @@ export default function PanoClient() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Disconnect active paired board (flips status back to offline / red in Principal portal)
+  // Open the logout confirmation dialog
   const handleDisconnectBoard = useCallback(() => {
-    if (
-      confirm(
-        'Akıllı tahta oturumunu sonlandırmak ve panoyu çevrimdışı (kırmızı) yapmak istediğinize emin misiniz?'
-      )
-    ) {
-      disconnectActiveBoard()
-      setPairedBoard(null)
-      setSelectedClass(null)
-      setIsProfileOpen(false)
-      toast.success('Pano oturumu kapatıldı. Pano pasif duruma alındı.')
+    setIsProfileOpen(false)
+    setIsLogoutConfirmOpen(true)
+  }, [])
+
+  // Execute confirmed logout and revert status to offline
+  const handleConfirmLogout = useCallback(() => {
+    disconnectActiveBoard()
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('oxonom_paired_board_session')
+      localStorage.removeItem('oxonom_active_board_id')
+      localStorage.removeItem('oxonom_last_active_tahta_no')
     }
+    setPairedBoard(null)
+    setSelectedClass(null)
+    setIsLogoutConfirmOpen(false)
+    toast.success('Pano oturumu kapatıldı. Pano çevrimdışı duruma alındı.')
   }, [setSelectedClass])
 
   // Synchronize multi-tenant school classes and auto-select assigned classroom when paired
@@ -4240,6 +4287,52 @@ export default function PanoClient() {
     }
     return { role: 'Sınıf Rehber Öğretmeni', name: tName, detail: `(${subj})` }
   }, [selectedClass, displayName])
+
+  // Live Timetable Lesson calculation (User Rule: "Kademe kutusu olmasın onun yerine güncel ders yazsın (ders programından ders saatine göre otomatik güncellensin)")
+  const currentLessonInfo = useMemo(() => {
+    const now = new Date()
+    const hours = now.getHours()
+    const minutes = now.getMinutes()
+    const totalMinutes = hours * 60 + minutes
+    const day = now.getDay() // 0 = Pazar, 6 = Cumartesi
+
+    if (day === 0 || day === 6) {
+      return {
+        title: 'Hafta Sonu Atölyesi',
+        detail: 'Serbest Etkinlik',
+        isBreak: true,
+        remaining: 'Pazartesi 08:30',
+      }
+    }
+
+    if (totalMinutes < 510) {
+      return { title: 'Ders Öncesi Hazırlık', detail: 'İlk ders: Türkçe', isBreak: true, remaining: '08:30 Başlangıç' }
+    } else if (totalMinutes < 550) {
+      return { title: 'Türkçe', detail: '1. Ders (Okuma & Yazma)', isBreak: false, remaining: `${550 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 565) {
+      return { title: 'Teneffüs', detail: 'Sıradaki: Matematik', isBreak: true, remaining: `${565 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 605) {
+      return { title: 'Matematik', detail: '2. Ders (Sayılar & İşlemler)', isBreak: false, remaining: `${605 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 620) {
+      return { title: 'Teneffüs', detail: 'Sıradaki: Hayat Bilgisi', isBreak: true, remaining: `${620 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 660) {
+      return { title: 'Hayat Bilgisi', detail: '3. Ders (Okulumuzda Hayat)', isBreak: false, remaining: `${660 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 675) {
+      return { title: 'Teneffüs', detail: 'Sıradaki: Görsel Sanatlar', isBreak: true, remaining: `${675 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 715) {
+      return { title: 'Görsel Sanatlar', detail: '4. Ders (Çizim & Boyama)', isBreak: false, remaining: `${715 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 765) {
+      return { title: 'Öğle Arası & Yemek', detail: 'Sıradaki: Fen Bilimleri', isBreak: true, remaining: `${765 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 805) {
+      return { title: 'Fen Bilimleri', detail: '5. Ders (Canlılar & Çevre)', isBreak: false, remaining: `${805 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 820) {
+      return { title: 'Teneffüs', detail: 'Sıradaki: Beden Eğitimi', isBreak: true, remaining: `${820 - totalMinutes} dk kaldı` }
+    } else if (totalMinutes < 860) {
+      return { title: 'Beden Eğitimi', detail: '6. Ders (Oyun & Spor)', isBreak: false, remaining: `${860 - totalMinutes} dk kaldı` }
+    } else {
+      return { title: 'Ders Çıkışı', detail: 'Serbest Etkinlik & Etüt', isBreak: true, remaining: 'Yarın 08:30' }
+    }
+  }, [dataSyncTrigger])
 
   // Modal states for interactive animated windows
   const [isToolsModalOpen, setIsToolsModalOpen] = useState(false)
@@ -4880,21 +4973,32 @@ export default function PanoClient() {
 
       {/* 2. CENTERED BRANDING & MULTI-TENANT PANO BAR */}
       <div className="w-full pt-3 pb-1 px-4 sm:px-6 flex items-center justify-center relative z-30 shrink-0">
-        {/* Centered Brand Logo */}
-        <Link href={getUriWithOrg(orgslug, '/')} className="flex items-center group cursor-pointer" title="Ana Sayfaya Dön">
-          <div className="h-10 sm:h-12 flex items-center group-hover:scale-105 transition-transform">
-            <img
-              src="/oxonom-logo-light.png"
-              alt="Oxonom Edu"
-              className="h-8 sm:h-10 md:h-11 w-auto object-contain dark:hidden transition-all drop-shadow-xs"
-            />
-            <img
-              src="/oxonom-logo-dark.png"
-              alt="Oxonom Edu"
-              className="h-8 sm:h-10 md:h-11 w-auto object-contain hidden dark:block transition-all drop-shadow-xs"
-            />
+        {/* Centered School Name + Oxonom Logo (User: "okul adı üstte logonun yanında (sol taraf) yazsın ve logo ile okul adı sayfaya ortalı olsun") */}
+        <div className="flex items-center gap-3 sm:gap-4 max-w-full">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-white/90 dark:bg-[#241329]/90 backdrop-blur-md border border-[#E8DFEB] dark:border-[#49364F] shadow-2xs">
+            <School className="w-4 h-4 sm:w-5 sm:h-5 text-[#8D49A6] shrink-0" />
+            <span className="font-black text-xs sm:text-sm md:text-base text-[#241329] dark:text-white tracking-tight truncate max-w-[220px] sm:max-w-none">
+              {currentSchoolName}
+            </span>
           </div>
-        </Link>
+
+          <div className="h-5 w-px bg-[#D5C5DC] dark:bg-[#49364F]" />
+
+          <Link href={getUriWithOrg(orgslug, '/')} className="flex items-center group cursor-pointer" title="Ana Sayfaya Dön">
+            <div className="h-9 sm:h-11 flex items-center group-hover:scale-105 transition-transform">
+              <img
+                src="/oxonom-logo-light.png"
+                alt="Oxonom Edu"
+                className="h-7 sm:h-9 md:h-10 w-auto object-contain dark:hidden transition-all drop-shadow-xs"
+              />
+              <img
+                src="/oxonom-logo-dark.png"
+                alt="Oxonom Edu"
+                className="h-7 sm:h-9 md:h-10 w-auto object-contain hidden dark:block transition-all drop-shadow-xs"
+              />
+            </div>
+          </Link>
+        </div>
 
         {/* Discreet Top Right Controls */}
         <div className="absolute right-4 sm:right-6 top-3 flex items-center gap-2" ref={popupRef}>
@@ -4979,7 +5083,7 @@ export default function PanoClient() {
           </div>
 
           {/* ======================================================== */}
-          {/* HERO ALANI (MODERN, GLASSMORPHIC & CORPORATE PALETTE)    */}
+          {/* HERO ALANI (MODERN, GLASSMORPHIC & ANIMATED PATTERNS)    */}
           {/* ======================================================== */}
           <div className="p-[1.5px] rounded-[2.2rem] sm:rounded-[2.6rem] bg-gradient-to-r from-[#4B075F]/35 via-[#8D49A6]/30 to-[#D914C8]/30 shadow-xl shadow-purple-950/5">
             <motion.div
@@ -4988,62 +5092,52 @@ export default function PanoClient() {
               transition={{ duration: 0.3 }}
               className="relative overflow-hidden rounded-[2.1rem] sm:rounded-[2.5rem] bg-white/95 dark:bg-[#1E1124]/95 backdrop-blur-2xl p-6 sm:p-8 space-y-6"
             >
-              {/* Ambient decorative glow */}
-              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 rounded-full bg-gradient-to-br from-[#4B075F]/15 via-[#8D49A6]/10 to-transparent blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-72 h-72 rounded-full bg-gradient-to-tr from-[#8D49A6]/15 via-[#D914C8]/10 to-transparent blur-3xl pointer-events-none" />
+              {/* Ambient animated decorative glow & patterns */}
+              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-gradient-to-br from-[#4B075F]/20 via-[#8D49A6]/15 to-transparent blur-3xl pointer-events-none animate-pulse" style={{ animationDuration: '7s' }} />
+              <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-80 h-80 rounded-full bg-gradient-to-tr from-[#8D49A6]/20 via-[#D914C8]/15 to-transparent blur-3xl pointer-events-none animate-pulse" style={{ animationDuration: '9s' }} />
 
-              {/* Header: Class Name, Hero Badge (Okul, Sınıf, Pano No: 0368-01, Canlı) */}
+              {/* Geometric pattern overlay */}
+              <svg className="absolute inset-0 w-full h-full opacity-[0.035] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="hero-pattern" width="28" height="28" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="1.2" fill="#D914C8" />
+                    <path d="M 28 0 L 0 28 M 0 0 L 28 28" stroke="#8D49A6" strokeWidth="0.5" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#hero-pattern)" />
+              </svg>
+
+              {/* Header: Class Name, Live Status, Teacher & Pano Code */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                 <div>
                   <div className="flex items-center gap-3 flex-wrap">
                     <h2 className="text-3xl sm:text-4xl font-black text-[#241329] dark:text-white tracking-tight">
                       {currentClass.name}
                     </h2>
-
-                    {/* HERO BADGE: Okul | Sınıf | Pano No (0368-01) | Canlı */}
-                    <div className="inline-flex items-center gap-2 sm:gap-2.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] text-white text-xs sm:text-sm font-black shadow-md border border-white/20 flex-wrap">
-                      <School className="w-4 h-4 text-pink-200 shrink-0" />
-                      <span className="tracking-wide">{pairedBoard?.schoolName || currentSchoolName}</span>
-                      <span className="text-white/40">|</span>
-                      <span className="px-2 py-0.5 rounded-lg bg-white/20 text-white text-xs font-black">
-                        {currentClass.name}
-                      </span>
-                      <span className="text-white/40">|</span>
-                      <span className="font-mono text-amber-200 font-black">
-                        Pano No: {boardIdentity.panoId}-{boardIdentity.boardNo}
-                      </span>
-                      <span className="text-white/40">|</span>
-                      <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-300">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        Canlı
-                      </span>
-                    </div>
-
-                    <div className="px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-[11px] font-semibold text-[#4B075F] dark:text-[#E9D5FF] flex items-center gap-1.5">
-                      <span>💡 Öğretmen dosya aktarımı için:</span>
-                      <strong className="font-mono font-black text-[#D914C8]">{boardIdentity.panoId}-{boardIdentity.boardNo}</strong>
-                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-black">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      Canlı
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 mt-2 text-xs text-[#514458] dark:text-slate-400 font-medium flex-wrap">
-                    <span>Kurum: <strong className="text-[#241329] dark:text-slate-200">{pairedBoard?.schoolName || currentSchoolName}</strong></span>
-                    <span className="text-[#8D49A6]">•</span>
-                    <span>Pano Kodu: <strong className="text-[#D914C8]">{boardIdentity.panoId}-{boardIdentity.boardNo}</strong></span>
-                    <span className="text-[#8D49A6]">•</span>
                     <span>{teacherDisplayLabel.role}: <strong className="text-[#4B075F] dark:text-[#E9D5FF]">{teacherDisplayLabel.name}</strong>{teacherDisplayLabel.detail ? <span className="text-[#8D49A6] dark:text-purple-300 font-normal"> {teacherDisplayLabel.detail}</span> : ''}</span>
+                    <span className="text-[#8D49A6]">•</span>
+                    <span>Pano Kodu: <strong className="font-mono text-[#D914C8]">{boardIdentity.panoId}-{boardIdentity.boardNo}</strong></span>
                   </div>
                 </div>
               </div>
 
-              {/* 3 Stat Cards in Harmonious Brand Theme (Kademe, Öğrenci, Günlük Devam) */}
+              {/* 3 Stat Cards: GÜNCEL DERS (Ders Programına Göre Otomatik), ÖĞRENCİ, YOKLAMA */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 relative z-10">
-                {/* 1. KADEME */}
+                {/* 1. GÜNCEL DERS */}
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-[#8D49A6]/60 shadow-2xs">
                   <div className="w-12 h-12 rounded-2xl bg-[#4B075F]/10 dark:bg-[#4B075F]/40 border border-[#4B075F]/20 flex items-center justify-center text-[#4B075F] dark:text-[#E9D5FF] shrink-0">
-                    <School className="w-6 h-6" />
+                    <BookOpen className="w-6 h-6" />
                   </div>
-                  <div>
-                    <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">KADEME</span>
-                    <span className="text-base sm:text-lg font-black text-[#241329] dark:text-white">{currentClass.gradeLevel}</span>
+                  <div className="min-w-0">
+                    <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">GÜNCEL DERS</span>
+                    <span className="text-base sm:text-lg font-black text-[#241329] dark:text-white truncate block">{currentLessonInfo.title}</span>
+                    <span className="block text-[11px] font-bold text-[#8D49A6] dark:text-[#C58ADB] truncate">{currentLessonInfo.detail} • <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{currentLessonInfo.remaining}</span></span>
                   </div>
                 </div>
 
@@ -5052,20 +5146,22 @@ export default function PanoClient() {
                   <div className="w-12 h-12 rounded-2xl bg-[#8D49A6]/10 dark:bg-[#8D49A6]/40 border border-[#8D49A6]/20 flex items-center justify-center text-[#8D49A6] dark:text-[#F0D8FA] shrink-0">
                     <Users className="w-6 h-6" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">ÖĞRENCİ</span>
                     <span className="text-base sm:text-lg font-black text-[#4B075F] dark:text-[#F0D8FA]">{liveStudentCount} Kayıtlı</span>
+                    <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400">Aktif Şube Mevcudu</span>
                   </div>
                 </div>
 
-                {/* 3. GÜNLÜK DEVAM */}
+                {/* 3. YOKLAMA */}
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FCF9FD] to-[#FAF5FC] dark:from-[#261730] dark:to-[#1C1024] border border-[#E8DFEB] dark:border-[#49364F] flex items-center gap-3.5 transition-all hover:border-emerald-500/60 shadow-2xs">
                   <div className={`w-12 h-12 rounded-2xl ${liveAttendance.isTaken ? 'bg-emerald-500/10 dark:bg-emerald-500/40 border border-emerald-500/20 text-emerald-600 dark:text-emerald-300' : 'bg-amber-500/10 dark:bg-amber-500/40 border border-amber-500/20 text-amber-600 dark:text-amber-400'} flex items-center justify-center shrink-0`}>
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <div>
-                    <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">GÜNLÜK DEVAM</span>
+                  <div className="min-w-0">
+                    <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">YOKLAMA</span>
                     <span className={`text-base sm:text-lg font-black ${liveAttendance.isTaken ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>{liveAttendance.rateStr}</span>
+                    <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">{liveAttendance.detail}</span>
                   </div>
                 </div>
               </div>
@@ -5573,6 +5669,48 @@ export default function PanoClient() {
                 </div>
               </motion.div>
             )}
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* In-App Confirmation Modal: Panodan Çıkış Yap */}
+      <AnimatePresence>
+        {isLogoutConfirmOpen && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 15 }}
+              className="w-full max-w-md rounded-3xl bg-white dark:bg-[#1E1124] border border-rose-300 dark:border-rose-900/60 p-6 shadow-2xl text-center space-y-4"
+            >
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-rose-100 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 flex items-center justify-center shadow-inner">
+                <Power className="w-7 h-7 text-rose-600 dark:text-rose-400" />
+              </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-black text-[#241329] dark:text-white">
+                  Panodan Çıkış Yapılsın mı?
+                </h3>
+                <p className="text-xs sm:text-sm text-[#716779] dark:text-[#C58ADB] mt-1.5 leading-relaxed">
+                  Akıllı tahta oturumunu sonlandırmak ve panoyu çevrimdışı (pasif) duruma almak istediğinize emin misiniz?
+                </p>
+              </div>
+              <div className="pt-2 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsLogoutConfirmOpen(false)}
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-[#D5C5DC] dark:border-[#49364F] text-xs font-bold text-[#514458] dark:text-slate-300 hover:bg-[#FAF5FC] dark:hover:bg-[#2D1636] transition-colors cursor-pointer"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmLogout}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow-md shadow-rose-950/20 transition-all cursor-pointer"
+                >
+                  Evet, Çıkış Yap
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
       </AnimatePresence>

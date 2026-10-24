@@ -30,13 +30,53 @@ export interface BoardPairingInfo {
   anthemEnabled?: boolean
   pairedAt?: string
   activeBoardNo?: string
+  pin?: string // 4 haneli kilit parolası (örn: "1234")
+  autoLockMinutes?: number // Kaç dakika sonra kilitlenecek (örn: 5)
+  quotes?: string[] // Ekranda çıkacak eğitimle ilgili 10 özlü söz
 }
 
 export const GLOBAL_BOARD_REGISTRY_KEY = 'oxonom_global_board_registry'
 export const ACTIVE_PAIRED_BOARD_KEY = 'oxonom_paired_board_session'
 export const BOARD_SYNC_CHANNEL_NAME = 'oxonom_board_sync_channel'
 
+export const DEFAULT_PANO_QUOTES: string[] = [
+  '“Yeni nesil sizin eseriniz olacaktır!” — Gazi Mustafa Kemal Atatürk',
+  '“Hayatta en hakiki mürşit ilimdir, fendir.” — Gazi Mustafa Kemal Atatürk',
+  '“Eğitimdir ki bir milleti ya hür, bağımsız yaşatır; ya da sefalete terk eder.” — Mustafa Kemal Atatürk',
+  '“Öğretmenler! Cumhuriyet sizden fikri hür, vicdanı hür nesiller ister.” — Mustafa Kemal Atatürk',
+  '“Bana bir harf öğretenin kırk yıl kölesi olurum.” — Hz. Ali (r.a.)',
+  '“İlim ilim bilmektir, ilim kendin bilmektir; sen kendini bilmezsin ya nice okumaktır.” — Yunus Emre',
+  '“Eğitim kafayı geliştirmek demektir, hafızayı doldurmak değil.” — Mark Twain',
+  '“Çocuklarınıza mutlu olmayı öğretin; hayatları boyunca şeylerin fiyatını değil, değerini bilsinler.” — Anonim',
+  '“Bir çocuğu eğitmek, geleceği ve tüm dünyayı güzelleştirmektir.” — Oxonom Edu',
+  '“Merak, öğrenmenin en güçlü motorudur; her soru zihinde yeni bir ufuk açar.” — Oxonom Edu',
+]
+
 const DEFAULT_DEMO_BOARDS: BoardPairingInfo[] = [
+  {
+    id: 'board-demo-1234',
+    code: '1234',
+    name: '1-A Sınıfı Akıllı Tahta',
+    location: 'B Blok · 1. Kat 101 Nolu Derslik',
+    type: 'classroom',
+    status: 'offline',
+    classroom: '1-A',
+    schoolCode: '741295',
+    schoolName: 'Necla Görer İlkokulu',
+    slideDuration: 10,
+    dutyTeacherTicker: true,
+    weatherWidget: true,
+    bellSoundEnabled: true,
+    announcementTicker: true,
+    mealMenuEnabled: true,
+    anthemEnabled: true,
+    lastSeen: 'Bağlantı Bekliyor',
+    resolution: '1920x1080 (FHD)',
+    activeBoardNo: '01',
+    pin: '1234',
+    autoLockMinutes: 5,
+    quotes: DEFAULT_PANO_QUOTES,
+  },
   {
     id: 'board-1',
     code: '1234',
@@ -286,6 +326,9 @@ export function registerBoardInGlobal(
     mealMenuEnabled: board.mealMenuEnabled ?? true,
     anthemEnabled: board.anthemEnabled ?? true,
     pairedAt: board.pairedAt,
+    pin: board.pin || '1234',
+    autoLockMinutes: board.autoLockMinutes ?? 5,
+    quotes: Array.isArray(board.quotes) && board.quotes.length > 0 ? board.quotes : DEFAULT_PANO_QUOTES,
   }
 
   // 1. Update Global Registry
