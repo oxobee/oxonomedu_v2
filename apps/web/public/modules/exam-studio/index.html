@@ -788,6 +788,273 @@
         box-shadow: 0 0 0 3px rgba(217, 20, 200, 0.15) !important;
         outline: none !important;
       }
+
+      /* ── 1. KULLANICI HESABI & DROPDOWN TAMAMEN KALDIRILDI ── */
+      .user-menu-wrapper,
+      .user-menu-trigger,
+      .user-menu-dropdown,
+      .user-menu-backdrop,
+      .ts-topbar-right {
+        display: none !important;
+      }
+
+      /* ── 2. PENCERE MODUNDA LOGO GİZLİ, GENİŞLETİLMİŞ MODDA GÖRÜNÜR ── */
+      .ts-topbar-logo,
+      .ts-topbar-beta {
+        display: none !important;
+      }
+      body.oxonom-expanded-mode .ts-topbar-logo {
+        display: inline-block !important;
+        animation: oxonomLogoFadeIn 0.35s ease forwards;
+      }
+      body.oxonom-expanded-mode .ts-topbar-beta {
+        display: inline-flex !important;
+        animation: oxonomLogoFadeIn 0.35s ease forwards;
+      }
+      @keyframes oxonomLogoFadeIn {
+        from { opacity: 0; transform: scale(0.92); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      /* ── 3. ELASTİK ANİMASYONLU İKONİK YAN MENÜ ── */
+      @media (min-width: 769px) {
+        .dash-sidebar.is-drawer,
+        .dash-sidebar {
+          position: relative !important;
+          transform: none !important;
+          top: auto !important;
+          left: auto !important;
+          bottom: auto !important;
+          height: 100% !important;
+          width: 74px !important;
+          min-width: 74px !important;
+          max-width: 74px !important;
+          transition: width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), min-width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), max-width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+          will-change: width;
+          overflow-x: hidden !important;
+          box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25) !important;
+          z-index: 10 !important;
+        }
+
+        /* Hamburger tıklandığında .is-open eklenir ve elastik genişler */
+        .dash-sidebar.is-drawer.is-open,
+        .dash-sidebar.is-open {
+          width: 275px !important;
+          min-width: 275px !important;
+          max-width: 275px !important;
+          transform: none !important;
+        }
+
+        /* İkonik Modda (henüz .is-open değilken) */
+        .dash-sidebar:not(.is-open) .sidebar-stat-section,
+        .dash-sidebar:not(.is-open) .oxonom-sidebar-card,
+        .dash-sidebar:not(.is-open) .sidebar-stat-label,
+        .dash-sidebar:not(.is-open) .dash-subtitle,
+        .dash-sidebar:not(.is-open) div[style*="font-size: 10px"] {
+          display: none !important;
+        }
+
+        .dash-sidebar:not(.is-open) div[style*="display: flex; gap: 8px"],
+        .dash-sidebar:not(.is-open) div[style*="display:flex;gap:8px"] {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          gap: 12px !important;
+        }
+
+        .dash-sidebar:not(.is-open) button,
+        .dash-sidebar:not(.is-open) label {
+          width: 52px !important;
+          height: 52px !important;
+          min-height: 52px !important;
+          max-height: 52px !important;
+          padding: 0 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          border-radius: 14px !important;
+          margin: 0 auto !important;
+        }
+
+        .dash-sidebar:not(.is-open) button span,
+        .dash-sidebar:not(.is-open) label span {
+          display: none !important;
+        }
+
+        .dash-sidebar:not(.is-open) svg {
+          margin: 0 !important;
+        }
+
+        .sidebar-backdrop {
+          display: none !important;
+        }
+      }
+      .ts-topbar-hamburger {
+        display: inline-flex !important;
+        cursor: pointer !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(217, 20, 200, 0.3) !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        color: #FCE8FA !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+      }
+      .ts-topbar-hamburger:hover {
+        background: rgba(217, 20, 200, 0.2) !important;
+        border-color: #D914C8 !important;
+        transform: scale(1.08) !important;
+      }
+      .dash-sidebar {
+        transition: width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), min-width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), max-width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.3s ease !important;
+        will-change: width, transform;
+        position: relative;
+        overflow-x: hidden !important;
+      }
+      .dash-sidebar.oxonom-iconic-mode {
+        width: 74px !important;
+        min-width: 74px !important;
+        max-width: 74px !important;
+        padding: 0 !important;
+      }
+      .dash-sidebar.oxonom-iconic-mode .sidebar-stat-section,
+      .dash-sidebar.oxonom-iconic-mode .oxonom-sidebar-card,
+      .dash-sidebar.oxonom-iconic-mode .sidebar-stat-label,
+      .dash-sidebar.oxonom-iconic-mode .dash-subtitle,
+      .dash-sidebar.oxonom-iconic-mode div[style*="font-size: 10px"],
+      .dash-sidebar.oxonom-iconic-mode .oxonom-toggle-text {
+        display: none !important;
+      }
+      .dash-sidebar.oxonom-iconic-mode div[style*="display: flex; gap: 8px"],
+      .dash-sidebar.oxonom-iconic-mode div[style*="display:flex;gap:8px"] {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px !important;
+      }
+      .dash-sidebar.oxonom-iconic-mode button,
+      .dash-sidebar.oxonom-iconic-mode label {
+        width: 52px !important;
+        height: 52px !important;
+        min-height: 52px !important;
+        max-height: 52px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 14px !important;
+        margin: 0 auto !important;
+      }
+      .dash-sidebar.oxonom-iconic-mode button span,
+      .dash-sidebar.oxonom-iconic-mode label span {
+        display: none !important;
+      }
+      .dash-sidebar.oxonom-iconic-mode svg {
+        margin: 0 !important;
+      }
+      .oxonom-sidebar-toggle-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 8px;
+        box-sizing: border-box;
+      }
+      .dash-sidebar.oxonom-iconic-mode .oxonom-sidebar-toggle-bar {
+        justify-content: center;
+        padding: 12px 0;
+      }
+      .oxonom-sidebar-toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(217, 20, 200, 0.12);
+        border: 1px solid rgba(217, 20, 200, 0.28);
+        color: #FCE8FA;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .oxonom-sidebar-toggle-btn:hover {
+        background: #D914C8;
+        color: white;
+        transform: scale(1.05);
+      }
+      .dash-sidebar.oxonom-iconic-mode .oxonom-sidebar-toggle-btn {
+        width: 42px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+      }
+      .dash-sidebar.oxonom-iconic-mode .toggle-icon-collapse {
+        display: none !important;
+      }
+      .dash-sidebar:not(.oxonom-iconic-mode) .toggle-icon-expand {
+        display: none !important;
+      }
+
+      /* ── 4. MOBİL UYARI KALDIRILDI & RESPONSIVE DÜZENLEME ── */
+      .mobile-warning-overlay,
+      .mobile-warning-card {
+        display: none !important;
+      }
+      @media (max-width: 768px) {
+        .ts-topbar {
+          padding: 8px 10px !important;
+          gap: 6px !important;
+        }
+        .ts-topbar-nav {
+          display: flex !important;
+          overflow-x: auto !important;
+          flex-wrap: nowrap !important;
+          gap: 4px !important;
+          padding: 4px 0 !important;
+          scrollbar-width: none !important;
+        }
+        .ts-topbar-nav::-webkit-scrollbar {
+          display: none !important;
+        }
+        .ts-topbar-link {
+          padding: 6px 10px !important;
+          font-size: 12px !important;
+          white-space: nowrap !important;
+        }
+        .ts-topbar-link-suffix {
+          display: none !important;
+        }
+        .empty-pool-actions {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr !important;
+          gap: 10px !important;
+          padding: 10px !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+        }
+        .action-card {
+          width: 100% !important;
+          min-width: 0 !important;
+          max-width: none !important;
+          height: 110px !important;
+          padding: 10px 6px !important;
+          gap: 6px !important;
+        }
+        .action-icon svg {
+          width: 28px !important;
+          height: 28px !important;
+        }
+        .action-text {
+          font-size: 11px !important;
+          line-height: 1.2 !important;
+          text-align: center !important;
+        }
+      }
     </style>
 
     <script>
@@ -801,6 +1068,7 @@
         localStorage.setItem("ts_analytics_consent", "true");
         localStorage.setItem("ts_marketing_consent", "true");
         localStorage.setItem("ts_cookie_consent", "accepted");
+        sessionStorage.setItem("mobile-warning-ack", "1");
 
         // Oxonom Edu Yan Menü Asistanı & İpucu Kartı Entegrasyonu
         function injectOxonomSidebarCard() {
@@ -824,6 +1092,58 @@
           }
         }
         setInterval(injectOxonomSidebarCard, 600);
+
+        // Elastik İkonik Yan Menü Toggle Sistemi
+        function setupIconicSidebar() {
+          const sidebar = document.querySelector(".dash-sidebar");
+          const hamburger = document.querySelector(".ts-topbar-hamburger");
+          if (!sidebar || sidebar.dataset.iconicSetup) return;
+          sidebar.dataset.iconicSetup = "true";
+
+          const toggleBar = document.createElement("div");
+          toggleBar.className = "oxonom-sidebar-toggle-bar";
+          toggleBar.innerHTML = `
+            <button type="button" class="oxonom-sidebar-toggle-btn" title="Menüyü Daralt / Genişlet">
+              <svg class="toggle-icon-collapse" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <svg class="toggle-icon-expand" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span class="oxonom-toggle-text">Menüyü Daralt</span>
+            </button>
+          `;
+
+          const toggleBtn = toggleBar.querySelector(".oxonom-sidebar-toggle-btn");
+          const toggleAction = (e) => {
+            if (e) e.stopPropagation();
+            sidebar.classList.toggle("oxonom-iconic-mode");
+            const isIconic = sidebar.classList.contains("oxonom-iconic-mode");
+            const label = toggleBar.querySelector(".oxonom-toggle-text");
+            if (label) label.textContent = isIconic ? "" : "Menüyü Daralt";
+            try { localStorage.setItem("oxonom_sidebar_iconic", isIconic ? "true" : "false"); } catch(_) {}
+          };
+
+          toggleBtn.addEventListener("click", toggleAction);
+          if (hamburger) {
+            hamburger.addEventListener("click", toggleAction);
+          }
+
+          try {
+            if (localStorage.getItem("oxonom_sidebar_iconic") === "true") {
+              sidebar.classList.add("oxonom-iconic-mode");
+              const label = toggleBar.querySelector(".oxonom-toggle-text");
+              if (label) label.textContent = "";
+            }
+          } catch(_) {}
+
+          sidebar.insertBefore(toggleBar, sidebar.firstChild);
+        }
+        setInterval(setupIconicSidebar, 500);
+
+        // Pencere / Genişletilmiş Görünüm Dinleyicisi
+        window.addEventListener("message", (event) => {
+          if (event.data && event.data.type === "OXONOM_VIEW_MODE") {
+            document.body.classList.toggle("oxonom-expanded-mode", !!event.data.isFullscreen);
+            document.documentElement.classList.toggle("oxonom-expanded-mode", !!event.data.isFullscreen);
+          }
+        });
       } catch (e) {
         console.error("Auth injection error:", e);
       }
