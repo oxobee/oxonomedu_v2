@@ -142,9 +142,15 @@ const AVAILABLE_SUB_ICONS = [
 
 export default function SuperAdminPage() {
   // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('oxonom_superadmin_auth') === 'true';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && sessionStorage.getItem('oxonom_superadmin_auth') === 'true') {
+        setIsAuthenticated(true);
+      }
+    } catch {}
+  }, []);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
