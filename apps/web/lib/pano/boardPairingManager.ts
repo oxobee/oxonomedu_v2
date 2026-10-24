@@ -29,6 +29,7 @@ export interface BoardPairingInfo {
   mealMenuEnabled?: boolean
   anthemEnabled?: boolean
   pairedAt?: string
+  activeBoardNo?: string
 }
 
 export const GLOBAL_BOARD_REGISTRY_KEY = 'oxonom_global_board_registry'
@@ -38,7 +39,7 @@ export const BOARD_SYNC_CHANNEL_NAME = 'oxonom_board_sync_channel'
 const DEFAULT_DEMO_BOARDS: BoardPairingInfo[] = [
   {
     id: 'board-1',
-    code: '123456',
+    code: '1234',
     name: '1-A Sınıfı Akıllı Tahta',
     location: 'B Blok · 1. Kat 101 Nolu Derslik',
     type: 'classroom',
@@ -58,7 +59,7 @@ const DEFAULT_DEMO_BOARDS: BoardPairingInfo[] = [
   },
   {
     id: 'board-2',
-    code: '654321',
+    code: '4321',
     name: '4-A Sınıfı Akıllı Tahta',
     location: 'B Blok · 2. Kat 204 Nolu Derslik',
     type: 'classroom',
@@ -78,7 +79,7 @@ const DEFAULT_DEMO_BOARDS: BoardPairingInfo[] = [
   },
   {
     id: 'board-3',
-    code: '741295',
+    code: '7412',
     name: 'Ana Giriş & Lobi Panosu',
     location: 'Ana Bina · Zemin Kat Giriş Turnikeleri',
     type: 'lobby',
@@ -98,7 +99,7 @@ const DEFAULT_DEMO_BOARDS: BoardPairingInfo[] = [
   },
   {
     id: 'board-4',
-    code: '888999',
+    code: '8888',
     name: 'Öğretmenler Odası Bilgi Ekranı',
     location: 'A Blok · 2. Kat Öğretmenler Odası',
     type: 'teachers_lounge',
@@ -119,11 +120,79 @@ const DEFAULT_DEMO_BOARDS: BoardPairingInfo[] = [
 ]
 
 /**
- * Generates a clean, unique 6-digit numeric pairing code
- * e.g. 849201 for frictionless smartboard keypad input
+ * Checks whether a 4-digit Pano Code is already used by another school in the multi-tenant system.
+ */
+export function isPanoCodeTakenByOtherSchool(
+  code: string,
+  currentSchoolCode: string
+): { isTaken: boolean; usedBySchool?: string } {
+  if (typeof window === 'undefined') return { isTaken: false }
+  const clean = code.trim().toUpperCase()
+  if (!clean) return { isTaken: false }
+
+  // 1. Check Global Registry
+  const registry = getGlobalBoardRegistry()
+  const hit = registry[clean] || Object.values(registry).find((b) => b.code.toUpperCase() === clean)
+  if (hit && String(hit.schoolCode) !== String(currentSchoolCode)) {
+    return {
+      isTaken: true,
+      usedBySchool: hit.schoolName || `Okul Kodu: ${hit.schoolCode}`,
+    }
+  }
+
+  // 2. Scan all tenant board partitions
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key && key.startsWith('oxonom_tenant_boards_')) {
+      const sc = key.replace('oxonom_tenant_boards_', '')
+      if (sc !== String(currentSchoolCode)) {
+        try {
+          const list = JSON.parse(localStorage.getItem(key) || '[]')
+          if (Array.isArray(list)) {
+            const match = list.find((b: any) => b.code && b.code.toUpperCase() === clean)
+            if (match) {
+              return {
+                isTaken: true,
+                usedBySchool: match.schoolName || `Okul Kodu: ${sc}`,
+              }
+            }
+          }
+        } catch (_) {}
+      }
+    }
+  }
+
+  return { isTaken: false }
+}
+
+/**
+ * Generates a unique 4-digit random Pano Code (e.g. "0368") not taken by any school.
+ */
+export function generateUnique4DigitPanoCode(currentSchoolCode: string): string {
+  for (let attempt = 0; attempt < 100; attempt++) {
+    const rand = Math.floor(1000 + Math.random() * 9000).toString()
+    const check = isPanoCodeTakenByOtherSchool(rand, currentSchoolCode)
+    if (!check.isTaken) {
+      return rand
+    }
+  }
+  return Math.floor(1000 + Math.random() * 9000).toString()
+}
+
+/**
+ * Legacy compatibility alias
  */
 export function generateUniqueBoardCode(schoolCode?: string, classroom?: string): string {
-  return Math.floor(100000 + Math.random() * 900000).toString()
+  return generateUnique4DigitPanoCode(schoolCode || '741295')
+}
+
+/**
+ * Formats a combined Pano + Board No (e.g. "0368-01")
+ */
+export function formatCompositeBoardCode(panoCode: string, boardNo: string | number = '01'): string {
+  const cleanPano = panoCode.replace(/[^0-9A-Za-z]/g, '').padStart(4, '0')
+  const cleanBoard = String(boardNo).replace(/[^0-9]/g, '').padStart(2, '0')
+  return `${cleanPano}-${cleanBoard}`
 }
 
 /**

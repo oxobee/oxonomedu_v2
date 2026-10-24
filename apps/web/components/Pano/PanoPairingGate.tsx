@@ -22,7 +22,7 @@ interface PanoPairingGateProps {
 }
 
 export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPairingGateProps) {
-  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', ''])
+  const [digits, setDigits] = useState<string[]>(['', '', '', ''])
   const [activeIndex, setActiveIndex] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -35,14 +35,14 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
   // If initialCode has digits, prefill them
   useEffect(() => {
     if (initialCode) {
-      const clean = initialCode.replace(/[^0-9]/g, '').slice(0, 6)
+      const clean = initialCode.replace(/[^0-9]/g, '').slice(0, 4)
       if (clean.length > 0) {
-        const next = ['', '', '', '', '', '']
+        const next = ['', '', '', '']
         for (let i = 0; i < clean.length; i++) {
           next[i] = clean[i]
         }
         setDigits(next)
-        if (clean.length === 6) {
+        if (clean.length === 4) {
           validateAndPair(clean)
         } else {
           setActiveIndex(clean.length)
@@ -53,7 +53,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
 
   // Focus active input box
   useEffect(() => {
-    if (!isLoading && activeIndex >= 0 && activeIndex < 6) {
+    if (!isLoading && activeIndex >= 0 && activeIndex < 4) {
       inputRefs.current[activeIndex]?.focus()
     }
   }, [activeIndex, isLoading])
@@ -69,7 +69,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
         setIsSuccess(true)
         setTimeout(() => {
           onSuccess(result.board!)
-        }, 600)
+        }, 550)
       } else {
         // Trigger shake, show error and auto-reset
         setIsShaking(true)
@@ -80,7 +80,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
 
         setTimeout(() => {
           setIsShaking(false)
-          setDigits(['', '', '', '', '', ''])
+          setDigits(['', '', '', ''])
           setActiveIndex(0)
           inputRefs.current[0]?.focus()
         }, 1100)
@@ -107,11 +107,11 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
     setDigits(next)
     setErrorMessage(null)
 
-    // Check if full 6 digits are filled
+    // Check if full 4 digits are filled
     const fullCode = next.join('')
-    if (fullCode.length === 6 && !next.includes('')) {
+    if (fullCode.length === 4 && !next.includes('')) {
       validateAndPair(fullCode)
-    } else if (index < 5) {
+    } else if (index < 3) {
       setActiveIndex(index + 1)
     }
   }
@@ -133,7 +133,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
       }
     } else if (e.key === 'ArrowLeft' && index > 0) {
       setActiveIndex(index - 1)
-    } else if (e.key === 'ArrowRight' && index < 5) {
+    } else if (e.key === 'ArrowRight' && index < 3) {
       setActiveIndex(index + 1)
     }
   }
@@ -141,7 +141,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
   // Handle paste
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault()
-    const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6)
+    const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 4)
     if (!pasted) return
 
     const next = [...digits]
@@ -150,10 +150,10 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
     }
     setDigits(next)
 
-    if (pasted.length === 6) {
+    if (pasted.length === 4) {
       validateAndPair(pasted)
     } else {
-      setActiveIndex(Math.min(5, pasted.length))
+      setActiveIndex(Math.min(3, pasted.length))
     }
   }
 
@@ -163,7 +163,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
     setShowKeypad(true)
 
     if (key === 'clear') {
-      setDigits(['', '', '', '', '', ''])
+      setDigits(['', '', '', ''])
       setActiveIndex(0)
       setErrorMessage(null)
       inputRefs.current[0]?.focus()
@@ -182,8 +182,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
 
     // Number key 0-9
     let targetIdx = activeIndex
-    // If current box already has a digit and we're not at the end, find next empty or move to next
-    if (digits[targetIdx] !== '' && targetIdx < 5) {
+    if (digits[targetIdx] !== '' && targetIdx < 3) {
       targetIdx = targetIdx + 1
     }
 
@@ -193,9 +192,9 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
     setErrorMessage(null)
 
     const fullCode = next.join('')
-    if (fullCode.length === 6 && !next.includes('')) {
+    if (fullCode.length === 4 && !next.includes('')) {
       validateAndPair(fullCode)
-    } else if (targetIdx < 5) {
+    } else if (targetIdx < 3) {
       setActiveIndex(targetIdx + 1)
     }
   }
@@ -279,15 +278,15 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
             </h1>
 
             <p className="text-xs sm:text-sm text-[#C4B3CD] mt-1.5 max-w-xs leading-relaxed">
-              Okul müdürünüzden aldığınız 6 haneli{' '}
+              Okul müdürünüzden aldığınız 4 haneli{' '}
               <strong className="text-white font-bold">Pano Kodunu</strong> giriniz.
             </p>
           </div>
 
-          {/* ── 6-Digit OTP / PIN Entry Boxes ── */}
+          {/* ── 4-Digit OTP / PIN Entry Boxes ── */}
           <div
             onClick={() => setShowKeypad(true)}
-            className="w-full flex items-center justify-center gap-1.5 sm:gap-2.5 my-3 cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 sm:gap-3.5 my-3 cursor-pointer"
           >
             {digits.map((digit, idx) => {
               const isCurrent = activeIndex === idx
@@ -311,7 +310,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
                     onKeyDown={(e) => handleKeyDown(idx, e)}
                     onPaste={handlePaste}
                     disabled={isLoading || isSuccess}
-                    className={`w-11 h-14 sm:w-13 sm:h-16 text-center text-2xl sm:text-3xl font-mono font-black rounded-2xl transition-all duration-200 outline-none select-none caret-transparent cursor-pointer ${
+                    className={`w-14 h-16 sm:w-17 sm:h-20 text-center text-3xl sm:text-4xl font-mono font-black rounded-2xl transition-all duration-200 outline-none select-none caret-transparent cursor-pointer ${
                       isShaking
                         ? 'border-2 border-rose-500 bg-rose-500/10 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.4)]'
                         : isSuccess
