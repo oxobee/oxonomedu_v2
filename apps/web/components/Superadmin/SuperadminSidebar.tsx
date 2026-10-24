@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Activity,
   Layers,
+  Server,
   X,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -48,6 +49,13 @@ const SUPERADMIN_NAV_CATEGORIES: NavCategory[] = [
         label: 'Genel Bakış (Dashboard)',
         path: '/superadmin',
         icon: LayoutDashboard,
+      },
+      {
+        label: 'Sunucu & Altyapı Sağlığı',
+        path: '/superadmin/infrastructure',
+        icon: Server,
+        badge: 'Canlı',
+        badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
       },
     ],
   },
