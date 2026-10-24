@@ -41,7 +41,9 @@ import {
 } from '@/lib/schools/schoolTenantManager'
 import { getStoredPrincipalProfile } from '@/lib/principal/principalProfileStorage'
 import {
-  generateUniqueBoardCode,
+  generateUnique4DigitPanoCode,
+  isPanoCodeTakenByOtherSchool,
+  formatCompositeBoardCode,
   registerBoardInGlobal,
   unregisterBoardFromGlobal,
   setBoardLiveStatus,
@@ -72,7 +74,7 @@ export interface SchoolBoard {
 const DEFAULT_BOARDS: SchoolBoard[] = [
   {
     id: 'board-1',
-    code: 'ANA-PANO',
+    code: '0368',
     name: 'Ana Giriş & Lobi Panosu',
     location: 'Ana Bina · Zemin Kat Giriş Turnikeleri',
     type: 'lobby',
@@ -90,7 +92,7 @@ const DEFAULT_BOARDS: SchoolBoard[] = [
   },
   {
     id: 'board-2',
-    code: 'OGRETMEN-PANO',
+    code: '0369',
     name: 'Öğretmenler Odası Bilgi Ekranı',
     location: 'A Blok · 2. Kat Öğretmenler Odası',
     type: 'teachers_lounge',
@@ -108,7 +110,7 @@ const DEFAULT_BOARDS: SchoolBoard[] = [
   },
   {
     id: 'board-3',
-    code: '1-A',
+    code: '0370',
     name: '1-A Sınıfı Akıllı Tahta',
     location: 'B Blok · 1. Kat 101 Nolu Derslik',
     type: 'classroom',
@@ -126,7 +128,7 @@ const DEFAULT_BOARDS: SchoolBoard[] = [
   },
   {
     id: 'board-4',
-    code: '4-A',
+    code: '0371',
     name: '4-A Sınıfı Akıllı Tahta',
     location: 'B Blok · 2. Kat 204 Nolu Derslik',
     type: 'classroom',
@@ -264,22 +266,22 @@ export default function PrincipalBoardsView() {
     } catch (_) {}
   }
 
-  // Auto-generate code when opening new board modal
+  // Auto-generate 4-digit code when opening new board modal
   const handleOpenNewBoardModal = () => {
     const initialClass = availableClasses[0]?.name.replace(/ Sınıfı.*/i, '').trim() || ''
     setNewBoardClassroom(initialClass)
     setNewBoardType('classroom')
     setNewBoardName(initialClass ? `${initialClass} Sınıfı Akıllı Tahtası` : 'Yeni Akıllı Tahta')
     setNewBoardLocation(initialClass ? `${initialClass} Dersliği` : 'Genel Okul Alanı')
-    setNewBoardCode(generateUniqueBoardCode(schoolCode, initialClass))
+    setNewBoardCode(generateUnique4DigitPanoCode(schoolCode))
     setIsNewBoardOpen(true)
   }
 
-  // Re-generate unique pairing code
+  // Re-generate unique 4-digit pairing code
   const handleRegenerateCode = () => {
-    const newCode = generateUniqueBoardCode(schoolCode, newBoardClassroom)
+    const newCode = generateUnique4DigitPanoCode(schoolCode)
     setNewBoardCode(newCode)
-    toast.success(`Yeni benzersiz kod üretildi: ${newCode}`)
+    toast.success(`Yeni 4 haneli pano kodu üretildi: ${newCode}`)
   }
 
   // Classroom changed in creation modal
@@ -288,11 +290,9 @@ export default function PrincipalBoardsView() {
     if (clsName) {
       setNewBoardName(`${clsName} Sınıfı Akıllı Tahtası`)
       setNewBoardLocation(`${clsName} Dersliği`)
-      setNewBoardCode(generateUniqueBoardCode(schoolCode, clsName))
     } else {
       setNewBoardName('Kat Koridor Panosu')
       setNewBoardLocation('Genel Okul Alanı')
-      setNewBoardCode(generateUniqueBoardCode(schoolCode))
     }
   }
 
@@ -330,9 +330,20 @@ export default function PrincipalBoardsView() {
       return
     }
 
-    const code =
+    const code = (
       newBoardCode.trim().toUpperCase() ||
-      generateUniqueBoardCode(schoolCode, newBoardClassroom)
+      generateUnique4DigitPanoCode(schoolCode)
+    )
+
+    // Multi-tenant check: Is this 4-digit code already used by another school?
+    const conflict = isPanoCodeTakenByOtherSchool(code, schoolCode)
+    if (conflict.isTaken) {
+      toast.error(
+        `Bu pano numarası (${code}) başka bir okul (${conflict.usedBySchool}) tarafından kullanılıyor! Lütfen farklı bir 4 haneli numara seçiniz veya "Farklı Kod Üret" butonuna basınız.`,
+        { duration: 6000 }
+      )
+      return
+    }
 
     const newBoard: SchoolBoard = {
       id: `board-${Date.now()}`,
@@ -549,9 +560,10 @@ export default function PrincipalBoardsView() {
                       type="button"
                       onClick={() => handleCopyCode(board.code)}
                       className="group/code px-3 py-1.5 rounded-xl bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA] font-mono text-xs font-black border border-[#D5C5DC] dark:border-[#8D49A6]/40 flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-xs"
-                      title="Kodu Kopyala"
+                      title="Pano Kodunu Kopyala"
                     >
-                      <span>{board.code}</span>
+                      <span>Pano No: {board.code}</span>
+                      <span className="text-[10px] font-normal opacity-75">({board.code}-01)</span>
                       {copiedCode === board.code ? (
                         <Check size={12} className="text-emerald-600" />
                       ) : (
@@ -629,7 +641,7 @@ export default function PrincipalBoardsView() {
                   <div className="mt-3 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2">
                     <span>
                       Akıllı tahtada <strong>/pano</strong> ekranına{' '}
-                      <strong className="font-mono text-xs">{board.code}</strong> kodunu giriniz.
+                      <strong className="font-mono text-xs font-black">{board.code}</strong> (veya tahta no ile <strong className="font-mono text-xs">{board.code}-01</strong>) giriniz.
                     </span>
                     <button
                       type="button"
@@ -974,7 +986,7 @@ export default function PrincipalBoardsView() {
                             ? 'Yemekhane Bilgi Ekranı'
                             : 'Kat Koridoru Panosu'
                         )
-                        setNewBoardCode(generateUniqueBoardCode(schoolCode))
+                        setNewBoardCode(generateUnique4DigitPanoCode(schoolCode))
                       }
                     }}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#F7F0FA] dark:bg-[#17101C] border border-[#E8DFEB] dark:border-[#49364F] text-xs font-semibold text-[#241329] dark:text-white focus:outline-none focus:border-[#D914C8]"
@@ -1029,12 +1041,12 @@ export default function PrincipalBoardsView() {
                   />
                 </div>
 
-                {/* Otomatik Benzersiz Kod */}
+                {/* Otomatik 4 Haneli Benzersiz Kod */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-bold text-[#241329] dark:text-[#E0D0E8] flex items-center gap-1.5">
-                      <span>Benzersiz Eşleştirme Kodu</span>
-                      <span className="text-[10px] text-emerald-600 font-semibold">(Otomatik Üretildi)</span>
+                      <span>4 Haneli Benzersiz Pano Kodu *</span>
+                      <span className="text-[10px] text-emerald-600 font-semibold">(Karışık 4 Hane)</span>
                     </label>
                     <button
                       type="button"
@@ -1042,20 +1054,22 @@ export default function PrincipalBoardsView() {
                       className="text-[11px] text-[#8D49A6] dark:text-[#D914C8] hover:underline font-bold flex items-center gap-1 cursor-pointer"
                     >
                       <RotateCcw size={11} />
-                      <span>Farklı Kod Üret</span>
+                      <span>Farklı 4 Haneli Kod Üret</span>
                     </button>
                   </div>
                   <div className="relative">
                     <input
                       type="text"
                       required
+                      maxLength={4}
+                      placeholder="Örn: 0368"
                       value={newBoardCode}
-                      onChange={(e) => setNewBoardCode(e.target.value.toUpperCase())}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F0D8FA]/30 dark:bg-[#350444]/40 border border-[#D5C5DC] dark:border-[#8D49A6]/40 font-mono text-sm font-black text-[#4B075F] dark:text-[#F0D8FA] tracking-wider uppercase focus:outline-none focus:border-[#D914C8]"
+                      onChange={(e) => setNewBoardCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F0D8FA]/30 dark:bg-[#350444]/40 border border-[#D5C5DC] dark:border-[#8D49A6]/40 font-mono text-sm font-black text-[#4B075F] dark:text-[#F0D8FA] tracking-widest text-center focus:outline-none focus:border-[#D914C8]"
                     />
                   </div>
                   <p className="text-[10px] text-[#716779] dark:text-[#A898B0] mt-1">
-                    Bu kod akıllı tahtada girilene kadar pano durumu <strong>Pasif / Bağlantı Bekliyor</strong> olarak kalır.
+                    Akıllı tahtalar bu pano numarasına ({newBoardCode || '0368'}-01, {newBoardCode || '0368'}-02) tanımlanır. Başka bir okulda olan numaralar kullanılamaz.
                   </p>
                 </div>
 

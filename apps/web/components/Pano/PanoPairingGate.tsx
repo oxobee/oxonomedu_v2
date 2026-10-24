@@ -137,7 +137,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
 
           <p className="text-xs sm:text-sm text-[#C4B3CD] mt-2 max-w-sm leading-relaxed">
             Bu akıllı tahtayı okulunuzun sistemine bağlamak için Okul Müdürünüzden aldığınız{' '}
-            <strong className="text-white">Pano Kodunu</strong> giriniz.
+            <strong className="text-white">4 Haneli Pano Kodunu</strong> giriniz.
           </p>
         </div>
 
@@ -151,7 +151,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
               type="text"
               autoFocus
               required
-              placeholder="Örn: PANO-4A-8392"
+              placeholder="Örn: 0368 veya 0368-01"
               value={code}
               onChange={(e) => {
                 setCode(e.target.value.toUpperCase())

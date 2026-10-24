@@ -69,8 +69,8 @@ export default function PanoLockScreen({
   const [isVerifying, setIsVerifying] = useState(false)
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const actualPin = settings.pin ? String(settings.pin).trim() : ''
-  const targetPinLength = actualPin.length > 0 ? actualPin.length : 4
+  const actualPin = settings.pin ? String(settings.pin).trim().slice(0, 4) : '1234'
+  const targetPinLength = 4
 
   // Live Clock & Date
   const [currentTime, setCurrentTime] = useState(new Date())
