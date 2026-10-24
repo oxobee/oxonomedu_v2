@@ -1,5 +1,14 @@
 // apps/web/lib/schools/schoolData.ts
 
+import {
+  isDemoSchool,
+  getTenantTeachers,
+  getTenantStudents,
+  getTenantClasses,
+  getTenantBoards,
+  DEMO_INSTITUTION_CODE,
+} from './schoolTenantManager'
+
 export interface SchoolPrincipal {
   name: string
   title: string
@@ -946,6 +955,9 @@ const LEGACY_STORAGE_KEY = 'oxonom_superadmin_schools'
 export function normalizeSchool(raw: any): SchoolDetail {
   if (!raw) return INITIAL_SCHOOLS[0]
 
+  const code = String(raw.code || '741295').trim()
+  const isDemo = isDemoSchool(code) || code === 'NECLA-GORER-01'
+
   const principalName = raw.principal?.name || raw.principalName || 'Okul Müdürü'
   const principalPhone = raw.principal?.phone || raw.phone || '+90 (212) 000 00 00'
   const principalEmail = raw.principal?.email || raw.email || 'mudur@okul.k12.tr'
@@ -953,8 +965,31 @@ export function normalizeSchool(raw: any): SchoolDetail {
   const principalTitle = raw.principal?.title || 'Okul Müdürü · Kurum Baş Yetkilisi'
   const appointmentDate = raw.principal?.appointmentDate || raw.createdAt || '01.09.2023'
 
-  const studentCount = Number(raw.stats?.totalStudents ?? raw.studentCount ?? 360)
-  const teacherCount = Number(raw.stats?.totalTeachers ?? raw.teacherCount ?? 24)
+  let savedSector = raw.schoolSector
+  if (typeof window !== 'undefined') {
+    const fromStorage = localStorage.getItem(`oxonom_school_sector_${code}`)
+    if (fromStorage === 'devlet' || fromStorage === 'ozel' || fromStorage === 'kurs') {
+      savedSector = fromStorage
+    }
+  }
+  const schoolSector =
+    savedSector ||
+    (String(raw.type || '').toLowerCase().includes('özel')
+      ? 'ozel'
+      : String(raw.type || '').toLowerCase().includes('kurs')
+      ? 'kurs'
+      : 'devlet')
+
+  // Real tenant data lookup from school's isolated storage
+  let tenantTeachers: any[] | null = null
+  let tenantStudents: any[] | null = null
+  let tenantClasses: any[] | null = null
+
+  if (typeof window !== 'undefined') {
+    tenantTeachers = getTenantTeachers(code)
+    tenantStudents = getTenantStudents(code)
+    tenantClasses = getTenantClasses(code)
+  }
 
   const defaultStaff: SchoolStaffMember[] = [
     {
@@ -1052,10 +1087,10 @@ export function normalizeSchool(raw: any): SchoolDetail {
   ]
 
   const defaultClassrooms: SchoolClassroom[] = [
-    { grade: '1-A', level: '1. Sınıf', studentCount: Math.round(studentCount * 0.25), headTeacher: 'Sevda KOÇ', averageScore: 92.4 },
-    { grade: '2-A', level: '2. Sınıf', studentCount: Math.round(studentCount * 0.25), headTeacher: 'Nermin KURT', averageScore: 89.5 },
-    { grade: '3-A', level: '3. Sınıf', studentCount: Math.round(studentCount * 0.25), headTeacher: 'Berna TAŞ', averageScore: 87.9 },
-    { grade: '4-A', level: '4. Sınıf', studentCount: Math.round(studentCount * 0.25), headTeacher: 'Ayşe DEMİR', averageScore: 93.1 },
+    { grade: '1-A', level: '1. Sınıf', studentCount: 24, headTeacher: 'Sevda KOÇ', averageScore: 92.4 },
+    { grade: '2-A', level: '2. Sınıf', studentCount: 26, headTeacher: 'Nermin KURT', averageScore: 89.5 },
+    { grade: '3-A', level: '3. Sınıf', studentCount: 25, headTeacher: 'Berna TAŞ', averageScore: 87.9 },
+    { grade: '4-A', level: '4. Sınıf', studentCount: 25, headTeacher: 'Ayşe DEMİR', averageScore: 93.1 },
   ]
 
   const defaultLogs: SchoolActivityLog[] = [
@@ -1079,13 +1114,110 @@ export function normalizeSchool(raw: any): SchoolDetail {
     },
   ]
 
+  // Real Teachers: Check tenant isolation first
+  let realTeachers: SchoolTeacher[] = []
+  if (Array.isArray(tenantTeachers) && (!isDemo || tenantTeachers.length > 0)) {
+    realTeachers = tenantTeachers.map((t: any, i: number) => ({
+      id: t.id || `tch-${code}-${i + 1}`,
+      name: t.name || 'Öğretmen',
+      branch: t.branch || 'Branş Öğretmeni',
+      classroom: t.classroom || (t.assignedClassrooms ? t.assignedClassrooms.join(', ') : '—'),
+      phone: t.phone || principalPhone,
+      email: t.email || `ogretmen@${code}.k12.tr`,
+      lessonCount: Number(t.weeklyHours || t.lessonCount || 20),
+      lastLogin: t.lastLogin || 'Aktif',
+      status: t.status === 'passive' ? 'passive' : 'active',
+    }))
+  } else if (Array.isArray(raw.teachers) && (isDemo || raw.teachers.length > 0)) {
+    realTeachers = raw.teachers
+  } else if (isDemo) {
+    realTeachers = defaultTeachers
+  } else {
+    realTeachers = []
+  }
+
+  // Real Students: Check tenant isolation first
+  let realStudents: SchoolStudent[] = []
+  if (Array.isArray(tenantStudents) && (!isDemo || tenantStudents.length > 0)) {
+    realStudents = tenantStudents.map((s: any, i: number) => ({
+      id: s.id || `stu-${code}-${i + 1}`,
+      studentNumber: String(s.studentNumber || s.number || 100 + i + 1),
+      name: s.name || 'Öğrenci',
+      grade: s.grade || s.className || '1-A',
+      parentName: s.parentName || 'Veli',
+      parentPhone: s.parentPhone || principalPhone,
+      attendanceRate: Number(s.attendanceRate || 98.0),
+      gpa: Number(s.gpa || 85.0),
+      status: s.status === 'transferred' || s.status === 'suspended' ? s.status : 'active',
+    }))
+  } else if (Array.isArray(raw.students) && (isDemo || raw.students.length > 0)) {
+    realStudents = raw.students
+  } else if (isDemo) {
+    realStudents = defaultStudents
+  } else {
+    realStudents = []
+  }
+
+  // Real Classrooms: Check tenant isolation first
+  let realClassrooms: SchoolClassroom[] = []
+  if (Array.isArray(tenantClasses) && (!isDemo || tenantClasses.length > 0)) {
+    realClassrooms = tenantClasses.map((c: any) => ({
+      grade: c.code || c.grade || `${c.gradeNumber || 1}-${c.branch || 'A'}`,
+      level: c.level || `${c.gradeNumber || 1}. Sınıf`,
+      studentCount: Number(c.studentCount || c.enrolledCount || 0),
+      headTeacher: c.headTeacher || 'Atanmadı',
+      averageScore: Number(c.averageScore || 85.0),
+    }))
+  } else if (Array.isArray(raw.classrooms) && (isDemo || raw.classrooms.length > 0)) {
+    realClassrooms = raw.classrooms
+  } else if (isDemo) {
+    realClassrooms = defaultClassrooms
+  } else {
+    realClassrooms = []
+  }
+
+  // Real Staff
+  let realStaff: SchoolStaffMember[] = []
+  if (Array.isArray(raw.staff) && (isDemo || raw.staff.length > 0)) {
+    realStaff = raw.staff
+  } else if (isDemo) {
+    realStaff = defaultStaff
+  } else {
+    realStaff = []
+  }
+
+  // Calculate actual statistics
+  const totalStudents = isDemo ? Number(raw.stats?.totalStudents ?? (realStudents.length || 360)) : realStudents.length
+  const activeStudents = isDemo ? Number(raw.stats?.activeStudents ?? 348) : realStudents.filter((s) => s.status === 'active').length
+  const totalTeachers = isDemo ? Number(raw.stats?.totalTeachers ?? (realTeachers.length || 24)) : realTeachers.length
+  const activeTeachers = isDemo ? Number(raw.stats?.activeTeachers ?? 24) : realTeachers.filter((t) => t.status === 'active').length
+  const totalStaff = isDemo ? Number(raw.stats?.totalStaff ?? 8) : realStaff.length
+
+  const avgAttendance =
+    realStudents.length > 0
+      ? Math.round(
+          (realStudents.reduce((acc, s) => acc + (s.attendanceRate || 95), 0) / realStudents.length) * 10
+        ) / 10
+      : isDemo
+      ? 96.8
+      : 0
+
+  const avgGpa =
+    realStudents.length > 0
+      ? Math.round(
+          (realStudents.reduce((acc, s) => acc + (s.gpa || 85), 0) / realStudents.length) * 10
+        ) / 10
+      : isDemo
+      ? 88.4
+      : 0
+
   return {
     id: String(raw.id || `sch-${Date.now()}`),
-    code: String(raw.code || '741295'),
+    code,
     name: String(raw.name || 'Oxonom İlkokulu'),
     shortName: String(raw.shortName || (raw.name ? String(raw.name).split(' ').slice(0, 2).join(' ') : 'Oxonom')),
-    type: String(raw.type || 'MEB Resmi İlkokulu & Ortaokulu'),
-    schoolSector: raw.schoolSector || (String(raw.type || '').toLowerCase().includes('özel') ? 'ozel' : String(raw.type || '').toLowerCase().includes('kurs') ? 'kurs' : 'devlet'),
+    type: String(raw.type || (schoolSector === 'ozel' ? 'Özel İlkokulu' : schoolSector === 'kurs' ? 'Özel Kurs' : 'MEB Resmi İlkokulu')),
+    schoolSector,
     level: String(raw.level || 'İlkokul (1-4) & Ortaokul (5-8)'),
     city: String(raw.city || 'İstanbul'),
     district: String(raw.district || 'Merkez'),
@@ -1111,26 +1243,26 @@ export function normalizeSchool(raw: any): SchoolDetail {
       isFirstLogin: raw.principal?.isFirstLogin ?? raw.isFirstLogin ?? false,
       isNewEmptySchool: raw.principal?.isNewEmptySchool ?? raw.isNewEmptySchool ?? false,
     },
-    staff: Array.isArray(raw.staff) && raw.staff.length > 0 ? raw.staff : defaultStaff,
-    teachers: Array.isArray(raw.teachers) && raw.teachers.length > 0 ? raw.teachers : defaultTeachers,
-    students: Array.isArray(raw.students) && raw.students.length > 0 ? raw.students : defaultStudents,
-    classrooms: Array.isArray(raw.classrooms) && raw.classrooms.length > 0 ? raw.classrooms : defaultClassrooms,
+    staff: realStaff,
+    teachers: realTeachers,
+    students: realStudents,
+    classrooms: realClassrooms,
     stats: {
-      totalStudents: studentCount,
-      activeStudents: Number(raw.stats?.activeStudents ?? studentCount),
-      maleStudents: Number(raw.stats?.maleStudents ?? Math.round(studentCount * 0.52)),
-      femaleStudents: Number(raw.stats?.femaleStudents ?? Math.round(studentCount * 0.48)),
-      totalTeachers: teacherCount,
-      activeTeachers: Number(raw.stats?.activeTeachers ?? teacherCount),
-      totalStaff: Number(raw.stats?.totalStaff ?? 8),
-      attendanceRate: Number(raw.stats?.attendanceRate ?? 96.8),
-      academicAverage: Number(raw.stats?.academicAverage ?? 88.4),
-      weeklyActiveUsers: Number(raw.stats?.weeklyActiveUsers ?? Math.round(studentCount * 0.92)),
-      completedLessonsThisMonth: Number(raw.stats?.completedLessonsThisMonth ?? 1240),
-      storageUsedMb: Number(raw.stats?.storageUsedMb ?? 14200),
-      storageLimitMb: Number(raw.stats?.storageLimitMb ?? 51200),
-      aiTokensUsed: Number(raw.stats?.aiTokensUsed ?? 18400),
-      aiTokensLimit: Number(raw.stats?.aiTokensLimit ?? 50000),
+      totalStudents,
+      activeStudents,
+      maleStudents: Math.round(totalStudents * 0.52),
+      femaleStudents: Math.round(totalStudents * 0.48),
+      totalTeachers,
+      activeTeachers,
+      totalStaff,
+      attendanceRate: avgAttendance,
+      academicAverage: avgGpa,
+      weeklyActiveUsers: isDemo ? 330 : totalStudents + totalTeachers,
+      completedLessonsThisMonth: isDemo ? 1240 : 0,
+      storageUsedMb: isDemo ? 14200 : 0,
+      storageLimitMb: 51200,
+      aiTokensUsed: isDemo ? 18400 : 0,
+      aiTokensLimit: 50000,
     },
     modules: raw.modules || {
       gameStudio: true,

@@ -48,6 +48,7 @@ import {
   EyeOff,
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import {
   SchoolDetail,
   getSchoolById,
@@ -75,21 +76,40 @@ export default function SuperadminSchoolDetailPage() {
 
   useEffect(() => {
     if (!schoolId) return
-    setIsLoading(true)
-    const found = getSchoolById(schoolId)
-    if (found) {
-      setSchool(normalizeSchool(found))
-    } else {
-      // If not found in memory, try loading from all
-      const all = getAllSchools()
-      const fallback = all.find(
-        (s) =>
-          (s.id || '').toLowerCase() === schoolId.toLowerCase() ||
-          (s.code || '').toLowerCase() === schoolId.toLowerCase()
-      )
-      setSchool(fallback ? normalizeSchool(fallback) : null)
+    const loadDetail = async () => {
+      setIsLoading(true)
+      let found = getSchoolById(schoolId)
+      if (!found) {
+        const all = getAllSchools()
+        found = all.find(
+          (s) =>
+            (s.id || '').toLowerCase() === schoolId.toLowerCase() ||
+            (s.code || '').toLowerCase() === schoolId.toLowerCase()
+        )
+      }
+
+      if (!found && isSupabaseConfigured()) {
+        try {
+          const client = getSupabaseBrowserClient()
+          const { data } = await client
+            .from('schools')
+            .select('*')
+            .or(`id.eq.${schoolId},code.eq.${schoolId}`)
+            .single()
+          if (data) {
+            found = normalizeSchool(data)
+          }
+        } catch (_) {}
+      }
+
+      if (found) {
+        setSchool(normalizeSchool(found))
+      } else {
+        setSchool(null)
+      }
+      setIsLoading(false)
     }
-    setIsLoading(false)
+    loadDetail()
   }, [schoolId])
 
   if (isLoading) {
@@ -254,7 +274,11 @@ export default function SuperadminSchoolDetailPage() {
             <button
               type="button"
               onClick={() => {
-                toast.success(`"${school.name}" için son sistem senkronizasyonu tamamlandı.`)
+                if (school) {
+                  const refreshed = normalizeSchool(school)
+                  setSchool(refreshed)
+                  toast.success(`"${school.name}" için son sistem ve veritabanı verileri başarıyla senkronize edildi.`)
+                }
               }}
               className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] hover:brightness-110 text-white text-xs font-black flex items-center gap-1.5 shadow-lg shadow-[#D914C8]/25 transition-all cursor-pointer active:scale-95"
             >
@@ -869,8 +893,20 @@ export default function SuperadminSchoolDetailPage() {
               </table>
 
               {filteredTeachers.length === 0 && (
-                <div className="text-center py-8 text-xs text-[#A998B3]">
-                  Arama kriterlerinize uygun öğretmen bulunamadı.
+                <div className="text-center py-12 px-4 space-y-2">
+                  <div className="w-12 h-12 rounded-2xl bg-[#20152B] border border-[#2E1E3B] text-[#A998B3] flex items-center justify-center mx-auto">
+                    <GraduationCap size={22} />
+                  </div>
+                  <div className="text-sm font-bold text-white">
+                    {(school.teachers || []).length === 0
+                      ? 'Bu Okulda Henüz Kayıtlı Öğretmen Bulunmuyor'
+                      : 'Arama kriterlerinize uygun öğretmen bulunamadı'}
+                  </div>
+                  <p className="text-xs text-[#A998B3] max-w-md mx-auto">
+                    {(school.teachers || []).length === 0
+                      ? 'Okul müdürü veya idare tarafından Öğretmen ve Personel Yönetimi modülünden yeni öğretmen eklendikçe burada anlık olarak listelenecektir.'
+                      : 'Farklı bir arama terimi veya filtre deneyebilirsiniz.'}
+                  </p>
                 </div>
               )}
             </div>
@@ -983,8 +1019,20 @@ export default function SuperadminSchoolDetailPage() {
               </table>
 
               {filteredStudents.length === 0 && (
-                <div className="text-center py-8 text-xs text-[#A998B3]">
-                  Arama kriterlerinize uygun öğrenci bulunamadı.
+                <div className="text-center py-12 px-4 space-y-2">
+                  <div className="w-12 h-12 rounded-2xl bg-[#20152B] border border-[#2E1E3B] text-[#A998B3] flex items-center justify-center mx-auto">
+                    <Users size={22} />
+                  </div>
+                  <div className="text-sm font-bold text-white">
+                    {(school.students || []).length === 0
+                      ? 'Bu Okulda Henüz Kayıtlı Öğrenci Bulunmuyor'
+                      : 'Arama kriterlerinize uygun öğrenci bulunamadı'}
+                  </div>
+                  <p className="text-xs text-[#A998B3] max-w-md mx-auto">
+                    {(school.students || []).length === 0
+                      ? 'Okul müdürü veya idare tarafından Öğrenci Yönetimi modülünden yeni öğrenci veya şube kaydı yapıldıkça burada anlık olarak listelenecektir.'
+                      : 'Farklı bir arama terimi veya filtre deneyebilirsiniz.'}
+                  </p>
                 </div>
               )}
             </div>

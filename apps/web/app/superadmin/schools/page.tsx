@@ -80,6 +80,7 @@ export default function SuperadminSchoolsPage() {
   const fetchSchools = async () => {
     setIsLoading(true)
     const configured = isSupabaseConfigured()
+    const localSchools = getAllSchools().map(normalizeSchool)
 
     if (configured) {
       try {
@@ -89,10 +90,42 @@ export default function SuperadminSchoolsPage() {
           .select('*')
           .order('name', { ascending: true })
 
-        if (!error && Array.isArray(data) && data.length > 0) {
-          // Normalize rows from Supabase to guarantee complete SchoolDetail shape
-          const normalized = data.map(normalizeSchool)
-          setSchools(normalized)
+        if (!error && Array.isArray(data)) {
+          const schoolMap = new Map<string, SchoolDetail>()
+
+          // 1. Seed with local schools
+          localSchools.forEach((s) => {
+            const key = (s.code || s.id).toLowerCase().trim()
+            schoolMap.set(key, s)
+          })
+
+          // 2. Merge Supabase schools
+          data.forEach((row) => {
+            const codeKey = (row.code || '').toLowerCase().trim()
+            const idKey = (row.id || '').toLowerCase().trim()
+            const existing = (codeKey && schoolMap.get(codeKey)) || (idKey && schoolMap.get(idKey))
+
+            if (existing) {
+              const updated = normalizeSchool({
+                ...existing,
+                name: row.name || existing.name,
+                code: row.code || existing.code,
+                city: row.city || existing.city,
+                district: row.district || existing.district,
+                supabaseId: row.id,
+              })
+              if (codeKey) schoolMap.set(codeKey, updated)
+              if (idKey) schoolMap.set(idKey, updated)
+            } else {
+              const normalized = normalizeSchool(row)
+              if (codeKey) schoolMap.set(codeKey, normalized)
+              if (idKey) schoolMap.set(idKey, normalized)
+            }
+          })
+
+          const merged = Array.from(new Set(schoolMap.values()))
+          setSchools(merged)
+          saveAllSchools(merged)
           setSupabaseStatus({ configured: true, connected: true })
           setIsLoading(false)
           return
@@ -102,9 +135,8 @@ export default function SuperadminSchoolsPage() {
       }
     }
 
-    // Local storage / initial schools
-    const loaded = getAllSchools().map(normalizeSchool)
-    setSchools(loaded)
+    // Local storage fallback
+    setSchools(localSchools)
     setSupabaseStatus({ configured, connected: configured })
     setIsLoading(false)
   }
@@ -142,19 +174,29 @@ export default function SuperadminSchoolsPage() {
       principalEmail: formEmail.trim() || 'bilgi@okul.k12.tr',
       principalPassword: formPrincipalPassword.trim() || 'Oxonom2026!',
       planType: formPlan,
-      studentCount: Number(formStudentCount) || 240,
-      teacherCount: Number(formTeacherCount) || 16,
+      studentCount: 0,
+      teacherCount: 0,
     })
 
     // Attempt Supabase insert if configured
     if (supabaseStatus.configured) {
       try {
         const client = getSupabaseBrowserClient()
-        await client.from('schools').insert([created])
-      } catch (_) {}
+        await client.from('schools').insert([
+          {
+            name: created.name,
+            code: created.code,
+            city: created.city,
+            district: created.district,
+            total_classes: 0,
+          },
+        ])
+      } catch (err) {
+        console.warn('Supabase school insert warning:', err)
+      }
     }
 
-    setSchools([created, ...schools])
+    setSchools((prev) => [created, ...prev.filter((s) => s.code !== created.code)])
     toast.success(`🏫 "${created.name}" başarıyla sisteme kaydedildi!`)
     setIsModalOpen(false)
 
