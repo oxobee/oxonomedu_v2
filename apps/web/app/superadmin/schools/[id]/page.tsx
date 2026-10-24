@@ -49,6 +49,7 @@ import {
   getSchoolById,
   getAllSchools,
   saveAllSchools,
+  normalizeSchool,
 } from '@/lib/schools/schoolData'
 
 export default function SuperadminSchoolDetailPage() {
@@ -72,16 +73,16 @@ export default function SuperadminSchoolDetailPage() {
     setIsLoading(true)
     const found = getSchoolById(schoolId)
     if (found) {
-      setSchool(found)
+      setSchool(normalizeSchool(found))
     } else {
       // If not found in memory, try loading from all
       const all = getAllSchools()
       const fallback = all.find(
         (s) =>
-          s.id.toLowerCase() === schoolId.toLowerCase() ||
-          s.code.toLowerCase() === schoolId.toLowerCase()
+          (s.id || '').toLowerCase() === schoolId.toLowerCase() ||
+          (s.code || '').toLowerCase() === schoolId.toLowerCase()
       )
-      setSchool(fallback || null)
+      setSchool(fallback ? normalizeSchool(fallback) : null)
     }
     setIsLoading(false)
   }, [schoolId])
@@ -119,22 +120,22 @@ export default function SuperadminSchoolDetailPage() {
   }
 
   // Filtered teachers
-  const filteredTeachers = school.teachers.filter(
+  const filteredTeachers = (school.teachers || []).filter(
     (t) =>
-      t.name.toLowerCase().includes(teacherSearch.toLowerCase()) ||
-      t.branch.toLowerCase().includes(teacherSearch.toLowerCase()) ||
+      (t.name || '').toLowerCase().includes(teacherSearch.toLowerCase()) ||
+      (t.branch || '').toLowerCase().includes(teacherSearch.toLowerCase()) ||
       (t.classroom && t.classroom.toLowerCase().includes(teacherSearch.toLowerCase()))
   )
 
   // Filtered students
-  const filteredStudents = school.students.filter((s) => {
+  const filteredStudents = (school.students || []).filter((s) => {
     if (studentGradeFilter !== 'all' && s.grade !== studentGradeFilter) return false
     if (!studentSearch.trim()) return true
     const q = studentSearch.toLowerCase()
     return (
-      s.name.toLowerCase().includes(q) ||
-      s.studentNumber.includes(q) ||
-      s.parentName.toLowerCase().includes(q)
+      (s.name || '').toLowerCase().includes(q) ||
+      (s.studentNumber || '').includes(q) ||
+      (s.parentName || '').toLowerCase().includes(q)
     )
   })
 
@@ -301,7 +302,7 @@ export default function SuperadminSchoolDetailPage() {
             <span className="font-bold">Toplam Şube</span>
             <Layers size={14} className="text-sky-400" />
           </div>
-          <div className="text-2xl font-black text-white">{school.classrooms.length}</div>
+          <div className="text-2xl font-black text-white">{(school.classrooms || []).length}</div>
           <div className="text-[11px] text-[#A998B3]">Aktif Derslik</div>
         </div>
 
@@ -357,7 +358,7 @@ export default function SuperadminSchoolDetailPage() {
           }`}
         >
           <ShieldCheck size={15} />
-          <span>Okul Müdürü & İdari Kadro ({school.staff.length + 1})</span>
+          <span>Okul Müdürü & İdari Kadro ({(school.staff || []).length + 1})</span>
         </button>
 
         <button
@@ -370,7 +371,7 @@ export default function SuperadminSchoolDetailPage() {
           }`}
         >
           <GraduationCap size={15} />
-          <span>Öğretmenler ({school.teachers.length})</span>
+          <span>Öğretmenler ({(school.teachers || []).length})</span>
         </button>
 
         <button
@@ -383,7 +384,7 @@ export default function SuperadminSchoolDetailPage() {
           }`}
         >
           <Users size={15} />
-          <span>Öğrenciler & Sınıflar ({school.students.length})</span>
+          <span>Öğrenciler & Sınıflar ({(school.students || []).length})</span>
         </button>
 
         <button
@@ -409,7 +410,7 @@ export default function SuperadminSchoolDetailPage() {
           }`}
         >
           <History size={15} />
-          <span>Okul İçi İşlem Logları ({school.activityLogs.length})</span>
+          <span>Okul İçi İşlem Logları ({(school.activityLogs || []).length})</span>
         </button>
       </div>
 
@@ -430,12 +431,12 @@ export default function SuperadminSchoolDetailPage() {
                   </p>
                 </div>
                 <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-[#21142C] text-[#D0C0D9] border border-[#2E1E3B]">
-                  {school.classrooms.length} Şube
+                  {(school.classrooms || []).length} Şube
                 </span>
               </div>
 
               <div className="space-y-3">
-                {school.classrooms.map((cls, idx) => (
+                {(school.classrooms || []).map((cls, idx) => (
                   <div
                     key={idx}
                     className="p-3.5 rounded-2xl bg-[#20152B] border border-[#2E1E3B]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-[#8D49A6]/50 transition-all"
@@ -575,7 +576,7 @@ export default function SuperadminSchoolDetailPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2E1E3B]">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#D914C8] to-[#8D49A6] flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#D914C8]/30">
-                  {school.principal.name.charAt(0)}
+                  {(school.principal?.name || 'M').charAt(0)}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -587,9 +588,9 @@ export default function SuperadminSchoolDetailPage() {
                     </span>
                   </div>
                   <h2 className="text-xl sm:text-2xl font-black text-white mt-1">
-                    {school.principal.name}
+                    {school.principal?.name || 'Okul Müdürü'}
                   </h2>
-                  <p className="text-xs text-[#A998B3]">{school.principal.title}</p>
+                  <p className="text-xs text-[#A998B3]">{school.principal?.title || 'Okul Yetkilisi'}</p>
                 </div>
               </div>
 
@@ -607,25 +608,29 @@ export default function SuperadminSchoolDetailPage() {
               <div className="p-3.5 rounded-2xl bg-[#17101E] border border-[#2E1E3B] space-y-1">
                 <span className="text-[10.5px] text-[#A998B3] block">T.C. Kimlik No</span>
                 <span className="font-mono font-bold text-white tracking-wider">
-                  {school.principal.tcNo}
+                  {school.principal?.tcNo || '—'}
                 </span>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-[#17101E] border border-[#2E1E3B] space-y-1">
                 <span className="text-[10.5px] text-[#A998B3] block">Yetkili Telefonu</span>
-                <span className="font-mono font-bold text-white">{school.principal.phone}</span>
+                <span className="font-mono font-bold text-white">
+                  {school.principal?.phone || school.phone || '—'}
+                </span>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-[#17101E] border border-[#2E1E3B] space-y-1">
                 <span className="text-[10.5px] text-[#A998B3] block">Kurumsal E-Posta</span>
                 <span className="font-mono font-bold text-white truncate block">
-                  {school.principal.email}
+                  {school.principal?.email || school.email || '—'}
                 </span>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-[#17101E] border border-[#2E1E3B] space-y-1">
                 <span className="text-[10.5px] text-[#A998B3] block">Göreve Başlama Tarihi</span>
-                <span className="font-bold text-white">{school.principal.appointmentDate}</span>
+                <span className="font-bold text-white">
+                  {school.principal?.appointmentDate || school.createdAt || '01.09.2023'}
+                </span>
               </div>
             </div>
           </div>
@@ -643,12 +648,12 @@ export default function SuperadminSchoolDetailPage() {
                 </p>
               </div>
               <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-[#21142C] text-[#D0C0D9] border border-[#2E1E3B]">
-                {school.staff.length} Personel
+                {(school.staff || []).length} Personel
               </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {school.staff.map((stf) => (
+              {(school.staff || []).map((stf) => (
                 <div
                   key={stf.id}
                   className="p-4 rounded-2xl bg-[#20152B] border border-[#2E1E3B] space-y-3 hover:border-[#8D49A6]/50 transition-all"
@@ -822,7 +827,7 @@ export default function SuperadminSchoolDetailPage() {
                   className="h-10 px-3 rounded-xl bg-[#20152B] border border-[#2E1E3B] text-xs font-bold text-white focus:outline-hidden cursor-pointer"
                 >
                   <option value="all">Tüm Şubeler</option>
-                  {school.classrooms.map((c) => (
+                  {(school.classrooms || []).map((c) => (
                     <option key={c.grade} value={c.grade}>
                       {c.grade} Şubesi
                     </option>
@@ -1082,12 +1087,12 @@ export default function SuperadminSchoolDetailPage() {
                 </p>
               </div>
               <span className="text-xs font-bold px-2.5 py-1 rounded-xl bg-[#21142C] text-[#D0C0D9] border border-[#2E1E3B]">
-                {school.activityLogs.length} İşlem Kaydı
+                {(school.activityLogs || []).length} İşlem Kaydı
               </span>
             </div>
 
             <div className="space-y-3">
-              {school.activityLogs.map((log) => (
+              {(school.activityLogs || []).map((log) => (
                 <div
                   key={log.id}
                   className="p-4 rounded-2xl bg-[#20152B] border border-[#2E1E3B] flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-[#8D49A6]/50 transition-all"

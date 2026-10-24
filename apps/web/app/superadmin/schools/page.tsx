@@ -35,6 +35,7 @@ import {
   getAllSchools,
   addNewSchool,
   saveAllSchools,
+  normalizeSchool,
 } from '@/lib/schools/schoolData'
 
 export default function SuperadminSchoolsPage() {
@@ -81,8 +82,9 @@ export default function SuperadminSchoolsPage() {
           .order('name', { ascending: true })
 
         if (!error && Array.isArray(data) && data.length > 0) {
-          // If supabase returned rows, merge or map
-          setSchools(data as any)
+          // Normalize rows from Supabase to guarantee complete SchoolDetail shape
+          const normalized = data.map(normalizeSchool)
+          setSchools(normalized)
           setSupabaseStatus({ configured: true, connected: true })
           setIsLoading(false)
           return
@@ -93,7 +95,7 @@ export default function SuperadminSchoolsPage() {
     }
 
     // Local storage / initial schools
-    const loaded = getAllSchools()
+    const loaded = getAllSchools().map(normalizeSchool)
     setSchools(loaded)
     setSupabaseStatus({ configured, connected: configured })
     setIsLoading(false)
@@ -113,7 +115,7 @@ export default function SuperadminSchoolsPage() {
     }
 
     // Check duplicate code
-    if (schools.some((s) => s.code.toLowerCase() === formCode.trim().toLowerCase())) {
+    if (schools.some((s) => (s.code || '').toLowerCase() === formCode.trim().toLowerCase())) {
       toast.error(`"${formCode}" MEB koduna sahip bir okul zaten kayıtlı!`)
       return
     }
@@ -163,18 +165,22 @@ export default function SuperadminSchoolsPage() {
       if (statusFilter !== 'all' && s.status !== statusFilter) return false
       if (!search.trim()) return true
       const q = search.toLowerCase()
+      const pName = s.principal?.name || (s as any).principalName || ''
+      const sName = s.name || ''
+      const sCode = s.code || ''
+      const sDistrict = s.district || ''
       return (
-        s.name.toLowerCase().includes(q) ||
-        s.code.includes(q) ||
-        s.district.toLowerCase().includes(q) ||
-        s.principal.name.toLowerCase().includes(q)
+        sName.toLowerCase().includes(q) ||
+        sCode.includes(q) ||
+        sDistrict.toLowerCase().includes(q) ||
+        pName.toLowerCase().includes(q)
       )
     })
   }, [schools, cityFilter, statusFilter, search])
 
   // Cities List
   const cities = useMemo(() => {
-    const set = new Set(schools.map((s) => s.city))
+    const set = new Set(schools.map((s) => s.city || 'İstanbul'))
     return Array.from(set)
   }, [schools])
 
@@ -182,8 +188,8 @@ export default function SuperadminSchoolsPage() {
   const totalStats = useMemo(() => {
     return schools.reduce(
       (acc, s) => {
-        acc.totalStudents += s.stats?.totalStudents || 0
-        acc.totalTeachers += s.stats?.totalTeachers || 0
+        acc.totalStudents += s.stats?.totalStudents || (s as any).studentCount || 0
+        acc.totalTeachers += s.stats?.totalTeachers || (s as any).teacherCount || 0
         acc.totalSchools += 1
         if (s.status === 'active') acc.activeSchools += 1
         return acc
@@ -360,18 +366,18 @@ export default function SuperadminSchoolsPage() {
             <div className="flex items-start justify-between gap-3 relative z-10">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#D914C8] to-[#6A1689] text-white flex items-center justify-center font-black text-lg shrink-0 shadow-md group-hover:scale-105 transition-transform">
-                  {sch.name.charAt(0)}
+                  {(sch.name || 'O').charAt(0)}
                 </div>
                 <div>
                   <h3 className="text-base font-black text-white group-hover:text-[#FCE8FA] transition-colors leading-snug">
-                    {sch.name}
+                    {sch.name || 'İsimsiz Okul'}
                   </h3>
                   <div className="flex items-center gap-2 text-xs text-[#A998B3] mt-0.5">
-                    <span className="font-mono text-[#D914C8] font-bold">MEB: {sch.code}</span>
+                    <span className="font-mono text-[#D914C8] font-bold">MEB: {sch.code || '—'}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <MapPin size={11} />
-                      {sch.district} / {sch.city}
+                      {sch.district || 'Merkez'} / {sch.city || 'İstanbul'}
                     </span>
                   </div>
                 </div>
@@ -396,11 +402,15 @@ export default function SuperadminSchoolsPage() {
             <div className="grid grid-cols-4 gap-2 p-3 rounded-2xl bg-[#20152B] border border-[#2E1E3B]/80 text-center relative z-10">
               <div>
                 <span className="text-[10px] text-[#A998B3] block">Öğrenci</span>
-                <span className="text-xs font-black text-white">{sch.stats?.totalStudents || 0}</span>
+                <span className="text-xs font-black text-white">
+                  {sch.stats?.totalStudents ?? (sch as any).studentCount ?? 0}
+                </span>
               </div>
               <div>
                 <span className="text-[10px] text-[#A998B3] block">Öğretmen</span>
-                <span className="text-xs font-black text-white">{sch.stats?.totalTeachers || 0}</span>
+                <span className="text-xs font-black text-white">
+                  {sch.stats?.totalTeachers ?? (sch as any).teacherCount ?? 0}
+                </span>
               </div>
               <div>
                 <span className="text-[10px] text-[#A998B3] block">Personel</span>
@@ -409,7 +419,7 @@ export default function SuperadminSchoolsPage() {
               <div>
                 <span className="text-[10px] text-[#A998B3] block">Paket</span>
                 <span className="text-[11px] font-bold text-[#FCF9FD] truncate block">
-                  {sch.licensePlan}
+                  {sch.licensePlan || (sch as any).planType || 'Standart'}
                 </span>
               </div>
             </div>
@@ -418,19 +428,25 @@ export default function SuperadminSchoolsPage() {
             <div className="space-y-1.5 text-xs text-[#FCF9FD] relative z-10">
               <div className="flex items-center justify-between text-[11.5px]">
                 <span className="text-[#A998B3]">Okul Müdürü:</span>
-                <strong className="text-white font-bold">{sch.principal.name}</strong>
+                <strong className="text-white font-bold">
+                  {sch.principal?.name || (sch as any).principalName || 'Okul Müdürü'}
+                </strong>
               </div>
               <div className="flex items-center justify-between text-[11.5px]">
                 <span className="text-[#A998B3]">Müdür Telefonu:</span>
-                <span className="font-mono text-[#D0C0D9]">{sch.principal.phone}</span>
+                <span className="font-mono text-[#D0C0D9]">
+                  {sch.principal?.phone || sch.phone || '—'}
+                </span>
               </div>
               <div className="flex items-center justify-between text-[11.5px]">
                 <span className="text-[#A998B3]">Müdür E-Posta:</span>
-                <span className="text-[#D0C0D9] truncate max-w-[200px]">{sch.principal.email}</span>
+                <span className="text-[#D0C0D9] truncate max-w-[200px]">
+                  {sch.principal?.email || sch.email || '—'}
+                </span>
               </div>
               <div className="flex items-center justify-between text-[11px] text-[#A998B3] pt-2 border-t border-[#2E1E3B]">
-                <span>Kademe: {sch.level}</span>
-                <span>Lisans Bitiş: {sch.licenseExpires}</span>
+                <span>Kademe: {sch.level || 'İlkokul'}</span>
+                <span>Lisans Bitiş: {sch.licenseExpires || '31.12.2027'}</span>
               </div>
             </div>
 

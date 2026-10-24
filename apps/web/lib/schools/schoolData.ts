@@ -936,6 +936,204 @@ export const INITIAL_SCHOOLS: SchoolDetail[] = [
 ]
 
 const STORAGE_KEY = 'oxonom_superadmin_schools_v2'
+const LEGACY_STORAGE_KEY = 'oxonom_superadmin_schools'
+
+export function normalizeSchool(raw: any): SchoolDetail {
+  if (!raw) return INITIAL_SCHOOLS[0]
+
+  const principalName = raw.principal?.name || raw.principalName || 'Okul Müdürü'
+  const principalPhone = raw.principal?.phone || raw.phone || '+90 (212) 000 00 00'
+  const principalEmail = raw.principal?.email || raw.email || 'mudur@okul.k12.tr'
+  const principalTc = raw.principal?.tcNo || raw.tcNo || '10000000001'
+  const principalTitle = raw.principal?.title || 'Okul Müdürü · Kurum Baş Yetkilisi'
+  const appointmentDate = raw.principal?.appointmentDate || raw.createdAt || '01.09.2023'
+
+  const studentCount = Number(raw.stats?.totalStudents ?? raw.studentCount ?? 360)
+  const teacherCount = Number(raw.stats?.totalTeachers ?? raw.teacherCount ?? 24)
+
+  const defaultStaff: SchoolStaffMember[] = [
+    {
+      id: `stf-${raw.id || '1'}-1`,
+      name: 'Mustafa KAYA',
+      role: 'Müdür Başyardımcısı (Öğrenci İşleri)',
+      category: 'yonetim',
+      phone: principalPhone,
+      email: principalEmail,
+      shift: '08:00 - 17:00',
+      status: 'active',
+    },
+    {
+      id: `stf-${raw.id || '1'}-2`,
+      name: 'Pelin ARSLAN',
+      role: 'Rehberlik & Psikolojik Danışman (PDR)',
+      category: 'pdr',
+      phone: principalPhone,
+      email: principalEmail,
+      shift: '08:30 - 16:30',
+      status: 'active',
+    },
+  ]
+
+  const defaultTeachers: SchoolTeacher[] = [
+    {
+      id: `tch-${raw.id || '1'}-1`,
+      name: 'Ayşe DEMİR',
+      branch: 'Sınıf Öğretmenliği',
+      classroom: '4-A',
+      phone: principalPhone,
+      email: `a.demir@${raw.name ? raw.name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'okul'}.k12.tr`,
+      lessonCount: 28,
+      lastLogin: '15 dk önce',
+      status: 'active',
+    },
+    {
+      id: `tch-${raw.id || '1'}-2`,
+      name: 'Burak AKSOY',
+      branch: 'Matematik',
+      classroom: '6-A, 7-A, 8-A',
+      phone: principalPhone,
+      email: `b.aksoy@${raw.name ? raw.name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'okul'}.k12.tr`,
+      lessonCount: 24,
+      lastLogin: '1 saat önce',
+      status: 'active',
+    },
+    {
+      id: `tch-${raw.id || '1'}-3`,
+      name: 'Elif KORKMAZ',
+      branch: 'Fen Bilimleri',
+      classroom: '5-A, 6-B',
+      phone: principalPhone,
+      email: `e.korkmaz@${raw.name ? raw.name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'okul'}.k12.tr`,
+      lessonCount: 22,
+      lastLogin: 'Bugün, 09:15',
+      status: 'active',
+    },
+  ]
+
+  const defaultStudents: SchoolStudent[] = [
+    {
+      id: `stu-${raw.id || '1'}-1`,
+      studentNumber: '101',
+      name: 'Deniz ARSLAN',
+      grade: '4-A',
+      parentName: 'Tolga ARSLAN',
+      parentPhone: principalPhone,
+      attendanceRate: 98.6,
+      gpa: 94.5,
+      status: 'active',
+    },
+    {
+      id: `stu-${raw.id || '1'}-2`,
+      studentNumber: '102',
+      name: 'Ece KARACA',
+      grade: '4-A',
+      parentName: 'Berna KARACA',
+      parentPhone: principalPhone,
+      attendanceRate: 97.2,
+      gpa: 91.0,
+      status: 'active',
+    },
+    {
+      id: `stu-${raw.id || '1'}-3`,
+      studentNumber: '201',
+      name: 'Defne ŞENGÜL',
+      grade: '6-A',
+      parentName: 'Özlem ŞENGÜL',
+      parentPhone: principalPhone,
+      attendanceRate: 96.5,
+      gpa: 89.2,
+      status: 'active',
+    },
+  ]
+
+  const defaultClassrooms: SchoolClassroom[] = [
+    { grade: '1-A', level: '1. Sınıf', studentCount: Math.round(studentCount * 0.25), headTeacher: 'Sevda KOÇ', averageScore: 92.4 },
+    { grade: '2-A', level: '2. Sınıf', studentCount: Math.round(studentCount * 0.25), headTeacher: 'Nermin KURT', averageScore: 89.5 },
+    { grade: '3-A', level: '3. Sınıf', studentCount: Math.round(studentCount * 0.25), headTeacher: 'Berna TAŞ', averageScore: 87.9 },
+    { grade: '4-A', level: '4. Sınıf', studentCount: Math.round(studentCount * 0.25), headTeacher: 'Ayşe DEMİR', averageScore: 93.1 },
+  ]
+
+  const defaultLogs: SchoolActivityLog[] = [
+    {
+      id: `act-${raw.id || '1'}-1`,
+      action: '4-A sınıfı Matematik sınav puanları sisteme girildi ve onaylandı',
+      actor: principalName,
+      role: 'Okul Müdürü',
+      timestamp: '15 dakika önce',
+      category: 'not_girisi',
+      status: 'success',
+    },
+    {
+      id: `act-${raw.id || '1'}-2`,
+      action: 'Günlük yoklama bildirimleri velilere SMS ve mobil bildirim ile iletildi',
+      actor: 'Sistem Otomasyonu',
+      role: 'Otomatik Süreç',
+      timestamp: '1 saat önce',
+      category: 'yoklama',
+      status: 'info',
+    },
+  ]
+
+  return {
+    id: String(raw.id || `sch-${Date.now()}`),
+    code: String(raw.code || '741295'),
+    name: String(raw.name || 'Oxonom İlkokulu'),
+    shortName: String(raw.shortName || (raw.name ? String(raw.name).split(' ').slice(0, 2).join(' ') : 'Oxonom')),
+    type: String(raw.type || 'MEB Resmi İlkokulu & Ortaokulu'),
+    level: String(raw.level || 'İlkokul (1-4) & Ortaokul (5-8)'),
+    city: String(raw.city || 'İstanbul'),
+    district: String(raw.district || 'Merkez'),
+    address: String(raw.address || `${raw.district || 'Merkez'} / ${raw.city || 'İstanbul'}`),
+    phone: String(raw.phone || principalPhone),
+    email: String(raw.email || principalEmail),
+    website: String(raw.website || `https://${raw.name ? String(raw.name).toLowerCase().replace(/[^a-z0-9]/g, '') : 'okul'}.k12.tr`),
+    status: raw.status === 'pending' || raw.status === 'suspended' ? raw.status : 'active',
+    licensePlan: raw.licensePlan || raw.planType || 'Enterprise Pro',
+    licenseStart: raw.licenseStart || raw.createdAt || '01.09.2024',
+    licenseExpires: raw.licenseExpires || '31.12.2027',
+    createdAt: raw.createdAt || '01.09.2024',
+    principal: {
+      name: principalName,
+      title: principalTitle,
+      tcNo: principalTc,
+      phone: principalPhone,
+      email: principalEmail,
+      appointmentDate: appointmentDate,
+      status: 'active',
+    },
+    staff: Array.isArray(raw.staff) && raw.staff.length > 0 ? raw.staff : defaultStaff,
+    teachers: Array.isArray(raw.teachers) && raw.teachers.length > 0 ? raw.teachers : defaultTeachers,
+    students: Array.isArray(raw.students) && raw.students.length > 0 ? raw.students : defaultStudents,
+    classrooms: Array.isArray(raw.classrooms) && raw.classrooms.length > 0 ? raw.classrooms : defaultClassrooms,
+    stats: {
+      totalStudents: studentCount,
+      activeStudents: Number(raw.stats?.activeStudents ?? studentCount),
+      maleStudents: Number(raw.stats?.maleStudents ?? Math.round(studentCount * 0.52)),
+      femaleStudents: Number(raw.stats?.femaleStudents ?? Math.round(studentCount * 0.48)),
+      totalTeachers: teacherCount,
+      activeTeachers: Number(raw.stats?.activeTeachers ?? teacherCount),
+      totalStaff: Number(raw.stats?.totalStaff ?? 8),
+      attendanceRate: Number(raw.stats?.attendanceRate ?? 96.8),
+      academicAverage: Number(raw.stats?.academicAverage ?? 88.4),
+      weeklyActiveUsers: Number(raw.stats?.weeklyActiveUsers ?? Math.round(studentCount * 0.92)),
+      completedLessonsThisMonth: Number(raw.stats?.completedLessonsThisMonth ?? 1240),
+      storageUsedMb: Number(raw.stats?.storageUsedMb ?? 14200),
+      storageLimitMb: Number(raw.stats?.storageLimitMb ?? 51200),
+      aiTokensUsed: Number(raw.stats?.aiTokensUsed ?? 18400),
+      aiTokensLimit: Number(raw.stats?.aiTokensLimit ?? 50000),
+    },
+    modules: raw.modules || {
+      gameStudio: true,
+      aiExamEngine: true,
+      liveClassroom: true,
+      smartBoard: true,
+      parentPortal: true,
+      mebSync: true,
+      analyticsPro: true,
+    },
+    activityLogs: Array.isArray(raw.activityLogs) && raw.activityLogs.length > 0 ? raw.activityLogs : defaultLogs,
+  }
+}
 
 export function getAllSchools(): SchoolDetail[] {
   if (typeof window === 'undefined') return INITIAL_SCHOOLS
@@ -945,7 +1143,17 @@ export function getAllSchools(): SchoolDetail[] {
     if (raw) {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed
+        return parsed.map(normalizeSchool)
+      }
+    }
+    // Check legacy storage
+    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY)
+    if (legacyRaw) {
+      const parsedLegacy = JSON.parse(legacyRaw)
+      if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
+        const normalized = parsedLegacy.map(normalizeSchool)
+        saveAllSchools(normalized)
+        return normalized
       }
     }
   } catch (_) {}
@@ -961,9 +1169,10 @@ export function getAllSchools(): SchoolDetail[] {
 export function getSchoolById(idOrCode: string): SchoolDetail | undefined {
   const all = getAllSchools()
   const clean = decodeURIComponent(idOrCode).trim().toLowerCase()
-  return all.find(
+  const found = all.find(
     (s) => s.id.toLowerCase() === clean || s.code.toLowerCase() === clean
   )
+  return found ? normalizeSchool(found) : undefined
 }
 
 export function saveAllSchools(schools: SchoolDetail[]): void {
