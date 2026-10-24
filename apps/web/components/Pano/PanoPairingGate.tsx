@@ -1,25 +1,19 @@
 // apps/web/components/Pano/PanoPairingGate.tsx
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Tv,
-  KeyRound,
-  ArrowRight,
-  School,
-  Sparkles,
-  ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
   RotateCw,
-  Layers,
-  HelpCircle,
+  AlertCircle,
+  Delete,
+  Sparkles,
+  CheckCircle2,
+  Tv,
 } from 'lucide-react'
 import {
   pairBoardWithCode,
   BoardPairingInfo,
-  getGlobalBoardRegistry,
 } from '@/lib/pano/boardPairingManager'
 
 interface PanoPairingGateProps {
@@ -28,75 +22,204 @@ interface PanoPairingGateProps {
 }
 
 export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPairingGateProps) {
-  const [code, setCode] = useState(initialCode.toUpperCase())
+  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', ''])
+  const [activeIndex, setActiveIndex] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [showHelperList, setShowHelperList] = useState(false)
+  const [isShaking, setIsShaking] = useState(false)
+  const [showKeypad, setShowKeypad] = useState(true)
 
-  // Quick lookup of available demo/system boards
-  const registeredBoards = Object.values(getGlobalBoardRegistry())
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  const handlePairSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault()
-    const cleanCode = code.trim().toUpperCase()
-    if (!cleanCode) {
-      setErrorMessage('Lütfen okul müdürünüzden aldığınız pano kodunu giriniz.')
-      return
+  // If initialCode has digits, prefill them
+  useEffect(() => {
+    if (initialCode) {
+      const clean = initialCode.replace(/[^0-9]/g, '').slice(0, 6)
+      if (clean.length > 0) {
+        const next = ['', '', '', '', '', '']
+        for (let i = 0; i < clean.length; i++) {
+          next[i] = clean[i]
+        }
+        setDigits(next)
+        if (clean.length === 6) {
+          validateAndPair(clean)
+        } else {
+          setActiveIndex(clean.length)
+        }
+      }
     }
+  }, [initialCode])
 
+  // Focus active input box
+  useEffect(() => {
+    if (!isLoading && activeIndex >= 0 && activeIndex < 6) {
+      inputRefs.current[activeIndex]?.focus()
+    }
+  }, [activeIndex, isLoading])
+
+  // Core pairing validation
+  const validateAndPair = (codeString: string) => {
     setIsLoading(true)
     setErrorMessage(null)
 
-    // Simulate snappy handshake
     setTimeout(() => {
-      const result = pairBoardWithCode(cleanCode)
+      const result = pairBoardWithCode(codeString)
       if (result.success && result.board) {
-        onSuccess(result.board)
+        setIsSuccess(true)
+        setTimeout(() => {
+          onSuccess(result.board!)
+        }, 600)
       } else {
+        // Trigger shake, show error and auto-reset
+        setIsShaking(true)
         setErrorMessage(
-          result.error ||
-            'Girdiğiniz pano kodu sistemde bulunamadı. Lütfen okul müdürünüzün oluşturduğu kodu kontrol ediniz.'
+          result.error || 'Girdiğiniz pano kodu bulunamadı. Lütfen kontrol ediniz.'
         )
+        setIsLoading(false)
+
+        setTimeout(() => {
+          setIsShaking(false)
+          setDigits(['', '', '', '', '', ''])
+          setActiveIndex(0)
+          inputRefs.current[0]?.focus()
+        }, 1100)
       }
-      setIsLoading(false)
     }, 450)
   }
 
-  const handleQuickSelect = (quickCode: string) => {
-    setCode(quickCode)
+  // Handle single digit input
+  const handleDigitChange = (index: number, val: string) => {
+    if (isLoading || isSuccess) return
+
+    // Allow only numeric digit
+    const char = val.replace(/[^0-9]/g, '').slice(-1)
+    if (!char) {
+      // Cleared
+      const next = [...digits]
+      next[index] = ''
+      setDigits(next)
+      return
+    }
+
+    const next = [...digits]
+    next[index] = char
+    setDigits(next)
     setErrorMessage(null)
-    setIsLoading(true)
-    setTimeout(() => {
-      const result = pairBoardWithCode(quickCode)
-      if (result.success && result.board) {
-        onSuccess(result.board)
+
+    // Check if full 6 digits are filled
+    const fullCode = next.join('')
+    if (fullCode.length === 6 && !next.includes('')) {
+      validateAndPair(fullCode)
+    } else if (index < 5) {
+      setActiveIndex(index + 1)
+    }
+  }
+
+  // Handle backspace / navigation
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isLoading || isSuccess) return
+
+    if (e.key === 'Backspace') {
+      if (digits[index] === '' && index > 0) {
+        const next = [...digits]
+        next[index - 1] = ''
+        setDigits(next)
+        setActiveIndex(index - 1)
       } else {
-        setErrorMessage(result.error || 'Geçersiz pano kodu')
+        const next = [...digits]
+        next[index] = ''
+        setDigits(next)
       }
-      setIsLoading(false)
-    }, 350)
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      setActiveIndex(index - 1)
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      setActiveIndex(index + 1)
+    }
+  }
+
+  // Handle paste
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6)
+    if (!pasted) return
+
+    const next = [...digits]
+    for (let i = 0; i < pasted.length; i++) {
+      next[i] = pasted[i]
+    }
+    setDigits(next)
+
+    if (pasted.length === 6) {
+      validateAndPair(pasted)
+    } else {
+      setActiveIndex(Math.min(5, pasted.length))
+    }
+  }
+
+  // Virtual Keypad Button Press
+  const handleVirtualKeyPress = (key: string) => {
+    if (isLoading || isSuccess) return
+    setShowKeypad(true)
+
+    if (key === 'clear') {
+      setDigits(['', '', '', '', '', ''])
+      setActiveIndex(0)
+      setErrorMessage(null)
+      inputRefs.current[0]?.focus()
+      return
+    }
+
+    if (key === 'backspace') {
+      const targetIdx = digits[activeIndex] !== '' ? activeIndex : Math.max(0, activeIndex - 1)
+      const next = [...digits]
+      next[targetIdx] = ''
+      setDigits(next)
+      setActiveIndex(targetIdx)
+      inputRefs.current[targetIdx]?.focus()
+      return
+    }
+
+    // Number key 0-9
+    let targetIdx = activeIndex
+    // If current box already has a digit and we're not at the end, find next empty or move to next
+    if (digits[targetIdx] !== '' && targetIdx < 5) {
+      targetIdx = targetIdx + 1
+    }
+
+    const next = [...digits]
+    next[targetIdx] = key
+    setDigits(next)
+    setErrorMessage(null)
+
+    const fullCode = next.join('')
+    if (fullCode.length === 6 && !next.includes('')) {
+      validateAndPair(fullCode)
+    } else if (targetIdx < 5) {
+      setActiveIndex(targetIdx + 1)
+    }
   }
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-[#0E0614] text-white flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto select-none font-sans z-[9999]">
+    <div className="fixed inset-0 w-screen h-screen bg-[#0B030F] text-white flex flex-col items-center justify-center p-3 sm:p-6 overflow-y-auto select-none font-sans z-[9999]">
       {/* ── Ambient Background Lighting ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-[#4B075F]/35 blur-[140px] animate-pulse" />
+        <div className="absolute -top-32 -left-32 w-[550px] h-[550px] rounded-full bg-[#4B075F]/35 blur-[140px] animate-pulse" />
         <div
-          className="absolute -bottom-40 -right-40 w-[650px] h-[650px] rounded-full bg-[#8D49A6]/25 blur-[150px] animate-pulse"
+          className="absolute -bottom-32 -right-32 w-[600px] h-[600px] rounded-full bg-[#8D49A6]/25 blur-[150px] animate-pulse"
           style={{ animationDuration: '8s' }}
         />
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#D914C8]/15 blur-[160px]"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full bg-[#D914C8]/15 blur-[160px]"
         />
 
-        {/* Floating Geometric Grid */}
+        {/* Floating Geometric Dots */}
         <svg
-          className="absolute inset-0 w-full h-full opacity-[0.07]"
+          className="absolute inset-0 w-full h-full opacity-[0.08]"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            <pattern id="gate-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <pattern id="gate-grid" width="36" height="36" patternUnits="userSpaceOnUse">
               <circle cx="2" cy="2" r="1.5" fill="#D914C8" />
             </pattern>
           </defs>
@@ -104,166 +227,213 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
         </svg>
       </div>
 
-      {/* ── Main Pairing Card ── */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="relative z-10 w-full max-w-lg rounded-[2.5rem] bg-[#1A0E24]/90 backdrop-blur-2xl border border-[#49364F] shadow-2xl p-6 sm:p-10 text-center flex flex-col items-center"
-      >
-        {/* Brand Header */}
-        <div className="mb-6 flex flex-col items-center">
-          <div className="h-12 sm:h-14 mb-4 flex items-center justify-center">
-            <img
-              src="/oxonom-logo-dark.png"
-              alt="Oxonom Edu"
-              className="h-10 sm:h-12 w-auto object-contain drop-shadow-md"
-              onError={(e) => {
-                // Fallback text if logo image is missing
-                const target = e.currentTarget
-                target.style.display = 'none'
-              }}
-            />
-          </div>
+      {/* ── Mascot & Main Pairing Card ── */}
+      <div className="relative z-10 w-full max-w-[440px] flex flex-col items-center">
+        {/* Mascot Peeking Over Top */}
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.85 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="relative -mb-10 z-20 pointer-events-none flex flex-col items-center select-none"
+        >
+          <img
+            src="/mascot-scholar.png"
+            alt="Oxonom Maskotu"
+            className="w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-[0_12px_24px_rgba(217,20,200,0.4)] animate-bounce"
+            style={{ animationDuration: '4s' }}
+          />
+        </motion.div>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8D49A6]/25 border border-[#8D49A6]/40 text-[#F0D8FA] text-xs font-black uppercase tracking-wider mb-2">
-            <Tv size={14} className="text-[#D914C8]" />
-            <span>Akıllı Tahta & Pano Girişi</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
-            Cihaz Eşleştirme Ekranı
-          </h1>
-
-          <p className="text-xs sm:text-sm text-[#C4B3CD] mt-2 max-w-sm leading-relaxed">
-            Bu akıllı tahtayı okulunuzun sistemine bağlamak için Okul Müdürünüzden aldığınız{' '}
-            <strong className="text-white">4 Haneli Pano Kodunu</strong> giriniz.
-          </p>
-        </div>
-
-        {/* Pairing Form */}
-        <form onSubmit={handlePairSubmit} className="w-full space-y-4">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#C4B3CD]">
-              <KeyRound size={20} className="text-[#D914C8]" />
+        {/* Main Card with Shake Animation */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94, y: 15 }}
+          animate={
+            isShaking
+              ? { x: [-12, 12, -9, 9, -5, 5, 0], scale: 1, y: 0 }
+              : { opacity: 1, scale: 1, y: 0 }
+          }
+          transition={{ duration: isShaking ? 0.45 : 0.35, ease: 'easeOut' }}
+          className="relative w-full rounded-[2.5rem] bg-[#160B20]/95 backdrop-blur-2xl border border-[#49364F]/80 shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-6 sm:p-8 pt-12 sm:pt-14 text-center flex flex-col items-center"
+        >
+          {/* Logo & Header */}
+          <div className="mb-5 flex flex-col items-center">
+            <div className="h-8 sm:h-9 mb-3 flex items-center justify-center">
+              <img
+                src="/brand/oxonom_edu_logo_white.png"
+                alt="Oxonom Edu"
+                className="h-7 sm:h-8 w-auto object-contain drop-shadow-md"
+                onError={(e) => {
+                  const target = e.currentTarget
+                  target.src = '/oxonom-logo-dark.png'
+                }}
+              />
             </div>
-            <input
-              type="text"
-              autoFocus
-              required
-              placeholder="Örn: 0368 veya 0368-01"
-              value={code}
-              onChange={(e) => {
-                setCode(e.target.value.toUpperCase())
-                setErrorMessage(null)
-              }}
-              className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#261533] border-2 border-[#8D49A6]/50 focus:border-[#D914C8] text-white font-mono text-lg sm:text-xl font-black tracking-widest uppercase text-center placeholder:text-[#716779] focus:outline-none focus:ring-4 focus:ring-[#D914C8]/20 transition-all shadow-inner"
-            />
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8D49A6]/20 border border-[#8D49A6]/40 text-[#F0D8FA] text-[11px] font-black uppercase tracking-wider mb-2">
+              <Tv size={13} className="text-[#D914C8]" />
+              <span>Akıllı Tahta Girişi</span>
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
+              Cihaz Eşleştirme
+            </h1>
+
+            <p className="text-xs sm:text-sm text-[#C4B3CD] mt-1.5 max-w-xs leading-relaxed">
+              Okul müdürünüzden aldığınız 6 haneli{' '}
+              <strong className="text-white font-bold">Pano Kodunu</strong> giriniz.
+            </p>
           </div>
 
-          {/* Error Message */}
-          <AnimatePresence>
-            {errorMessage && (
-              <motion.div
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center gap-2 text-left"
-              >
-                <AlertCircle size={16} className="shrink-0 text-rose-400" />
-                <span>{errorMessage}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#D914C8] via-[#8D49A6] to-[#4B075F] hover:brightness-110 active:scale-[0.99] text-white font-black text-sm tracking-wide shadow-xl shadow-[#D914C8]/25 flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
+          {/* ── 6-Digit OTP / PIN Entry Boxes ── */}
+          <div
+            onClick={() => setShowKeypad(true)}
+            className="w-full flex items-center justify-center gap-1.5 sm:gap-2.5 my-3 cursor-pointer"
           >
-            {isLoading ? (
-              <>
-                <RotateCw size={18} className="animate-spin" />
-                <span>Pano Doğrulanıyor...</span>
-              </>
-            ) : (
-              <>
-                <span>Panoya Giriş Yap</span>
-                <ArrowRight size={18} strokeWidth={2.5} />
-              </>
-            )}
-          </button>
-        </form>
-
-        {/* Feature Highlights */}
-        <div className="grid grid-cols-3 gap-2 w-full mt-6 pt-5 border-t border-[#49364F]/70 text-[10px] text-[#C4B3CD]">
-          <div className="flex flex-col items-center gap-1 text-center p-2 rounded-xl bg-[#261533]/40 border border-[#3A2942]">
-            <School size={16} className="text-[#D914C8]" />
-            <span className="font-bold text-white">Okul & Sınıf</span>
-            <span className="text-[9px] text-[#A898B0]">Otomatik Algılanır</span>
-          </div>
-
-          <div className="flex flex-col items-center gap-1 text-center p-2 rounded-xl bg-[#261533]/40 border border-[#3A2942]">
-            <CheckCircle2 size={16} className="text-emerald-400" />
-            <span className="font-bold text-white">Canlı Durum</span>
-            <span className="text-[9px] text-[#A898B0]">Müdürde Yeşil Yanar</span>
-          </div>
-
-          <div className="flex flex-col items-center gap-1 text-center p-2 rounded-xl bg-[#261533]/40 border border-[#3A2942]">
-            <ShieldCheck size={16} className="text-[#8D49A6]" />
-            <span className="font-bold text-white">Multi-Tenant</span>
-            <span className="text-[9px] text-[#A898B0]">%100 İzole Veri</span>
-          </div>
-        </div>
-
-        {/* Available System Boards Drawer / Quick Select */}
-        <div className="mt-5 w-full">
-          <button
-            type="button"
-            onClick={() => setShowHelperList(!showHelperList)}
-            className="text-[11px] text-[#C58ADB] hover:text-white transition-colors flex items-center justify-center gap-1 mx-auto cursor-pointer"
-          >
-            <HelpCircle size={13} />
-            <span>Kayıtlı panoları ve demo kodlarını göster</span>
-          </button>
-
-          <AnimatePresence>
-            {showHelperList && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-3 p-3 rounded-2xl bg-[#261533]/80 border border-[#49364F] text-left text-xs space-y-2 overflow-hidden"
-              >
-                <div className="text-[10px] uppercase font-bold text-[#A898B0] tracking-wider">
-                  Hızlı Seçim (Tıklayarak Bağlan):
-                </div>
-                <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
-                  {registeredBoards.map((b) => (
-                    <button
-                      key={b.code}
-                      type="button"
-                      onClick={() => handleQuickSelect(b.code)}
-                      className="px-2.5 py-1.5 rounded-lg bg-[#3A2448] hover:bg-[#8D49A6] text-white font-mono text-xs font-black border border-[#5A396E] transition-all flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <span>{b.code}</span>
-                      <span className="text-[10px] font-sans font-normal opacity-75">
-                        ({b.classroom || b.name})
-                      </span>
-                    </button>
-                  ))}
-                  {registeredBoards.length === 0 && (
-                    <div className="text-[11px] text-[#A898B0]">
-                      Henüz kayıtlı pano bulunamadı. Lütfen önce Okul Müdürü panelinden pano ekleyiniz.
-                    </div>
+            {digits.map((digit, idx) => {
+              const isCurrent = activeIndex === idx
+              const hasVal = digit !== ''
+              return (
+                <div key={idx} className="relative">
+                  <input
+                    ref={(el) => {
+                      inputRefs.current[idx] = el
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={1}
+                    value={digit}
+                    onFocus={() => {
+                      setActiveIndex(idx)
+                      setShowKeypad(true)
+                    }}
+                    onChange={(e) => handleDigitChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(idx, e)}
+                    onPaste={handlePaste}
+                    disabled={isLoading || isSuccess}
+                    className={`w-11 h-14 sm:w-13 sm:h-16 text-center text-2xl sm:text-3xl font-mono font-black rounded-2xl transition-all duration-200 outline-none select-none caret-transparent cursor-pointer ${
+                      isShaking
+                        ? 'border-2 border-rose-500 bg-rose-500/10 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.4)]'
+                        : isSuccess
+                        ? 'border-2 border-emerald-500 bg-emerald-500/15 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
+                        : isCurrent
+                        ? 'border-2 border-[#D914C8] bg-[#261533] text-white shadow-[0_0_20px_rgba(217,20,200,0.45)] scale-105'
+                        : hasVal
+                        ? 'border border-[#8D49A6]/70 bg-[#20102C] text-white shadow-sm'
+                        : 'border border-[#49364F] bg-[#1A0E24]/80 text-[#716779] hover:border-[#8D49A6]/50'
+                    }`}
+                  />
+                  {/* Subtle dash divider between 3rd and 4th box */}
+                  {idx === 2 && (
+                    <div className="absolute -right-2 sm:-right-3 top-1/2 -translate-y-1/2 w-1 sm:w-1.5 h-0.5 bg-[#49364F] rounded-full pointer-events-none hidden" />
                   )}
                 </div>
+              )
+            })}
+          </div>
+
+          {/* Feedback & Status Message */}
+          <div className="min-h-[28px] my-1 flex items-center justify-center w-full">
+            <AnimatePresence mode="wait">
+              {isLoading && (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="inline-flex items-center gap-2 text-xs font-bold text-[#D914C8]"
+                >
+                  <RotateCw size={14} className="animate-spin" />
+                  <span>Pano doğrulanıyor...</span>
+                </motion.div>
+              )}
+
+              {isSuccess && (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400"
+                >
+                  <CheckCircle2 size={16} />
+                  <span>Eşleşme başarılı! Tahta açılıyor...</span>
+                </motion.div>
+              )}
+
+              {errorMessage && !isLoading && !isSuccess && (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold text-center"
+                >
+                  <AlertCircle size={14} className="shrink-0 text-rose-400" />
+                  <span>{errorMessage}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* ── Virtual On-Screen Numeric Keypad ── */}
+          <AnimatePresence>
+            {showKeypad && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, y: 10 }}
+                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                exit={{ opacity: 0, height: 0, y: 10 }}
+                transition={{ duration: 0.25 }}
+                className="w-full mt-3 pt-3 border-t border-[#49364F]/50 flex flex-col items-center gap-2 select-none"
+              >
+                <div className="grid grid-cols-3 gap-2 w-full max-w-[320px]">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => handleVirtualKeyPress(num.toString())}
+                      disabled={isLoading || isSuccess}
+                      className="h-12 sm:h-13 rounded-2xl bg-[#241330] hover:bg-[#341B45] active:bg-[#4B075F] active:scale-95 text-white font-mono text-xl sm:text-2xl font-black border border-[#49364F]/80 shadow-md transition-all flex items-center justify-center cursor-pointer disabled:opacity-50"
+                    >
+                      {num}
+                    </button>
+                  ))}
+
+                  {/* Row 4: Clear, 0, Backspace */}
+                  <button
+                    type="button"
+                    onClick={() => handleVirtualKeyPress('clear')}
+                    disabled={isLoading || isSuccess}
+                    className="h-12 sm:h-13 rounded-2xl bg-[#241330] hover:bg-rose-500/20 active:scale-95 text-rose-300 font-bold text-xs uppercase tracking-wider border border-[#49364F]/80 shadow-md transition-all flex items-center justify-center cursor-pointer disabled:opacity-50"
+                    title="Temizle"
+                  >
+                    Temizle
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleVirtualKeyPress('0')}
+                    disabled={isLoading || isSuccess}
+                    className="h-12 sm:h-13 rounded-2xl bg-[#241330] hover:bg-[#341B45] active:bg-[#4B075F] active:scale-95 text-white font-mono text-xl sm:text-2xl font-black border border-[#49364F]/80 shadow-md transition-all flex items-center justify-center cursor-pointer disabled:opacity-50"
+                  >
+                    0
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleVirtualKeyPress('backspace')}
+                    disabled={isLoading || isSuccess}
+                    className="h-12 sm:h-13 rounded-2xl bg-[#241330] hover:bg-[#341B45] active:scale-95 text-[#D914C8] border border-[#49364F]/80 shadow-md transition-all flex items-center justify-center cursor-pointer disabled:opacity-50"
+                    title="Sil"
+                  >
+                    <Delete size={20} />
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   )
 }

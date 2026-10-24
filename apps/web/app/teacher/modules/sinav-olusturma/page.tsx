@@ -80,17 +80,17 @@ export default function ExamStudioModulePage() {
     <div
       className={`font-jakarta flex flex-col transition-all duration-300 ${
         isFullscreen
-          ? 'fixed inset-0 z-50 bg-[#FCF9FD] dark:bg-[#17101C] p-1.5 sm:p-4'
-          : 'p-2 sm:p-4 lg:p-6 space-y-2.5 sm:space-y-3'
+          ? 'fixed inset-0 z-50 bg-[#FCF9FD] dark:bg-[#17101C] p-1 sm:p-2.5'
+          : 'p-1.5 sm:p-3 lg:p-3.5 space-y-1.5 sm:space-y-2'
       }`}
     >
       {/* ── TOP ACTION BAR ── */}
-      <div className="flex items-center justify-between gap-2.5 sm:gap-3 bg-white dark:bg-[#211729] px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl border border-[#E8DFEB] dark:border-[#49364F] shadow-xs shrink-0">
+      <div className="flex items-center justify-between gap-2 sm:gap-3 bg-white dark:bg-[#211729] px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl border border-[#E8DFEB] dark:border-[#49364F] shadow-xs shrink-0">
         {/* Left: Back & Title */}
-        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Link
             href="/teacher/modules"
-            className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#4B075F] dark:text-[#C58ADB] flex items-center justify-center transition-colors shrink-0 cursor-pointer"
             title="Tüm Modüllere Dön"
           >
             <ArrowLeft size={16} />
@@ -125,7 +125,7 @@ export default function ExamStudioModulePage() {
           <button
             type="button"
             onClick={handleRefresh}
-            className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#716779] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#716779] dark:text-[#D2C5D8] flex items-center justify-center transition-colors cursor-pointer shrink-0"
             title="Modülü Yenile"
           >
             <RotateCcw size={15} />
@@ -134,7 +134,7 @@ export default function ExamStudioModulePage() {
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="h-8.5 sm:h-9 px-2.5 sm:px-3 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#4B075F] dark:text-[#C58ADB] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F] shrink-0"
+            className="h-8 sm:h-9 px-2.5 sm:px-3 rounded-xl bg-[#F7F0FA] dark:bg-[#2D2035] hover:bg-[#F0D8FA] dark:hover:bg-[#49364F] text-[#4B075F] dark:text-[#C58ADB] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-[#E8DFEB] dark:border-[#49364F] shrink-0"
             title={isFullscreen ? 'Pencereli Görünüme Dön (Esc)' : 'Geniş Çalışma Alanı'}
           >
             {isFullscreen ? (
@@ -152,12 +152,12 @@ export default function ExamStudioModulePage() {
         </div>
       </div>
 
-      {/* ── EMBEDDED MODULE CONTAINER ── */}
+      {/* ── EMBEDDED MODULE CONTAINER (Ekrana Tam Oturan Yükseklik) ── */}
       <div
         className={`relative w-full rounded-2xl overflow-hidden border border-[#E8DFEB] dark:border-[#49364F] shadow-sm bg-[#FCF9FD] dark:bg-[#180320] flex-1 ${
           isFullscreen
-            ? 'h-[calc(100vh-70px)] sm:h-[calc(100vh-80px)]'
-            : 'h-[calc(100vh-125px)] sm:h-[calc(100vh-145px)] min-h-[560px]'
+            ? 'h-[calc(100dvh-54px)] sm:h-[calc(100dvh-64px)]'
+            : 'h-[calc(100dvh-200px)] sm:h-[calc(100dvh-115px)] min-h-[460px] sm:min-h-[600px]'
         }`}
       >
         {/* Loading Spinner */}

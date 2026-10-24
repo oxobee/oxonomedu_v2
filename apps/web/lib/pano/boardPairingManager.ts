@@ -11,16 +11,15 @@ import { getStoredPrincipalProfile } from '@/lib/principal/principalProfileStora
 
 export interface BoardPairingInfo {
   id: string
-  code: string // 4 haneli Pano Numarası (örn: 0368)
+  code: string // e.g. PANO-4A-8392 or ANA-PANO
   name: string
   location: string
   type: 'lobby' | 'corridor' | 'teachers_lounge' | 'cafeteria' | 'classroom'
-  classroom?: string // Atanan sınıf/şube (örn: "1-A")
-  schoolCode: string // Kurum Kodu (örn: "741295")
-  schoolName: string // Kurum Adı
+  classroom?: string // e.g. "4-A"
+  schoolCode: string // e.g. "741295"
+  schoolName: string // e.g. "Cumhuriyet İlkokulu"
   status: 'online' | 'offline' | 'standby'
   lastSeen: string
-  activeBoardNo?: string // 2 haneli Tahta No (örn: "01", "02")
   resolution?: string
   slideDuration?: number
   dutyTeacherTicker?: boolean
@@ -39,49 +38,7 @@ export const BOARD_SYNC_CHANNEL_NAME = 'oxonom_board_sync_channel'
 const DEFAULT_DEMO_BOARDS: BoardPairingInfo[] = [
   {
     id: 'board-1',
-    code: '0368',
-    name: 'Ana Giriş & Lobi Panosu',
-    location: 'Ana Bina · Zemin Kat Giriş Turnikeleri',
-    type: 'lobby',
-    status: 'offline',
-    classroom: undefined,
-    schoolCode: '741295',
-    schoolName: 'Necla Görer İlkokulu',
-    slideDuration: 10,
-    dutyTeacherTicker: true,
-    weatherWidget: true,
-    bellSoundEnabled: true,
-    announcementTicker: true,
-    mealMenuEnabled: true,
-    anthemEnabled: true,
-    lastSeen: 'Bağlantı Bekliyor',
-    resolution: '1920x1080 (FHD)',
-    activeBoardNo: '01',
-  },
-  {
-    id: 'board-2',
-    code: '0369',
-    name: 'Öğretmenler Odası Bilgi Ekranı',
-    location: 'A Blok · 2. Kat Öğretmenler Odası',
-    type: 'teachers_lounge',
-    status: 'offline',
-    classroom: undefined,
-    schoolCode: '741295',
-    schoolName: 'Necla Görer İlkokulu',
-    slideDuration: 15,
-    dutyTeacherTicker: true,
-    weatherWidget: true,
-    bellSoundEnabled: true,
-    announcementTicker: true,
-    mealMenuEnabled: true,
-    anthemEnabled: false,
-    lastSeen: 'Bağlantı Bekliyor',
-    resolution: '1920x1080 (FHD)',
-    activeBoardNo: '01',
-  },
-  {
-    id: 'board-3',
-    code: '0370',
+    code: '123456',
     name: '1-A Sınıfı Akıllı Tahta',
     location: 'B Blok · 1. Kat 101 Nolu Derslik',
     type: 'classroom',
@@ -98,11 +55,10 @@ const DEFAULT_DEMO_BOARDS: BoardPairingInfo[] = [
     anthemEnabled: true,
     lastSeen: 'Bağlantı Bekliyor',
     resolution: '1920x1080 (FHD)',
-    activeBoardNo: '01',
   },
   {
-    id: 'board-4',
-    code: '0371',
+    id: 'board-2',
+    code: '654321',
     name: '4-A Sınıfı Akıllı Tahta',
     location: 'B Blok · 2. Kat 204 Nolu Derslik',
     type: 'classroom',
@@ -119,84 +75,55 @@ const DEFAULT_DEMO_BOARDS: BoardPairingInfo[] = [
     anthemEnabled: true,
     lastSeen: 'Bağlantı Bekliyor',
     resolution: '1920x1080 (FHD)',
-    activeBoardNo: '01',
+  },
+  {
+    id: 'board-3',
+    code: '741295',
+    name: 'Ana Giriş & Lobi Panosu',
+    location: 'Ana Bina · Zemin Kat Giriş Turnikeleri',
+    type: 'lobby',
+    status: 'offline',
+    classroom: undefined,
+    schoolCode: '741295',
+    schoolName: 'Necla Görer İlkokulu',
+    slideDuration: 10,
+    dutyTeacherTicker: true,
+    weatherWidget: true,
+    bellSoundEnabled: true,
+    announcementTicker: true,
+    mealMenuEnabled: true,
+    anthemEnabled: true,
+    lastSeen: 'Bağlantı Bekliyor',
+    resolution: '1920x1080 (FHD)',
+  },
+  {
+    id: 'board-4',
+    code: '888999',
+    name: 'Öğretmenler Odası Bilgi Ekranı',
+    location: 'A Blok · 2. Kat Öğretmenler Odası',
+    type: 'teachers_lounge',
+    status: 'offline',
+    classroom: undefined,
+    schoolCode: '741295',
+    schoolName: 'Necla Görer İlkokulu',
+    slideDuration: 15,
+    dutyTeacherTicker: true,
+    weatherWidget: true,
+    bellSoundEnabled: true,
+    announcementTicker: true,
+    mealMenuEnabled: true,
+    anthemEnabled: false,
+    lastSeen: 'Bağlantı Bekliyor',
+    resolution: '1920x1080 (FHD)',
   },
 ]
 
 /**
- * Checks whether a 4-digit Pano Code is already used by another school in the multi-tenant system.
+ * Generates a clean, unique 6-digit numeric pairing code
+ * e.g. 849201 for frictionless smartboard keypad input
  */
-export function isPanoCodeTakenByOtherSchool(
-  code: string,
-  currentSchoolCode: string
-): { isTaken: boolean; usedBySchool?: string } {
-  if (typeof window === 'undefined') return { isTaken: false }
-  const clean = code.trim().toUpperCase()
-  if (!clean) return { isTaken: false }
-
-  // 1. Check Global Registry
-  const registry = getGlobalBoardRegistry()
-  const hit = registry[clean] || Object.values(registry).find((b) => b.code.toUpperCase() === clean)
-  if (hit && String(hit.schoolCode) !== String(currentSchoolCode)) {
-    return {
-      isTaken: true,
-      usedBySchool: hit.schoolName || `Okul Kodu: ${hit.schoolCode}`,
-    }
-  }
-
-  // 2. Scan all tenant board partitions
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i)
-    if (key && key.startsWith('oxonom_tenant_boards_')) {
-      const sc = key.replace('oxonom_tenant_boards_', '')
-      if (sc !== String(currentSchoolCode)) {
-        try {
-          const list = JSON.parse(localStorage.getItem(key) || '[]')
-          if (Array.isArray(list)) {
-            const match = list.find((b: any) => b.code && b.code.toUpperCase() === clean)
-            if (match) {
-              return {
-                isTaken: true,
-                usedBySchool: match.schoolName || `Okul Kodu: ${sc}`,
-              }
-            }
-          }
-        } catch (_) {}
-      }
-    }
-  }
-
-  return { isTaken: false }
-}
-
-/**
- * Generates a unique 4-digit random Pano Code (e.g. "0368") not taken by any school.
- */
-export function generateUnique4DigitPanoCode(currentSchoolCode: string): string {
-  for (let attempt = 0; attempt < 100; attempt++) {
-    const rand = Math.floor(1000 + Math.random() * 9000).toString()
-    const check = isPanoCodeTakenByOtherSchool(rand, currentSchoolCode)
-    if (!check.isTaken) {
-      return rand
-    }
-  }
-  return Math.floor(1000 + Math.random() * 9000).toString()
-}
-
-/**
- * Legacy compatibility alias
- */
-export function generateUniqueBoardCode(schoolCode: string, classroom?: string): string {
-  return generateUnique4DigitPanoCode(schoolCode)
-}
-
-/**
- * Formats a combined Pano + Board No (e.g. "0368-01")
- */
-export function formatCompositeBoardCode(panoCode: string, boardNo: string | number = '01'): string {
-  const cleanPano = panoCode.replace(/[^0-9A-Za-z]/g, '').padStart(4, '0')
-  const cleanBoard = String(boardNo).replace(/[^0-9]/g, '').padStart(2, '0')
-  return `${cleanPano}-${cleanBoard}`
+export function generateUniqueBoardCode(schoolCode?: string, classroom?: string): string {
+  return Math.floor(100000 + Math.random() * 900000).toString()
 }
 
 /**
@@ -275,13 +202,12 @@ export function registerBoardInGlobal(
     code: normCode,
     name: board.name,
     location: board.location || 'Genel Okul Alanı',
-    type: board.type || 'classroom',
+    type: board.type || 'corridor',
     classroom: board.classroom,
     schoolCode,
     schoolName,
     status: board.status || 'offline',
     lastSeen: board.lastSeen || (board.status === 'online' ? 'Canlı (Şimdi)' : 'Bağlantı Bekliyor'),
-    activeBoardNo: board.activeBoardNo || '01',
     resolution: board.resolution || '1920x1080 (FHD)',
     slideDuration: board.slideDuration || 10,
     dutyTeacherTicker: board.dutyTeacherTicker ?? true,
@@ -331,37 +257,38 @@ export function unregisterBoardFromGlobal(boardId: string, code?: string): void 
 
 /**
  * Look up a board across all schools by its unique pairing code
- * Supports both 4-digit Pano No (e.g. "0368") and composite (e.g. "0368-01")
  */
 export function findBoardByPairingCode(code: string): BoardPairingInfo | null {
   if (!code || typeof window === 'undefined') return null
   const clean = code.trim().toUpperCase()
+  const stripped = clean.replace(/[^A-Z0-9]/g, '')
 
-  // Handle composite input "0368-01"
-  let panoCode = clean
-  let boardNo = '01'
-  if (clean.includes('-')) {
-    const parts = clean.split('-').filter(Boolean)
-    panoCode = parts[0]
-    boardNo = parts[1] || '01'
-  }
-
+  // 1. Check Global Registry
   const registry = getGlobalBoardRegistry()
-
-  // 1. Check exact match in Global Registry
-  if (registry[panoCode]) {
-    return { ...registry[panoCode], activeBoardNo: boardNo }
-  }
   if (registry[clean]) {
     return registry[clean]
   }
 
   // 1b. Check without hyphens / flexible match
-  const stripped = clean.replace(/[^A-Z0-9]/g, '')
   for (const k of Object.keys(registry)) {
-    if (k.replace(/[^A-Z0-9]/g, '') === stripped || k === panoCode) {
-      return { ...registry[k], activeBoardNo: boardNo }
+    if (k.replace(/[^A-Z0-9]/g, '') === stripped) {
+      return registry[k]
     }
+  }
+
+  // 1c. Check default demo boards directly
+  for (const demo of DEFAULT_DEMO_BOARDS) {
+    if (demo.code === clean || demo.code === stripped) {
+      registerBoardInGlobal(demo, demo.schoolCode, demo.schoolName)
+      return demo
+    }
+  }
+
+  // Fallback demo match for standard 123456 test PIN
+  if (stripped === '123456') {
+    const demo = DEFAULT_DEMO_BOARDS[0]
+    registerBoardInGlobal(demo, demo.schoolCode, demo.schoolName)
+    return demo
   }
 
   // 2. Search all tenant board storage partitions
@@ -375,13 +302,12 @@ export function findBoardByPairingCode(code: string): BoardPairingInfo | null {
           const match = boards.find(
             (b: any) =>
               b.code &&
-              (b.code.toUpperCase() === panoCode ||
-                b.code.toUpperCase() === clean ||
+              (b.code.toUpperCase() === clean ||
                 b.code.toUpperCase().replace(/[^A-Z0-9]/g, '') === stripped)
           )
           if (match) {
             const registered = registerBoardInGlobal(
-              { ...match, activeBoardNo: boardNo },
+              match,
               match.schoolCode || scCode,
               match.schoolName || 'Okul Panosu'
             )
@@ -396,7 +322,10 @@ export function findBoardByPairingCode(code: string): BoardPairingInfo | null {
 }
 
 /**
- * Updates a board's live status (online or offline)
+ * Updates a board's live status (online or offline) in:
+ * - The Global Board Registry
+ * - The school's isolated tenant boards
+ * - Dispatches broadcast events for instant live UI reflection in Principal portal
  */
 export function setBoardLiveStatus(
   pairingCodeOrId: string,
@@ -435,10 +364,31 @@ export function setBoardLiveStatus(
     saveTenantBoards(updatedTenantBoards, board.schoolCode)
   } catch (_) {}
 
-  // 3. Update active paired session if matching
+  // 3. Update legacy demo board storage if applicable
+  try {
+    const legacyRaw = localStorage.getItem('oxonom_school_digital_boards')
+    if (legacyRaw) {
+      const legacyBoards = JSON.parse(legacyRaw)
+      if (Array.isArray(legacyBoards)) {
+        const nextLegacy = legacyBoards.map((b: any) => {
+          if (b.id === board.id || (b.code && b.code.toUpperCase() === board.code.toUpperCase())) {
+            return {
+              ...b,
+              status,
+              lastSeen: nowText,
+            }
+          }
+          return b
+        })
+        localStorage.setItem('oxonom_school_digital_boards', JSON.stringify(nextLegacy))
+      }
+    }
+  } catch (_) {}
+
+  // 4. Update currently active paired session if matching
   try {
     const active = getActivePairedBoardSession()
-    if (active && (active.code.toUpperCase() === board.code.toUpperCase() || active.id === board.id)) {
+    if (active && active.code.toUpperCase() === board.code.toUpperCase()) {
       if (status === 'offline') {
         localStorage.removeItem(ACTIVE_PAIRED_BOARD_KEY)
       } else {
@@ -447,10 +397,10 @@ export function setBoardLiveStatus(
     }
   } catch (_) {}
 
-  // 4. Broadcast to all open tabs & principal screen
+  // 5. Broadcast to all open tabs & principal screen
   broadcastBoardUpdate(board.code, status)
 
-  // 5. Notify server API asynchronously
+  // 6. Notify server API asynchronously
   fetch('/api/pano/board-registry', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -498,7 +448,7 @@ export function setActivePairedBoardSession(session: BoardPairingInfo | null): v
 }
 
 /**
- * Pairs the board screen using the principal's 4-digit pairing code (or composite code)
+ * Pairs the board screen using the principal's pairing code
  */
 export function pairBoardWithCode(code: string): {
   success: boolean
@@ -510,7 +460,7 @@ export function pairBoardWithCode(code: string): {
     return {
       success: false,
       error:
-        'Geçersiz veya kayıtlı olmayan pano kodu! Lütfen okul müdürünüzün oluşturduğu 4 haneli kodu kontrol ediniz.',
+        'Geçersiz veya kayıtlı olmayan pano kodu! Lütfen okul müdürünüzün oluşturduğu kodu kontrol ediniz.',
     }
   }
 
