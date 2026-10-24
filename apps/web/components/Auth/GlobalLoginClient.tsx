@@ -162,7 +162,7 @@ export default function GlobalLoginClient() {
 
     let targetRoute = '/principal/dashboard'
     if (isSuperadmin) {
-      targetRoute = '/superadmin/gamestudio'
+      targetRoute = '/superadmin'
     } else if (isAdmin) {
       targetRoute = '/principal/dashboard'
     } else if (isTeacher) {

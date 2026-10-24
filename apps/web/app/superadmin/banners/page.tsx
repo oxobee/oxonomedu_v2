@@ -141,21 +141,6 @@ const AVAILABLE_SUB_ICONS = [
 ];
 
 export default function SuperAdminPage() {
-  // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-
-  useEffect(() => {
-    try {
-      if (typeof window !== 'undefined' && sessionStorage.getItem('oxonom_superadmin_auth') === 'true') {
-        setIsAuthenticated(true);
-      }
-    } catch {}
-  }, []);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [authError, setAuthError] = useState('');
-
   // Active Tab
   const [activeTab, setActiveTab] = useState<'hero' | 'menus' | 'student'>('hero');
 
@@ -210,24 +195,6 @@ export default function SuperAdminPage() {
     });
     return unsub;
   }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError('');
-    if (username === 'ugurxugurlu' && password === 'Ugur2803*') {
-      sessionStorage.setItem('oxonom_superadmin_auth', 'true');
-      setIsAuthenticated(true);
-    } else {
-      setAuthError('Hatalı kullanıcı adı veya şifre! Lütfen kontrol edip tekrar deneyin.');
-    }
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem('oxonom_superadmin_auth');
-    setIsAuthenticated(false);
-    setUsername('');
-    setPassword('');
-  };
 
   const triggerSuccess = (msg: string) => {
     setSaveSuccessMsg(msg);
@@ -540,93 +507,6 @@ export default function SuperAdminPage() {
     }
   };
 
-  // -------------------------------------------------------------
-  // LOGIN SCREEN
-  // -------------------------------------------------------------
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#241329] flex items-center justify-center p-4 relative overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#4B075F]/30 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#D914C8]/20 rounded-full blur-[140px] pointer-events-none" />
-
-        <div className="w-full max-w-md bg-white/10 backdrop-blur-2xl border border-white/15 rounded-3xl p-8 shadow-2xl relative z-10">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#4B075F] to-[#D914C8] mx-auto flex items-center justify-center shadow-lg shadow-[#D914C8]/30 mb-4 p-2">
-              <img src="/oxonom-mascot.png" alt="Oxonom Edu Logo" className="w-full h-full object-contain" />
-            </div>
-            <span className="text-[11px] font-bold tracking-widest text-[#D914C8] uppercase block mb-1">
-              YÖNETİM PANELİ
-            </span>
-            <h1 className="text-2xl font-black text-white">Oxonom Edu Süper Admin</h1>
-            <p className="text-xs text-white/60 mt-1">
-              Hero Banner ve menü yapılandırmasını yönetmek için giriş yapın.
-            </p>
-          </div>
-
-          {authError && (
-            <div className="mb-6 p-3.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-200 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
-              <span>{authError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-white/80 mb-1.5">Kullanıcı Adı</label>
-              <div className="relative">
-                <User className="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Kullanıcı adınızı girin"
-                  required
-                  className="w-full bg-white/5 border border-white/15 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D914C8] focus:ring-1 focus:ring-[#D914C8] transition-all"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-white/80 mb-1.5">Şifre</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Şifrenizi girin"
-                  required
-                  className="w-full bg-white/5 border border-white/15 rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D914C8] focus:ring-1 focus:ring-[#D914C8] transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full mt-2 py-3.5 px-4 bg-gradient-to-r from-[#4B075F] via-[#8D49A6] to-[#D914C8] hover:opacity-95 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-[#D914C8]/25 active:scale-[0.99] flex items-center justify-center gap-2"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              Süper Admin Girişi Yap
-            </button>
-          </form>
-
-          <div className="mt-6 pt-6 border-t border-white/10 text-center">
-            <Link href="/" className="text-xs text-white/60 hover:text-white flex items-center justify-center gap-1.5 transition-colors">
-              <span>← Ana Sayfaya Dön</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Student Showcase Handlers
   const handleStudentFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -665,55 +545,14 @@ export default function SuperAdminPage() {
   };
 
   // -------------------------------------------------------------
-  // AUTHENTICATED ADMIN DASHBOARD
+  // ADMIN DASHBOARD
   // -------------------------------------------------------------
   const activeBanners = banners.filter((b) => b.active);
   const currentPreviewBanner = activeBanners[previewSlideIndex % (activeBanners.length || 1)] || banners[0];
 
   return (
-    <div className="min-h-screen bg-[#FCF9FD] text-[#241329] flex flex-col">
-      {/* Top Admin Navigation Header */}
-      <header className="bg-[#241329] text-white border-b border-white/10 sticky top-0 z-40 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#4B075F] to-[#D914C8] p-0.5">
-              <div className="w-full h-full bg-[#241329] rounded-[10px] flex items-center justify-center">
-                <img src="/oxonom-mascot.png" alt="Oxonom Edu" className="w-6 h-6 object-contain" />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm tracking-tight text-white">Oxonom Edu</span>
-                <span className="text-[10px] bg-[#D914C8] text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                  Süper Admin
-                </span>
-              </div>
-              <p className="text-[10px] text-white/50">Yönetici: ugurxugurlu</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/"
-              target="_blank"
-              className="text-xs text-white/80 hover:text-white bg-white/10 hover:bg-white/15 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all font-medium"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Siteyi Gör</span>
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="text-xs text-red-200 hover:text-white bg-red-500/20 hover:bg-red-500/30 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all font-bold"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Çıkış</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Admin Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full space-y-6">
+    <div className="space-y-6 text-[#241329]">
+      <div className="space-y-6">
         {/* Welcome & Info Banner */}
         <div className="bg-gradient-to-r from-[#4B075F] via-[#350444] to-[#241329] text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
           <div className="absolute right-0 top-0 bottom-0 w-80 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#D914C8]/30 via-transparent to-transparent pointer-events-none" />
@@ -1649,34 +1488,35 @@ export default function SuperAdminPage() {
             </div>
           </div>
         )}
-      </main>
+      </div>
 
       {/* ========================================================= */}
-      {/* MODAL 1: HERO BANNER EKLE / DÜZENLE                       */}
+      {/* MODAL 1: HERO SLIDER EKLE / DÜZENLE                       */}
       {/* ========================================================= */}
       {isEditingModalOpen && editingBanner && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-[#E8DFEB] my-8 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-[#E8DFEB] pb-4 mb-6">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
+          <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-[#E8DFEB] flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-[#E8DFEB] px-5 sm:px-7 py-4 shrink-0 bg-white">
               <div>
-                <h3 className="font-black text-xl text-[#241329]">
-                  {banners.some((b) => b.id === editingBanner.id) ? 'Hero Banner Düzenle' : 'Yeni Hero Banner Ekle'}
+                <h3 className="font-black text-lg sm:text-xl text-[#241329]">
+                  {banners.some((b) => b.id === editingBanner.id) ? 'Hero Slider Düzenle' : 'Yeni Hero Slider Ekle'}
                 </h3>
-                <p className="text-xs text-[#716779] mt-0.5">
+                <p className="text-[11px] sm:text-xs text-[#716779] mt-0.5">
                   Görsel şeffaf PNG formatında olmalı ve sağ sütunda mor arkaplan üstünde parlayacaktır.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsEditingModalOpen(false)}
-                className="p-2 text-[#716779] hover:text-[#241329] hover:bg-slate-100 rounded-xl"
+                className="p-2 text-[#716779] hover:text-[#241329] hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveBannerModal} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSaveBannerModal} className="flex flex-col flex-1 overflow-hidden min-h-0">
+              <div className="overflow-y-auto px-5 sm:px-7 py-5 space-y-4 flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-bold text-[#241329] mb-1">Üst Rozet (Badge) Metni</label>
                   <input
@@ -1903,22 +1743,23 @@ export default function SuperAdminPage() {
                   />
                 </button>
               </div>
+              </div>
 
-              {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E8DFEB]">
+              {/* Modal Buttons (Fixed at bottom) */}
+              <div className="flex items-center justify-end gap-3 px-5 sm:px-7 py-4 border-t border-[#E8DFEB] bg-[#FCF9FD] shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsEditingModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition-all text-xs"
+                  className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition-all text-xs cursor-pointer"
                 >
                   Vazgeç
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-[#D914C8] hover:bg-[#620B79] text-white font-bold transition-all shadow-md text-xs flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-[#D914C8] hover:bg-[#620B79] text-white font-bold transition-all shadow-md text-xs flex items-center gap-2 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
-                  Bannerı Kaydet & Yayınla
+                  Sliderı Kaydet & Yayınla
                 </button>
               </div>
             </form>
@@ -1930,27 +1771,28 @@ export default function SuperAdminPage() {
       {/* MODAL 2: MENÜ EKLE / DÜZENLE                              */}
       {/* ========================================================= */}
       {isMenuModalOpen && editingMenu && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-[#E8DFEB] my-8 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-[#E8DFEB] pb-4 mb-6">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
+          <div className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-[#E8DFEB] flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-[#E8DFEB] px-5 sm:px-7 py-4 shrink-0 bg-white">
               <div>
-                <h3 className="font-black text-xl text-[#241329]">
+                <h3 className="font-black text-lg sm:text-xl text-[#241329]">
                   {navMenus.some((m) => m.id === editingMenu.id) ? 'Menüyü Düzenle' : 'Yeni Menü Ekle'}
                 </h3>
-                <p className="text-xs text-[#716779] mt-0.5">
+                <p className="text-[11px] sm:text-xs text-[#716779] mt-0.5">
                   Menü tipini seçin (Direkt Bağlantı, Dropdown Açılır Menü veya Mega Menü).
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsMenuModalOpen(false)}
-                className="p-2 text-[#716779] hover:text-[#241329] hover:bg-slate-100 rounded-xl"
+                className="p-2 text-[#716779] hover:text-[#241329] hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveMenuModal} className="space-y-4">
+            <form onSubmit={handleSaveMenuModal} className="flex flex-col flex-1 overflow-hidden min-h-0">
+              <div className="overflow-y-auto px-5 sm:px-7 py-5 space-y-4 flex-1">
               <div>
                 <label className="block font-bold text-xs text-[#241329] mb-1">Menü Başlığı</label>
                 <input
@@ -2064,18 +1906,20 @@ export default function SuperAdminPage() {
                 </button>
               </div>
 
-              {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E8DFEB]">
+              </div>
+
+              {/* Modal Buttons (Fixed at bottom) */}
+              <div className="flex items-center justify-end gap-3 px-5 sm:px-7 py-4 border-t border-[#E8DFEB] bg-[#FCF9FD] shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsMenuModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition-all text-xs"
+                  className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition-all text-xs cursor-pointer"
                 >
                   Vazgeç
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold transition-all shadow-md text-xs flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-[#4B075F] hover:bg-[#620B79] text-white font-bold transition-all shadow-md text-xs flex items-center gap-2 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   Menüyü Kaydet
@@ -2090,30 +1934,30 @@ export default function SuperAdminPage() {
       {/* MODAL 3: ALT ÖGELER / MEGA MENÜ İÇERİK YÖNETİCİSİ         */}
       {/* ========================================================= */}
       {isSubItemsModalOpen && selectedMenuForSubItems && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-[#E8DFEB] my-8 animate-in fade-in zoom-in-95 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between border-b border-[#E8DFEB] pb-4 mb-4 shrink-0">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
+          <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-[#E8DFEB] flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-[#E8DFEB] px-5 sm:px-7 py-4 shrink-0 bg-white">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-black uppercase text-[#8D49A6] bg-[#FCE8FA] px-2 py-0.5 rounded-md">
                     {selectedMenuForSubItems.title}
                   </span>
-                  <h3 className="font-black text-xl text-[#241329]">Alt Menü & İçerik Yönetimi</h3>
+                  <h3 className="font-black text-lg sm:text-xl text-[#241329]">Alt Menü & İçerik Yönetimi</h3>
                 </div>
-                <p className="text-xs text-[#716779] mt-0.5">
+                <p className="text-[11px] sm:text-xs text-[#716779] mt-0.5">
                   Bu menünün altındaki linkleri, açıklamaları ve ikonları yönetin.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsSubItemsModalOpen(false)}
-                className="p-2 text-[#716779] hover:text-[#241329] hover:bg-slate-100 rounded-xl"
+                className="p-2 text-[#716779] hover:text-[#241329] hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="overflow-y-auto flex-1 space-y-4 pr-1">
+            <div className="overflow-y-auto px-5 sm:px-7 py-5 space-y-4 flex-1">
               {/* Add New SubItem Form Toggle */}
               {!isAddingSubItem ? (
                 <button
@@ -2313,11 +2157,11 @@ export default function SuperAdminPage() {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-[#E8DFEB] flex justify-end shrink-0">
+            <div className="px-5 sm:px-7 py-4 border-t border-[#E8DFEB] bg-[#FCF9FD] flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setIsSubItemsModalOpen(false)}
-                className="px-6 py-2.5 bg-[#4B075F] text-white rounded-xl text-xs font-bold hover:bg-[#620B79] transition-all shadow-md"
+                className="px-6 py-2.5 bg-[#4B075F] text-white rounded-xl text-xs font-bold hover:bg-[#620B79] transition-all shadow-md cursor-pointer"
               >
                 Tamamla & Kapat
               </button>

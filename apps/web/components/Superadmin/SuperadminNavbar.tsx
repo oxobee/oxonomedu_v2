@@ -2,28 +2,36 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
-  Monitor,
   LayoutDashboard,
   ExternalLink,
-  ShieldAlert,
-  Sparkles,
   School,
   Sliders,
-  Layers,
   Gamepad2,
+  LogOut,
 } from 'lucide-react'
 
 export default function SuperadminNavbar() {
   const pathname = usePathname()
+  const router = useRouter()
 
   const navItems = [
     {
-      label: 'Tanıtım & Bannerlar',
+      label: 'Genel Bakış',
+      path: '/superadmin',
+      icon: LayoutDashboard,
+    },
+    {
+      label: 'Slider & Tanıtım',
       path: '/superadmin/banners',
       icon: Sliders,
-      badge: 'Promo',
+      badge: 'Slider & Promo',
+    },
+    {
+      label: 'Okul Yönetimi',
+      path: '/superadmin/schools',
+      icon: School,
     },
     {
       label: 'Game Studio',
@@ -31,15 +39,19 @@ export default function SuperadminNavbar() {
       icon: Gamepad2,
       badge: 'Oyunlar',
     },
-    {
-      label: 'Genel Bakış',
-      path: '/superadmin',
-      icon: LayoutDashboard,
-    },
   ]
 
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('oxonom_superadmin_session')
+      localStorage.removeItem('oxonom_current_role')
+      sessionStorage.removeItem('oxonom_superadmin_auth')
+    }
+    router.push('/login')
+  }
+
   return (
-    <header className="sticky top-0 z-40 bg-[#10141E]/90 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 py-3">
+    <header className="sticky top-0 z-40 bg-[#10141E]/95 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand & Badge */}
         <div className="flex items-center gap-3">
@@ -104,15 +116,37 @@ export default function SuperadminNavbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
+          {/* Canlı Tanıtım Sayfası */}
+          <Link
+            href="/"
+            target="_blank"
+            className="h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-200 text-xs font-bold flex items-center gap-1.5 transition-colors border border-white/10"
+            title="Tanıtım Sayfasını Canlı Gör"
+          >
+            <ExternalLink size={14} className="text-[#D914C8]" />
+            <span className="hidden sm:inline">Siteyi Gör</span>
+          </Link>
+
           {/* School Principal Portal Link */}
           <Link
             href="/principal/dashboard"
-            className="h-9 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-gray-200 text-xs font-bold flex items-center gap-1.5 transition-colors border border-white/10"
+            className="h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-200 text-xs font-bold flex items-center gap-1.5 transition-colors border border-white/10"
             title="Müdür Portalı"
           >
             <School size={14} className="text-gray-400" />
-            <span className="hidden md:inline">Müdür Portalı</span>
+            <span className="hidden lg:inline">Müdür Portalı</span>
           </Link>
+
+          {/* Logout */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="h-9 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 hover:text-red-200 text-xs font-bold flex items-center gap-1.5 transition-colors border border-red-500/20 cursor-pointer"
+            title="Süper Admin Çıkışı"
+          >
+            <LogOut size={14} />
+            <span className="hidden sm:inline">Çıkış</span>
+          </button>
         </div>
       </div>
     </header>
