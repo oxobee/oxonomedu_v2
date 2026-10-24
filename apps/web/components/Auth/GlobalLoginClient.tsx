@@ -19,8 +19,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@components/Contexts/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
-import { getStoredPrincipalProfile, savePrincipalProfile } from '@/lib/principal/principalProfileStorage'
+import { getStoredPrincipalProfile, savePrincipalProfile, saveSchoolInfo } from '@/lib/principal/principalProfileStorage'
 import { isDemoResetDue, resetAllDemoData } from '@/lib/demo/demoResetEngine'
+import { getAllSchools } from '@/lib/schools/schoolData'
 
 type RoleType = 'principal' | 'teacher' | 'student' | 'superadmin'
 
@@ -153,9 +154,23 @@ export default function GlobalLoginClient() {
       lowerIdent === 'ugurxugurlu' ||
       lowerIdent.includes('superadmin') ||
       lowerIdent === 'root'
+
+    // Check if identifier matches any registered school principal
+    const allSchools = getAllSchools()
+    const matchedSchool = allSchools.find(
+      (s) =>
+        (s.principal?.email && s.principal.email.toLowerCase().trim() === lowerIdent) ||
+        (s.code && s.code.toLowerCase().trim() === lowerIdent) ||
+        (s.principal?.phone && s.principal.phone.replace(/\D/g, '') === identifier.replace(/\D/g, '') && identifier.length >= 7)
+    )
+
+    const isMatchedSchoolPrincipal = Boolean(matchedSchool)
     const isAdmin =
       !isSuperadmin &&
-      (selectedRole === 'principal' || lowerIdent.includes('mudur') || lowerIdent.includes('admin'))
+      (selectedRole === 'principal' ||
+        isMatchedSchoolPrincipal ||
+        lowerIdent.includes('mudur') ||
+        lowerIdent.includes('admin'))
     const isTeacher =
       selectedRole === 'teacher' || lowerIdent.includes('ogretmen') || lowerIdent.includes('teacher')
     const isStudent = selectedRole === 'student' || lowerIdent === '101' || lowerIdent.includes('ogrenci')
@@ -192,11 +207,50 @@ export default function GlobalLoginClient() {
           localStorage.removeItem('oxonom_teacher_profile_completed')
           localStorage.setItem('oxonom_current_role', 'admin')
 
-          const existingProfile = getStoredPrincipalProfile()
-          savePrincipalProfile({
-            ...existingProfile,
-            loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
-          })
+          if (matchedSchool) {
+            savePrincipalProfile({
+              name: matchedSchool.principal.name,
+              email: matchedSchool.principal.email,
+              phone: matchedSchool.principal.phone,
+              schoolName: matchedSchool.name,
+              institutionCode: matchedSchool.code,
+              title: matchedSchool.principal.title || 'Okul Müdürü · Kurum Baş Yetkilisi',
+              role: '1. Derece Kurum Müdürü',
+              tcNo: matchedSchool.principal.tcNo || '10000000001',
+              mustChangePassword: matchedSchool.principal.mustChangePassword ?? true,
+              initialPassword: matchedSchool.principal.loginPassword || 'Oxonom2026!',
+              isFirstLogin: matchedSchool.principal.isFirstLogin ?? true,
+              isNewEmptySchool: matchedSchool.principal.isNewEmptySchool ?? (matchedSchool.students?.length === 0),
+              loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+            })
+            saveSchoolInfo({
+              officialName: matchedSchool.name,
+              institutionCode: matchedSchool.code,
+              educationLevel: matchedSchool.level,
+              city: matchedSchool.city,
+              district: matchedSchool.district,
+              address: matchedSchool.address,
+              schoolPhone: matchedSchool.phone,
+              schoolEmail: matchedSchool.email,
+              website: matchedSchool.website,
+              term: '2026-2027 Eğitim Öğretim Yılı',
+            })
+            if (matchedSchool.principal.isNewEmptySchool ?? (matchedSchool.students?.length === 0)) {
+              localStorage.setItem('oxonom_is_empty_profile', 'true')
+              localStorage.setItem('oxonom_admin_teachers_30', '[]')
+              localStorage.setItem('oxonom_admin_students_30', '[]')
+              localStorage.setItem('oxonom_admin_classes_30', '[]')
+              localStorage.setItem('oxonom_m_students_v3', '[]')
+            } else {
+              localStorage.removeItem('oxonom_is_empty_profile')
+            }
+          } else {
+            const existingProfile = getStoredPrincipalProfile()
+            savePrincipalProfile({
+              ...existingProfile,
+              loginTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+            })
+          }
         } else if (isTeacher) {
           localStorage.removeItem('oxonom_active_admin_session')
           localStorage.setItem('oxonom_current_role', 'teacher')

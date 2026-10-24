@@ -27,6 +27,11 @@ import {
   BarChart3,
   Globe,
   SlidersHorizontal,
+  Lock,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Copy,
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
@@ -64,6 +69,8 @@ export default function SuperadminSchoolsPage() {
   const [formPrincipal, setFormPrincipal] = useState('')
   const [formPhone, setFormPhone] = useState('')
   const [formEmail, setFormEmail] = useState('')
+  const [formPrincipalPassword, setFormPrincipalPassword] = useState('Oxonom2026!')
+  const [showPassword, setShowPassword] = useState(false)
   const [formPlan, setFormPlan] = useState<'Enterprise Pro' | 'Standart Okul' | 'Deneme Lisansı (14 Gün)'>('Enterprise Pro')
   const [formStudentCount, setFormStudentCount] = useState<number>(360)
   const [formTeacherCount, setFormTeacherCount] = useState<number>(24)
@@ -131,6 +138,7 @@ export default function SuperadminSchoolsPage() {
       principalName: formPrincipal.trim() || 'Okul Müdürü',
       principalPhone: formPhone.trim() || '+90 (212) 000 00 00',
       principalEmail: formEmail.trim() || 'bilgi@okul.k12.tr',
+      principalPassword: formPrincipalPassword.trim() || 'Oxonom2026!',
       planType: formPlan,
       studentCount: Number(formStudentCount) || 240,
       teacherCount: Number(formTeacherCount) || 16,
@@ -657,6 +665,49 @@ export default function SuperadminSchoolsPage() {
                         onChange={(e) => setFormEmail(e.target.value)}
                         className="w-full h-9 px-3 rounded-lg bg-[#17101E] border border-[#2E1E3B] text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8]"
                       />
+                    </div>
+                  </div>
+
+                  {/* Giriş Şifresi Tanımlama */}
+                  <div className="pt-2.5 border-t border-[#2E1E3B] space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="font-bold text-gray-200 flex items-center gap-1.5">
+                        <Lock size={12} className="text-[#D914C8]" />
+                        <span>Müdür Giriş Şifresi (Geçici Şifre) *</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setFormPrincipalPassword(`Oxo${Math.floor(1000 + Math.random() * 9000)}!`)}
+                        className="text-[10.5px] font-bold text-[#D914C8] hover:underline cursor-pointer flex items-center gap-1"
+                      >
+                        <RefreshCw size={10} />
+                        <span>Rastgele Şifre Üret</span>
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        placeholder="Örn: Oxonom2026!"
+                        value={formPrincipalPassword}
+                        onChange={(e) => setFormPrincipalPassword(e.target.value)}
+                        className="w-full h-9 px-3 pr-10 rounded-lg bg-[#17101E] border border-[#2E1E3B] font-mono text-white placeholder-[#A998B3] focus:outline-hidden focus:border-[#D914C8]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A998B3] hover:text-white cursor-pointer"
+                      >
+                        {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                    </div>
+
+                    <div className="flex items-start gap-1.5 text-[10.5px] text-[#A998B3] pt-0.5">
+                      <ShieldCheck size={13} className="text-emerald-400 shrink-0 mt-0.5" />
+                      <span>
+                        Müdür bu şifreyle ilk kez giriş yaptığında, sistem güvenliği için şifresini değiştireceği ekran zorunlu olarak açılacaktır. Ardından boş (öğrenci/öğretmensiz) temiz bir başlangıç profili karşılayacaktır.
+                      </span>
                     </div>
                   </div>
                 </div>

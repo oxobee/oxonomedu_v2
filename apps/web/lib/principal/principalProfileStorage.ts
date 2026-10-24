@@ -16,6 +16,11 @@ export interface PrincipalProfile {
   loginTime?: string
   institutionCode?: string
   is_customized?: boolean
+  mustChangePassword?: boolean
+  initialPassword?: string
+  currentPassword?: string
+  isFirstLogin?: boolean
+  isNewEmptySchool?: boolean
 }
 
 export interface SchoolInfo {
@@ -171,11 +176,36 @@ export function getStoredPrincipalProfile(): PrincipalProfile {
       first_name,
       last_name,
       loginTime: parsedSession?.loginTime || DEFAULT_PRINCIPAL_PROFILE.loginTime,
-      institutionCode: parsedSchool?.institutionCode || '741295',
+      institutionCode: parsedSchool?.institutionCode || parsedPrincipal?.institutionCode || '741295',
+      mustChangePassword: parsedPrincipal?.mustChangePassword ?? parsedSession?.mustChangePassword ?? false,
+      initialPassword: parsedPrincipal?.initialPassword || parsedSession?.initialPassword || 'Oxonom123!',
+      currentPassword: parsedPrincipal?.currentPassword || parsedSession?.currentPassword,
+      isFirstLogin: parsedPrincipal?.isFirstLogin ?? parsedSession?.isFirstLogin ?? false,
+      isNewEmptySchool: parsedPrincipal?.isNewEmptySchool ?? parsedSession?.isNewEmptySchool ?? (typeof window !== 'undefined' && localStorage.getItem('oxonom_is_empty_profile') === 'true'),
     }
   } catch (_) {
     return DEFAULT_PRINCIPAL_PROFILE
   }
+}
+
+/**
+ * Returns true if the currently logged-in principal is required to change password on first login.
+ */
+export function isPrincipalPasswordChangeRequired(): boolean {
+  if (typeof window === 'undefined') return false
+  const p = getStoredPrincipalProfile()
+  return Boolean(p.mustChangePassword || p.isFirstLogin)
+}
+
+/**
+ * Completes the principal's initial password change and updates persistent storage.
+ */
+export function setPrincipalPasswordUpdated(newPassword: string): PrincipalProfile {
+  return savePrincipalProfile({
+    mustChangePassword: false,
+    isFirstLogin: false,
+    currentPassword: newPassword,
+  })
 }
 
 /**

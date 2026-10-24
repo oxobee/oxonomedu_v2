@@ -39,6 +39,7 @@ import { getStoredPrincipalProfile, getPrincipalInitials } from '@/lib/principal
 import HeaderLiveClock from '@components/Common/HeaderLiveClock'
 import HeaderNotificationDropdown from '@components/Notifications/HeaderNotificationDropdown'
 import { startDemoAutoResetWatcher, resetAllDemoData } from '@/lib/demo/demoResetEngine'
+import PrincipalPasswordChangeModal from './PrincipalPasswordChangeModal'
 
 interface PrincipalLayoutProps {
   children: React.ReactNode
@@ -83,6 +84,19 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
             title: profile.title,
             schoolName: profile.schoolName || 'Oxonom Maarif Koleji',
           })
+
+          const isEmpty =
+            Boolean(profile.isNewEmptySchool) ||
+            localStorage.getItem('oxonom_is_empty_profile') === 'true'
+
+          if (isEmpty) {
+            setCounts({
+              teachers: '0 Öğretmen',
+              students: '0 Öğrenci',
+              classes: '0 Şube',
+            })
+            return
+          }
 
           const org = 30
           // Teachers dynamic count
@@ -607,6 +621,9 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Mandatory First-Login Password Change Modal */}
+      <PrincipalPasswordChangeModal />
     </div>
   )
 }

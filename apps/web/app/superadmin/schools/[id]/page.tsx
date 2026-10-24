@@ -42,6 +42,10 @@ import {
   TrendingUp,
   SlidersHorizontal,
   ChevronDown,
+  Lock,
+  Copy,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import {
@@ -67,6 +71,7 @@ export default function SuperadminSchoolDetailPage() {
   const [teacherSearch, setTeacherSearch] = useState('')
   const [studentSearch, setStudentSearch] = useState('')
   const [studentGradeFilter, setStudentGradeFilter] = useState('all')
+  const [showPrincipalPass, setShowPrincipalPass] = useState(false)
 
   useEffect(() => {
     if (!schoolId) return
@@ -631,6 +636,75 @@ export default function SuperadminSchoolDetailPage() {
                 <span className="font-bold text-white">
                   {school.principal?.appointmentDate || school.createdAt || '01.09.2023'}
                 </span>
+              </div>
+            </div>
+
+            {/* Müdür Portalı Giriş Bilgileri & Geçici Şifre Kutusu */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#17101E] border border-[#D914C8]/30 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[#2E1E3B]">
+                <div className="flex items-center gap-2">
+                  <KeyRound size={16} className="text-[#D914C8]" />
+                  <span className="text-xs font-black text-white">Müdür Portalı Giriş Yetkileri</span>
+                  {school.principal?.mustChangePassword !== false ? (
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                      <Clock size={10} />
+                      <span>İlk Giriş Bekleniyor (Şifre Değişimi Zorunlu)</span>
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                      <CheckCircle2 size={10} />
+                      <span>Şifre Güncellendi</span>
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const pass = school.principal?.loginPassword || 'Oxonom2026!'
+                    const info = `Sayın ${school.principal?.name},\nOxonom EDU Kurum Yönetim Portalınız hazırlandı.\n\n🌐 Giriş Adresi: https://edu.oxonom.com/login\n🏫 Kurum Kodu: ${school.code}\n📧 Giriş E-postası: ${school.principal?.email}\n🔑 Geçici Giriş Şifresi: ${pass}\n\n*İlk girişinizde sistem güvenliğiniz için yeni bir kalıcı şifre belirlemenizi isteyecektir.`
+                    navigator.clipboard.writeText(info)
+                    toast.success('📋 Müdür giriş erişim şablonu panoya kopyalandı!')
+                  }}
+                  className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#D914C8]/20 to-[#8D49A6]/20 hover:from-[#D914C8]/30 hover:to-[#8D49A6]/30 text-white text-[11px] font-bold border border-[#D914C8]/40 transition-all cursor-pointer"
+                >
+                  <Copy size={12} />
+                  <span>Giriş Bilgilerini Kopyala (SMS / E-Posta)</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="space-y-0.5">
+                  <span className="text-[10px] text-[#A998B3] block">Giriş Kullanıcı Adı / E-Posta:</span>
+                  <span className="font-mono font-bold text-white block truncate">
+                    {school.principal?.email || '—'}
+                  </span>
+                </div>
+
+                <div className="space-y-0.5">
+                  <span className="text-[10px] text-[#A998B3] block">MEB Kurum Kodu:</span>
+                  <span className="font-mono font-black text-[#D914C8] block">
+                    {school.code}
+                  </span>
+                </div>
+
+                <div className="space-y-0.5">
+                  <span className="text-[10px] text-[#A998B3] block">Hesap Giriş Şifresi:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-emerald-400">
+                      {showPrincipalPass
+                        ? school.principal?.loginPassword || 'Oxonom2026!'
+                        : '••••••••••••'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowPrincipalPass(!showPrincipalPass)}
+                      className="text-[#A998B3] hover:text-white cursor-pointer"
+                    >
+                      {showPrincipalPass ? <EyeOff size={13} /> : <Eye size={13} />}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

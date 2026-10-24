@@ -9,6 +9,10 @@ export interface SchoolPrincipal {
   appointmentDate: string
   avatarUrl?: string
   status: 'active' | 'leave' | 'transferred'
+  loginPassword?: string
+  mustChangePassword?: boolean
+  isFirstLogin?: boolean
+  isNewEmptySchool?: boolean
 }
 
 export interface SchoolStaffMember {
@@ -1100,6 +1104,10 @@ export function normalizeSchool(raw: any): SchoolDetail {
       email: principalEmail,
       appointmentDate: appointmentDate,
       status: 'active',
+      loginPassword: raw.principal?.loginPassword || raw.loginPassword || 'Oxonom123!',
+      mustChangePassword: raw.principal?.mustChangePassword ?? raw.mustChangePassword ?? false,
+      isFirstLogin: raw.principal?.isFirstLogin ?? raw.isFirstLogin ?? false,
+      isNewEmptySchool: raw.principal?.isNewEmptySchool ?? raw.isNewEmptySchool ?? false,
     },
     staff: Array.isArray(raw.staff) && raw.staff.length > 0 ? raw.staff : defaultStaff,
     teachers: Array.isArray(raw.teachers) && raw.teachers.length > 0 ? raw.teachers : defaultTeachers,
@@ -1184,6 +1192,23 @@ export function saveAllSchools(schools: SchoolDetail[]): void {
   }
 }
 
+export function updateSchoolPrincipalPassword(schoolCodeOrId: string, newPassword: string): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    const all = getAllSchools()
+    const clean = decodeURIComponent(schoolCodeOrId).trim().toLowerCase()
+    const school = all.find((s) => s.id.toLowerCase() === clean || s.code.toLowerCase() === clean)
+    if (school) {
+      school.principal.loginPassword = newPassword
+      school.principal.mustChangePassword = false
+      school.principal.isFirstLogin = false
+      saveAllSchools(all)
+      return true
+    }
+  } catch (_) {}
+  return false
+}
+
 export function addNewSchool(data: {
   name: string
   code: string
@@ -1195,6 +1220,7 @@ export function addNewSchool(data: {
   principalName: string
   principalPhone: string
   principalEmail: string
+  principalPassword?: string
   phone?: string
   email?: string
   website?: string
@@ -1210,8 +1236,7 @@ export function addNewSchool(data: {
   const expireYear = data.planType.includes('Deneme') ? now.getFullYear() : now.getFullYear() + 3
   const formattedExpire = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${expireYear}`
 
-  const studentCount = data.studentCount || 240
-  const teacherCount = data.teacherCount || 16
+  const initialPassword = (data.principalPassword || 'Oxonom2026!').trim()
 
   const newSchool: SchoolDetail = {
     id,
@@ -1239,88 +1264,32 @@ export function addNewSchool(data: {
       email: data.principalEmail.trim(),
       appointmentDate: formattedDate,
       status: 'active',
+      loginPassword: initialPassword,
+      mustChangePassword: true,
+      isFirstLogin: true,
+      isNewEmptySchool: true,
     },
-    staff: [
-      {
-        id: `stf-${Date.now()}-1`,
-        name: 'Müdür Yardımcısı',
-        role: 'Müdür Yardımcısı (Öğrenci İşleri)',
-        category: 'yonetim',
-        phone: data.principalPhone,
-        email: data.principalEmail,
-        shift: '08:00 - 17:00',
-        status: 'active',
-      },
-      {
-        id: `stf-${Date.now()}-2`,
-        name: 'Rehberlik Servisi',
-        role: 'PDR Koordinatörü',
-        category: 'pdr',
-        phone: data.principalPhone,
-        email: data.principalEmail,
-        shift: '08:30 - 16:30',
-        status: 'active',
-      },
-    ],
-    teachers: [
-      {
-        id: `tch-${Date.now()}-1`,
-        name: `${data.principalName.split(' ')[0]} Bey Öğretmen`,
-        branch: 'Sınıf Öğretmenliği',
-        classroom: '1-A',
-        phone: data.principalPhone,
-        email: data.principalEmail,
-        lessonCount: 28,
-        lastLogin: 'Yeni Kayıt',
-        status: 'active',
-      },
-      {
-        id: `tch-${Date.now()}-2`,
-        name: 'Matematik Zümre Bşk.',
-        branch: 'Matematik',
-        classroom: 'Tüm Sınıflar',
-        phone: data.principalPhone,
-        email: data.principalEmail,
-        lessonCount: 24,
-        lastLogin: 'Yeni Kayıt',
-        status: 'active',
-      },
-    ],
-    students: [
-      {
-        id: `stu-${Date.now()}-1`,
-        studentNumber: '101',
-        name: 'Örnek Öğrenci',
-        grade: '1-A',
-        parentName: 'Veli Bilgisi',
-        parentPhone: data.principalPhone,
-        attendanceRate: 100.0,
-        gpa: 95.0,
-        status: 'active',
-      },
-    ],
-    classrooms: [
-      { grade: '1-A', level: '1. Sınıf', studentCount: Math.round(studentCount / 4), headTeacher: 'Sınıf Öğretmeni', averageScore: 90.0 },
-      { grade: '2-A', level: '2. Sınıf', studentCount: Math.round(studentCount / 4), headTeacher: 'Sınıf Öğretmeni', averageScore: 89.0 },
-      { grade: '3-A', level: '3. Sınıf', studentCount: Math.round(studentCount / 4), headTeacher: 'Sınıf Öğretmeni', averageScore: 88.0 },
-      { grade: '4-A', level: '4. Sınıf', studentCount: Math.round(studentCount / 4), headTeacher: 'Sınıf Öğretmeni', averageScore: 89.5 },
-    ],
+    // Boş profil: Hiç öğrenci, öğretmen veya personel verisi olmayacak
+    staff: [],
+    teachers: [],
+    students: [],
+    classrooms: [],
     stats: {
-      totalStudents: studentCount,
-      activeStudents: studentCount,
-      maleStudents: Math.round(studentCount / 2),
-      femaleStudents: Math.round(studentCount / 2),
-      totalTeachers: teacherCount,
-      activeTeachers: teacherCount,
-      totalStaff: 4,
-      attendanceRate: 97.0,
-      academicAverage: 89.0,
-      weeklyActiveUsers: Math.round(studentCount * 0.9),
-      completedLessonsThisMonth: 120,
-      storageUsedMb: 1200,
-      storageLimitMb: 20480,
-      aiTokensUsed: 500,
-      aiTokensLimit: 25000,
+      totalStudents: 0,
+      activeStudents: 0,
+      maleStudents: 0,
+      femaleStudents: 0,
+      totalTeachers: 0,
+      activeTeachers: 0,
+      totalStaff: 1,
+      attendanceRate: 0,
+      academicAverage: 0,
+      weeklyActiveUsers: 0,
+      completedLessonsThisMonth: 0,
+      storageUsedMb: 0,
+      storageLimitMb: 51200,
+      aiTokensUsed: 0,
+      aiTokensLimit: 50000,
     },
     modules: {
       gameStudio: true,
@@ -1334,7 +1303,7 @@ export function addNewSchool(data: {
     activityLogs: [
       {
         id: `act-${Date.now()}-init`,
-        action: `Okul kurulumu tamamlandı ve sisteme başarıyla kaydedildi`,
+        action: `Kurum kaydı oluşturuldu. Okul Müdürü (${data.principalName.trim()}) için ilk giriş şifresi tanımlandı.`,
         actor: 'Süper Admin',
         role: 'Sistem Yöneticisi',
         timestamp: 'Az önce',

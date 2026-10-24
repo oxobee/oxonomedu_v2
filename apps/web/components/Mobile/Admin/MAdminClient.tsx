@@ -198,6 +198,25 @@ export default function MAdminClient({
           setEditEmail(stored.email)
           setEditSchoolName(stored.schoolName || storedSchool.officialName)
 
+          // Check if this school is an empty fresh school (no mock data)
+          const isEmpty =
+            Boolean(stored.isNewEmptySchool) ||
+            localStorage.getItem('oxonom_is_empty_profile') === 'true'
+
+          if (isEmpty) {
+            setRealStats({
+              studentCount: 0,
+              studentName: 'Henüz Öğrenci Yok',
+              teacherCount: 0,
+              teacherName: 'Henüz Öğretmen Yok',
+              classCount: 0,
+              className: 'Şube Tanımsız',
+              parentCount: 0,
+              activeBoardsCount: 0,
+            })
+            return
+          }
+
           // Real counts for selectedOrgId
           const rawTeachers = localStorage.getItem(`oxonom_admin_teachers_${selectedOrgId}`)
           const teachers = rawTeachers ? JSON.parse(rawTeachers) : null
@@ -862,7 +881,7 @@ export default function MAdminClient({
                 </div>
                 <div>
                   <div className="text-xs font-black text-white flex items-center gap-1.5">
-                    <span>Oxonom Okulları</span>
+                    <span>{adminProfile.schoolName || 'Oxonom Okulları'}</span>
                     <span className="w-1.5 h-1.5 rounded-full bg-[#D914C8] animate-pulse" />
                   </div>
                   <div className="text-[11px] text-[#B5A5BD] font-medium">
@@ -882,6 +901,55 @@ export default function MAdminClient({
 
       {/* ── 2. OKUL ANA METRİK KARTLARI (4 KPI KARTI - HIGH CONTRAST & RESPONSIVE) ── */}
       <section className="w-full">
+        {/* Onboarding Banner for Empty / Newly Created Schools */}
+        {realStats.studentCount === 0 && realStats.teacherCount === 0 && (
+          <div className="mb-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-[#21142C] via-[#1A0E24] to-[#21142C] border-2 border-[#D914C8]/30 shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-black uppercase bg-[#D914C8]/20 text-[#FCE8FA] border border-[#D914C8]/40 flex items-center gap-1">
+                    <Sparkles size={11} />
+                    <span>Yeni Kurum Kurulum Rehberi</span>
+                  </span>
+                  <span className="text-[11px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                    0 Kayıt · Temiz Başlangıç
+                  </span>
+                </div>
+                <h4 className="text-base sm:text-lg font-black text-white">
+                  Okulunuzun Dijital Altyapısını Yapılandırmaya Başlayın
+                </h4>
+                <p className="text-xs text-[#A998B3] max-w-2xl">
+                  Kurumunuz sisteme başarıyla tanımlandı. Okulunuzda henüz kayıtlı öğrenci veya öğretmen bulunmuyor. Aşağıdaki hızlı adımlarla şubelerinizi ve kadronuzu ekleyebilirsiniz.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <Link
+                  href={getUrl('/m-admin-classes')}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white text-xs font-black shadow-md hover:brightness-110 transition-all flex items-center gap-1.5"
+                >
+                  <Building2 size={13} />
+                  <span>+ İlk Şubeyi Aç</span>
+                </Link>
+                <Link
+                  href={getUrl('/m-admin-teachers')}
+                  className="px-3.5 py-2 rounded-xl bg-[#20152B] hover:bg-[#2B1D36] text-white text-xs font-bold border border-[#49364F] transition-all flex items-center gap-1.5"
+                >
+                  <Briefcase size={13} />
+                  <span>+ Öğretmen Davet Et</span>
+                </Link>
+                <Link
+                  href={getUrl('/m-admin-students')}
+                  className="px-3.5 py-2 rounded-xl bg-[#20152B] hover:bg-[#2B1D36] text-white text-xs font-bold border border-[#49364F] transition-all flex items-center gap-1.5"
+                >
+                  <GraduationCap size={13} />
+                  <span>+ Öğrenci Kaydet</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-2">
             <h3 className="text-xs font-black uppercase tracking-wider text-[#716779] dark:text-[#B5A5BD]">
