@@ -23,7 +23,7 @@ export default function SuperadminRootLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-[#0B0D13] text-white flex flex-col font-jakarta">
+    <div className="dark min-h-screen bg-[#0B0D13] text-foreground flex flex-col font-jakarta selection:bg-[#D914C8]/30 selection:text-white">
       <SuperadminNavbar />
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {children}

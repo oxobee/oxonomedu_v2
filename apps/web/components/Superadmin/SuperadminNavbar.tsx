@@ -10,7 +10,12 @@ import {
   Sliders,
   Gamepad2,
   LogOut,
+  Building2,
+  Shield,
+  Layers,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 export default function SuperadminNavbar() {
   const pathname = usePathname()
@@ -26,12 +31,13 @@ export default function SuperadminNavbar() {
       label: 'Slider & Tanıtım',
       path: '/superadmin/banners',
       icon: Sliders,
-      badge: 'Slider & Promo',
+      badge: 'Slider',
     },
     {
       label: 'Okul Yönetimi',
       path: '/superadmin/schools',
-      icon: School,
+      icon: Building2,
+      badge: 'MEB',
     },
     {
       label: 'Game Studio',
@@ -51,7 +57,7 @@ export default function SuperadminNavbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-[#10141E]/95 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 py-3">
+    <header className="sticky top-0 z-40 bg-[#0B0D13]/90 backdrop-blur-md border-b border-border/40 px-4 sm:px-8 py-2.5">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand & Badge */}
         <div className="flex items-center gap-3">
@@ -59,31 +65,34 @@ export default function SuperadminNavbar() {
             href="/superadmin"
             className="flex items-center gap-2.5 group cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#D914C8] to-[#4B075F] p-1 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs shadow-[#D914C8]/30">
               <img
                 src="/oxonom-icon-white.png"
                 alt="Oxonom EDU"
-                className="w-8 h-8 object-contain select-none"
+                className="w-full h-full object-contain select-none"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-black text-sm tracking-tight text-white">
+                <span className="font-extrabold text-xs sm:text-sm tracking-tight text-white">
                   OXONOM <span className="text-[#D914C8]">SUPERADMIN</span>
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-[#D914C8]/20 text-[#F0D8FA] border border-[#D914C8]/40 uppercase tracking-widest">
+                <Badge
+                  variant="outline"
+                  className="px-1.5 py-0 text-[9px] font-black uppercase tracking-wider border-[#D914C8]/40 bg-[#D914C8]/10 text-[#FCE8FA]"
+                >
                   Root
-                </span>
+                </Badge>
               </div>
-              <p className="text-[10px] text-gray-400 font-medium">
-                Oxonom Dijital Ekosistem Yönetimi
+              <p className="text-[10px] text-muted-foreground font-medium hidden sm:block">
+                Platform Konsolu & Kurum Yönetimi
               </p>
             </div>
           </Link>
         </div>
 
         {/* Center Nav */}
-        <nav className="hidden md:flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/10">
+        <nav className="hidden md:flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-border/50">
           {navItems.map((item) => {
             const Icon = item.icon
             const active = pathname === item.path
@@ -92,18 +101,20 @@ export default function SuperadminNavbar() {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
                   active
-                    ? 'bg-gradient-to-r from-[#D914C8] to-[#8D49A6] text-white shadow-md font-black'
-                    : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    ? 'bg-primary text-primary-foreground font-bold shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
                 }`}
               >
-                <Icon size={14} />
+                <Icon size={14} className={active ? 'text-primary-foreground' : 'text-muted-foreground'} />
                 <span>{item.label}</span>
                 {item.badge && (
                   <span
-                    className={`text-[9px] px-1.5 py-0.2 rounded font-extrabold uppercase ${
-                      active ? 'bg-black/20 text-white' : 'bg-[#D914C8]/20 text-[#F0D8FA]'
+                    className={`text-[8.5px] px-1.5 py-0.2 rounded font-extrabold uppercase ${
+                      active
+                        ? 'bg-black/20 text-white'
+                        : 'bg-[#D914C8]/15 text-[#FCE8FA] border border-[#D914C8]/30'
                     }`}
                   >
                     {item.badge}
@@ -117,36 +128,42 @@ export default function SuperadminNavbar() {
         {/* Right Actions */}
         <div className="flex items-center gap-2">
           {/* Canlı Tanıtım Sayfası */}
-          <Link
-            href="/"
-            target="_blank"
-            className="h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-200 text-xs font-bold flex items-center gap-1.5 transition-colors border border-white/10"
-            title="Tanıtım Sayfasını Canlı Gör"
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground border border-transparent hover:border-border/60"
           >
-            <ExternalLink size={14} className="text-[#D914C8]" />
-            <span className="hidden sm:inline">Siteyi Gör</span>
-          </Link>
+            <Link href="/" target="_blank" title="Tanıtım Sayfasını Canlı Gör">
+              <ExternalLink size={13} className="text-[#D914C8]" />
+              <span className="hidden sm:inline">Siteyi Gör</span>
+            </Link>
+          </Button>
 
           {/* School Principal Portal Link */}
-          <Link
-            href="/principal/dashboard"
-            className="h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-200 text-xs font-bold flex items-center gap-1.5 transition-colors border border-white/10"
-            title="Müdür Portalı"
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground border border-transparent hover:border-border/60"
           >
-            <School size={14} className="text-gray-400" />
-            <span className="hidden lg:inline">Müdür Portalı</span>
-          </Link>
+            <Link href="/principal/dashboard" title="Müdür Portalı">
+              <School size={13} />
+              <span className="hidden lg:inline">Müdür Portalı</span>
+            </Link>
+          </Button>
 
           {/* Logout */}
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleLogout}
-            className="h-9 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 hover:text-red-200 text-xs font-bold flex items-center gap-1.5 transition-colors border border-red-500/20 cursor-pointer"
+            className="h-8 px-2.5 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 border-red-500/20"
             title="Süper Admin Çıkışı"
           >
-            <LogOut size={14} />
+            <LogOut size={13} />
             <span className="hidden sm:inline">Çıkış</span>
-          </button>
+          </Button>
         </div>
       </div>
     </header>
