@@ -362,19 +362,15 @@ export default function GlobalLoginClient() {
 
       {/* ── SOL TARAF: GİRİŞ YAPMA FORMU (PANO BUTONU YOK, HIZLI DEMO YOK, KAYIT OL BUTONU VAR) ── */}
       <div className="w-full lg:w-[48%] xl:w-[44%] 2xl:w-[40%] h-full flex flex-col justify-between p-5 sm:p-7 lg:p-10 z-10 relative overflow-y-auto lg:overflow-hidden border-r border-white/5 bg-[#0A0512]/60 backdrop-blur-xl">
-        {/* Masaüstünde sol üstte zarif logo */}
-        <header className="w-full hidden lg:flex items-center justify-between pb-2 shrink-0">
-          <Link href="/login" className="group flex items-center gap-2 cursor-pointer">
+        {/* Masaüstünde üstte ortalı, daha büyük logo (v2.0 Portalı badgesi kaldırıldı) */}
+        <header className="w-full hidden lg:flex items-center justify-center pt-1 pb-4 shrink-0">
+          <Link href="/login" className="group flex items-center justify-center cursor-pointer">
             <img
               src="/oxonom-logo-dark.png"
               alt="Oxonom EDU"
-              className="h-9 w-auto object-contain transition-transform group-hover:scale-[1.02]"
+              className="h-12 xl:h-14 w-auto object-contain drop-shadow-md transition-transform group-hover:scale-[1.03]"
             />
           </Link>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-bold text-[#F0D8FA]">
-            <Sparkles size={12} className="text-[#D914C8]" />
-            <span>v2.0 Portalı</span>
-          </div>
         </header>
 
         {/* Orta Kısım: Giriş Formu ve Rol Seçici */}
@@ -385,7 +381,7 @@ export default function GlobalLoginClient() {
               <img
                 src="/oxonom-logo-dark.png"
                 alt="Oxonom EDU"
-                className="h-12 sm:h-14 w-auto max-w-[75vw] sm:max-w-[280px] object-contain drop-shadow-2xl transition-transform active:scale-95"
+                className="h-13 sm:h-15 w-auto max-w-[80vw] sm:max-w-[300px] object-contain drop-shadow-2xl transition-transform active:scale-95"
               />
             </Link>
             <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
@@ -399,24 +395,30 @@ export default function GlobalLoginClient() {
               </span>
             </div>
           </div>
-          {/* Başlık */}
+          {/* Başlık ve Demo Rozeti */}
           <div className="mb-4">
-            <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#D914C8] mb-1">
-              <Sparkles size={13} />
-              <span>Giriş Portalı</span>
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#D914C8]">
+                <Sparkles size={13} />
+                <span>Giriş Portalı</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[10.5px] font-extrabold text-amber-300 shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <span>Demo Hesaplar</span>
+              </div>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
               Hesabınıza Giriş Yapın
             </h1>
             <p className="text-xs text-[#A998B3] mt-0.5">
               {selectedRole === 'principal'
-                ? `${principalDisplayName} · Kurum Yönetimi`
-                : `${activeRoleConfig.defaultName} · ${activeRoleConfig.subtitle}`}
+                ? `${principalDisplayName} · Kurum Yönetimi (Demo)`
+                : `${activeRoleConfig.defaultName} · ${activeRoleConfig.subtitle} (Demo)`}
             </p>
           </div>
 
-          {/* SADECE MÜDÜR, ÖĞRETMEN, ÖĞRENCİ SEÇİM BUTONLARI */}
-          <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#130B1B] rounded-2xl border border-white/10 mb-4 relative shadow-inner">
+          {/* SADECE MÜDÜR, ÖĞRETMEN, ÖĞRENCİ SEÇİM BUTONLARI (DEMO HESAP BELİRTECİ İLE) */}
+          <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#130B1B] rounded-2xl border border-white/10 mb-2 relative shadow-inner">
             {ROLES.map((r) => {
               const Icon = r.icon
               const isSelected = selectedRole === r.id
@@ -425,7 +427,7 @@ export default function GlobalLoginClient() {
                   key={r.id}
                   type="button"
                   onClick={() => handleRoleSelect(r.id)}
-                  className="relative z-10 py-2.5 px-2 rounded-xl text-center cursor-pointer transition-colors"
+                  className="relative z-10 py-2 px-2 rounded-xl text-center cursor-pointer transition-colors"
                 >
                   {isSelected && (
                     <motion.div
@@ -434,7 +436,7 @@ export default function GlobalLoginClient() {
                       transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                     />
                   )}
-                  <div className="relative z-20 flex flex-col items-center gap-1">
+                  <div className="relative z-20 flex flex-col items-center gap-0.5">
                     <Icon
                       size={16}
                       className={isSelected ? 'text-[#FCE8FA]' : 'text-[#7D6E87]'}
@@ -446,10 +448,30 @@ export default function GlobalLoginClient() {
                     >
                       {r.label}
                     </span>
+                    <span
+                      className={`text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-md ${
+                        isSelected
+                          ? 'bg-white/20 text-[#FCE8FA]'
+                          : 'bg-white/5 text-[#7D6E87]'
+                      }`}
+                    >
+                      Demo
+                    </span>
                   </div>
                 </button>
               )
             })}
+          </div>
+
+          {/* Demo Bilgilendirme Notu */}
+          <div className="flex items-center justify-between px-1 mb-3.5 text-[10.5px]">
+            <span className="flex items-center gap-1.5 text-[#C4B5D0] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span>Sistemi incelemek için hazır demo hesaplar</span>
+            </span>
+            <span className="text-[10px] text-amber-300 font-bold bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+              30 dk sıfırlama
+            </span>
           </div>
 
           {/* FORM */}

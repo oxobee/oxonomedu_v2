@@ -420,11 +420,11 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               </h2>
               <p className="text-[13px] text-[#5B6577] mt-1 mb-0 font-medium">
                 {identifier.includes('mudur') || identifier.includes('idare')
-                  ? 'Okul Müdürü (Kemal SOYSAL) yönetim hesabı'
+                  ? 'Okul Müdürü (Kemal SOYSAL) demo yönetim hesabı'
                   : identifier.includes('ogrenci')
-                  ? 'Öğrenci (Ali Yağız DEMİREL — 1/A) hesabı'
+                  ? 'Öğrenci (Ali Yağız DEMİREL — 1/A) demo hesabı'
                   : identifier.includes('ogretmen')
-                  ? 'Öğretmen (Bahar ÇETİN — 1/A Rehberi) hesabı'
+                  ? 'Öğretmen (Bahar ÇETİN — 1/A Rehberi) demo hesabı'
                   : 'Oxonom Okulları hesabınıza erişmek için bilgilerinizi girin.'}
               </p>
             </div>
@@ -449,7 +449,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               }`}
             >
               <ShieldCheck size={12} className={identifier.includes('mudur') || identifier.includes('idare') ? 'text-white' : 'text-emerald-600'} />
-              <span>👔 Müdür</span>
+              <span>👔 Müdür (Demo)</span>
             </button>
             <button
               type="button"
@@ -461,7 +461,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               }`}
             >
               <Sparkles size={12} className={identifier.includes('ogretmen') ? 'text-[#34D399]' : 'text-gray-500'} />
-              <span>👩‍🏫 Öğretmen</span>
+              <span>👩‍🏫 Öğretmen (Demo)</span>
             </button>
             <button
               type="button"
@@ -473,7 +473,7 @@ export default function MLoginClient({ org, orgslug }: MLoginClientProps) {
               }`}
             >
               <Rocket size={12} className={identifier.includes('ogrenci') ? 'text-white' : 'text-indigo-500'} />
-              <span>🎒 Öğrenci</span>
+              <span>🎒 Öğrenci (Demo)</span>
             </button>
           </div>
 
