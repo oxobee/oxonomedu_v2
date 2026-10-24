@@ -62,6 +62,7 @@ import {
   Image as ImageIcon,
   FileQuestion,
   UploadCloud,
+  Power,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import {
@@ -79,6 +80,18 @@ import { createBoard } from '@services/boards/boards'
 import toast from 'react-hot-toast'
 import PanoStandbyScreen from './PanoStandbyScreen'
 import PanoLockScreen from './PanoLockScreen'
+import PanoPairingGate from './PanoPairingGate'
+import {
+  BoardPairingInfo,
+  getActivePairedBoardSession,
+  setActivePairedBoardSession,
+  disconnectActiveBoard,
+  pairBoardWithCode,
+  findBoardByPairingCode,
+  setBoardLiveStatus,
+  BOARD_SYNC_CHANNEL_NAME,
+} from '@/lib/pano/boardPairingManager'
+import { getTenantClasses } from '@/lib/schools/schoolTenantManager'
 import { TeacherPairData } from '@/lib/pano-pair/store'
 import { usePanoSync, AppItem, WindowState, ClassroomItem, PanoAction } from '@/hooks/usePanoSync'
 import screenfull from 'screenfull'
@@ -3081,6 +3094,14 @@ export default function PanoClient() {
     return null
   })
 
+  // Active Paired Board Session from Principal Portal (Multi-Tenant)
+  const [pairedBoard, setPairedBoard] = useState<BoardPairingInfo | null>(() => {
+    if (typeof window !== 'undefined') {
+      return getActivePairedBoardSession()
+    }
+    return null
+  })
+
   // Classrooms list
   const [classrooms, setClassrooms] = useState<ClassroomItem[]>(DEFAULT_CLASSROOMS)
 
@@ -3089,6 +3110,33 @@ export default function PanoClient() {
   const rawIdParam = routeBoardId || searchParams?.get('id') || searchParams?.get('boardId') || ''
   const panoIdParam = searchParams?.get('panoId') || ''
   const tahtaIdParam = searchParams?.get('tahtaId') || searchParams?.get('boardNo') || ''
+
+  // Auto-pair if code is provided in URL query (?code=... or ?board=... or /pano/PANO-4A-8392)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const qCode = (searchParams?.get('code') || searchParams?.get('board') || rawIdParam || '').trim()
+    if (qCode && (!pairedBoard || pairedBoard.code.toUpperCase() !== qCode.toUpperCase())) {
+      const res = pairBoardWithCode(qCode)
+      if (res.success && res.board) {
+        setPairedBoard(res.board)
+      }
+    }
+  }, [searchParams, rawIdParam, pairedBoard])
+
+  // Multi-window & live storage sync for paired board updates
+  useEffect(() => {
+    const handleBoardSync = () => {
+      const current = getActivePairedBoardSession()
+      setPairedBoard(current)
+    }
+    window.addEventListener('oxonom_boards_updated', handleBoardSync)
+    window.addEventListener('storage', handleBoardSync)
+    return () => {
+      window.removeEventListener('oxonom_boards_updated', handleBoardSync)
+      window.removeEventListener('storage', handleBoardSync)
+    }
+  }, [])
+
 
   const resolveBoardIdentity = useCallback((rawInput?: string, pInput?: string, tInput?: string): { panoId: string; boardNo: string } => {
     let pano = '1A'
@@ -3389,6 +3437,8 @@ export default function PanoClient() {
       window.dispatchEvent(new Event('storage'))
     }
 
+    disconnectActiveBoard()
+    setPairedBoard(null)
     setPairedSession(null)
     setActiveSessionId(null)
     setSelectedClass(null)
@@ -3883,6 +3933,89 @@ export default function PanoClient() {
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  // Disconnect active paired board (flips status back to offline / red in Principal portal)
+  const handleDisconnectBoard = useCallback(() => {
+    if (
+      confirm(
+        `"${pairedBoard?.name || 'Pano'}" bağlantısını sonlandırmak ve panoyu çevrimdışı (kırmızı) yapmak istediğinize emin misiniz?`
+      )
+    ) {
+      disconnectActiveBoard()
+      setPairedBoard(null)
+      setSelectedClass(null)
+      setIsProfileOpen(false)
+      toast.success('Pano oturumu kapatıldı. Pano pasif duruma alındı.')
+    }
+  }, [pairedBoard, setSelectedClass])
+
+  // Synchronize multi-tenant school classes and auto-select assigned classroom when paired
+  useEffect(() => {
+    if (!pairedBoard) return
+
+    // 1. Try loading isolated classes for this school
+    const tenantClasses = getTenantClasses(pairedBoard.schoolCode)
+    if (Array.isArray(tenantClasses) && tenantClasses.length > 0) {
+      const formattedClasses: ClassroomItem[] = tenantClasses.map((c: any, idx: number) => {
+        const numericId = typeof c.id === 'number' ? c.id : (parseInt(String(c.id).replace(/\D/g, ''), 10) || (idx + 101))
+        return {
+          id: numericId,
+          name: c.name || c.code || String(c.id),
+          code: c.code || c.name,
+          gradeLevel: c.grade_level || c.name.match(/\d+/)?.[0] || '1',
+          studentCount: c.student_count || c.students?.length || 24,
+          boardCount: 1,
+          attendance: 'Alınmadı',
+          teacherName: c.teacher_name || 'Sınıf Öğretmeni',
+          subject: c.subject || 'Derslik',
+          schoolName: pairedBoard.schoolName,
+        }
+      })
+      setClassrooms(formattedClasses)
+
+      if (pairedBoard.classroom) {
+        const normTarget = normalizeClassCode(pairedBoard.classroom)
+        const match = formattedClasses.find(
+          (cls) => normalizeClassCode(cls.code || cls.name) === normTarget
+        )
+        if (match) {
+          setSelectedClass(match)
+        } else {
+          const autoId = parseInt(pairedBoard.classroom.replace(/\D/g, ''), 10) || 901
+          const autoItem: ClassroomItem = {
+            id: autoId,
+            name: `${pairedBoard.classroom} Sınıfı`,
+            code: pairedBoard.classroom,
+            gradeLevel: pairedBoard.classroom.match(/\d+/)?.[0] || '1',
+            studentCount: 24,
+            boardCount: 1,
+            attendance: 'Alınmadı',
+            teacherName: 'Sınıf Öğretmeni',
+            subject: 'Sınıf Dersi',
+            schoolName: pairedBoard.schoolName,
+          }
+          setClassrooms([autoItem, ...formattedClasses])
+          setSelectedClass(autoItem)
+        }
+      }
+    } else if (pairedBoard.classroom) {
+      const singleId = parseInt(pairedBoard.classroom.replace(/\D/g, ''), 10) || 901
+      const singleItem: ClassroomItem = {
+        id: singleId,
+        name: `${pairedBoard.classroom} Sınıfı`,
+        code: pairedBoard.classroom,
+        gradeLevel: pairedBoard.classroom.match(/\d+/)?.[0] || '1',
+        studentCount: 24,
+        boardCount: 1,
+        attendance: 'Alınmadı',
+        teacherName: 'Sınıf Öğretmeni',
+        subject: 'Sınıf Dersi',
+        schoolName: pairedBoard.schoolName,
+      }
+      setClassrooms([singleItem])
+      setSelectedClass(singleItem)
+    }
+  }, [pairedBoard, setSelectedClass])
 
   // Live Dynamic Class Stats (User Rule: "Pano ekranında veriler hep güncel olmalı sayfayı yenilemek gerekmemeli")
   const [dataSyncTrigger, setDataSyncTrigger] = useState(0)
@@ -4616,8 +4749,18 @@ export default function PanoClient() {
     )
   }
 
-  // 1. Akıllı Tahta Doğrudan Kullanım Modu:
-  // Tüm kullanıcı profilleri (Öğretmen, İdare, Öğrenci, Misafir, Tahta) /pano ekranına doğrudan erişebilir.
+  // 1. Akıllı Tahta Eşleştirme Giriş Ekranı (Multi-Tenant Pano Pairing Gate)
+  if (!pairedBoard) {
+    return (
+      <PanoPairingGate
+        initialCode={(searchParams?.get('code') || searchParams?.get('board') || rawIdParam || '').toUpperCase()}
+        onSuccess={(board) => {
+          setPairedBoard(board)
+          toast.success(`"${board.schoolName} - ${board.classroom || board.name}" panosuna bağlanıldı! 🚀`)
+        }}
+      />
+    )
+  }
 
   // apps is already memoized above and ready for rendering and remote control
 
@@ -4699,8 +4842,30 @@ export default function PanoClient() {
         </div>
       )}
 
-      {/* 2. CENTERED BRANDING (HEADER TAMAMEN KALDIRILDI - LOGO MERKEZDE) */}
+      {/* 2. CENTERED BRANDING & MULTI-TENANT PANO BAR */}
       <div className="w-full pt-3 pb-1 px-4 sm:px-6 flex items-center justify-center relative z-30 shrink-0">
+        {/* School & Classroom Identity (Multi-Tenant) */}
+        {pairedBoard && (
+          <div className="absolute left-4 sm:left-6 top-3 flex items-center gap-2">
+            <div className="px-3 py-1.5 rounded-2xl bg-white/90 dark:bg-[#241329]/90 backdrop-blur-md border border-[#E8DFEB] dark:border-[#49364F] shadow-2xs flex items-center gap-2 text-xs font-bold text-[#241329] dark:text-white">
+              <School className="w-4 h-4 text-[#D914C8] shrink-0" />
+              <span className="hidden sm:inline font-black text-xs sm:text-sm">{pairedBoard.schoolName}</span>
+              {pairedBoard.classroom && (
+                <span className="px-2 py-0.5 rounded-md bg-[#F0D8FA] dark:bg-[#350444] text-[#4B075F] dark:text-[#F0D8FA] text-[11px] font-black">
+                  {pairedBoard.classroom} Sınıfı
+                </span>
+              )}
+              <span className="font-mono text-[10px] text-[#716779] dark:text-[#C58ADB] font-bold px-1.5 py-0.5 rounded bg-[#FAF5FC] dark:bg-[#1E1124] border border-[#E8DFEB] dark:border-[#3A2942] hidden md:inline">
+                {pairedBoard.code}
+              </span>
+              <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold ml-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Canlı
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Centered Brand Logo */}
         <Link href={getUriWithOrg(orgslug, '/')} className="flex items-center group cursor-pointer" title="Ana Sayfaya Dön">
           <div className="h-10 sm:h-12 flex items-center group-hover:scale-105 transition-transform">
@@ -4717,8 +4882,19 @@ export default function PanoClient() {
           </div>
         </Link>
 
-        {/* Discreet Top Right Lock & Settings Dropdown */}
+        {/* Discreet Top Right Controls */}
         <div className="absolute right-4 sm:right-6 top-3 flex items-center gap-2" ref={popupRef}>
+          {pairedBoard && (
+            <button
+              onClick={handleDisconnectBoard}
+              className="h-8 sm:h-9 px-3 rounded-2xl bg-white/90 dark:bg-[#241329]/90 backdrop-blur-md shadow-2xs flex items-center gap-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors cursor-pointer border border-rose-200 dark:border-rose-900/50 text-xs font-bold"
+              title="Panodan Çıkış Yap (Çevrimdışı Yap)"
+            >
+              <Power className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Panodan Çıkış</span>
+            </button>
+          )}
+
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -4744,7 +4920,7 @@ export default function PanoClient() {
                       </div>
                       <div>
                         <div className="text-[10px] uppercase font-bold text-white/80">Akıllı Tahta</div>
-                        <div className="text-xs font-black text-white">{boardIdentity.panoId}-{boardIdentity.boardNo}</div>
+                        <div className="text-xs font-black text-white">{pairedBoard?.code || `${boardIdentity.panoId}-${boardIdentity.boardNo}`}</div>
                       </div>
                     </div>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white flex items-center gap-1">
@@ -4772,6 +4948,13 @@ export default function PanoClient() {
                     >
                       <Lock className="w-3.5 h-3.5 text-[#8D49A6]" />
                       <span>Ekranı Kilitle</span>
+                    </button>
+                    <button
+                      onClick={handleDisconnectBoard}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs font-bold transition-colors cursor-pointer text-left border-t border-[#E8DFEB] dark:border-[#3A2942] mt-1 pt-2"
+                    >
+                      <Power className="w-3.5 h-3.5 text-rose-500" />
+                      <span>Panodan Çıkış / Eşleştirmeyi Kapat</span>
                     </button>
                   </div>
                 </motion.div>
