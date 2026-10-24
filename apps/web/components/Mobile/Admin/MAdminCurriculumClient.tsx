@@ -460,6 +460,54 @@ export default function MAdminCurriculumClient({
     period: number
   } | null>(null)
 
+  // Otomatik Ders & Teneffüs Hesaplayıcı Durumu
+  const [calcStartTime, setCalcStartTime] = useState('08:30')
+  const [calcLessonDuration, setCalcLessonDuration] = useState(40)
+  const [calcRecessDuration, setCalcRecessDuration] = useState(15)
+  const [calcLunchDuration, setCalcLunchDuration] = useState(50)
+  const [calcLunchAfterPeriod, setCalcLunchAfterPeriod] = useState(4)
+  const [calcDailyPeriods, setCalcDailyPeriods] = useState(6)
+
+  // Otomatik Ders ve Teneffüs Saatleri Hesaplama Fonksiyonu
+  const handleAutoCalculatePeriods = () => {
+    try {
+      const parts = calcStartTime.split(':')
+      const startH = parseInt(parts[0], 10) || 8
+      const startM = parseInt(parts[1], 10) || 30
+      let currentMinutes = startH * 60 + startM
+      const generated: PeriodSlot[] = []
+
+      const fmt = (totalMin: number) => {
+        const h = Math.floor(totalMin / 60) % 24
+        const m = totalMin % 60
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+      }
+
+      for (let i = 1; i <= calcDailyPeriods; i++) {
+        const lessonStartMin = currentMinutes
+        const lessonEndMin = lessonStartMin + calcLessonDuration
+        const isLunch = i === calcLunchAfterPeriod
+
+        generated.push({
+          periodNumber: i,
+          time: `${fmt(lessonStartMin)} - ${fmt(lessonEndMin)}`,
+          isLunchAfter: isLunch,
+        })
+
+        if (i < calcDailyPeriods) {
+          const breakMin = isLunch ? calcLunchDuration : calcRecessDuration
+          currentMinutes = lessonEndMin + breakMin
+        }
+      }
+
+      setPeriods(generated)
+      persistPeriods(generated)
+      toast.success(`${calcDailyPeriods} ders saati ve teneffüs araları otomatik oluşturuldu!`, { icon: '✨' })
+    } catch (_) {
+      toast.error('Saat hesaplama hatası oluştu.')
+    }
+  }
+
   // Form Fields for Add/Edit Course (Strictly grouped as requested)
   // Section 1: Ders Bilgileri
   const [formName, setFormName] = useState('')
@@ -2279,10 +2327,13 @@ export default function MAdminCurriculumClient({
               <button
                 type="button"
                 onClick={() => setIsEditPeriodsModalOpen(true)}
-                className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold text-white transition-all cursor-pointer"
+                className="self-start sm:self-auto flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 text-xs font-bold text-white transition-all cursor-pointer shadow-xs"
               >
-                <Sliders size={13} className="text-emerald-400" />
-                <span>Ders Saatlerini Düzenle</span>
+                <Clock size={14} className="text-emerald-400" />
+                <span>Ders & Teneffüs Saatleri</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-400 text-emerald-950 font-black">
+                  ✨ Otomatik
+                </span>
               </button>
             </div>
 
@@ -2764,12 +2815,33 @@ export default function MAdminCurriculumClient({
 
                 <section className="px-3 space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {periods.map((slot) => {
+                    {periods.map((slot, pIdx) => {
                       const entry = activeDayEntries.find((e) => e.period === slot.periodNumber)
                       const style = entry ? getColorStyle(entry.color) : null
+                      const prevSlot = pIdx > 0 ? periods[pIdx - 1] : null
+                      const prevEnd = prevSlot ? prevSlot.time.split('-')[1]?.trim() : null
+                      const currStart = slot.time.split('-')[0]?.trim()
+                      const isLunch = prevSlot?.isLunchAfter
 
                       return (
-                        <div
+                        <React.Fragment key={slot.periodNumber}>
+                          {prevSlot && prevEnd && currStart && (
+                            <div className={`col-span-full py-1.5 px-3 rounded-xl border border-dashed flex items-center justify-between text-[11px] ${
+                              isLunch
+                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300'
+                                : 'bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                            }`}>
+                              <div className="flex items-center gap-1.5 font-bold">
+                                <span>{isLunch ? '🍽️' : '☕'}</span>
+                                <span>{isLunch ? 'Öğle Arası Dinlenme & Yemek' : 'Teneffüs Arası'}</span>
+                              </div>
+                              <span className="font-mono font-bold">
+                                {prevEnd} - {currStart}
+                              </span>
+                            </div>
+                          )}
+
+                          <div
                           key={slot.periodNumber}
                           onClick={() => {
                             if (entry) {
@@ -2849,8 +2921,9 @@ export default function MAdminCurriculumClient({
                             )}
                           </div>
                         </div>
-                      )
-                    })}
+                      </React.Fragment>
+                    )
+                  })}
                   </div>
                 </section>
               </div>
@@ -3085,12 +3158,33 @@ export default function MAdminCurriculumClient({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {periods.map((slot) => {
+                {periods.map((slot, pIdx) => {
                   const entry = activeDayEntries.find((e) => e.period === slot.periodNumber)
                   const style = entry ? getColorStyle(entry.color) : null
+                  const prevSlot = pIdx > 0 ? periods[pIdx - 1] : null
+                  const prevEnd = prevSlot ? prevSlot.time.split('-')[1]?.trim() : null
+                  const currStart = slot.time.split('-')[0]?.trim()
+                  const isLunch = prevSlot?.isLunchAfter
 
                   return (
-                    <motion.div
+                    <React.Fragment key={slot.periodNumber}>
+                      {prevSlot && prevEnd && currStart && (
+                        <div className={`col-span-full py-1.5 px-3 rounded-xl border border-dashed flex items-center justify-between text-[11px] ${
+                          isLunch
+                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300'
+                            : 'bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'
+                        }`}>
+                          <div className="flex items-center gap-1.5 font-bold">
+                            <span>{isLunch ? '🍽️' : '☕'}</span>
+                            <span>{isLunch ? 'Öğle Arası Dinlenme & Yemek' : 'Teneffüs Arası'}</span>
+                          </div>
+                          <span className="font-mono font-bold">
+                            {prevEnd} - {currStart}
+                          </span>
+                        </div>
+                      )}
+
+                      <motion.div
                       key={slot.periodNumber}
                       whileTap={{ scale: 0.98 }}
                       onDragOver={(e) => e.preventDefault()}
@@ -3204,8 +3298,9 @@ export default function MAdminCurriculumClient({
                         </div>
                       </div>
                     </motion.div>
-                  )
-                })}
+                  </React.Fragment>
+                )
+              })}
               </div>
             </section>
           </div>
@@ -3901,7 +3996,7 @@ export default function MAdminCurriculumClient({
         )}
       </AnimatePresence>
 
-      {/* ── MODAL 3: DERS SAATLERİNİ DÜZENLE (MÜDÜR İSTERSE SAATLERDE DEĞİŞİKLİK YAPABİLİR) ── */}
+      {/* ── MODAL 3: DERS & TENEFFÜS SAATLERİ PLANLAYICI (OTOMATİK HESAPLAMA & MANUEL DÜZENLEME) ── */}
       <AnimatePresence>
         {isEditPeriodsModalOpen && (
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 font-jakarta select-none">
@@ -3918,12 +4013,13 @@ export default function MAdminCurriculumClient({
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0.8 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className={`relative w-full sm:max-w-md max-h-[90vh] rounded-t-[32px] sm:rounded-[32px] shadow-2xl flex flex-col z-10 overflow-hidden ${
+              className={`relative w-full sm:max-w-xl max-h-[92vh] rounded-t-[32px] sm:rounded-[32px] shadow-2xl flex flex-col z-10 overflow-hidden ${
                 theme === 'dark'
                   ? 'bg-[#0E131F] text-white border-t sm:border border-gray-800'
                   : 'bg-white text-gray-900 border-t sm:border border-gray-200'
               }`}
             >
+              {/* Header */}
               <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
@@ -3931,10 +4027,10 @@ export default function MAdminCurriculumClient({
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-gray-900 dark:text-white">
-                      Ders Saatlerini Özelleştir
+                      Haftalık Ders & Teneffüs Saatleri Planlayıcı
                     </h3>
                     <p className="text-[11px] text-gray-400">
-                      Günün ders periyotlarını ve başlangıç-bitiş saatlerini güncelleyin
+                      Giriş-çıkış saatlerini ve teneffüs aralarını belirleyin veya sistemin otomatik hesaplamasını sağlayın.
                     </p>
                   </div>
                 </div>
@@ -3948,40 +4044,207 @@ export default function MAdminCurriculumClient({
                 </button>
               </div>
 
-              <div className="p-5 overflow-y-auto space-y-3 text-xs">
-                {periods.map((p, idx) => (
-                  <div key={p.periodNumber} className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
-                    <span className="w-8 font-black text-gray-700 dark:text-gray-300">
-                      {p.periodNumber}. Ders
+              <div className="p-5 overflow-y-auto space-y-4 text-xs">
+                {/* ── SİHİRBAZ: OTOMATİK HESAPLAMA KARTI ── */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 border border-emerald-500/20 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-black text-emerald-800 dark:text-emerald-300">
+                      <Sparkles size={16} className="text-emerald-500 animate-pulse" />
+                      <span>Akıllı Otomatik Hesaplayıcı</span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold">
+                      MEB Çizelge Uyumlu
                     </span>
-                    <input
-                      type="text"
-                      value={p.time}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        const updated = periods.map((item) =>
-                          item.periodNumber === p.periodNumber ? { ...item, time: val } : item
-                        )
-                        setPeriods(updated)
-                      }}
-                      className="flex-1 h-9 px-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 font-mono font-bold text-xs"
-                      placeholder="08:30 - 09:10"
-                    />
-                    {periods.length > 4 && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = periods.filter((item) => item.periodNumber !== p.periodNumber)
-                          setPeriods(updated)
-                        }}
-                        className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center cursor-pointer"
-                        title="Ders Saatini Sil"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    )}
                   </div>
-                ))}
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 block mb-1">
+                        İlk Ders Başlangıcı
+                      </label>
+                      <input
+                        type="time"
+                        value={calcStartTime}
+                        onChange={(e) => setCalcStartTime(e.target.value)}
+                        className="w-full h-8 px-2.5 rounded-xl bg-white dark:bg-gray-900 border border-emerald-500/30 font-mono font-bold text-xs"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 block mb-1">
+                        Ders Süresi
+                      </label>
+                      <select
+                        value={calcLessonDuration}
+                        onChange={(e) => setCalcLessonDuration(Number(e.target.value))}
+                        className="w-full h-8 px-2 rounded-xl bg-white dark:bg-gray-900 border border-emerald-500/30 font-bold text-xs"
+                      >
+                        <option value={30}>30 Dakika</option>
+                        <option value={35}>35 Dakika</option>
+                        <option value={40}>40 Dakika (Standart)</option>
+                        <option value={45}>45 Dakika</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 block mb-1">
+                        Teneffüs Süresi
+                      </label>
+                      <select
+                        value={calcRecessDuration}
+                        onChange={(e) => setCalcRecessDuration(Number(e.target.value))}
+                        className="w-full h-8 px-2 rounded-xl bg-white dark:bg-gray-900 border border-emerald-500/30 font-bold text-xs"
+                      >
+                        <option value={10}>10 Dakika</option>
+                        <option value={15}>15 Dakika (Standart)</option>
+                        <option value={20}>20 Dakika</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 block mb-1">
+                        Öğle Arası Süresi
+                      </label>
+                      <select
+                        value={calcLunchDuration}
+                        onChange={(e) => setCalcLunchDuration(Number(e.target.value))}
+                        className="w-full h-8 px-2 rounded-xl bg-white dark:bg-gray-900 border border-emerald-500/30 font-bold text-xs"
+                      >
+                        <option value={40}>40 Dakika</option>
+                        <option value={45}>45 Dakika</option>
+                        <option value={50}>50 Dakika (Standart)</option>
+                        <option value={60}>60 Dakika</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 block mb-1">
+                        Öğle Arası Yeri
+                      </label>
+                      <select
+                        value={calcLunchAfterPeriod}
+                        onChange={(e) => setCalcLunchAfterPeriod(Number(e.target.value))}
+                        className="w-full h-8 px-2 rounded-xl bg-white dark:bg-gray-900 border border-emerald-500/30 font-bold text-xs"
+                      >
+                        <option value={3}>3. Dersten Sonra</option>
+                        <option value={4}>4. Dersten Sonra</option>
+                        <option value={5}>5. Dersten Sonra</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 block mb-1">
+                        Günlük Ders Sayısı
+                      </label>
+                      <select
+                        value={calcDailyPeriods}
+                        onChange={(e) => setCalcDailyPeriods(Number(e.target.value))}
+                        className="w-full h-8 px-2 rounded-xl bg-white dark:bg-gray-900 border border-emerald-500/30 font-bold text-xs"
+                      >
+                        <option value={5}>5 Ders / Gün (25 Saat/Hafta)</option>
+                        <option value={6}>6 Ders / Gün (30 Saat/Hafta - İlkokul)</option>
+                        <option value={7}>7 Ders / Gün (35 Saat/Hafta - Ortaokul)</option>
+                        <option value={8}>8 Ders / Gün (40 Saat/Hafta - Lise)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAutoCalculatePeriods}
+                    className="w-full h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  >
+                    <Wand2 size={13} />
+                    <span>✨ Otomatik Hesapla ve Saatleri Doldur</span>
+                  </button>
+                </div>
+
+                {/* ── MEVCUT PERİYOTLAR VE TENEFFÜSLER LİSTESİ ── */}
+                <div className="space-y-2">
+                  <div className="text-[11px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 px-1">
+                    Aktif Ders Periyotları & Teneffüs Çizelgesi
+                  </div>
+
+                  {periods.map((p, idx) => {
+                    const prevSlot = idx > 0 ? periods[idx - 1] : null
+                    const prevEnd = prevSlot ? prevSlot.time.split('-')[1]?.trim() : null
+                    const currStart = p.time.split('-')[0]?.trim()
+                    const isLunch = prevSlot?.isLunchAfter
+
+                    return (
+                      <React.Fragment key={p.periodNumber}>
+                        {/* Teneffüs / Öğle Arası Bandı */}
+                        {prevSlot && prevEnd && currStart && (
+                          <div className={`flex items-center justify-between px-3 py-1.5 rounded-xl border border-dashed text-[11px] ${
+                            isLunch
+                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300'
+                              : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+                          }`}>
+                            <div className="flex items-center gap-1.5 font-bold">
+                              <span>{isLunch ? '🍽️' : '☕'}</span>
+                              <span>{isLunch ? 'Öğle Arası Dinlenme & Yemek' : 'Teneffüs Arası'}</span>
+                            </div>
+                            <span className="font-mono font-bold">
+                              {prevEnd} - {currStart}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Ders Satırı */}
+                        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
+                          <span className="w-16 font-black text-gray-700 dark:text-gray-300 shrink-0">
+                            {p.periodNumber}. Ders
+                          </span>
+                          <input
+                            type="text"
+                            value={p.time}
+                            onChange={(e) => {
+                              const val = e.target.value
+                              const updated = periods.map((item) =>
+                                item.periodNumber === p.periodNumber ? { ...item, time: val } : item
+                              )
+                              setPeriods(updated)
+                            }}
+                            className="flex-1 h-9 px-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 font-mono font-bold text-xs"
+                            placeholder="08:30 - 09:10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = periods.map((item) =>
+                                item.periodNumber === p.periodNumber
+                                  ? { ...item, isLunchAfter: !item.isLunchAfter }
+                                  : item
+                              )
+                              setPeriods(updated)
+                            }}
+                            className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
+                              p.isLunchAfter
+                                ? 'bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-300'
+                                : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400'
+                            }`}
+                            title="Bu dersten sonra öğle arası verilsin mi?"
+                          >
+                            {p.isLunchAfter ? '🍽️ Öğle' : '☕ Teneffüs'}
+                          </button>
+                          {periods.length > 4 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = periods.filter((item) => item.periodNumber !== p.periodNumber)
+                                setPeriods(updated)
+                              }}
+                              className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center cursor-pointer shrink-0"
+                              title="Ders Saatini Sil"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      </React.Fragment>
+                    )
+                  })}
+                </div>
 
                 <button
                   type="button"
@@ -4005,11 +4268,11 @@ export default function MAdminCurriculumClient({
                     onClick={() => {
                       persistPeriods(periods)
                       setIsEditPeriodsModalOpen(false)
-                      toast.success('Ders saatleri çizelgesi başarıyla kaydedildi!')
+                      toast.success('Ders ve teneffüs saatleri çizelgesi başarıyla kaydedildi!')
                     }}
                     className="w-full h-11 rounded-2xl bg-brand-gradient hover:opacity-95 text-white font-black text-xs shadow-md shadow-purple-950/20 transition-all cursor-pointer"
                   >
-                    Kaydet ve Uygula
+                    Kaydet ve Çizelgeye Uygula
                   </button>
                 </div>
               </div>

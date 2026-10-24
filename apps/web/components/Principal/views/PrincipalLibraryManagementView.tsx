@@ -9,9 +9,7 @@ import {
   X,
   Eye,
   EyeOff,
-  RotateCcw,
   Sparkles,
-  ShieldAlert,
   ShieldCheck,
   CheckCircle2,
   AlertTriangle,
@@ -28,7 +26,6 @@ import {
   setBookVisibility,
   toggleBookVisibility,
   setMultipleBooksVisibility,
-  resetToDefaultVisibility,
   isDefaultHiddenBook,
 } from '@/lib/student/libraryVisibilityStorage'
 import MobileBookReader from '@/components/Student/library/MobileBookReader'
@@ -167,15 +164,6 @@ export default function PrincipalLibraryManagementView() {
     toast.error(`${ids.length} kitap öğrencilerden gizlendi.`)
   }
 
-  // Reset to default (Arapça & Kur'an gizli, diğerleri açık)
-  const handleResetDefaults = () => {
-    if (confirm('Varsayılan kitaplık kurallarına dönmek istiyor musunuz?\n(Arapça ve Kur\'an-ı Kerim ders kitapları otomatik olarak gizlenecektir)')) {
-      resetToDefaultVisibility()
-      setHiddenBookIds(getHiddenBookIds())
-      toast.success('Kitaplık kuralları varsayılana sıfırlandı.')
-    }
-  }
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* ── 1. HEADER & IDENTITY ── */}
@@ -195,21 +183,10 @@ export default function PrincipalLibraryManagementView() {
             hızlıca belirleyin. Gizlenen kitaplar öğrenci portalında asla listelenmez.
           </p>
         </div>
-
-        {/* Quick Reset Button */}
-        <button
-          type="button"
-          onClick={handleResetDefaults}
-          className="px-3.5 py-2 rounded-2xl bg-gray-100 hover:bg-gray-200 dark:bg-[#131C31] dark:hover:bg-[#1B2744] text-gray-700 dark:text-gray-300 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 self-start md:self-auto border border-gray-200/80 dark:border-gray-800"
-          title="Arapça ve Kur'an-ı Kerim gizli kuralına dön"
-        >
-          <RotateCcw size={14} />
-          <span>Varsayılana Sıfırla (Arapça & Kur&apos;an Gizle)</span>
-        </button>
       </div>
 
       {/* ── 2. METRIC STAT CARDS ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <div className="p-4 rounded-3xl bg-white dark:bg-[#0E1526] border border-gray-200/80 dark:border-gray-800/80 shadow-xs">
           <div className="text-xs text-gray-400 font-medium">Toplam Müfredat Kitabı</div>
           <div className="text-2xl font-black text-gray-900 dark:text-white mt-1">
@@ -238,17 +215,6 @@ export default function PrincipalLibraryManagementView() {
             {stats.hidden} <span className="text-xs font-normal">Gizli</span>
           </div>
           <div className="text-[10px] text-rose-600/80 mt-1">Öğrenci kitaplığında çıkmaz</div>
-        </div>
-
-        <div className="p-4 rounded-3xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 shadow-xs">
-          <div className="text-xs text-amber-700 dark:text-amber-400 font-medium flex items-center justify-between">
-            <span>Arapça & Kur&apos;an Kuralı</span>
-            <ShieldAlert size={15} />
-          </div>
-          <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">
-            {stats.arabicOrQuranHidden} <span className="text-xs font-normal">Gizli</span>
-          </div>
-          <div className="text-[10px] text-amber-600/80 mt-1">Otomatik engellendi</div>
         </div>
       </div>
 
@@ -376,12 +342,6 @@ export default function PrincipalLibraryManagementView() {
                       <span className="font-bold text-gray-500 dark:text-gray-400">
                         {book.subject}
                       </span>
-                      {isAutoHidden && (
-                        <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 font-extrabold flex items-center gap-1">
-                          <AlertTriangle size={10} />
-                          <span>Otomatik Gizli Kuralı</span>
-                        </span>
-                      )}
                       {book.etkilesimliKitapUrl && (
                         <span className="px-1.5 py-0.2 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-semibold">
                           Flipbook

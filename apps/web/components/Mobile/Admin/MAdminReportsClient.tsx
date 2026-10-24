@@ -188,73 +188,46 @@ export default function MAdminReportsClient({
         } catch (_) {}
       }
 
-      return [
-        {
-          code: ALL_CLASSROOMS[0]?.code || '1/A',
-          teacher: 'Bahar ÇETİN',
-          students: 24,
-          average: avg > 0 ? avg : 89.2,
-          attendanceRate: 98.4,
-          topSubject: topSub || 'Bilişim & Kodlama (94.0)',
+      const sCode = getCurrentSchoolCode()
+      const tenantClasses = getTenantClasses(sCode)
+      if (Array.isArray(tenantClasses) && tenantClasses.length > 0) {
+        return tenantClasses.map((c: any) => ({
+          code: (c.name || c.code || '1/A').replace(/ Şubesi.*/i, ''),
+          teacher: c.teacher_name || c.teacher || 'Bahar ÇETİN',
+          students: c.student_count || (Array.isArray(c.students) ? c.students.length : 24),
+          average: avg > 0 ? avg : 88.6,
+          attendanceRate: 98.8,
+          topSubject: topSub || 'Türkçe (92.0)',
           riskCount,
           awardCounts: awardCounts.takdir + awardCounts.tesekkur > 0 ? awardCounts : { takdir: 14, tesekkur: 8, normal: 2 },
-          subjects: subjects.some((s: any) => s.avg > 0) ? subjects : [
-            { name: 'Türk Dili ve Edebiyatı', avg: 88.5 },
-            { name: 'Matematik', avg: 84.0 },
-            { name: 'Bilişim & Kodlama', avg: 94.0 },
-            { name: 'Fizik', avg: 82.5 },
-            { name: 'İngilizce', avg: 87.0 },
-          ],
-        },
-        {
-          code: '10/A',
-          teacher: 'Ahmet YILMAZ',
-          students: 26,
-          average: 87.8,
-          attendanceRate: 97.2,
-          topSubject: 'Matematik (91.0)',
-          riskCount: 1,
-          awardCounts: { takdir: 12, tesekkur: 10, normal: 4 },
           subjects: [
-            { name: 'Türk Dili ve Edebiyatı', avg: 85.0 },
-            { name: 'Matematik', avg: 91.0 },
-            { name: 'Bilişim & Kodlama', avg: 88.5 },
-            { name: 'Fizik', avg: 84.0 },
-            { name: 'İngilizce', avg: 86.0 },
+            { name: 'Türkçe', avg: 88.4 },
+            { name: 'Matematik', avg: 82.2 },
+            { name: 'Fen Bilimleri', avg: 89.1 },
+            { name: 'Sosyal / Hayat B.', avg: 90.8 },
+            { name: 'Yabancı Dil (İng)', avg: 84.5 },
+            { name: 'Din Kültürü', avg: 92.4 },
           ],
-        },
+        }))
+      }
+
+      return [
         {
-          code: '11/B',
-          teacher: 'Zeynep KARA',
-          students: 25,
-          average: 86.4,
-          attendanceRate: 96.8,
-          topSubject: 'Fizik (89.5)',
-          riskCount: 0,
-          awardCounts: { takdir: 11, tesekkur: 11, normal: 3 },
+          code: '1/A',
+          teacher: 'Bahar ÇETİN',
+          students: 24,
+          average: avg > 0 ? avg : 88.6,
+          attendanceRate: 98.8,
+          topSubject: topSub || 'Türkçe (92.0)',
+          riskCount,
+          awardCounts: awardCounts.takdir + awardCounts.tesekkur > 0 ? awardCounts : { takdir: 14, tesekkur: 8, normal: 2 },
           subjects: [
-            { name: 'Türk Dili ve Edebiyatı', avg: 86.0 },
-            { name: 'Matematik', avg: 83.0 },
-            { name: 'Bilişim & Kodlama', avg: 85.5 },
-            { name: 'Fizik', avg: 89.5 },
-            { name: 'İngilizce', avg: 84.0 },
-          ],
-        },
-        {
-          code: '12/A',
-          teacher: 'Mehmet DEMİR (YKS Koçu)',
-          students: 28,
-          average: 90.5,
-          attendanceRate: 98.6,
-          topSubject: 'Matematik (93.5)',
-          riskCount: 0,
-          awardCounts: { takdir: 19, tesekkur: 7, normal: 2 },
-          subjects: [
-            { name: 'Türk Dili ve Edebiyatı', avg: 88.0 },
-            { name: 'Matematik', avg: 93.5 },
-            { name: 'Bilişim & Kodlama', avg: 92.0 },
-            { name: 'Fizik', avg: 89.0 },
-            { name: 'İngilizce', avg: 88.5 },
+            { name: 'Türkçe', avg: 88.4 },
+            { name: 'Matematik', avg: 82.2 },
+            { name: 'Fen Bilimleri', avg: 89.1 },
+            { name: 'Sosyal / Hayat B.', avg: 90.8 },
+            { name: 'Yabancı Dil (İng)', avg: 84.5 },
+            { name: 'Din Kültürü', avg: 92.4 },
           ],
         },
       ]
@@ -694,17 +667,6 @@ export default function MAdminReportsClient({
             <div className="flex items-center gap-2 self-end sm:self-auto">
               <button
                 type="button"
-                onClick={() => {
-                  setPdfReportType('Genel Kurum Akademik Değerlendirme Raporu')
-                  setIsPdfPreviewOpen(true)
-                }}
-                className="h-9 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer backdrop-blur-xs"
-              >
-                <FileText size={14} />
-                <span>Resmi MEB PDF</span>
-              </button>
-              <button
-                type="button"
                 onClick={() => toast.success('Akademik veriler ve devamsızlık listeleri güncellendi.', { icon: '🔄' })}
                 className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
                 title="Verileri Yenile"
@@ -748,7 +710,7 @@ export default function MAdminReportsClient({
             <div className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
               %{overallStats.avgAttendance}
             </div>
-            <div className="text-[10px] text-gray-400 mt-0.5 font-medium">10 Gün Sınırı Aktif</div>
+            <div className="text-[10px] text-gray-400 mt-0.5 font-medium">Aktif Şube Katılımı</div>
           </div>
 
           {/* Metric 3 */}

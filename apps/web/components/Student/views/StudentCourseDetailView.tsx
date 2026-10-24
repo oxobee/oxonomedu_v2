@@ -802,78 +802,102 @@ export default function StudentCourseDetailView({ courseId }: StudentCourseDetai
           </div>
         </div>
 
-        {/* ── 6 BRAND CATEGORICAL TABS ── */}
-        <div className="pt-4 border-t border-[#E8DFEB] dark:border-[#2D1B36] flex flex-wrap gap-2">
+        {/* ── 4 MINIMAL & ICON-DRIVEN CATEGORIZED DASHBOARD CARDS ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-[#E8DFEB] dark:border-[#2D1B36]">
+          {/* Card 1: Üniteler */}
           <button
             type="button"
             onClick={() => setActiveTab('topics')}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2.5 ${
               activeTab === 'topics'
-                ? 'bg-brand-gradient text-white shadow-xs'
-                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
+                ? 'bg-gradient-to-br from-[#8D49A6]/10 to-[#D914C8]/10 border-[#8D49A6] dark:border-[#F17AE6] shadow-md ring-2 ring-[#8D49A6]/20'
+                : 'bg-white dark:bg-[#1A1122] border-[#E8DFEB] dark:border-[#3A2845] hover:border-[#8D49A6]/40'
             }`}
           >
-            Müfredat & Üniteler ({allCourseTopics.length})
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black">
+                <BookOpen size={18} />
+              </div>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
+                {allCourseTopics.length} Konu
+              </span>
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-black text-gray-900 dark:text-white">Üniteler & Konular</div>
+              <div className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5 line-clamp-1">Müfredat ve haftalık kazanımlar</div>
+            </div>
           </button>
 
+          {/* Card 2: Kitaplar & Materyaller */}
           <button
             type="button"
             onClick={() => setActiveTab('materials')}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-              activeTab === 'materials'
-                ? 'bg-brand-gradient text-white shadow-xs'
-                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
+            className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2.5 ${
+              activeTab === 'materials' || activeTab === 'books'
+                ? 'bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border-indigo-500 dark:border-indigo-400 shadow-md ring-2 ring-indigo-500/20'
+                : 'bg-white dark:bg-[#1A1122] border-[#E8DFEB] dark:border-[#3A2845] hover:border-indigo-400'
             }`}
           >
-            Ders Materyalleri ({courseMaterials.length})
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black">
+                <Layers size={18} />
+              </div>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
+                {visibleBooks.length + courseMaterials.length} Kaynak
+              </span>
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-black text-gray-900 dark:text-white">Kitaplar & Materyaller</div>
+              <div className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5 line-clamp-1">MEB flipbook ve çalışma föyleri</div>
+            </div>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('books')}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-              activeTab === 'books'
-                ? 'bg-brand-gradient text-white shadow-xs'
-                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
-            }`}
-          >
-            Müfredat Kitapları ({visibleBooks.length})
-          </button>
-
+          {/* Card 3: Testler & Sınavlar */}
           <button
             type="button"
             onClick={() => setActiveTab('quizzes')}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-              activeTab === 'quizzes'
-                ? 'bg-brand-gradient text-white shadow-xs'
-                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
+            className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2.5 ${
+              activeTab === 'quizzes' || activeTab === 'assessments'
+                ? 'bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500 dark:border-amber-400 shadow-md ring-2 ring-amber-500/20'
+                : 'bg-white dark:bg-[#1A1122] border-[#E8DFEB] dark:border-[#3A2845] hover:border-amber-400'
             }`}
           >
-            Testler & Etkinlikler
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black">
+                <Sparkles size={18} />
+              </div>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
+                {courseExams.length} Sınav
+              </span>
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-black text-gray-900 dark:text-white">Ödevler & Sınavlar</div>
+              <div className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5 line-clamp-1">Bölüm testleri ve yazılılar</div>
+            </div>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('assessments')}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-              activeTab === 'assessments'
-                ? 'bg-brand-gradient text-white shadow-xs'
-                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
-            }`}
-          >
-            Yazılı Sınavlar ({courseExams.length})
-          </button>
-
+          {/* Card 4: Başarım & Notlarım */}
           <button
             type="button"
             onClick={() => setActiveTab('notes')}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2.5 ${
               activeTab === 'notes'
-                ? 'bg-brand-gradient text-white shadow-xs'
-                : 'bg-[#FCF9FD] dark:bg-[#211729] text-[#514458] dark:text-[#D2C5D8] hover:text-[#241329] dark:hover:text-white border border-[#E8DFEB] dark:border-[#3A2845]'
+                ? 'bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500 dark:border-emerald-400 shadow-md ring-2 ring-emerald-500/20'
+                : 'bg-white dark:bg-[#1A1122] border-[#E8DFEB] dark:border-[#3A2845] hover:border-emerald-400'
             }`}
           >
-            Notlarım ({courseNotes.length})
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black">
+                <Award size={18} />
+              </div>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                {courseNotes.length} Not
+              </span>
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-black text-gray-900 dark:text-white">Başarı & Notlarım</div>
+              <div className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5 line-clamp-1">Ders notları ve kazanım durumu</div>
+            </div>
           </button>
         </div>
       </div>

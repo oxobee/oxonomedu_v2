@@ -40,6 +40,13 @@ import HeaderLiveClock from '@components/Common/HeaderLiveClock'
 import HeaderNotificationDropdown from '@components/Notifications/HeaderNotificationDropdown'
 import { startDemoAutoResetWatcher, resetAllDemoData } from '@/lib/demo/demoResetEngine'
 import PrincipalPasswordChangeModal from './PrincipalPasswordChangeModal'
+import {
+  getCurrentSchoolCode,
+  isDemoSchool,
+  getTenantTeachers,
+  getTenantStudents,
+  getTenantClasses,
+} from '@/lib/schools/schoolTenantManager'
 
 interface PrincipalLayoutProps {
   children: React.ReactNode
@@ -67,9 +74,9 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
 
   // Dynamic counts for menu badges to completely eliminate mock data
   const [counts, setCounts] = useState({
-    teachers: '18 Öğretmen',
-    students: '24 Öğrenci (9-A)',
-    classes: '33 Sınıf (9-A Aktif)',
+    teachers: '1 Öğretmen',
+    students: '24 Öğrenci',
+    classes: '1 Sınıf',
   })
 
   useEffect(() => {
@@ -82,37 +89,27 @@ export default function PrincipalLayout({ children }: PrincipalLayoutProps) {
           setAdminProfile({
             name: profile.name,
             title: profile.title,
-            schoolName: profile.schoolName || 'Oxonom Maarif Koleji',
+            schoolName: profile.schoolName || 'Necla Görer İlkokulu',
           })
 
           const isEmpty =
             Boolean(profile.isNewEmptySchool) ||
             localStorage.getItem('oxonom_is_empty_profile') === 'true'
 
+          const sCode = getCurrentSchoolCode()
+          const tenantTeachers = getTenantTeachers(sCode)
+          const tenantStudents = getTenantStudents(sCode)
+          const tenantClasses = getTenantClasses(sCode)
+
+          let tCount = Array.isArray(tenantTeachers) ? tenantTeachers.length : (isDemoSchool(sCode) ? 1 : 0)
+          let sCount = Array.isArray(tenantStudents) ? tenantStudents.length : (isDemoSchool(sCode) ? 24 : 0)
+          let cCount = Array.isArray(tenantClasses) ? tenantClasses.length : (isDemoSchool(sCode) ? 1 : 0)
+
           if (isEmpty) {
-            setCounts({
-              teachers: '0 Öğretmen',
-              students: '0 Öğrenci',
-              classes: '0 Şube',
-            })
-            return
+            tCount = 0
+            sCount = 0
+            cCount = 0
           }
-
-          const org = 30
-          // Teachers dynamic count
-          const rawTeachers = localStorage.getItem(`oxonom_admin_teachers_${org}`)
-          const teachers = rawTeachers ? JSON.parse(rawTeachers) : null
-          const tCount = Array.isArray(teachers) && teachers.length > 0 ? teachers.length : 18
-
-          // Students dynamic count
-          const rawStudents = localStorage.getItem(`oxonom_admin_students_${org}`) || localStorage.getItem('oxonom_m_students_v3')
-          const students = rawStudents ? JSON.parse(rawStudents) : null
-          const sCount = Array.isArray(students) && students.length > 0 ? students.length : 24
-
-          // Classes dynamic count
-          const rawClasses = localStorage.getItem(`oxonom_admin_classes_${org}`)
-          const classes = rawClasses ? JSON.parse(rawClasses) : null
-          const cCount = Array.isArray(classes) && classes.length > 0 ? classes.length : 33
 
           setCounts({
             teachers: `${tCount} Öğretmen`,

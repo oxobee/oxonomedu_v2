@@ -59,8 +59,10 @@ import {
   isDemoSchool,
   getTenantTeachers,
   saveTenantTeachers,
+  getTenantClasses,
   isFinanceEnabled,
 } from '@/lib/schools/schoolTenantManager'
+import { getStoredPrincipalProfile } from '@/lib/principal/principalProfileStorage'
 import { getTenantRolePermissions } from '@/lib/permissions/screenPermissions'
 
 export interface MAdminTeachersClientProps {
@@ -255,6 +257,18 @@ export default function MAdminTeachersClient({
   const [selectedOrgId, setSelectedOrgId] = useState<number>(30)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedBranchFilter, setSelectedBranchFilter] = useState<string>('ALL')
+  const [schoolName, setSchoolName] = useState('Necla Görer İlkokulu')
+  const [tenantClasses, setTenantClasses] = useState<any[]>([])
+
+  useEffect(() => {
+    try {
+      const prof = getStoredPrincipalProfile()
+      if (prof?.schoolName) setSchoolName(prof.schoolName)
+      const sCode = getCurrentSchoolCode()
+      const tCls = getTenantClasses(sCode)
+      if (Array.isArray(tCls)) setTenantClasses(tCls)
+    } catch (_) {}
+  }, [])
 
   // Modals state
   const [selectedTeacherForDetail, setSelectedTeacherForDetail] = useState<any | null>(null)
@@ -987,11 +1001,13 @@ export default function MAdminTeachersClient({
               </span>
               <div>
                 <div className="text-xs font-black text-gray-900 dark:text-white flex items-center gap-1.5">
-                  <span>Oxonom Okulları</span>
+                  <span>{schoolName}</span>
                   <span className="px-1.5 py-0.5 rounded-md bg-[#4B075F]/10 text-[#4B075F] dark:text-[#C58ADB] text-[10px] font-black">Aktif Kurum</span>
                 </div>
                 <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">
-                  1 Sınıf
+                  {tenantClasses.length > 0
+                    ? `${tenantClasses.length} Şube (${tenantClasses.map((c) => c.name || c.code).join(', ')})`
+                    : '1-A Şubesi · İlkokul Kademesi'}
                 </div>
               </div>
             </div>

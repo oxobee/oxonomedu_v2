@@ -29,6 +29,7 @@ import {
   getSingleSourceOfTruthStudents,
   generateClassStudents,
 } from '@services/demo/schoolDirectory'
+import { getTenantClasses, getTenantStudents } from '@/lib/schools/schoolTenantManager'
 import {
   GlowBadge,
   GlowButton,
@@ -37,27 +38,36 @@ import {
 } from '@components/ui/21st'
 
 export default function TeacherProgressView() {
+  const availableClassrooms = useMemo(() => {
+    const tenantCls = typeof window !== 'undefined' ? getTenantClasses() : null
+    if (tenantCls && tenantCls.length > 0) {
+      return tenantCls.map((c: any) => ({
+        id: c.id || c.code || c.name,
+        code: c.code || c.name,
+        name: c.name,
+        grade_level: c.grade_level || '1. Sınıf',
+      }))
+    }
+    return [
+      { id: 'c-1a', code: '1-A', name: '1-A', grade_level: 'İlkokul Kademesi · 1. Sınıf' },
+    ]
+  }, [])
+
   const [selectedClass, setSelectedClass] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       try {
         const urlParams = new URLSearchParams(window.location.search)
         const qClass = urlParams.get('class')
-        if (qClass) {
-          const match = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === normalizeClassCode(qClass))
-          if (match) return match.name
-        }
+        if (qClass) return qClass
         const saved = localStorage.getItem('oxonom_selected_class')
         if (saved) {
           const parsed = JSON.parse(saved)
           if (parsed.name) return parsed.name
-          if (parsed.code) {
-            const match = ALL_CLASSROOMS.find((c) => normalizeClassCode(c.code) === normalizeClassCode(parsed.code))
-            if (match) return match.name
-          }
+          if (parsed.code) return parsed.code
         }
       } catch (_) {}
     }
-    return ALL_CLASSROOMS[0]?.name || '1/A Şubesi'
+    return '1-A'
   })
   const [search, setSearch] = useState('')
 
@@ -104,15 +114,23 @@ export default function TeacherProgressView() {
     }
   }, [])
 
+  function getInitialStudents(): MStudentItem[] {
+    if (typeof window !== 'undefined') {
+      const tenantSt = getTenantStudents()
+      if (tenantSt && tenantSt.length > 0) return tenantSt
+    }
+    return getSingleSourceOfTruthStudents(30)
+  }
+
   // Student state with persistence (Single Source of Truth)
   const [students, setStudents] = useState<MStudentItem[]>(() => {
-    return getSingleSourceOfTruthStudents(30)
+    return getInitialStudents()
   })
 
   // Keep students reactive with storage and update events
   useEffect(() => {
     const handleSync = () => {
-      const fresh = getSingleSourceOfTruthStudents(30)
+      const fresh = getInitialStudents()
       setStudents(fresh)
       setSelectedStudent((prev) => {
         if (!prev) return null
@@ -120,10 +138,12 @@ export default function TeacherProgressView() {
       })
     }
     window.addEventListener('oxonom_student_updated', handleSync)
+    window.addEventListener('oxonom_students_updated', handleSync)
     window.addEventListener('oxonom_admin_students_updated', handleSync)
     window.addEventListener('storage', handleSync)
     return () => {
       window.removeEventListener('oxonom_student_updated', handleSync)
+      window.removeEventListener('oxonom_students_updated', handleSync)
       window.removeEventListener('oxonom_admin_students_updated', handleSync)
       window.removeEventListener('storage', handleSync)
     }
@@ -135,13 +155,13 @@ export default function TeacherProgressView() {
 
   // Filter students by selected class
   const classStudents = useMemo(() => {
-    const list = generateClassStudents(selectedClass)
-    if (list && list.length > 0) return list
     const norm = normalizeClassCode(selectedClass)
-    return students.filter((s) => {
+    const match = students.filter((s) => {
       const sNorm = normalizeClassCode(s.className || '')
       return sNorm === norm || sNorm.replace('-', '/') === norm.replace('-', '/')
     })
+    if (match.length > 0) return match
+    return students
   }, [students, selectedClass])
 
   const filteredStudents = useMemo(() => {
@@ -241,7 +261,7 @@ export default function TeacherProgressView() {
             onChange={(e) => handleSelectClass(e.target.value)}
             className="h-10 px-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-900 dark:text-white border-none focus:ring-2 focus:ring-[#8D49A6] cursor-pointer"
           >
-            {ALL_CLASSROOMS.map((cls) => (
+            {availableClassrooms.map((cls) => (
               <option key={cls.id} value={cls.name}>
                 {cls.name} ({cls.grade_level})
               </option>
@@ -345,28 +365,72 @@ export default function TeacherProgressView() {
                     </GlowBadge>
                   </div>
 
-                  {/* Metrics Grid */}
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                    <div className="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-gray-400 text-[10px] block font-bold">Genel Başarı</span>
-                        <GlowBadge
-                          variant={studentScore >= 85 ? 'emerald' : studentScore >= 70 ? 'indigo' : 'amber'}
-                          size="sm"
-                        >
-                          {studentScore >= 85 ? 'Pekiyi' : studentScore >= 70 ? 'İyi' : 'Geliştirilmeli'}
-                        </GlowBadge>
+                  {/* Metrics Grid & Mini Progress Bars */}
+                  <div className="space-y-2 pt-1 text-xs">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-gray-400 text-[10px] block font-bold">Genel Başarı</span>
+                          <GlowBadge
+                            variant={studentScore >= 85 ? 'emerald' : studentScore >= 70 ? 'indigo' : 'amber'}
+                            size="sm"
+                          >
+                            {studentScore >= 85 ? 'Pekiyi' : studentScore >= 70 ? 'İyi' : 'Geliştirilmeli'}
+                          </GlowBadge>
+                        </div>
+                        <span className="font-black text-sm text-indigo-600 dark:text-indigo-400">
+                          %{studentScore} Ort.
+                        </span>
                       </div>
-                      <span className="font-black text-sm text-indigo-600 dark:text-indigo-400">
-                        {studentScore} Ort.
-                      </span>
+
+                      <div className="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 flex flex-col justify-between">
+                        <span className="text-gray-400 text-[10px] block font-bold">Rehberlik Kaydı</span>
+                        <span className="font-extrabold text-xs text-gray-800 dark:text-gray-200">
+                          {st.guidanceNotes?.length || 0} Gözlem
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="p-2.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 flex flex-col justify-between">
-                      <span className="text-gray-400 text-[10px] block font-bold">Rehberlik Kaydı</span>
-                      <span className="font-extrabold text-xs text-gray-800 dark:text-gray-200">
-                        {st.guidanceNotes?.length || 0} Gözlem
-                      </span>
+                    {/* Inline Graphical Progress Bars */}
+                    <div className="p-2.5 rounded-2xl bg-indigo-50/40 dark:bg-indigo-950/20 border border-indigo-100/60 dark:border-indigo-900/40 space-y-2">
+                      <div>
+                        <div className="flex items-center justify-between text-[10px] font-bold text-gray-600 dark:text-gray-300 mb-0.5">
+                          <span>Ders Başarısı</span>
+                          <span className="text-indigo-600 dark:text-indigo-400 font-mono">%{studentScore}</span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                          <div
+                            style={{ width: `${Math.min(100, Math.max(5, studentScore))}%` }}
+                            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-600"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between text-[10px] font-bold text-gray-600 dark:text-gray-300 mb-0.5">
+                          <span>Okul Devamı</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-mono">%{st.attendanceRate}</span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                          <div
+                            style={{ width: `${Math.min(100, Math.max(5, st.attendanceRate))}%` }}
+                            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between text-[10px] font-bold text-gray-600 dark:text-gray-300 mb-0.5">
+                          <span>Ödev & Katılım</span>
+                          <span className="text-amber-600 dark:text-amber-400 font-mono">%95</span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                          <div
+                            style={{ width: '95%' }}
+                            className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-400"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -430,7 +494,122 @@ export default function TeacherProgressView() {
 
               {/* Body */}
               <div className="flex-1 overflow-y-auto p-5 space-y-6">
-                {/* 1. AKADEMİK NOTLAR (GRAFİKSEL VE İSTATİSTİKSEL) */}
+                {/* ── BİREYSEL GRAFİK & İSTATİSTİK ÖZET PANELİ ── */}
+                <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-indigo-50/80 via-purple-50/50 to-pink-50/40 dark:from-[#131A2B] dark:via-[#161226] dark:to-[#1B1124] border border-indigo-200/70 dark:border-indigo-900/50 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-100 dark:border-indigo-900/40 pb-3">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                        Performans & Yetkinlik Analitiği
+                      </span>
+                      <h4 className="text-sm font-black text-gray-900 dark:text-white mt-0.5">
+                        Ders Bazlı Başarı Çizelgesi & MEB Hedef Karşılaştırması
+                      </h4>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs font-bold">
+                      <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+                        MEB Hedefi Üstü (%80+)
+                      </span>
+                      <span className="text-gray-300">·</span>
+                      <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
+                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" />
+                        Öğrenci Puanı
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* SVG Bar Chart for Subjects */}
+                  <div className="space-y-2 pt-1">
+                    {(selectedStudent.grades || []).map((grade, idx) => {
+                      const avgNum = Number(grade.average) || 0
+                      const isTargetMet = avgNum >= 80
+
+                      return (
+                        <div key={idx} className="space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-extrabold text-gray-800 dark:text-gray-200">
+                              {grade.courseName}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-mono text-gray-400">
+                                1. Sınav: {grade.exam1} · 2. Sınav: {grade.exam2} · Perf: {grade.performance}
+                              </span>
+                              <span className={`font-black font-mono px-2 py-0.5 rounded-md text-xs ${
+                                avgNum >= 85
+                                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                                  : avgNum >= 70
+                                  ? 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300'
+                                  : 'bg-rose-500/15 text-rose-700 dark:text-rose-300'
+                              }`}>
+                                {grade.average}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Graphical Bar with Target Line */}
+                          <div className="relative w-full h-3 rounded-full bg-gray-200/80 dark:bg-gray-800 overflow-hidden">
+                            <div
+                              style={{ width: `${Math.min(100, Math.max(3, avgNum))}%` }}
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                avgNum >= 85
+                                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                                  : avgNum >= 70
+                                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500'
+                                  : 'bg-gradient-to-r from-rose-500 to-amber-500'
+                              }`}
+                            />
+                            {/* MEB 80 threshold guide marker */}
+                            <div
+                              style={{ left: '80%' }}
+                              className="absolute top-0 bottom-0 w-0.5 bg-black/30 dark:bg-white/40"
+                              title="MEB Başarı Eşiği (%80)"
+                            />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* 4 KPI Ring Strips */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+                    <div className="p-3 rounded-2xl bg-white/80 dark:bg-[#0E1526] border border-gray-100 dark:border-gray-800 text-center shadow-2xs">
+                      <span className="text-[10px] text-gray-400 font-bold block uppercase">Akademik Başarı</span>
+                      <strong className="text-lg font-black text-indigo-600 dark:text-indigo-400 font-mono mt-0.5 block">
+                        %{selectedStudent.grades && selectedStudent.grades.length > 0
+                          ? Number((selectedStudent.grades.reduce((sum, g) => sum + (Number(g.average) || 0), 0) / selectedStudent.grades.length).toFixed(1))
+                          : (selectedStudent.gpa ?? 0)}
+                      </strong>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">Pekiyi Seviye</span>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-white/80 dark:bg-[#0E1526] border border-gray-100 dark:border-gray-800 text-center shadow-2xs">
+                      <span className="text-[10px] text-gray-400 font-bold block uppercase">Dönem Devamı</span>
+                      <strong className="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block">
+                        %{selectedStudent.attendanceRate}
+                      </strong>
+                      <span className="text-[10px] text-gray-400 font-medium">0 Gün Özürsüz</span>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-white/80 dark:bg-[#0E1526] border border-gray-100 dark:border-gray-800 text-center shadow-2xs">
+                      <span className="text-[10px] text-gray-400 font-bold block uppercase">Ödev & Proje</span>
+                      <strong className="text-lg font-black text-purple-600 dark:text-purple-400 font-mono mt-0.5 block">
+                        %96
+                      </strong>
+                      <span className="text-[10px] text-purple-600 dark:text-purple-400 font-bold">Zamanında Teslim</span>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-white/80 dark:bg-[#0E1526] border border-gray-100 dark:border-gray-800 text-center shadow-2xs">
+                      <span className="text-[10px] text-gray-400 font-bold block uppercase">Ders İçi Katılım</span>
+                      <strong className="text-lg font-black text-pink-600 dark:text-pink-400 font-mono mt-0.5 block">
+                        %98
+                      </strong>
+                      <span className="text-[10px] text-pink-600 dark:text-pink-400 font-bold">Yüksek Etkileşim</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 1. AKADEMİK NOTLAR LİSTESİ */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">

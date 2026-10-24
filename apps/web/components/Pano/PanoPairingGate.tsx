@@ -226,62 +226,61 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
         </svg>
       </div>
 
-      {/* ── Mascot & Main Pairing Card ── */}
-      <div className="relative z-10 w-full max-w-[440px] flex flex-col items-center">
-        {/* Mascot Peeking Over Top */}
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.85 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="relative -mb-10 z-20 pointer-events-none flex flex-col items-center select-none"
-        >
-          <img
-            src="/mascot-scholar.png"
-            alt="Oxonom Maskotu"
-            className="w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-[0_12px_24px_rgba(217,20,200,0.4)] animate-bounce"
-            style={{ animationDuration: '4s' }}
-          />
-        </motion.div>
-
-        {/* Main Card with Shake Animation */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 15 }}
-          animate={
-            isShaking
-              ? { x: [-12, 12, -9, 9, -5, 5, 0], scale: 1, y: 0 }
-              : { opacity: 1, scale: 1, y: 0 }
-          }
-          transition={{ duration: isShaking ? 0.45 : 0.35, ease: 'easeOut' }}
-          className="relative w-full rounded-[2.5rem] bg-[#160B20]/95 backdrop-blur-2xl border border-[#49364F]/80 shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-6 sm:p-8 pt-12 sm:pt-14 text-center flex flex-col items-center"
-        >
-          {/* Logo & Header */}
-          <div className="mb-5 flex flex-col items-center">
-            <div className="h-8 sm:h-9 mb-3 flex items-center justify-center">
-              <img
-                src="/brand/oxonom_edu_logo_white.png"
-                alt="Oxonom Edu"
-                className="h-7 sm:h-8 w-auto object-contain drop-shadow-md"
-                onError={(e) => {
-                  const target = e.currentTarget
-                  target.src = '/oxonom-logo-dark.png'
-                }}
-              />
-            </div>
-
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8D49A6]/20 border border-[#8D49A6]/40 text-[#F0D8FA] text-[11px] font-black uppercase tracking-wider mb-2">
-              <Tv size={13} className="text-[#D914C8]" />
-              <span>Akıllı Tahta Girişi</span>
-            </div>
-
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
-              Cihaz Eşleştirme
-            </h1>
-
-            <p className="text-xs sm:text-sm text-[#C4B3CD] mt-1.5 max-w-xs leading-relaxed">
-              Okul müdürünüzden aldığınız 4 haneli{' '}
-              <strong className="text-white font-bold">Pano Kodunu</strong> giriniz.
-            </p>
+      {/* ── Side-by-Side Container: Mascot on Left (5x Larger, Static), Card on Right (Logo 2x Larger) ── */}
+      <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-14 px-4 py-8">
+        {/* Left Column: 5x Larger Static Mascot (No Bounce) */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center select-none shrink-0">
+          <div className="relative">
+            {/* Ambient Backlight Behind Mascot */}
+            <div className="absolute inset-0 bg-[#D914C8]/20 rounded-full blur-3xl scale-95 pointer-events-none" />
+            <img
+              src="/mascot-scholar.png"
+              alt="Oxonom Maskotu"
+              className="relative z-10 w-[260px] h-[260px] sm:w-[360px] sm:h-[360px] lg:w-[480px] lg:h-[480px] object-contain drop-shadow-[0_25px_50px_rgba(217,20,200,0.35)] pointer-events-none select-none"
+            />
           </div>
+        </div>
+
+        {/* Right Column: Main Pairing Card with 2x Larger Logo */}
+        <div className="w-full lg:w-1/2 max-w-[460px] flex flex-col items-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94, y: 15 }}
+            animate={
+              isShaking
+                ? { x: [-12, 12, -9, 9, -5, 5, 0], scale: 1, y: 0 }
+                : { opacity: 1, scale: 1, y: 0 }
+            }
+            transition={{ duration: isShaking ? 0.45 : 0.35, ease: 'easeOut' }}
+            className="relative w-full rounded-[2.5rem] bg-[#160B20]/95 backdrop-blur-2xl border border-[#49364F]/80 shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-6 sm:p-8 text-center flex flex-col items-center"
+          >
+            {/* Logo (2x Larger) & Header */}
+            <div className="mb-5 flex flex-col items-center">
+              <div className="h-16 sm:h-20 mb-3 flex items-center justify-center">
+                <img
+                  src="/brand/oxonom_edu_logo_white.png"
+                  alt="Oxonom Edu"
+                  className="h-14 sm:h-16 w-auto object-contain drop-shadow-lg"
+                  onError={(e) => {
+                    const target = e.currentTarget
+                    target.src = '/oxonom-logo-dark.png'
+                  }}
+                />
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8D49A6]/20 border border-[#8D49A6]/40 text-[#F0D8FA] text-[11px] font-black uppercase tracking-wider mb-2">
+                <Tv size={13} className="text-[#D914C8]" />
+                <span>Akıllı Tahta Girişi</span>
+              </div>
+
+              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
+                Cihaz Eşleştirme
+              </h1>
+
+              <p className="text-xs sm:text-sm text-[#C4B3CD] mt-1.5 max-w-xs leading-relaxed">
+                Okul müdürünüzden aldığınız 4 haneli{' '}
+                <strong className="text-white font-bold">Pano Kodunu</strong> giriniz.
+              </p>
+            </div>
 
           {/* ── 4-Digit OTP / PIN Entry Boxes ── */}
           <div
@@ -432,6 +431,7 @@ export default function PanoPairingGate({ onSuccess, initialCode = '' }: PanoPai
             )}
           </AnimatePresence>
         </motion.div>
+      </div>
       </div>
     </div>
   )
