@@ -220,33 +220,24 @@ export default function PromoHero({
                 key={currentBanner.id}
                 className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-16 items-center w-full"
               >
-                {/* Visual Column: Mobilde Üstte (order-1), Masaüstünde Sağda (lg:order-2, 60% Genişlik) */}
+                {/* Visual Column: Mobilde Üstte (order-1, 3x Büyük & Sallanmayan Görsel), Masaüstünde Sağda (lg:order-2, 60% Genişlik) */}
                 <motion.div
                   variants={visualVariants}
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  className="order-1 lg:order-2 lg:col-span-6 xl:col-span-7 flex flex-col items-center justify-center relative select-none w-full py-4 lg:py-2"
+                  className="order-1 lg:order-2 lg:col-span-6 xl:col-span-7 flex flex-col items-center justify-center relative select-none w-full py-8 sm:py-6 lg:py-2"
                 >
                   <div className="absolute w-[400px] h-[400px] sm:w-[550px] sm:h-[550px] lg:w-[720px] lg:h-[720px] xl:w-[850px] xl:h-[850px] bg-gradient-to-t from-[#D914C8]/40 via-[#8D49A6]/30 to-transparent rounded-full blur-[130px] pointer-events-none" />
-                  <motion.div
-                    animate={{
-                      y: [0, -14, 0],
-                      rotate: [0, 1.2, -1.2, 0],
-                    }}
-                    transition={{
-                      duration: 4.5,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                    className="relative max-w-full flex items-center justify-center"
-                  >
+                  
+                  {/* Sabit & Sallanma Efekti Olmayan Görsel Alanı (Mobilde 3x Büyütülmüş) */}
+                  <div className="relative max-w-full flex items-center justify-center">
                     <img
                       src={currentBanner.imageUrl}
                       alt={currentBanner.title}
-                      className="w-72 sm:w-96 md:w-[460px] lg:w-[620px] xl:w-[720px] 2xl:w-[820px] max-w-full max-h-[580px] lg:max-h-[700px] xl:max-h-[780px] h-auto object-contain relative z-10 drop-shadow-[0_35px_60px_rgba(75,7,95,0.7)] transition-transform duration-300 hover:scale-[1.03]"
+                      className="w-full max-w-[460px] sm:max-w-full md:w-[460px] lg:w-[620px] xl:w-[720px] 2xl:w-[820px] max-h-[500px] sm:max-h-[580px] lg:max-h-[700px] xl:max-h-[780px] h-auto object-contain relative z-10 drop-shadow-[0_35px_60px_rgba(75,7,95,0.7)] transition-transform duration-300 hover:scale-[1.03] scale-[1.5] sm:scale-100 origin-center my-6 sm:my-0"
                     />
-                  </motion.div>
+                  </div>
                 </motion.div>
 
                 {/* Text Column: Mobilde Altta (order-2), Masaüstünde Solda (lg:order-1) */}
