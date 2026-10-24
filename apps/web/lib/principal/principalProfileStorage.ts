@@ -21,6 +21,7 @@ export interface PrincipalProfile {
   currentPassword?: string
   isFirstLogin?: boolean
   isNewEmptySchool?: boolean
+  sectorType?: string
 }
 
 export interface SchoolInfo {

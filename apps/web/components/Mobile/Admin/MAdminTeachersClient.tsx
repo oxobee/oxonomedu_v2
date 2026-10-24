@@ -61,6 +61,7 @@ import {
   saveTenantTeachers,
   isFinanceEnabled,
 } from '@/lib/schools/schoolTenantManager'
+import { getTenantRolePermissions } from '@/lib/permissions/screenPermissions'
 
 export interface MAdminTeachersClientProps {
   orgSlug?: string
@@ -833,9 +834,7 @@ export default function MAdminTeachersClient({
       } catch (_) {}
     }
     if (!perms) {
-      perms = SYSTEM_SCREEN_PERMISSIONS
-        .filter((p) => p.defaultForRoles.includes(template))
-        .map((p) => p.id)
+      perms = getTenantRolePermissions(template, getCurrentSchoolCode())
     }
     setCustomPermissions(perms)
   }
@@ -844,9 +843,7 @@ export default function MAdminTeachersClient({
   const handleApplyRoleTemplate = (roleKey: string) => {
     setSelectedRoleTemplate(roleKey)
     if (roleKey === 'custom') return
-    const matched = SYSTEM_SCREEN_PERMISSIONS
-      .filter((p) => p.defaultForRoles.includes(roleKey))
-      .map((p) => p.id)
+    const matched = getTenantRolePermissions(roleKey, getCurrentSchoolCode())
     setCustomPermissions(matched)
   }
 
@@ -1503,9 +1500,18 @@ export default function MAdminTeachersClient({
                           {customPermissions.length} Ekran Açık
                         </span>
                       </div>
-                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                        Öğretmenin sisteme giriş yaptığında erişebileceği ekranları ve yönetim panellerini belirleyin.
-                      </p>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                          Öğretmenin sisteme giriş yaptığında erişebileceği ekranları ve yönetim panellerini belirleyin.
+                        </p>
+                        <a
+                          href="/principal/permissions"
+                          className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline inline-flex items-center gap-1"
+                        >
+                          <span>Rol Şablonlarını Yönet</span>
+                          <span aria-hidden="true">&rarr;</span>
+                        </a>
+                      </div>
                     </div>
 
                     {/* Rol Şablonları */}
